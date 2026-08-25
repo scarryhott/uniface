@@ -3,14 +3,16 @@
   "status": "MODEL_SUGGESTED_RELATION",
   "persistence": "git",
   "closure_store": ["ledger/", "occurrences/", "ledger/runs/"],
-  "relative_interaction_store": "local continuation now; Supabase residue OPEN (not this beat; no secrets in repo)",
-  "not": "a bidirectional gate, a token product, Vercel deploy, or an achieved framework",
-  "last_beat": "2026-08-25-1416-et",
-  "last_beat_residue": "occ-2026-08-25-relative-forms-as-interface",
-  "next_0": "occ-2026-08-25-interactive-closure-not-gate",
-  "cursor": 16,
+  "relative_interaction_store": "local continuation now; Supabase residue OPEN (Harry pending $0 uniface-relative confirm; not rmf_*)",
+  "not": "the field, a bidirectional gate, a second site, Rate My Face, or an achieved framework",
+  "last_beat": "2026-08-25-1434-et",
+  "last_beat_residue": "occ-2026-08-25-interactive-closure-not-gate",
+  "next_0": "occ-2026-08-25-vercel-public-projection",
+  "cursor": 17,
   "framework_achieved": false,
   "interface": "interactive closure, not a bidirectional gate",
+  "public_projection": "https://uniface-tawny.vercel.app",
+  "public_projection_note": "LIVE named projection of docs/index.html; root docs; production branch cursor/unification-reading-occurrence-706f; not the field",
   "living_network_follows": "tokenomic perspectival continuum (Slearn L→G→L′ / NRRF656 derived chart; money is not Super network; leftover PR 10 not the deploy)",
   "pages_seam": "OPEN: GitHub Pages not enabled from this PR.",
   "open_seams": {
@@ -18,19 +20,20 @@
     "Turing": "OPEN (not assumed)",
     "O_B_eq_R": "refused",
     "Pages": "OPEN",
-    "Vercel": "OPEN (auth not a deploy this beat)",
-    "Supabase": "OPEN — relative interaction will persist here later; closure stays git",
+    "Vercel_MCP": "needsAuth",
+    "Vercel_projection": "https://uniface-tawny.vercel.app (named; not the field)",
+    "Supabase": "OPEN — pending Harry confirm for $0 uniface-relative; do not use rmf_* / Rate My Face",
     "others_on_site": "OPEN",
     "kantian-ivi": "unreachable",
     "Aristotle_native_equality": "OPEN",
     "Slearn_FRAMEWORK": "OPEN, not RETURNED",
-    "framework": "not achieved",
-    "localStorage": "relative interaction only — never closure, never the Super network"
+    "NRRF764_NRRF765_on_slearn_main": "OPEN",
+    "framework": "not achieved"
   },
   "learning": "the residue, not a model training loop",
   "beat_layers": {
-    "organization": "Selected 0: occ-2026-08-25-relative-forms-as-interface. Harry: living network follows tokenomic perspectival continuum; closure evolves; choice changes relative interaction; interface is interactive closure not a gate.",
-    "planning": "Two stores on the page. Select writes relative interaction only. Supabase named OPEN. No secrets. No Vercel deploy. No FOUNDATION rewrite.",
-    "action": "occ-2026-08-25-interactive-closure-not-gate; two-store operators on docs/index.html; last_beat=1416; next_0=interactive-closure-not-gate."
+    "organization": "Selected 0: occ-2026-08-25-interactive-closure-not-gate. Public projection LIVE at https://uniface-tawny.vercel.app. Page is not the field. Supabase relative sink OPEN (not rmf). Vercel MCP needsAuth.",
+    "planning": "Name the Vercel URL on docs/index.html. Do not duplicate 1416. Do not create Supabase. Do not mix rmf_*. Do not merge. Framework not achieved.",
+    "action": "occ-2026-08-25-vercel-public-projection; URL named on public surface; last_beat=1434; last_beat_residue=interactive-closure-not-gate; next_0=vercel-public-projection."
   }
 }
