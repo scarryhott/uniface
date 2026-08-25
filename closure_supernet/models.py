@@ -201,6 +201,10 @@ class RuntimeCycleResult(BaseModel):
     rule_proposals: int = 0
     projection_classes: int = 0
     projection_edges: int = 0
+    integration_pulled: int = 0
+    integration_pushed: int = 0
+    integration_runs: int = 0
+    integration_errors: int = 0
     started_at: str
     finished_at: str
 
@@ -211,4 +215,6 @@ class RuntimeStatus(BaseModel):
     last_cycle: dict[str, Any] | None
     autonomy_interval_seconds: float
     llm_mode: str
+    enabled_integrations: int = 0
+    integration_errors: int = 0
     turing_complete_assumed: bool = False
