@@ -19,6 +19,8 @@ from .agents import (
 )
 from .axiometry import extract_exact_symbols, extract_operator_path
 from .config import RuntimeConfig
+from .integration_store import IntegrationStore
+from .integrations import DigitalIntegrationManager
 from .models import OccurrenceCreate, RuntimeCycleResult, RuntimeStatus
 from .policy import AdmissionPolicy
 from .providers import build_provider
@@ -33,16 +35,19 @@ def utcnow() -> str:
 class ClosureSupernetRuntime:
     """Autonomous but bounded Closure Supernet.
 
-    It continuously senses source occurrences, proposes relations, builds
-    source-reversible interpretations, applies constitutional admission rules,
-    projects current topology, and reopens incomplete relations. It never
-    mutates an original occurrence and never assumes terminal closure.
+    It continuously senses exact source occurrences from local and configured
+    digital interfaces, proposes relations, builds source-reversible
+    interpretations, applies constitutional admission rules, projects current
+    topology, exports source-reversible returns, and reopens incomplete
+    relations. It never mutates an original occurrence and never assumes
+    terminal closure.
     """
 
     def __init__(self, config: RuntimeConfig | None = None):
         self.config = config or RuntimeConfig()
         self.config.ensure_directories()
         self.store = EventStore(self.config.database_path)
+        self.integration_store = IntegrationStore(self.config.database_path)
         self.provider = build_provider(self.config)
         self.inbox = InboxSensorAgent(self.config, self.store)
         self.understanding = UnderstandingAgent(self.config, self.store)
@@ -52,6 +57,12 @@ class ClosureSupernetRuntime:
         self.moral_audit = MoralAuditAgent(self.store)
         self.rule_review = RuleReviewAgent(self.config, self.store)
         self.projection = ProjectionAgent(self.store)
+        self.integrations = DigitalIntegrationManager(
+            self.config,
+            self.store,
+            self.integration_store,
+            self.ingest,
+        )
         self._running = False
         self._task: asyncio.Task[None] | None = None
         self._stop = asyncio.Event()
@@ -60,8 +71,7 @@ class ClosureSupernetRuntime:
     async def ingest(self, data: OccurrenceCreate) -> dict[str, Any]:
         path = extract_operator_path(data.exact_text)
         symbols = extract_exact_symbols(data.exact_text, path)
-        occurrence = self.store.create_occurrence(data, symbols, path)
-        return occurrence
+        return self.store.create_occurrence(data, symbols, path)
 
     async def bootstrap_markdown(self, root: Path | None = None) -> int:
         root = Path(root or self.config.bootstrap_root)
@@ -92,20 +102,38 @@ class ClosureSupernetRuntime:
             started_at = utcnow()
             self.store.append_event("RUNTIME_CYCLE_STARTED", "runtime_cycle", cycle_id, {})
             result = RuntimeCycleResult(cycle_id=cycle_id, started_at=started_at, finished_at=started_at)
-            result.ingested = self.inbox.run()
+
+            pull_runs = await self.integrations.poll_enabled()
+            result.integration_pulled = sum(run.pulled for run in pull_runs)
+            result.integration_runs = len(pull_runs)
+            result.integration_errors = sum(run.errors for run in pull_runs)
+
+            result.ingested = self.inbox.run() + result.integration_pulled
             result.candidates = self.understanding.run()
             result.interpretations = await self.interpretation.run()
             result.admissions = self.admission.run()
             result.open_seams = self.reopening.run() + self.moral_audit.run()
             result.rule_proposals = self.rule_review.run()
+
             projection = self.projection.run()
             result.projection_classes = len(projection["classes"])
             result.projection_edges = len(projection["edges"])
+
+            push_runs = await self.integrations.push_enabled(projection)
+            result.integration_pushed = sum(run.pushed for run in push_runs)
+            result.integration_runs += len(push_runs)
+            result.integration_errors += sum(run.errors for run in push_runs)
+
             result.finished_at = utcnow()
             cycle_count = int(self.store.get_state("cycle_count", 0)) + 1
             self.store.set_state("cycle_count", cycle_count)
             self.store.set_state("last_cycle", result.model_dump(mode="json"))
-            self.store.append_event("RUNTIME_CYCLE_FINISHED", "runtime_cycle", cycle_id, result.model_dump(mode="json"))
+            self.store.append_event(
+                "RUNTIME_CYCLE_FINISHED",
+                "runtime_cycle",
+                cycle_id,
+                result.model_dump(mode="json"),
+            )
             return result
 
     async def start(self) -> None:
@@ -116,7 +144,12 @@ class ClosureSupernetRuntime:
         if self.config.bootstrap_repository:
             await self.bootstrap_markdown()
         self._task = asyncio.create_task(self._run_loop(), name="closure-supernet-autonomy")
-        self.store.append_event("AUTONOMY_STARTED", "runtime", "closure-supernet", {"interval": self.config.autonomy_interval_seconds})
+        self.store.append_event(
+            "AUTONOMY_STARTED",
+            "runtime",
+            "closure-supernet",
+            {"interval": self.config.autonomy_interval_seconds},
+        )
 
     async def _run_loop(self) -> None:
         while not self._stop.is_set():
@@ -125,10 +158,22 @@ class ClosureSupernetRuntime:
             except asyncio.CancelledError:
                 raise
             except Exception as exc:
-                self.store.append_event("AUTONOMY_ERROR", "runtime", "closure-supernet", {"type": type(exc).__name__, "message": str(exc)})
-                self.store.create_open_seam(None, None, f"Autonomous cycle error: {type(exc).__name__}: {exc}", {"runtime": True})
+                self.store.append_event(
+                    "AUTONOMY_ERROR",
+                    "runtime",
+                    "closure-supernet",
+                    {"type": type(exc).__name__, "message": str(exc)},
+                )
+                self.store.create_open_seam(
+                    None,
+                    None,
+                    f"Autonomous cycle error: {type(exc).__name__}: {exc}",
+                    {"runtime": True},
+                )
             try:
-                await asyncio.wait_for(self._stop.wait(), timeout=self.config.autonomy_interval_seconds)
+                await asyncio.wait_for(
+                    self._stop.wait(), timeout=self.config.autonomy_interval_seconds
+                )
             except TimeoutError:
                 continue
 
@@ -143,12 +188,17 @@ class ClosureSupernetRuntime:
         self.store.append_event("AUTONOMY_STOPPED", "runtime", "closure-supernet", {})
 
     def status(self) -> RuntimeStatus:
+        recent_runs = self.integration_store.list_runs(limit=1000)
         return RuntimeStatus(
             running=self._running,
             cycle_count=int(self.store.get_state("cycle_count", 0)),
             last_cycle=self.store.get_state("last_cycle"),
             autonomy_interval_seconds=self.config.autonomy_interval_seconds,
             llm_mode=self.config.llm_mode,
+            enabled_integrations=len(
+                self.integration_store.list_integrations(enabled_only=True)
+            ),
+            integration_errors=sum(1 for row in recent_runs if row["status"] == "ERROR"),
             turing_complete_assumed=False,
         )
 
@@ -159,4 +209,5 @@ class ClosureSupernetRuntime:
         return projection
 
     def close(self) -> None:
+        self.integration_store.close()
         self.store.close()
