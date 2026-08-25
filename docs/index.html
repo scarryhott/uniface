@@ -79,7 +79,9 @@ const liveOccurrences=[
 {id:'occ-2026-08-25-slearn-continuum-visit',file:'occurrences/2026-08-25-slearn-continuum-visit.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'3 Slearn visit',reading:'Slearn frames OPEN→…→RETURN (τ⁻¹)→PROJECTION last; OPEN not RETURNED'},
 {id:'occ-2026-08-25-aristotle-translation',file:'occurrences/2026-08-25-aristotle-translation.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'4 Aristotle chart',reading:'origin-independent translation; 34-role subinterface only; native equality OPEN'},
 {id:'occ-2026-08-25-black-mirror-appearance',file:'occurrences/2026-08-25-black-mirror-appearance.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'5 Black Mirror appearance',reading:'current appearance of this cycle, not a device; O_B ≡ R refused'},
-{id:'occ-2026-08-25-heartbeat-live-field',file:'occurrences/2026-08-25-heartbeat-live-field.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'6 heartbeat build',reading:'prototype wired to live field; learned artifact, not another plan essay'}
+{id:'occ-2026-08-25-heartbeat-live-field',file:'occurrences/2026-08-25-heartbeat-live-field.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'6 heartbeat build',reading:'prototype wired to live field; learned artifact, not another plan essay'},
+{id:'occ-2026-08-25-nrrf764-ccm-super-network',file:'occurrences/2026-08-25-nrrf764-ccm-super-network.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'7 NRRF764 derived chart',reading:'derived computational chart of Super network notes; not the network; not FOUNDATION; not a second closure'},
+{id:'occ-2026-08-25-problems-as-real',file:'occurrences/2026-08-25-problems-as-real.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'8 architecture note',reading:'problems as real, rather than nothing; solutions are the interactions'}
 ];
 const liveCycle=[
 ['0 / this live loop','selected point'],
@@ -89,6 +91,8 @@ const liveCycle=[
 ['Aristotle chart','native equality OPEN'],
 ['Black Mirror appearance','receipt ≠ relation'],
 ['heartbeat prototype','this page'],
+['NRRF764 chart','derived chart / not the network'],
+['problems as real','architecture note; solutions = interactions'],
 ['reopening','next live note is a new 0']
 ];
 const shown=[
@@ -97,7 +101,9 @@ const shown=[
 'Slearn is the continuum L —τ→ G —τ⁻¹→ L′, projection last',
 'Aristotle is a translation chart; native equality OPEN',
 'Black Mirror is appearance, not a device',
-'This HTML is a projection of those occurrences'
+'This HTML is a projection of those occurrences',
+'NRRF764 is a derived computational chart, not the network',
+'Architecture note: problems as real; solutions are the interactions'
 ];
 const hidden=[
 'kantian-ivi (not publicly reachable)',
@@ -113,7 +119,9 @@ const openSeams=[
 'Slearn packet OPEN, not RETURNED',
 'all live occurrences MODEL_SUGGESTED_RELATION',
 'TRUE not issued; reopening available',
-'leftover Slearn PR 10 is leftover OPEN packet, NOT the deploy'
+'leftover Slearn PR 10 is leftover OPEN packet, NOT the deploy',
+'NRRF764 not verified on public slearn main from this interaction',
+'Harry has not issued TRUE on problems-as-real'
 ];
 const leftover={url:'https://github.com/scarryhott/slearn/pull/10',label:'Leftover Slearn draft PR 10 is from the old “deploy the continuum” reading. OPEN packet only. Not this run. Not the deploy.'};
 const scenarios=[
@@ -154,7 +162,7 @@ $('occRows').innerHTML=liveOccurrences.map(o=>`<tr><td class="occ"><a href="${GH
 $('selectedPoint').textContent='this live loop / 0';
 $('selectedNote').textContent='Current selected point: the Super network loop as stored on this branch. Halt is a reading, not termination.';
 $('selectedEq').textContent='0 / L / selected point  —τ→  inf / ∞ / G / continuation  —τ⁻¹→  L′ / returned local\nnotes stay notes · charts stay charts · residue remaining';
-$('bmShown').textContent='What this cycle currently returns: live occurrence ids above, Slearn OPEN not RETURNED, Aristotle native equality OPEN, leftover Slearn PR 10 named as not-the-deploy. Black Mirror is appearance, not a device.';
+$('bmShown').textContent='What this cycle currently returns: live occurrence ids above, including NRRF764 as a derived chart (not the network) and problems-as-real as architecture note. Slearn OPEN not RETURNED, Aristotle native equality OPEN, leftover Slearn PR 10 named as not-the-deploy. Black Mirror is appearance, not a device. TRUE is not issued.';
 $('bmLeftover').innerHTML=`<a href="${leftover.url}">${leftover.url}</a> — ${leftover.label}`;
 function current(){return scenarios.find(s=>s.id===$('scenario').value)}
 function draw(){const s=current(),p=Number($('phase').value),r=Number($('r').value),i=Number($('i').value),ss=Number($('ss').value);$('rOut').textContent=fmt(r);$('iOut').textContent=fmt(i);$('ssOut').textContent=fmt(ss);const cx=460,cy=260,len=55+46*r,x2=cx+len*Math.cos(i),y2=cy-len*Math.sin(i),rad=52+22*r,ny=105+300*Math.abs(2*ss-1);let out='<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#9fb4ff"/></marker></defs>';out+=`<circle cx="${cx}" cy="${cy}" r="10" fill="#eef3fa"/><text x="${cx}" y="${cy+28}" text-anchor="middle" fill="#aab6c9">0 / this live loop</text>`;out+=`<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#9fb4ff" stroke-width="5" marker-end="url(#a)" opacity="${p>=1?1:.15}"/><text x="${(cx+x2)/2}" y="${(cy+y2)/2-12}" fill="#aab6c9">r-extension / continuation</text>`;out+=`<path d="M ${x2} ${y2} A ${rad} ${rad} 0 1 1 ${x2-.1} ${y2}" fill="none" stroke="#e7bd56" stroke-width="5" opacity="${p>=2?1:.12}"/><text x="${x2+rad+8}" y="${y2}" fill="#e7bd56">i-rotation / sensor loop</text>`;out+=`<circle cx="${x2}" cy="${y2}" r="${rad*(.45+.5*ss)}" fill="rgba(88,211,148,.14)" stroke="#58d394" stroke-width="5" opacity="${p>=3?1:.12}"/><text x="${x2}" y="${y2+5}" text-anchor="middle" fill="#eef3fa" opacity="${p>=3?1:.2}">authored return</text>`;out+=`<path d="M ${x2+rad} ${y2} C 760 95,790 440,860 ${ny}" fill="none" stroke="#ff9fd4" stroke-width="4" marker-end="url(#a)" opacity="${p>=4?1:.1}"/><circle cx="860" cy="${ny}" r="10" fill="#ff9fd4" opacity="${p>=4?1:.1}"/><text x="860" y="${ny+28}" text-anchor="middle" fill="#ff9fd4" opacity="${p>=4?1:.1}">new 0 / reopening</text>`;out+=`<text x="35" y="43" fill="#eef3fa">${s.live?'LIVE field · ':''}${phases[p]}</text><text x="35" y="70" fill="#aab6c9">OPEN seams: ${s.live?openSeams.length:s.open}</text><text x="35" y="97" fill="#aab6c9">hidden perspectives: ${s.live?hidden.length:s.hidden}</text>`;$('canvas').innerHTML=out}
