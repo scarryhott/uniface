@@ -96,7 +96,7 @@ Slearn interaction
 - [`NON_COLLAPSE_CLOSURE_INTERFACE.md`](NON_COLLAPSE_CLOSURE_INTERFACE.md) — non-collapse philosophy.
 - [`FULL_CLOSURE_DERIVED_INTERFACE.md`](FULL_CLOSURE_DERIVED_INTERFACE.md) — interface architecture.
 - [`FORMAL_LINEAGE.md`](FORMAL_LINEAGE.md) — NRRF theorem lineage and scope.
-- [`docs/index.html`](docs/index.html) — interactive Uniface prototype; THE public Super network projection, named live at https://uniface-tawny.vercel.app (not the field, not a second site). Public / persist / reintegrate are three surfaces of the same sense→select loop, not three products. GitHub Pages enablement remains OPEN.
+- [`docs/index.html`](docs/index.html) — interactive Uniface prototype; THE public Super network projection, named live at https://uniface-tawny.vercel.app (not the field, not a second site). Persist = `uniface-relative` relative interaction (not closure). Public / persist / reintegrate are three surfaces of the same sense→select loop, not three products. GitHub Pages enablement remains OPEN.
 - [`ledger/`](ledger/) — heartbeat receipts (organization / planning / action). Derived store, not source notes. [`ledger/runs/`](ledger/runs/) is last run residue the page may load. Git is persistence.
 - [`occurrences/`](occurrences/) and [`interactions/`](interactions/) — stored live-reading returns. They are interpretation occurrences, not source notes and not a second foundation.
 - [`occurrences/2026-08-25-full-closure-loop-plan.md`](occurrences/2026-08-25-full-closure-loop-plan.md) — Super network full-closure-loop plan; interpretation return, not source notes.
@@ -112,6 +112,7 @@ Slearn interaction
 - [`occurrences/2026-08-25-relative-forms-as-interface.md`](occurrences/2026-08-25-relative-forms-as-interface.md) — relative forms as live interface operators; translational truth as relative admission; framework not achieved; interpretation return, not source notes.
 - [`occurrences/2026-08-25-interactive-closure-not-gate.md`](occurrences/2026-08-25-interactive-closure-not-gate.md) — living network follows the tokenomic perspectival continuum; interface is interactive closure, not a bidirectional gate; interpretation return, not a FOUNDATION rewrite.
 - [`occurrences/2026-08-25-vercel-public-projection.md`](occurrences/2026-08-25-vercel-public-projection.md) — named live Vercel public projection; not the field; interpretation return, not a second site.
+- [`occurrences/2026-08-25-uniface-relative-store.md`](occurrences/2026-08-25-uniface-relative-store.md) — `$0/month` `uniface-relative` persist of relative interaction, not closure, not Rate My Face; interpretation return, not a FOUNDATION rewrite.
 
 ## Status discipline
 

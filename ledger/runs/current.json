@@ -3,12 +3,12 @@
   "status": "MODEL_SUGGESTED_RELATION",
   "persistence": "git",
   "closure_store": ["ledger/", "occurrences/", "ledger/runs/"],
-  "relative_interaction_store": "local continuation now; Supabase residue OPEN (Harry pending $0 uniface-relative confirm; not rmf_*)",
+  "relative_interaction_store": "uniface-relative public.uniface_relative_interaction (not closure; not rmf_*; no service-role)",
   "not": "the field, a bidirectional gate, a second site, Rate My Face, or an achieved framework",
-  "last_beat": "2026-08-25-1434-et",
-  "last_beat_residue": "occ-2026-08-25-interactive-closure-not-gate",
-  "next_0": "occ-2026-08-25-vercel-public-projection",
-  "cursor": 17,
+  "last_beat": "2026-08-25-1534-et",
+  "last_beat_residue": "occ-2026-08-25-vercel-public-projection",
+  "next_0": "occ-2026-08-25-uniface-relative-store",
+  "cursor": 18,
   "framework_achieved": false,
   "interface": "interactive closure, not a bidirectional gate",
   "public_projection": "https://uniface-tawny.vercel.app",
@@ -22,7 +22,7 @@
     "Pages": "OPEN",
     "Vercel_MCP": "needsAuth",
     "Vercel_projection": "https://uniface-tawny.vercel.app (named; not the field)",
-    "Supabase": "OPEN — pending Harry confirm for $0 uniface-relative; do not use rmf_* / Rate My Face",
+    "Supabase": "uniface-relative persist wired; service-role never in client; authenticated authors OPEN; not rmf_*",
     "others_on_site": "OPEN",
     "kantian-ivi": "unreachable",
     "Aristotle_native_equality": "OPEN",
@@ -32,8 +32,8 @@
   },
   "learning": "the residue, not a model training loop",
   "beat_layers": {
-    "organization": "Selected 0: occ-2026-08-25-interactive-closure-not-gate. Public projection LIVE at https://uniface-tawny.vercel.app. Page is not the field. Supabase relative sink OPEN (not rmf). Vercel MCP needsAuth.",
-    "planning": "Name the Vercel URL on docs/index.html. Do not duplicate 1416. Do not create Supabase. Do not mix rmf_*. Do not merge. Framework not achieved.",
-    "action": "occ-2026-08-25-vercel-public-projection; URL named on public surface; last_beat=1434; last_beat_residue=interactive-closure-not-gate; next_0=vercel-public-projection."
+    "organization": "Selected 0: occ-2026-08-25-vercel-public-projection. Harry confirmed $0 uniface-relative ACTIVE_HEALTHY. Page is not the field.",
+    "planning": "Wire select/admit to POST public.uniface_relative_interaction. Git stays closure. Do not mix rmf_*. Do not merge.",
+    "action": "occ-2026-08-25-uniface-relative-store; persist wired; last_beat=1534; last_beat_residue=vercel-public-projection; next_0=uniface-relative-store."
   }
 }
