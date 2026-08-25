@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "closure-supernet"
-version = "0.1.0"
-description = "Source-preserving autonomous runtime for Uniface Closure Supernet"
+version = "0.2.0"
+description = "Source-preserving autonomous runtime and digital integration fabric for Uniface Closure Supernet"
 readme = "AUTONOMOUS_RUNTIME.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
