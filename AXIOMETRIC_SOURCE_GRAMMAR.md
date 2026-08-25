@@ -2,6 +2,22 @@
 
 This document preserves the source symbols and intended operations that Uniface must operate. It is not a classical replacement and does not claim that every variant has already been reconciled.
 
+## Configuration principle
+
+The mathematical forms represented by these symbols may have precedents. Their intended unification is not determined by mathematical availability alone.
+
+```text
+literal occurrence
+→ understood candidate relation
+→ explicit interpretation
+→ interaction and challenge
+→ configured admission
+→ provisional return
+→ reopening
+```
+
+No source equation is treated as an isolated master formula. No formal analogy is admitted as identity without an explicit operator translation, frame, status, and reverse path.
+
 ## 1. Reciprocal readings
 
 ```text
@@ -176,16 +192,38 @@ No equation is stored as an isolated master formula. Each occurrence records:
 source context
 operator path
 interacting notes
+candidate relations
+interpretation witnesses
+configured admission
 frame of interpretation
 preserved relation
 transformed relation
+omitted or hidden relation
 formal status
 open seams
 ```
 
 Its meaning is completed relative to interaction with the full note network.
 
-## 14. Normalization policy
+The same mathematical occurrence may participate in more than one configuration. These alternatives remain distinct until an explicit translation is admitted.
+
+## 14. Configuration admissibility
+
+A relation among source equations must identify:
+
+- the exact source occurrences;
+- the source and target operator paths;
+- the frame and scope;
+- what is preserved and transformed;
+- what is omitted or remains invisible;
+- how the relation composes with other admitted translations;
+- whether the author confirmed it;
+- whether it is formal, simulated, empirical, physical, moral, or OPEN;
+- how the return reopens into the note field.
+
+Semantic similarity alone cannot configure unity.
+
+## 15. Normalization policy
 
 Uniface must never:
 
@@ -195,12 +233,14 @@ Uniface must never:
 - treat a Lean interpretation as the only meaning of a note;
 - merge physical, philosophical, cultural, socioeconomic, and formal readings without status labels;
 - assume a digital chart is Turing complete;
-- use a local halt as a terminal interface return.
+- use a local halt as a terminal interface return;
+- treat one configured interpretation as the only possible reading of existing mathematics.
 
 A classical chart must always provide:
 
 ```text
 source occurrence
+→ understood candidate relation
 → interpretive translation
 → derived notation
 → proof or simulation
