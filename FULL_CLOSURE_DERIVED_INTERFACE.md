@@ -2,191 +2,215 @@
 
 ## 1. Interface principle
 
-Uniface does not begin by defining isolated objects and later connecting them to a pre-given closure. It also does not use closure as a terminal state.
-
-The interface begins with exact occurrences and active relations:
+Uniface is not a database that stores notes beneath a fixed ontology. It is a source-preserving latent field whose organization changes through interaction.
 
 ```text
-occurrence ↔ relation ↔ translation ↔ provisional return ↔ reopening
+source note
+↔ relation
+↔ interaction
+↔ latent memory update
+↔ admissible reinterpretation
+↔ transformed note or rule
+↔ return
+↔ reopening
 ```
 
-The source axiometry organizes this motion:
+Closure is the continuity of this entire loop. It is neither supplied before the note field nor declared terminal after a return.
+
+## 2. Canonical layers
+
+### Literal source
+
+Exact text, equations, drawings, dates, and context remain immutable.
+
+### Axiometric operator field
+
+Notes are indexed by the literal operations they enact:
 
 ```text
-0 ↔ ∞
-r ↔ i
-point → line → loop → return → new point
-ball ↔ hair
-loop ↔ sensor
+0↔∞
+r/i
+Triangle Time
+implicit shell return
+Chaitin–Kakeya
+tan(π/2) fold
+predual Fourier
+four-i
+ball–hair
+loop–sensor–selection
+metavectorization
 ```
 
-A definite language or definition is permitted. What is not permitted is treating its reference as complete outside the translations that make it meaningful.
+### Relational latent memory
 
-## 2. Latent note object
+Semantic, operator, temporal, formal, evidential, cultural, and moral relations are stored separately and linked by provenance.
 
-Every note occurrence remains immutable and source-reversible.
+### Interaction and rule versioning
+
+Each assistant/user interaction records retrieval, proposed relation, author response, artifacts, and accepted, rejected, or OPEN changes. Rule changes are versioned.
+
+### Returned projection
+
+Black Mirror displays the current topology of returned relations without claiming to reconstruct every source path or hidden residue.
+
+### Reopening
+
+Every return can become the point or sensor condition of another interaction.
+
+## 3. Source-preserving latent object
 
 ```text
-NoteOccurrence
-  source_id
-  exact_text
-  exact_symbols
-  drawings_or_images
-  date
+LatentNote
+  literal_occurrence
   source_context
-  author_status
-  operator_path
+  axiometric_symbols
+  ordered_operator_paths
   typed_relations
+  interaction_history
   formal_witnesses
   simulation_witnesses
-  evidence_status
+  empirical_evidence
+  affected_perspectives
+  cultural_moral_consequences
+  rule_versions
   open_seams
 ```
 
-The embedding vector is never the canonical note. It is one search coordinate beside the literal archive, axiometric graph, proof graph, and evidence graph.
+The embedding is a search coordinate, never the canonical note.
 
-## 3. Axiometric operator path
+## 4. Slearn
 
-A note is indexed by the ordered operations it enacts, not only by subject keywords.
+Slearn is the active recursive continuum. It supports:
 
-Example paths:
+- entering exact notes;
+- retrieving distant formulations;
+- tracing `r`-extension and `i`-rotation;
+- inspecting `0↔∞` inversions;
+- comparing unresolved variants;
+- following sensor–selection cycles;
+- constructing relation-derived communities and metavectors;
+- connecting Lean theorems to exact readings;
+- branching interpretations rather than overwriting them;
+- recording conscious cultural and moral consequences;
+- reopening every returned form.
+
+Questions, lessons, projects, communities, and tokens are derived interaction roles rather than isolated primitives.
+
+## 5. Black Mirror
+
+Black Mirror is the nonterminal topological appearance of the active Slearn field.
+
+It may display:
+
+- returned classes and loops;
+- ball–hair relations;
+- path invariants and hidden order;
+- perspective and gluing obstructions;
+- sensor–selection boundaries;
+- OPEN seams and contradictions;
+- which distinctions the projection deletes;
+- formal, simulated, empirical, hypothetical, cultural, and moral status.
+
+Selecting a displayed form opens its exact notes, alternative paths, affected perspectives, rule versions, and unresolved relations.
+
+## 6. Conscious cultural morality
+
+The foundational field is culture, morality, and consciousness in interaction. Money, AI, rules, law, and social order are downstream views.
+
+The interface must show:
+
+- who and what sensed a condition;
+- who could select or respond;
+- who authored the returned form;
+- what consequences returned;
+- which perspectives were hidden;
+- whether the field can reopen.
+
+A stable or widely shared projection does not automatically constitute moral truth.
+
+## 7. Computation
+
+Uniface does not assume Turing completeness.
 
 ```text
-0↔∞ → r-extension → i-rotation → tan(π/2)-fold → ball/hair return
+halt ↔ selected point
+continuation ↔ reopened trajectory
 ```
 
-```text
-Triangle Time → implicit shell return → Lambert-W derived resolution
-```
+A digital machine can realize one local form. The interface scopes every computational theorem to its language or machine and shows what the halt reopens.
 
-```text
-Chaitin bound → Kakeya direction → predual Fourier exchange → returned form
-```
-
-The relation engine proposes typed translations between these paths. It never announces identity without showing the path and provenance.
-
-## 4. Slearn interaction continuum
-
-Slearn is the recursive movement through the latent field.
-
-It supports exact notes, reopening returned forms, tracing `r`-extension and `i`-rotation paths, inspecting `0↔∞` inversions, comparing notational variants without normalizing them, constructing relation-derived communities and metavectors, linking notes to Lean modules and exact theorem readings, branching unresolved interpretations, and connecting individual learning, projects, collaborators, and value paths.
-
-A question is an OPEN seam. A lesson is an admissible translation path. A project is a path with a pre-registered return test. These are derived interaction roles, not isolated foundational entity types.
-
-## 5. Black Mirror projection
-
-Black Mirror is the current topological appearance of the active Slearn field.
-
-It displays recurrent operator paths, relation-derived classes, loops and returned path invariants, ball–hair equivalences, translation obstructions, OPEN seams, opacity and deleted distinctions, and formal, simulated, empirical, and hypothetical status.
-
-It does not claim to reconstruct every path from a return. Selecting a displayed class opens its source notes, alternate forms, and recursive Slearn histories.
-
-Black Mirror is not terminal:
-
-```text
-Slearn path → Black Mirror appearance → changed perspective → new Slearn path
-```
-
-## 6. Translational truth
-
-Truth is not a sentence assumed before translation or a final value reached after all translation ends.
+## 8. Translational truth
 
 ```text
 OPEN  = coherent translation remains unfinished
 FALSE = translated forms contradict
-TRUE  = the required relation has provisionally returned at this level
+TRUE  = the required relation provisionally returns
 ```
 
-A TRUE result can reopen into another level.
+Truth is not a label attached before interaction and not a terminal judgment after it. It is what remains mutually translatable through the active relation.
 
-A global readout must be invariant under the admitted translation path and source-reversible. Otherwise it remains attached to a local chart.
-
-## 7. Natural interface display levels
-
-### Source depth
-
-Exact notes, symbols, drawings, and context.
-
-### Axiometric depth
-
-Literal operator paths using `0↔∞`, `r/i`, Triangle Time, Chaitin–Kakeya, tan seams, predual Fourier, four-i, ball–hair, loop–sensor, and metavectorization.
-
-### Translation depth
-
-Typed relations, frame changes, refinements, inversions, contradictions, and OPEN seams.
-
-### Return depth
-
-Current path invariant or provisional returned natural form.
-
-### Projection depth
-
-Black Mirror topology, showing what survives and what is hidden.
-
-### Reopening depth
-
-The returned form becomes a new point for further Slearn interaction.
-
-## 8. Interaction grammar
+## 9. Interaction grammar
 
 | Gesture | Axiometric interpretation |
 |---|---|
 | Select | Choose a current relative presentation |
-| Open | Reveal its source occurrences and possible trajectories |
+| Open | Reveal sources, alternatives, and affected perspectives |
 | Extend | Follow or create an `r` trajectory |
 | Rotate | Follow or create an `i` trajectory |
 | Invert | Exchange reciprocal `0↔∞` or predual readings |
-| Fold | Enter a tan-seam or other inter-bound transition |
-| Trace | Show recursive path and current return together |
-| Refine | Split one act into weaker sub-acts without assuming identical meaning |
-| Compare | Test a candidate frame translation |
-| Challenge | Apply a derived proof or evidence test |
+| Fold | Enter a tan seam or inter-bound transition |
+| Sense | Read potential distinctions without claiming terminal knowledge |
+| Select | Author a relative form and its responsibilities |
+| Trace | Show path, return, and reopening together |
+| Refine | Split an act without assuming identical meaning |
+| Compare | Test a frame translation |
+| Challenge | Apply a downstream proof or evidence test |
 | Return | Produce a provisional shared reading |
-| Reopen | Use the return as the point of another form |
-| Commit | Store a source-reversible closure receipt and its status |
+| Reopen | Use the return as a new point or sensor condition |
+| Commit | Store a source-reversible receipt and rule version |
 
-## 9. Proof and evidence
-
-The interface separates:
+## 10. Evidence and status
 
 ```text
+ORIGINAL_NOTE
+AUTHOR_CONFIRMED_RELATION
+MODEL_SUGGESTED_RELATION
 FORMALLY_PROVED_UNDER_READING
 SIMULATED_UNDER_ASSUMPTIONS
 EMPIRICALLY_SUPPORTED
 PHYSICAL_HYPOTHESIS
 SOCIOECONOMIC_PROPOSAL
-PHILOSOPHICAL_READING
+MORAL_CONSEQUENCE
 OPEN
+CONTRADICTION
 ```
 
-Lean verifies selected translations under explicit interpretations. It does not replace the source axiometry.
+Proof ledgers, simulations, sensor channels, and benchmarks are downstream witnesses. They do not replace unity with a checklist.
 
-The proof ledger may include naturality, frame invariance, refinement, path discrimination, gluing obstruction, sensor translation, and blinded information tests. The ledger is downstream evidence, not an isolated definition of unity.
+## 11. Required return path
 
-## 10. Formal lineage
+Every global interface result must expose:
 
-The NRRF modules increasingly derive the interface from relation and admission rather than assume a terminal closure: relation-first identity and continual truth; scalar and field return invariants; refinement and noncommutative ordered return; path-dependent return and informational firewall; one idempotent natural-form family; UX topological projection and Slearn perspective continuum; fibre-free readings; unity admission and the limits of isolated probes; completion before form; and admission as the forced unity of apparent isolations.
-
-See [`FORMAL_LINEAGE.md`](FORMAL_LINEAGE.md) for the theorem-level map.
-
-## 11. Derived simulation
-
-The runnable interface in [`docs/index.html`](docs/index.html) is a **derived simulation chart**. It demonstrates local language relabelling, perspective-origin shifts, relation-derived projection, truth completion and contradiction, path refinement, hidden ordered residue, and which readouts descend to Black Mirror.
-
-Its generic graph and operator notation are implementation coordinates. They are not the source axiometry.
+```text
+projection
+→ returned relation
+→ explicit translation
+→ exact source notes
+→ operator path
+→ formal/simulation/evidence witnesses
+→ affected perspectives
+→ rule version
+→ OPEN alternatives
+→ reopening
+```
 
 ## 12. Non-negotiable rule
 
-Every global interface result must support this return path:
+The interface is complete only as active continuity. It must never:
 
-```text
-exact source note
-→ literal axiometric operations
-→ explicit translation
-→ derived formal/simulation chart
-→ evidence or theorem
-→ source-reversible return
-→ reopened form
-```
-
-The interface is complete only as active continuity. It is never founded on a closure assumed beforehand and never ends by declaring closure terminal.
+- assume closure before translation;
+- use closure as terminal;
+- assume Turing completeness;
+- replace notes with embeddings;
+- treat downstream systems as the foundational network;
+- hide source, path, perspective, or status.

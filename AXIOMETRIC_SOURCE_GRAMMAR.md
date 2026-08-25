@@ -1,16 +1,29 @@
 # Axiometric Source Grammar
 
-This document records the source symbols and intended operations that Uniface must preserve. It is not a classical replacement or a claim that every variant has already been reconciled.
+This document preserves the source symbols and intended operations that Uniface must operate. It is not a classical replacement and does not claim that every variant has already been reconciled.
 
-## 1. Reciprocal closure readings
+## 1. Reciprocal readings
 
 ```text
 0 ↔ ∞
 ```
 
-- `0`: contraction, fixed appearance, returned basis.
-- `∞`: projection, recursive opening, continuing trajectory.
+- `0`: contraction, selected point, fixed appearance, returned basis.
+- `∞`: projection, reopened line, recursive potential, continuing trajectory.
 - The invariant is their reciprocal relation, not either isolated magnitude.
+
+Related reciprocal readings:
+
+```text
+point ↔ line
+selection ↔ sensor
+halt ↔ continuation
+proof ↔ assumption
+defined language ↔ open language
+partition ↔ unitary curvature
+```
+
+These are frame-relative orientations of one active relation, not terminal binary opposites.
 
 ## 2. Extension and rotation
 
@@ -22,13 +35,11 @@ basis ↔ trajectory
 
 `r` and `i` carry intended operational roles. They must not be silently normalized into generic variables.
 
-The source relation
-
 ```text
 i^r ≡ r^i
 ```
 
-is read as reciprocal completion of rotation-through-extension and extension-through-rotation, not automatically as ordinary exponent arithmetic.
+This is read as reciprocal completion of rotation-through-extension and extension-through-rotation, not automatically as ordinary exponent arithmetic.
 
 ## 3. Triangle Time
 
@@ -36,9 +47,7 @@ is read as reciprocal completion of rotation-through-extension and extension-thr
 i = 2^(r - 1)
 ```
 
-Triangle Time relates recursive order to its rotational/unity completion.
-
-The implicit shell return is:
+Triangle Time relates recursive order to rotational/unity completion.
 
 ```text
 S_(k+1) = S_k - 2^(S_(k+1) - 1)
@@ -73,21 +82,16 @@ This is the seam at which rotation and extension can no longer remain separately
 
 ```text
 1 → i → -1 → -i → 1
-```
-
-```text
 point → circle → sphere → filled sphere → point
 ```
 
 The return becomes the point of another level. The cycle is generative rather than terminal.
 
-A remembered ball route is:
-
 ```text
 2s + t → t^2 → -2s + 1/2 t → -t^2 → 2s + t
 ```
 
-This remains tied to its source interpretation until formalized.
+The remembered ball route remains tied to its source interpretation until formalized.
 
 ## 7. Predual Fourier
 
@@ -95,23 +99,12 @@ This remains tied to its source interpretation until formalized.
 σ(l_r,g_r,l_i,g_i) = (g_i,l_i,g_r,l_r)
 ```
 
-It exchanges:
-
-- local real ↔ global imaginary;
-- global real ↔ local imaginary;
-- local ↔ global;
-- real ↔ imaginary;
-- basis ↔ trajectory;
-- place ↔ event.
-
-Another source chart is:
+It exchanges local/global and real/imaginary readings, and thereby basis/trajectory, place/event, and point/line orientations.
 
 ```text
 Z(η,θ) = e^(η + iθ)
 σ(Z) = 1 / conjugate(Z) = Z(-η,θ)
 ```
-
-with the standing form:
 
 ```text
 (R e^(iθ) + R^(-1)e^(-iθ))/2
@@ -124,13 +117,13 @@ with the standing form:
 point → line → loop → return → new point
 ```
 
-- Point: current fixed appearance.
+- Point: current selected or fixed appearance.
 - Line: the same form opened into trajectory.
-- Loop: ordered return of the trajectory.
+- Loop: ordered sensor–selection interaction.
 - Return: provisional mutual identification.
 - New point: reopening at another level.
 
-The word `closure` may describe the continuity across this cycle, but it must not be assumed before it or used as its terminal object.
+Closure names continuity across the cycle. It is not assumed before it or used as its terminal object.
 
 ## 9. Ball–hair
 
@@ -138,23 +131,61 @@ The word `closure` may describe the continuity across this cycle, but it must no
 ball ↔ hair
 ```
 
-The ball is the hair read as returned relation. The hair is the ball read as reopening trajectory. Neither is an independent object to which the other is attached.
+The ball is the hair read as returned relation. The hair is the ball read as reopened trajectory. Neither is an independent object to which the other is attached.
 
-## 10. Loop–sensor
+## 10. Loop–sensor–selection
 
 ```text
-loop ↔ sensor
+loop ↔ sensor ↔ selection ↔ new loop
 ```
 
-The loop and sensor are equal through their true translation of natural relation. A sensor is not an external certifier of a terminal loop; its return changes the next loop condition.
+The sensor is not an external certifier. Its return contributes to selection, and selection authors the condition of the next sensor field.
 
-## 11. Metavectorization
+```text
+sensor potential
+→ natural choice
+→ relative selection
+→ authored form
+→ returned consequence
+→ new sensor potential
+```
+
+## 11. Indeterminate strings
+
+An indeterminate string is a factor of potential determination. Its meaning develops relative to sensor configuration, other strings, prior selections, cultural memory, authorship, and possible returns.
+
+```text
+indeterminate factors
+→ unitary-curvature equalization
+→ natural choice
+→ authored discretion
+→ new indeterminate factors
+```
+
+## 12. Metavectorization
 
 Exact token occurrences are related through closeness, betweenness, degree, temporal interaction, and community formation. Community metavectors carry length, thickness, and angle; their tip-to-tail organization and higher resuperposition generate cross-domain relations.
 
-The system must preserve the original ordering and distinguish source token vectors, relation-derived communities, community metavectors, field metavectors, resuperposition and dimensional rotation, and OPEN claims connecting this construction to Kakeya, harmonic identity, or physical light.
+The system preserves source token vectors, relation-derived communities, community metavectors, field metavectors, resuperposition, dimensional rotation, and OPEN claims connecting this construction to Kakeya, harmonic identity, or physical light.
 
-## 12. Normalization policy
+## 13. Network-derived meaning
+
+No equation is stored as an isolated master formula. Each occurrence records:
+
+```text
+source context
+operator path
+interacting notes
+frame of interpretation
+preserved relation
+transformed relation
+formal status
+open seams
+```
+
+Its meaning is completed relative to interaction with the full note network.
+
+## 14. Normalization policy
 
 Uniface must never:
 
@@ -162,7 +193,9 @@ Uniface must never:
 - choose `tan` versus `arctan` silently;
 - replace source equations with an equivalent-looking classical formula;
 - treat a Lean interpretation as the only meaning of a note;
-- merge physical, philosophical, socioeconomic, and formal readings without status labels.
+- merge physical, philosophical, cultural, socioeconomic, and formal readings without status labels;
+- assume a digital chart is Turing complete;
+- use a local halt as a terminal interface return.
 
 A classical chart must always provide:
 
@@ -172,4 +205,5 @@ source occurrence
 → derived notation
 → proof or simulation
 → return to source meaning
+→ reopening
 ```

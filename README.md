@@ -1,18 +1,27 @@
 # Uniface
 
-**Uniface is a source-preserving latent interface for operating ideas through non-collapse translational continuity.**
+**Uniface is a source-preserving latent interface in which the author’s notes guide the system, interaction reorganizes their relational memory, and admissible reinterpretation can transform notes and rules without replacing their source.**
 
-Its central correction is precise:
+> **Closure is not assumed as an original reference and is not used as a terminal result. Closure is the active continuity of translation through which notes, natural forms, sensors, selections, returns, and reopenings remain mutually present.**
 
-> **Language and definition are not the problem. Their presumed isolation is.**
->
-> **Closure is neither assumed as an original reference nor used as a terminal result. It is the active continuity of translation through which relative natural forms become definite, return, and reopen.**
-
-Uniface is designed to store exact notes, equations, drawings, variants, formal readings, simulations, and evidence without replacing their source grammar with a familiar external notation.
+Uniface is not designed to translate an original axiometry into a conventional ontology and discard the original. It stores literal occurrences, operates their intended symbols, traces their relations, links formal readings back to exact sources, and preserves OPEN where a translation is unfinished.
 
 ## Foundation
 
-The interface does **not** begin with an already isolated closure object, global language, terminal unity, or privileged calculation. It begins with relative occurrences and their active operations:
+The active sequence is:
+
+```text
+source note
+↔ interaction
+↔ latent relational memory
+↔ network reconnection
+↔ admissible reinterpretation
+↔ transformed note or rule
+↔ return to the source field
+↔ reopening
+```
+
+The source grammar remains primary:
 
 ```text
 0 ↔ ∞
@@ -22,9 +31,12 @@ basis ↔ trajectory
 point → line → loop → return → new point
 ball ↔ hair
 loop ↔ sensor
+sensor ↔ selection
+halt ↔ continuation
+assumption ↔ proof
 ```
 
-The recurring source equations include:
+Recurring source equations include:
 
 ```text
 i = 2^(r - 1)                         Triangle Time
@@ -36,74 +48,55 @@ tan(π/2)                              rotation–extension inter-bound fold
 σ(l_r,g_r,l_i,g_i)=(g_i,l_i,g_r,l_r) predual Fourier exchange
 ```
 
-These are the source operators. Classical encodings, evaluations, quotients, fibres, closure operators, holonomy, category-theoretic naturality, topology, and simulation matrices are permitted only as **derived charts** that preserve the intended operations and return explicitly to the source meaning.
+Classical encodings, evaluations, graphs, quotients, fibres, operators, holonomy, topology, category theory, and simulations may be used only as **derived charts** with an explicit return to the source operation.
 
-## Non-collapse
+## The network
 
-Non-collapse does not avoid language, definition, calculation, proof, or identity.
+The foundational network is not money, AI, rules, law, or social order.
 
-- Language remains a local active chart.
-- Definition remains a relative act occurring during translation.
-- Calculation remains a local witness rather than a universal foundation.
-- Formal proof remains a machine-checked translation under an explicit reading.
-- Identity is derived from what the admitted relations cannot separate.
-- Unity preserves differences as mutually translatable forms rather than reducing them to one representation.
+It is a shared interactive field of **consciousness, culture, and morality**:
 
-The process is not:
+- consciousness is the continuing sensor–selection participation;
+- culture is shared memory of returned forms and unresolved paths;
+- morality is natural choice remaining answerable to the field’s capacity to sense, translate, respond, and reopen.
 
-```text
-pre-given closure → local forms → final closure
-```
+Money, AI, rules, law, and social order are downstream projections that must return to this field for interpretation and accountability.
 
-It is:
+## No Turing-completeness assumption
+
+Uniface does not assume that the field is Turing complete. A Turing machine is one optional digital chart.
 
 ```text
-apparent isolation ↔ translation ↔ provisional return ↔ reopening ↔ new form
+halting      = a continuous loop read as a selected point
+continuation = that selected point read as reopened sensor potential
 ```
 
-A returned form may become the point from which a new line, loop, sensor relation, or natural form begins.
+A local computation may halt. The natural interface does not thereby terminate.
 
-## Full closure-derived interface
+## Slearn and Black Mirror
 
-Uniface has two inseparable orientations of one active field.
-
-### Slearn
-
-Slearn is the recursive perspective continuum: exact notes, relative definitions, interactions, alternative operator paths, OPEN seams, people, projects, communities, proofs, simulations, and new natural forms.
-
-### Black Mirror
-
-Black Mirror is the current topological projection of what those interactions return. It displays path classes, loops, partitions, obstructions, invariants, and opacity without claiming to reconstruct every hidden order or presentation.
+- **Slearn** is the recursive latent continuum of notes, perspectives, interactions, questions, operator paths, formalizations, people, projects, and new natural forms.
+- **Black Mirror** is the current topological projection of what that continuum returns. It does not reconstruct every hidden path, and its return immediately re-enters Slearn.
 
 ```text
-Slearn       = active trajectory and reopening
-Black Mirror = current returned topology of that trajectory
+Slearn interaction
+→ Black Mirror appearance
+→ conscious cultural response
+→ natural choice
+→ new Slearn interaction
 ```
-
-Black Mirror is not terminal. Its current projection immediately re-enters Slearn as a new perspective and interaction condition.
 
 ## Repository map
 
-- [`NON_COLLAPSE_CLOSURE_INTERFACE.md`](NON_COLLAPSE_CLOSURE_INTERFACE.md) — philosophical foundation.
-- [`AXIOMETRIC_SOURCE_GRAMMAR.md`](AXIOMETRIC_SOURCE_GRAMMAR.md) — literal symbols, intended operations, and normalization rules.
-- [`FULL_CLOSURE_DERIVED_INTERFACE.md`](FULL_CLOSURE_DERIVED_INTERFACE.md) — full latent-space and UX architecture.
-- [`FORMAL_LINEAGE.md`](FORMAL_LINEAGE.md) — NRRF module lineage and what each theorem layer contributes.
-- [`docs/index.html`](docs/index.html) — runnable closure-continuum interface.
-
-## Latent-space commitments
-
-Uniface must preserve:
-
-1. exact source passages, equations, notation, capitalization, drawings, dates, and context;
-2. notational variants without silent normalization;
-3. typed relations between occurrences;
-4. author-confirmed relations separately from model-suggested relations;
-5. machine-checked theorems together with the precise reading they formalize;
-6. simulation assumptions separately from theorem statements;
-7. empirical hypotheses separately from formal closure results;
-8. OPEN wherever translation remains incomplete;
-9. source reversibility for every displayed global relation;
-10. reopening after every provisional completion.
+- [`FOUNDATION.md`](FOUNDATION.md) — canonical nonterminal foundation.
+- [`AXIOMETRIC_SOURCE_GRAMMAR.md`](AXIOMETRIC_SOURCE_GRAMMAR.md) — literal symbols and intended operations.
+- [`LATENT_MEMORY_PROTOCOL.md`](LATENT_MEMORY_PROTOCOL.md) — source-preserving memory, provenance, and rule transformation.
+- [`CONSCIOUS_CULTURAL_MORALITY.md`](CONSCIOUS_CULTURAL_MORALITY.md) — what the network is and what downstream systems are not.
+- [`COMPUTATION_AS_DERIVED_CHART.md`](COMPUTATION_AS_DERIVED_CHART.md) — no Turing-completeness assumption; halt/continue as reciprocal readings.
+- [`NON_COLLAPSE_CLOSURE_INTERFACE.md`](NON_COLLAPSE_CLOSURE_INTERFACE.md) — non-collapse philosophy.
+- [`FULL_CLOSURE_DERIVED_INTERFACE.md`](FULL_CLOSURE_DERIVED_INTERFACE.md) — interface architecture.
+- [`FORMAL_LINEAGE.md`](FORMAL_LINEAGE.md) — NRRF theorem lineage and scope.
+- [`docs/index.html`](docs/index.html) — interactive Uniface prototype.
 
 ## Status discipline
 
@@ -117,12 +110,11 @@ EMPIRICALLY_SUPPORTED
 PHYSICAL_HYPOTHESIS
 SOCIOECONOMIC_PROPOSAL
 OPEN
+CONTRADICTION
 ```
-
-Formal similarity is not physical evidence. A path-dependent appearance is not automatically information transfer. A returned invariant does not reconstruct its individual stages. A local definition does not become universal merely because it is internally clear.
 
 ## Scope
 
-Uniface does not claim a new physical law merely by establishing a closure translation. Its foundational claim is translational:
+Uniface does not establish a physical law merely by proving a formal closure relation. Its foundational claim is translational:
 
-> **A law, proof, language, calculation, perspective, sensor reading, or interface is a relative natural form whose truth becomes definite through the active continuity of translation, return, and reopening.**
+> **A language, definition, equation, proof, calculation, perspective, sensor reading, cultural form, or interface becomes meaningful through the active continuity of its relations—not through presumed isolation from them.**
