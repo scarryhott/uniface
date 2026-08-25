@@ -114,6 +114,9 @@ Slearn interaction
 - [`occurrences/2026-08-25-vercel-public-projection.md`](occurrences/2026-08-25-vercel-public-projection.md) — named live Vercel public projection; not the field; interpretation return, not a second site.
 - [`occurrences/2026-08-25-uniface-relative-store.md`](occurrences/2026-08-25-uniface-relative-store.md) — `$0/month` `uniface-relative` persist of relative interaction, not closure, not Rate My Face; interpretation return, not a FOUNDATION rewrite.
 - [`occurrences/2026-08-25-relative-admission-form.md`](occurrences/2026-08-25-relative-admission-form.md) — one relative admission form (Problem / Inter / Note / reopen); per-lineage receipts; 764/765 Lean on slearn not here; interpretation return, not a FOUNDATION rewrite.
+- [`occurrences/2026-08-25-one-agent-reconstruction-smoke.md`](occurrences/2026-08-25-one-agent-reconstruction-smoke.md) — one-agent reconstruction smoke on the live projection; two-person+agent E2E remains OPEN.
+- [`occurrences/2026-08-25-slearn-nrrf657-pr12.md`](occurrences/2026-08-25-slearn-nrrf657-pr12.md) — pointed-at derived chart https://github.com/scarryhott/slearn/pull/12 ; not Super network; leftover PR 10 is not this.
+- [`occurrences/2026-08-25-readme-essential-quotes.md`](occurrences/2026-08-25-readme-essential-quotes.md) — points at https://github.com/scarryhott/readme (essential quotes; ORIGINAL_NOTE lives there). Uniface does not absorb `quotes.md`.
 
 ## Status discipline
 

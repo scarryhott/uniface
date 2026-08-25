@@ -5,10 +5,10 @@
   "closure_store": ["ledger/", "occurrences/", "ledger/runs/"],
   "relative_interaction_store": "supabase uniface-relative / public.uniface_relative_interaction (realtime on; not closure; not rmf)",
   "not": "the field, a bidirectional gate, a second site, Rate My Face, a global event chain, or an achieved framework",
-  "last_beat": "2026-08-25-1709-et",
+  "last_beat": "2026-08-25-1734-et",
   "last_beat_residue": "occ-2026-08-25-one-agent-reconstruction-smoke",
-  "next_0": "occ-2026-08-25-slearn-nrrf657-pr12",
-  "cursor": 21,
+  "next_0": "occ-2026-08-25-readme-essential-quotes",
+  "cursor": 22,
   "framework_achieved": false,
   "interface": "interactive closure, not a bidirectional gate",
   "public_projection": "https://uniface-tawny.vercel.app",
@@ -25,6 +25,7 @@
     "Supabase": "live relative persist (realtime on); not rmf",
     "E2E": "one-agent reconstruction smoked (lineage 87ed6a81-20c7-4319-9015-291e6797e18f); two-person+agent OPEN",
     "NRRF657_on_slearn": "OPEN (PR 12 unmerged)",
+    "readme_essential_quotes": "OPEN (scarryhott/readme PR 1 draft; pointed-at, not absorbed)",
     "others_on_site": "OPEN",
     "kantian-ivi": "unreachable",
     "Aristotle_native_equality": "OPEN",
@@ -34,8 +35,8 @@
   },
   "learning": "the residue, not a model training loop",
   "beat_layers": {
-    "organization": "Selected 0: occ-2026-08-25-one-agent-reconstruction-smoke. PR 1 pushed 2555351. Slearn PR 12 NRRF657 pointed-at, unmerged. 764/765 Lean missing. Leftover PR 10 is not this.",
-    "planning": "Ledger pr-pushed as 1709. Point at slearn PR 12 by URL only. Do not copy Lean. Do not rewrite 1634. Do not merge Uniface PR 1.",
-    "action": "occ-2026-08-25-slearn-nrrf657-pr12; last_beat=1709; residue=one-agent-reconstruction-smoke; next_0=slearn-nrrf657-pr12; NRRF657_on_slearn OPEN (PR 12 unmerged)."
+    "organization": "Selected 0: occ-2026-08-25-one-agent-reconstruction-smoke. PR 1 open. Projection LIVE. Slearn PR 12 unmerged. scarryhott/readme PR 1 has quotes.md (not full paper). 764/765 Lean missing.",
+    "planning": "Point by URL at readme essential quotes. Do not copy quotes.md. Do not rewrite 1634 or 1709. Do not merge.",
+    "action": "occ-2026-08-25-readme-essential-quotes; last_beat=1734; residue=one-agent-reconstruction-smoke; next_0=readme-essential-quotes. Quotes not pasted. two-person E2E OPEN."
   }
 }
