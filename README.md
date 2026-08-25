@@ -104,6 +104,7 @@ Slearn interaction
 - [`occurrences/2026-08-25-aristotle-translation.md`](occurrences/2026-08-25-aristotle-translation.md) — Aristotle translation visit (step 3); interpretation return, not source notes.
 - [`occurrences/2026-08-25-black-mirror-appearance.md`](occurrences/2026-08-25-black-mirror-appearance.md) — Black Mirror current appearance (step 4); interpretation return, not source notes.
 - [`occurrences/2026-08-25-nrrf764-ccm-super-network.md`](occurrences/2026-08-25-nrrf764-ccm-super-network.md) and [`occurrences/2026-08-25-problems-as-real.md`](occurrences/2026-08-25-problems-as-real.md) — NRRF764 derived chart and problems-as-real architecture note; interpretation returns, not source notes.
+- [`occurrences/2026-08-25-loop-sensor-integration.md`](occurrences/2026-08-25-loop-sensor-integration.md) — digital Super network loop sensor (sense/select); interpretation return, not source notes.
 
 ## Status discipline
 
