@@ -5,10 +5,10 @@
   "closure_store": ["ledger/", "occurrences/", "ledger/runs/"],
   "relative_interaction_store": "supabase uniface-relative / public.uniface_relative_interaction (realtime on; not closure; not rmf)",
   "not": "the field, a bidirectional gate, a second site, Rate My Face, a global event chain, or an achieved framework",
-  "last_beat": "2026-08-25-1634-et",
-  "last_beat_residue": "occ-2026-08-25-relative-admission-form",
-  "next_0": "occ-2026-08-25-one-agent-reconstruction-smoke",
-  "cursor": 20,
+  "last_beat": "2026-08-25-1709-et",
+  "last_beat_residue": "occ-2026-08-25-one-agent-reconstruction-smoke",
+  "next_0": "occ-2026-08-25-slearn-nrrf657-pr12",
+  "cursor": 21,
   "framework_achieved": false,
   "interface": "interactive closure, not a bidirectional gate",
   "public_projection": "https://uniface-tawny.vercel.app",
@@ -24,6 +24,7 @@
     "Vercel_projection": "https://uniface-tawny.vercel.app (named; not the field)",
     "Supabase": "live relative persist (realtime on); not rmf",
     "E2E": "one-agent reconstruction smoked (lineage 87ed6a81-20c7-4319-9015-291e6797e18f); two-person+agent OPEN",
+    "NRRF657_on_slearn": "OPEN (PR 12 unmerged)",
     "others_on_site": "OPEN",
     "kantian-ivi": "unreachable",
     "Aristotle_native_equality": "OPEN",
@@ -33,8 +34,8 @@
   },
   "learning": "the residue, not a model training loop",
   "beat_layers": {
-    "organization": "Selected 0: occ-2026-08-25-relative-admission-form. PR 1 open. Projection LIVE. Persist+realtime+lineage live. Aristotle NRRF657 queued, not landed. 764/765 Lean missing.",
-    "planning": "One-agent reconstruction smoke on the live projection (Problem/Inter/Note/reload). Full two-person E2E still needs a second human — do not fake-complete.",
-    "action": "lineage 87ed6a81-20c7-4319-9015-291e6797e18f on vercel. Problem+Inter persisted; Note local only; ?lineage= restored 2 receipts after localStorage clear; continue Inter wrote a third. last_beat=1634; residue=relative-admission-form; next_0=one-agent-reconstruction-smoke. two-person E2E OPEN."
+    "organization": "Selected 0: occ-2026-08-25-one-agent-reconstruction-smoke. PR 1 pushed 2555351. Slearn PR 12 NRRF657 pointed-at, unmerged. 764/765 Lean missing. Leftover PR 10 is not this.",
+    "planning": "Ledger pr-pushed as 1709. Point at slearn PR 12 by URL only. Do not copy Lean. Do not rewrite 1634. Do not merge Uniface PR 1.",
+    "action": "occ-2026-08-25-slearn-nrrf657-pr12; last_beat=1709; residue=one-agent-reconstruction-smoke; next_0=slearn-nrrf657-pr12; NRRF657_on_slearn OPEN (PR 12 unmerged)."
   }
 }
