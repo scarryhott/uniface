@@ -24,7 +24,7 @@ if action is in-flight, that fact is still the ACTION record
 
 No layer substitutes for another. That rule is already in [`LATENT_MEMORY_PROTOCOL.md`](../LATENT_MEMORY_PROTOCOL.md). This store does not rewrite that file. It does not replace `InteractionEvent` or `NoteOccurrence`. A beat may point at those records. Occurrences and interactions remain occurrences and interactions.
 
-Scheduled hourly beats and field-loop event beats share this folder. They are different sensors of the same ledger, not different stores.
+Scheduled hourly beats and field-loop event beats share this folder. They are different sensors of the same ledger, not different stores. Event beats and scheduled beats share this folder; no layer substitutes for another.
 
 ```text
 ledger/beats/
