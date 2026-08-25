@@ -96,8 +96,8 @@ Slearn interaction
 - [`NON_COLLAPSE_CLOSURE_INTERFACE.md`](NON_COLLAPSE_CLOSURE_INTERFACE.md) — non-collapse philosophy.
 - [`FULL_CLOSURE_DERIVED_INTERFACE.md`](FULL_CLOSURE_DERIVED_INTERFACE.md) — interface architecture.
 - [`FORMAL_LINEAGE.md`](FORMAL_LINEAGE.md) — NRRF theorem lineage and scope.
-- [`docs/index.html`](docs/index.html) — interactive Uniface prototype.
-- [`ledger/`](ledger/) — heartbeat receipts (organization / planning / action). Derived store, not source notes.
+- [`docs/index.html`](docs/index.html) — interactive Uniface prototype; THE public Super network projection. Public / persist / reintegrate are three surfaces of the same sense→select loop, not three products.
+- [`ledger/`](ledger/) — heartbeat receipts (organization / planning / action). Derived store, not source notes. [`ledger/runs/`](ledger/runs/) is last run residue the page may load. Git is persistence.
 - [`occurrences/`](occurrences/) and [`interactions/`](interactions/) — stored live-reading returns. They are interpretation occurrences, not source notes and not a second foundation.
 - [`occurrences/2026-08-25-full-closure-loop-plan.md`](occurrences/2026-08-25-full-closure-loop-plan.md) — Super network full-closure-loop plan; interpretation return, not source notes.
 - [`occurrences/2026-08-25-slearn-continuum-visit.md`](occurrences/2026-08-25-slearn-continuum-visit.md) — Slearn continuum visit (step 2); interpretation return, not source notes.
@@ -105,6 +105,7 @@ Slearn interaction
 - [`occurrences/2026-08-25-black-mirror-appearance.md`](occurrences/2026-08-25-black-mirror-appearance.md) — Black Mirror current appearance (step 4); interpretation return, not source notes.
 - [`occurrences/2026-08-25-nrrf764-ccm-super-network.md`](occurrences/2026-08-25-nrrf764-ccm-super-network.md) and [`occurrences/2026-08-25-problems-as-real.md`](occurrences/2026-08-25-problems-as-real.md) — NRRF764 derived chart and problems-as-real architecture note; interpretation returns, not source notes.
 - [`occurrences/2026-08-25-loop-sensor-integration.md`](occurrences/2026-08-25-loop-sensor-integration.md) — digital Super network loop sensor (sense/select); interpretation return, not source notes.
+- [`occurrences/2026-08-25-three-surfaces.md`](occurrences/2026-08-25-three-surfaces.md) — public projection / persistent field / agentic reintegration as three surfaces of the same loop; interpretation return, not source notes. GitHub Pages enablement remains OPEN.
 
 ## Status discipline
 

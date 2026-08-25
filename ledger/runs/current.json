@@ -1,0 +1,20 @@
+{
+  "kind": "derived_run_log",
+  "status": "MODEL_SUGGESTED_RELATION",
+  "persistence": "git",
+  "not": "a database, a second site, localStorage-as-network, or Turing-complete runtime",
+  "field_store": ["ledger/", "occurrences/", "ledger/runs/"],
+  "last_beat": "2026-08-25-1249-et",
+  "last_beat_residue": "occ-2026-08-25-slearn-nrrf656-merged",
+  "next_0": "occ-2026-08-25-three-surfaces",
+  "cursor": 11,
+  "pages_seam": "OPEN: GitHub Pages (Settings → Pages, source GitHub Actions or /docs) is not enabled from this PR. Workflow .github/workflows/pages.yml is the in-repo path; it does not rewrite source notes. Do not invent a host. Do not copy Slearn vinext.",
+  "open_seams": {
+    "T": "OPEN",
+    "Turing": "OPEN (not assumed)",
+    "O_B_eq_R": "refused",
+    "Pages": "OPEN",
+    "localStorage": "local continuation only — never the Super network"
+  },
+  "learning": "the residue, not a model training loop"
+}
