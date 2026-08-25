@@ -17,9 +17,12 @@ class OperatorMatch:
 
 
 # The exact lexeme is retained. The canonical key is only an index into the
-# source grammar and never replaces the note occurrence.
+# source grammar and never replaces the note occurrence. In the source notes,
+# 0 and infinity are reciprocal poles; they are not called axiometries by
+# themselves. The axiometry is the network of intended operations relating
+# poles, extension/rotation, paths, returns, and reopening.
 _PATTERNS: list[tuple[str, str, str]] = [
-    ("ZERO_INFINITY", r"0\s*(?:↔|<->|⇄|–|-)?\s*(?:∞|inf(?:inity)?)", "reciprocal closure reading"),
+    ("ZERO_INFINITY", r"0\s*(?:↔|<->|⇄|–|-)?\s*(?:∞|inf(?:inity)?)", "reciprocal poles"),
     ("R_I", r"\br\s*(?:↔|<->|⇄)\s*i\b", "extension/rotation reading"),
     ("TRIANGLE_TIME", r"\bi\s*=\s*2\s*\^\s*\(?\s*r\s*-\s*1\s*\)?", "Triangle Time"),
     ("SHELL_RETURN", r"S_?\(?k\s*\+\s*1\)?\s*=\s*S_?k\s*-\s*2\s*\^\s*\(?S_?\(?k\s*\+\s*1\)?\s*-\s*1\)?", "implicit shell return"),
