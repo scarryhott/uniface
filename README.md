@@ -100,6 +100,8 @@ Slearn interaction
 - [`occurrences/`](occurrences/) and [`interactions/`](interactions/) — stored live-reading returns. They are interpretation occurrences, not source notes and not a second foundation.
 - [`occurrences/2026-08-25-full-closure-loop-plan.md`](occurrences/2026-08-25-full-closure-loop-plan.md) — Super network full-closure-loop plan; interpretation return, not source notes.
 - [`occurrences/2026-08-25-slearn-continuum-visit.md`](occurrences/2026-08-25-slearn-continuum-visit.md) — Slearn continuum visit (step 2); interpretation return, not source notes.
+- [`occurrences/2026-08-25-aristotle-translation.md`](occurrences/2026-08-25-aristotle-translation.md) — Aristotle translation visit (step 3); interpretation return, not source notes.
+- [`occurrences/2026-08-25-black-mirror-appearance.md`](occurrences/2026-08-25-black-mirror-appearance.md) — Black Mirror current appearance (step 4); interpretation return, not source notes.
 
 ## Status discipline
 
