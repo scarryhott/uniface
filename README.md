@@ -97,6 +97,7 @@ Slearn interaction
 - [`FULL_CLOSURE_DERIVED_INTERFACE.md`](FULL_CLOSURE_DERIVED_INTERFACE.md) — interface architecture.
 - [`FORMAL_LINEAGE.md`](FORMAL_LINEAGE.md) — NRRF theorem lineage and scope.
 - [`docs/index.html`](docs/index.html) — interactive Uniface prototype.
+- [`occurrences/`](occurrences/) and [`interactions/`](interactions/) — stored live-reading returns. They are interpretation occurrences, not source notes and not a second foundation.
 
 ## Status discipline
 
