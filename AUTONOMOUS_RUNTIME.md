@@ -1,19 +1,21 @@
-# Closure Supernet Autonomous Runtime
+# Closure Supernet Autonomous Living Runtime
 
-This repository contains an executable runtime for the Uniface Closure Supernet.
+The repository contains an executable, persistent, public living-network runtime for the Uniface Closure Supernet.
 
-## What autonomous means
-
-The process runs continuously without requiring a person to manually advance every stage:
+## Active cycle
 
 ```text
-sense exact occurrences
+poll digital sources
+→ sense exact local and public occurrences
+→ reintegrate returned collective-action consequences
 → propose candidate relations
 → build source-reversible interpretation witnesses
 → apply constitutional admission rules
-→ project the current Black Mirror topology
-→ reopen incomplete relations
-→ inspect repeated seams and propose rule revisions
+→ apply participant reintegration decisions
+→ audit affected perspectives
+→ project Black Mirror and the living field
+→ export source-reversible returns
+→ reopen
 → repeat
 ```
 
@@ -22,32 +24,31 @@ Autonomy is bounded. The runtime never:
 - mutates an original occurrence;
 - silently normalizes notation;
 - upgrades semantic likeness into truth;
+- treats public popularity, money, rank, or model confidence as moral authority;
+- omits affected perspectives while claiming collective completion;
 - activates destructive external actions;
 - assumes the whole field is Turing complete;
-- treats a local halt or return as terminal closure;
+- treats a local halt, settlement, or return as terminal closure;
 - turns formal similarity into physical or moral fact.
-
-The runtime may autonomously create candidate relations, interpretations, OPEN seams, projections, and proposed rule versions. The conservative default auto-admits only exact source-preserving duplicates. Stronger unifications remain OPEN until author confirmation, formal proof, or evidence is attached.
 
 ## Source note on `0` and `∞`
 
-The source notes identify `0` and `∞` as reciprocal poles. They are not called axiometries by themselves. The broader axiometry is the configured network of operations relating the poles to `r/i`, Triangle Time, Chaitin–Kakeya, seams, paths, returns, sensor–selection, and reopening.
+The source notes identify `0` and `∞` as reciprocal poles. They are not the axiometry by themselves. The wider axiometry is the configured network connecting the poles with `r/i`, Triangle Time, Chaitin–Kakeya, the `tan(π/2)` seam, predual Fourier, four-i, ball–hair, loop–sensor–selection, and metavectorization.
 
-The runtime keeps the compatibility key `ZERO_INFINITY`, but its source role is `reciprocal poles`.
+## Agent ecology
 
-## Agents
-
-- **InboxSensorAgent** — watches the inbox for exact `.md`, `.txt`, and `.jsonl` occurrences.
+- **InboxSensorAgent** — senses exact local `.md`, `.txt`, and `.jsonl` occurrences.
 - **UnderstandingAgent** — proposes literal, operator-path, inverse-path, and semantic candidate relations.
 - **InterpretationAgent** — records preservation, transformation, omission, frame, scope, affected perspectives, reverse path, and reopening.
 - **AdmissionAgent** — applies the active source-preserving constitutional rule.
-- **MoralAuditAgent** — blocks global completeness when affected perspectives are omitted.
+- **MoralAuditAgent** — blocks completeness when affected perspectives are omitted.
 - **ReopeningAgent** — turns incomplete admissions into explicit OPEN seams.
-- **ProjectionAgent** — generates the current Black Mirror topology with reverse source indexes.
-- **RuleReviewAgent** — notices repeated seams and proposes versioned rule revisions without rewriting history.
-- **DigitalIntegrationManager** — polls configured digital sources, records receipts and cursors, imports exact occurrences, and exports event/projection returns without granting remote systems authority over admission.
+- **RuleReviewAgent** — proposes versioned rule revisions from repeated seams.
+- **ProjectionAgent** — builds the current source-reversible Black Mirror topology.
+- **DigitalIntegrationManager** — imports and exports digital sources without granting remote systems admission authority.
+- **LivingNetworkManager / reintegration agent** — persists participants, perspectives, real problems, notes, interactions-as-solutions, collective actions, returned consequences, and agentic reintegration proposals.
 
-An optional OpenAI-compatible provider can refine interpretation witnesses. It remains a derived chart and is subject to the same admission policy.
+The living reintegration agent does not declare a consequence to be the final solution. It creates a source-reversible `MORAL_CONSEQUENCE` candidate relation between the returned occurrence and the real problem, identifies missing affected perspectives, and reopens the problem for interpretation and participant decision.
 
 ## Quick start
 
@@ -61,35 +62,14 @@ closure-supernet serve
 
 Open:
 
-- dashboard: `http://localhost:8000/`
+- public living field: `http://localhost:8000/`
+- autonomous runtime console: `http://localhost:8000/runtime`
 - API documentation: `http://localhost:8000/docs`
 - health: `http://localhost:8000/health`
 
-For a repository bootstrap:
+## Persistent storage
 
-```bash
-closure-supernet bootstrap .
-closure-supernet run --cycles 5
-```
-
-## Inbox operation
-
-Drop source files into `runtime_data/inbox/`. Every autonomous cycle scans the directory. A source location plus checksum prevents repeated ingestion while the original file remains untouched.
-
-## Optional interpretation model
-
-```bash
-export CLOSURE_LLM_MODE=compatible
-export CLOSURE_LLM_API_KEY=...
-export CLOSURE_LLM_BASE_URL=https://api.openai.com/v1
-export CLOSURE_LLM_MODEL=gpt-5-mini
-```
-
-Without a model key the runtime remains operational using deterministic, source-preserving interpretation witnesses.
-
-## Storage
-
-The SQLite runtime is event-sourced and includes:
+The SQLite runtime is event-sourced and includes the canonical relation engine:
 
 ```text
 occurrences
@@ -105,7 +85,67 @@ integration_receipts
 integration_runs
 ```
 
-Original occurrences have no update endpoint. Revised notes are new occurrences linked by typed relations. Rules are versioned; historical outputs retain the rule version that generated them. Integration records persist configurations, cursor state, environment-variable names for secrets, idempotent delivery receipts, and run history. Secret values are not stored.
+It also includes the living public field:
+
+```text
+living_participants
+living_perspectives
+living_problems
+living_problem_states
+living_interactions
+living_solution_receipts
+living_problem_notes
+living_actions
+living_action_states
+living_action_returns
+living_reintegration_proposals
+living_reintegration_decisions
+living_state
+```
+
+Exact text remains in immutable `occurrences`. Problem, action, and reintegration state changes are additional records rather than replacements.
+
+## Public relative forms
+
+```text
+Problem       = exact source + at least one real situation + remaining discretion
+Note          = immutable occurrence + self-interaction / loop step
+Solution      = receipt constituted by an interaction
+Action        = exact collective intent + participants + affected perspectives + OPEN assumptions
+Return        = exact consequence returned by action
+Reintegration = agent-proposed, participant-decidable translation back into the problem
+```
+
+No quantity or quality score is stored as the foundational social value. The social return path is collective action and its consequences.
+
+## Public living API
+
+```text
+GET  /network/capabilities
+POST /network/participants
+GET  /network/participants
+POST /network/perspectives
+GET  /network/perspectives
+POST /network/problems
+GET  /network/problems
+GET  /network/problems/{id}/field
+POST /network/problems/{id}/state
+POST /network/problems/{id}/notes
+POST /network/interactions
+GET  /network/interactions
+GET  /network/solutions
+POST /network/actions
+GET  /network/actions
+POST /network/actions/{id}/state
+POST /network/actions/{id}/returns
+GET  /network/returns
+POST /network/reintegrate
+GET  /network/reintegration
+POST /network/reintegration/{id}/decision
+GET  /network/field
+```
+
+The previous source, rule, projection, integration, runtime, and WebSocket APIs remain available.
 
 ## Digital integrations
 
@@ -118,77 +158,30 @@ GITHUB_REPOSITORY
 HTTP_JSON_FEED
 ```
 
-The connector cycle is:
+External assertions enter as immutable sources, not truth claims. Outbound returns include Black Mirror plus living-field statistics and reverse source indexes.
 
-```text
-poll enabled pull sources
-→ import immutable exact occurrences
-→ run local understanding and admission
-→ build Black Mirror projection
-→ export new events and the source-reversible projection
-→ advance connector cursors
-→ reopen
-```
+See [`DIGITAL_SUPERNET_INTEGRATIONS.md`](DIGITAL_SUPERNET_INTEGRATIONS.md).
 
-External assertions enter as sources, not truth claims. An external system cannot self-certify a relation as locally TRUE.
+## Security and progress boundary
 
-Register a GitHub source:
+Implemented now:
 
-```bash
-closure-supernet integration-add \
-  --name notes-repository \
-  --kind GITHUB_REPOSITORY \
-  --secret-env GITHUB_TOKEN \
-  --config '{"repository":"owner/repo","ref":"main","include":["**/*.md","**/*.lean"]}'
+- single-node durable storage;
+- persistent participant and perspective records;
+- public problem/action/return interface;
+- autonomous reintegration;
+- exact source immutability;
+- append-only state and decision history;
+- digital connectors, API, dashboard, tests, and Docker support.
 
-closure-supernet integration-poll
-```
+Not yet claimed:
 
-See [`DIGITAL_SUPERNET_INTEGRATIONS.md`](DIGITAL_SUPERNET_INTEGRATIONS.md) for the protocol, signing, provenance, cursor, API, and security details.
+- production cryptographic participant authentication;
+- encrypted private/community scopes;
+- public cloud deployment;
+- replicated multi-node storage and federation;
+- signed commitments and action receipts;
+- machine-checked refinement from Python execution to NRRF764–765;
+- empirical proof of conscious-cultural or moral outcomes.
 
-## API
-
-```text
-POST /occurrences
-GET  /occurrences
-GET  /candidate-relations
-GET  /interpretations
-GET  /admissions
-POST /interpretations/{id}/author-decision
-GET  /open-seams
-GET  /projection
-GET  /events
-POST /runtime/cycle
-POST /runtime/start
-POST /runtime/stop
-GET  /runtime/status
-POST /rules
-POST /rules/{id}/activate
-GET  /integrations/capabilities
-POST /integrations
-GET  /integrations
-GET  /integrations/runs
-GET  /integrations/{id}
-POST /integrations/{id}/enable
-POST /integrations/{id}/disable
-POST /integrations/{id}/poll
-POST /integrations/{id}/webhook
-WS   /ws/events
-```
-
-## Black Mirror projection
-
-TRUE admissions form provisional classes. OPEN admissions remain visible as edges and seams. FALSE admissions remain contradictions. Every displayed class contains a reverse index to its exact source occurrences.
-
-Outbound connectors export this reverse index with the projection. The projection is nonterminal: its OPEN seams and returned classes become inputs to subsequent autonomous cycles.
-
-## Security boundary
-
-- Connector secrets are environment references, never stored values.
-- Webhooks support HMAC-SHA256 over the exact request body.
-- URLs cannot contain credentials.
-- Literal private and loopback destinations are blocked by default.
-- Redirects are not followed.
-- Production deployment must also enforce DNS and network egress policy.
-- Imported text is preserved as source and is not executed.
-- Transport success is not translational truth.
+These remain explicit next closure levels rather than hidden behind a terminal-completion claim.
