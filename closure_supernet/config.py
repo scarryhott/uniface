@@ -30,6 +30,21 @@ class RuntimeConfig:
     llm_model: str = os.getenv("CLOSURE_LLM_MODEL", "gpt-5-mini")
     request_timeout_seconds: float = float(os.getenv("CLOSURE_LLM_TIMEOUT_SECONDS", "45"))
 
+    # Source-neutral digital integration fabric. Secrets are referenced by
+    # environment-variable name in connector records and are never persisted.
+    integration_http_timeout_seconds: float = float(
+        os.getenv("CLOSURE_INTEGRATION_HTTP_TIMEOUT_SECONDS", "30")
+    )
+    integration_max_items_per_cycle: int = int(
+        os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500")
+    )
+    integration_user_agent: str = os.getenv(
+        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/0.2"
+    )
+    integration_allow_private_networks: bool = _bool(
+        "CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False
+    )
+
     # The field is deliberately not assumed Turing complete. Digital computation
     # is one derived chart and local halts reopen into later runtime cycles.
     turing_complete_assumed: bool = False
