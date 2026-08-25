@@ -5,10 +5,10 @@
   "closure_store": ["ledger/", "occurrences/", "ledger/runs/"],
   "relative_interaction_store": "supabase uniface-relative / public.uniface_relative_interaction (realtime on; not closure; not rmf)",
   "not": "the field, a bidirectional gate, a second site, Rate My Face, a global event chain, or an achieved framework",
-  "last_beat": "2026-08-25-1834-et",
-  "last_beat_residue": "occ-2026-08-25-readme-essential-quotes",
-  "next_0": "occ-2026-08-25-note-relative-persist",
-  "cursor": 22,
+  "last_beat": "2026-08-25-1934-et",
+  "last_beat_residue": "occ-2026-08-25-note-relative-persist",
+  "next_0": "occ-2026-08-25-admitted-prefix-reconstruction",
+  "cursor": 23,
   "framework_achieved": false,
   "interface": "interactive closure, not a bidirectional gate",
   "public_projection": "https://uniface-tawny.vercel.app",
@@ -24,7 +24,8 @@
     "Vercel_projection": "https://uniface-tawny.vercel.app (named; not the field)",
     "Supabase": "live relative persist (realtime on); not rmf",
     "Note_persist": "wired as returned_note on kind=relative_interaction (1834); one-agent smoked lineage b5b17022-80f3-4d7f-87b9-e211767ab716",
-    "E2E": "one-agent reconstruction smoked (lineage 87ed6a81-20c7-4319-9015-291e6797e18f); Note persist smoked; two-person+agent OPEN",
+    "Admitted_prefix": "rebuilt from ordered lineage receipts on reload/?lineage= (1934); smoked 87ed6a81-20c7-4319-9015-291e6797e18f",
+    "E2E": "one-agent reconstruction smoked (lineage 87ed6a81-20c7-4319-9015-291e6797e18f); Note persist smoked; admitted prefix smoked; two-person+agent OPEN",
     "NRRF657_on_slearn": "OPEN (PR 12 unmerged)",
     "readme_essential_quotes": "OPEN (scarryhott/readme PR 1 draft; pointed-at, not absorbed)",
     "others_on_site": "OPEN",
@@ -36,8 +37,8 @@
   },
   "learning": "the residue, not a model training loop",
   "beat_layers": {
-    "organization": "Selected 0: occ-2026-08-25-readme-essential-quotes (next_0 from 1734). Uniface PR 1 open; projection LIVE; persist+realtime live; 1634 Note was local-only; field-loop 1744 stopped the ledger cascade. Slearn PR 12 unmerged. quotes.md pointed-at by URL. OPEN: two-person E2E, Pages, TRUE, FRAMEWORK, 764/765 Lean, kantian-ivi, admitted-prefix reconstruction.",
-    "planning": "Persist the Note operator as a lineage receipt on uniface-relative, same store as Problem/Inter. WHY: 1634 residue was Note stayed a local returned reading. Will not rewrite 1734/1744, copy quotes, merge, fake two-person E2E, invent 764/765, or add a new RLS kind.",
-    "action": "Note persist wired: PERSIST_KINDS.returned_note; showReturnedNote writes kind=relative_interaction with payload.inter=returned_note. Reconstruction restores that Note. Smoke lineage b5b17022-80f3-4d7f-87b9-e211767ab716. two-person E2E remains OPEN."
+    "organization": "Selected 0: occ-2026-08-25-note-relative-persist (next_0 from 1834). Uniface PR 1 open; projection LIVE; Note persist wired+smoked; field-loop 1842 stopped the 1834-landing cascade. Slearn PR 12 unmerged. quotes.md pointed-at by URL. OPEN: two-person E2E, Pages, TRUE, FRAMEWORK, 764/765 Lean, kantian-ivi.",
+    "planning": "Reconstruct the admitted prefix from the lineage receipt chain on reload / ?lineage=, not only the last receipt cursor and Note. WHY: 1634 listed admitted prefix not reconstructed from receipts on reload. Will not rewrite 1834 Note wiring, fake two-person join, merge, copy quotes, invent 764/765, or add a new RLS kind.",
+    "action": "reconstructFromReceipts rebuilds S.admitted from admit/interact receipts. Smoke lineage 87ed6a81-20c7-4319-9015-291e6797e18f. two-person E2E remains OPEN."
   }
 }
