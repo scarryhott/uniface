@@ -205,6 +205,14 @@ class RuntimeCycleResult(BaseModel):
     integration_pushed: int = 0
     integration_runs: int = 0
     integration_errors: int = 0
+    living_reintegrations: int = 0
+    living_decisions_applied: int = 0
+    living_participants: int = 0
+    living_problems: int = 0
+    living_interactions: int = 0
+    living_actions: int = 0
+    living_returns: int = 0
+    living_open_reintegration: int = 0
     started_at: str
     finished_at: str
 
@@ -217,4 +225,10 @@ class RuntimeStatus(BaseModel):
     llm_mode: str
     enabled_integrations: int = 0
     integration_errors: int = 0
+    living_participants: int = 0
+    living_problems: int = 0
+    living_actions: int = 0
+    living_open_reintegration: int = 0
+    public_interface_enabled: bool = True
+    agentic_reintegration_enabled: bool = True
     turing_complete_assumed: bool = False
