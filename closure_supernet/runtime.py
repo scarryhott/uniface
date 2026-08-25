@@ -21,6 +21,8 @@ from .axiometry import extract_exact_symbols, extract_operator_path
 from .config import RuntimeConfig
 from .integration_store import IntegrationStore
 from .integrations import DigitalIntegrationManager
+from .living_network import LivingNetworkManager
+from .living_store import LivingNetworkStore
 from .models import OccurrenceCreate, RuntimeCycleResult, RuntimeStatus
 from .policy import AdmissionPolicy
 from .providers import build_provider
@@ -35,12 +37,12 @@ def utcnow() -> str:
 class ClosureSupernetRuntime:
     """Autonomous but bounded Closure Supernet.
 
-    It continuously senses exact source occurrences from local and configured
-    digital interfaces, proposes relations, builds source-reversible
-    interpretations, applies constitutional admission rules, projects current
-    topology, exports source-reversible returns, and reopens incomplete
-    relations. It never mutates an original occurrence and never assumes
-    terminal closure.
+    It continuously senses exact source occurrences from local, public living,
+    and configured digital interfaces; proposes relations; builds
+    source-reversible interpretations; applies constitutional admission rules;
+    reintegrates returned consequences; projects current topology; exports
+    source-reversible returns; and reopens incomplete relations. It never
+    mutates an original occurrence and never assumes terminal closure.
     """
 
     def __init__(self, config: RuntimeConfig | None = None):
@@ -48,6 +50,7 @@ class ClosureSupernetRuntime:
         self.config.ensure_directories()
         self.store = EventStore(self.config.database_path)
         self.integration_store = IntegrationStore(self.config.database_path)
+        self.living_store = LivingNetworkStore(self.config.database_path)
         self.provider = build_provider(self.config)
         self.inbox = InboxSensorAgent(self.config, self.store)
         self.understanding = UnderstandingAgent(self.config, self.store)
@@ -63,6 +66,7 @@ class ClosureSupernetRuntime:
             self.integration_store,
             self.ingest,
         )
+        self.living = LivingNetworkManager(self.store, self.living_store, self.ingest)
         self._running = False
         self._task: asyncio.Task[None] | None = None
         self._stop = asyncio.Event()
@@ -109,9 +113,14 @@ class ClosureSupernetRuntime:
             result.integration_errors = sum(run.errors for run in pull_runs)
 
             result.ingested = self.inbox.run() + result.integration_pulled
+
+            if self.config.agentic_reintegration_enabled:
+                result.living_reintegrations = self.living.reintegrate()
+
             result.candidates = self.understanding.run()
             result.interpretations = await self.interpretation.run()
             result.admissions = self.admission.run()
+            result.living_decisions_applied = self.living.apply_reintegration_decisions()
             result.open_seams = self.reopening.run() + self.moral_audit.run()
             result.rule_proposals = self.rule_review.run()
 
@@ -119,7 +128,26 @@ class ClosureSupernetRuntime:
             result.projection_classes = len(projection["classes"])
             result.projection_edges = len(projection["edges"])
 
-            push_runs = await self.integrations.push_enabled(projection)
+            living_projection = self.living.field_projection(projection)
+            self.living_store.set_state("living_field_projection", living_projection)
+            living_stats = living_projection["stats"]
+            result.living_participants = int(living_stats["participants"])
+            result.living_problems = int(living_stats["problems"])
+            result.living_interactions = int(living_stats["interactions"])
+            result.living_actions = int(living_stats["actions"])
+            result.living_returns = int(living_stats["returns"])
+            result.living_open_reintegration = int(living_stats["open_reintegration"])
+
+            push_runs = await self.integrations.push_enabled(
+                {
+                    **projection,
+                    "living_field": {
+                        "stats": living_projection["stats"],
+                        "source_reverse_index": living_projection["source_reverse_index"],
+                        "nonterminal": True,
+                    },
+                }
+            )
             result.integration_pushed = sum(run.pushed for run in push_runs)
             result.integration_runs += len(push_runs)
             result.integration_errors += sum(run.errors for run in push_runs)
@@ -189,6 +217,8 @@ class ClosureSupernetRuntime:
 
     def status(self) -> RuntimeStatus:
         recent_runs = self.integration_store.list_runs(limit=1000)
+        living_stats = self.living_store.stats()
+        reintegration = self.living_store.list_reintegration_proposals(limit=100_000)
         return RuntimeStatus(
             running=self._running,
             cycle_count=int(self.store.get_state("cycle_count", 0)),
@@ -199,6 +229,14 @@ class ClosureSupernetRuntime:
                 self.integration_store.list_integrations(enabled_only=True)
             ),
             integration_errors=sum(1 for row in recent_runs if row["status"] == "ERROR"),
+            living_participants=living_stats["participants"],
+            living_problems=living_stats["problems"],
+            living_actions=living_stats["actions"],
+            living_open_reintegration=sum(
+                1 for item in reintegration if item["current_status"] == "OPEN"
+            ),
+            public_interface_enabled=self.config.public_interface_enabled,
+            agentic_reintegration_enabled=self.config.agentic_reintegration_enabled,
             turing_complete_assumed=False,
         )
 
@@ -208,6 +246,13 @@ class ClosureSupernetRuntime:
             projection = build_projection(self.store).model_dump(mode="json")
         return projection
 
+    def living_field(self) -> dict[str, Any]:
+        projection = self.living_store.get_state("living_field_projection")
+        if projection is None:
+            projection = self.living.field_projection(self.black_mirror())
+        return projection
+
     def close(self) -> None:
+        self.living_store.close()
         self.integration_store.close()
         self.store.close()
