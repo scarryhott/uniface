@@ -39,10 +39,22 @@ class RuntimeConfig:
         os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500")
     )
     integration_user_agent: str = os.getenv(
-        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/0.2"
+        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/0.3"
     )
     integration_allow_private_networks: bool = _bool(
         "CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False
+    )
+
+    # Living public network. The first implementation provides durable
+    # participant and perspective records but deliberately does not claim that
+    # production authentication or federation is already complete.
+    public_interface_enabled: bool = _bool("CLOSURE_PUBLIC_INTERFACE_ENABLED", True)
+    public_development_mode: bool = _bool("CLOSURE_PUBLIC_DEVELOPMENT_MODE", True)
+    agentic_reintegration_enabled: bool = _bool(
+        "CLOSURE_AGENTIC_REINTEGRATION_ENABLED", True
+    )
+    public_default_visibility: str = os.getenv(
+        "CLOSURE_PUBLIC_DEFAULT_VISIBILITY", "PUBLIC"
     )
 
     # The field is deliberately not assumed Turing complete. Digital computation
