@@ -1,6 +1,6 @@
 # Closure Supernet Autonomous Runtime
 
-This repository now contains an executable runtime for the Uniface Closure Supernet.
+This repository contains an executable runtime for the Uniface Closure Supernet.
 
 ## What autonomous means
 
@@ -29,6 +29,12 @@ Autonomy is bounded. The runtime never:
 
 The runtime may autonomously create candidate relations, interpretations, OPEN seams, projections, and proposed rule versions. The conservative default auto-admits only exact source-preserving duplicates. Stronger unifications remain OPEN until author confirmation, formal proof, or evidence is attached.
 
+## Source note on `0` and `∞`
+
+The source notes identify `0` and `∞` as reciprocal poles. They are not called axiometries by themselves. The broader axiometry is the configured network of operations relating the poles to `r/i`, Triangle Time, Chaitin–Kakeya, seams, paths, returns, sensor–selection, and reopening.
+
+The runtime keeps the compatibility key `ZERO_INFINITY`, but its source role is `reciprocal poles`.
+
 ## Agents
 
 - **InboxSensorAgent** — watches the inbox for exact `.md`, `.txt`, and `.jsonl` occurrences.
@@ -39,6 +45,7 @@ The runtime may autonomously create candidate relations, interpretations, OPEN s
 - **ReopeningAgent** — turns incomplete admissions into explicit OPEN seams.
 - **ProjectionAgent** — generates the current Black Mirror topology with reverse source indexes.
 - **RuleReviewAgent** — notices repeated seams and proposes versioned rule revisions without rewriting history.
+- **DigitalIntegrationManager** — polls configured digital sources, records receipts and cursors, imports exact occurrences, and exports event/projection returns without granting remote systems authority over admission.
 
 An optional OpenAI-compatible provider can refine interpretation witnesses. It remains a derived chart and is subject to the same admission policy.
 
@@ -93,9 +100,51 @@ open_seams
 rules
 runtime_state
 events
+integrations
+integration_receipts
+integration_runs
 ```
 
-Original occurrences have no update endpoint. Revised notes are new occurrences linked by typed relations. Rules are versioned; historical outputs retain the rule version that generated them.
+Original occurrences have no update endpoint. Revised notes are new occurrences linked by typed relations. Rules are versioned; historical outputs retain the rule version that generated them. Integration records persist configurations, cursor state, environment-variable names for secrets, idempotent delivery receipts, and run history. Secret values are not stored.
+
+## Digital integrations
+
+Supported connectors:
+
+```text
+WEBHOOK_IN
+WEBHOOK_OUT
+GITHUB_REPOSITORY
+HTTP_JSON_FEED
+```
+
+The connector cycle is:
+
+```text
+poll enabled pull sources
+→ import immutable exact occurrences
+→ run local understanding and admission
+→ build Black Mirror projection
+→ export new events and the source-reversible projection
+→ advance connector cursors
+→ reopen
+```
+
+External assertions enter as sources, not truth claims. An external system cannot self-certify a relation as locally TRUE.
+
+Register a GitHub source:
+
+```bash
+closure-supernet integration-add \
+  --name notes-repository \
+  --kind GITHUB_REPOSITORY \
+  --secret-env GITHUB_TOKEN \
+  --config '{"repository":"owner/repo","ref":"main","include":["**/*.md","**/*.lean"]}'
+
+closure-supernet integration-poll
+```
+
+See [`DIGITAL_SUPERNET_INTEGRATIONS.md`](DIGITAL_SUPERNET_INTEGRATIONS.md) for the protocol, signing, provenance, cursor, API, and security details.
 
 ## API
 
@@ -115,6 +164,15 @@ POST /runtime/stop
 GET  /runtime/status
 POST /rules
 POST /rules/{id}/activate
+GET  /integrations/capabilities
+POST /integrations
+GET  /integrations
+GET  /integrations/runs
+GET  /integrations/{id}
+POST /integrations/{id}/enable
+POST /integrations/{id}/disable
+POST /integrations/{id}/poll
+POST /integrations/{id}/webhook
 WS   /ws/events
 ```
 
@@ -122,4 +180,15 @@ WS   /ws/events
 
 TRUE admissions form provisional classes. OPEN admissions remain visible as edges and seams. FALSE admissions remain contradictions. Every displayed class contains a reverse index to its exact source occurrences.
 
-The projection is nonterminal: its OPEN seams and returned classes become inputs to subsequent autonomous cycles.
+Outbound connectors export this reverse index with the projection. The projection is nonterminal: its OPEN seams and returned classes become inputs to subsequent autonomous cycles.
+
+## Security boundary
+
+- Connector secrets are environment references, never stored values.
+- Webhooks support HMAC-SHA256 over the exact request body.
+- URLs cannot contain credentials.
+- Literal private and loopback destinations are blocked by default.
+- Redirects are not followed.
+- Production deployment must also enforce DNS and network egress policy.
+- Imported text is preserved as source and is not executed.
+- Transport success is not translational truth.
