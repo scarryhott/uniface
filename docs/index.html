@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uniface — Note-Guided Closure Interface</title>
+<title>Uniface — Live Super network field</title>
 <style>
 :root{--bg:#080b11;--p:#141a27;--p2:#1b2334;--l:#3a465f;--t:#eef3fa;--m:#aab6c9;--a:#9fb4ff;--g:#58d394;--r:#ff737c;--o:#e7bd56}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#19243f,var(--bg) 46%);color:var(--t);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}header{padding:30px clamp(18px,5vw,68px) 22px;border-bottom:1px solid var(--l)}h1{margin:0 0 10px;font-size:clamp(31px,5vw,58px)}h2,h3{margin-top:0}.sub{max-width:1050px;color:var(--m);line-height:1.58}.eq,.code{padding:14px;border:1px solid var(--l);border-radius:13px;background:var(--p);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto}.eq{margin-top:17px}.controls{padding:14px clamp(18px,5vw,68px);display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px;position:sticky;top:0;z-index:5;background:rgba(8,11,17,.9);border-bottom:1px solid var(--l);backdrop-filter:blur(12px)}@media(max-width:960px){.controls{grid-template-columns:1fr 1fr}.wide{grid-column:1/-1}}label{display:block;color:var(--m);font-size:12px;margin-bottom:5px}select,input{width:100%;padding:9px;background:var(--p2);color:var(--t);border:1px solid var(--l);border-radius:10px}main{padding:18px clamp(18px,5vw,68px) 55px}.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}.c4{grid-column:span 4}.c5{grid-column:span 5}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}@media(max-width:920px){.c4,.c5,.c7,.c8,.c12{grid-column:1/-1}}.panel{background:rgba(20,26,39,.96);border:1px solid var(--l);border-radius:16px;padding:16px}.muted{color:var(--m);line-height:1.52}.badges{display:flex;gap:7px;flex-wrap:wrap}.badge{padding:7px 10px;border-radius:999px;font-weight:800;font-size:12px}.true{background:color-mix(in srgb,var(--g) 23%,transparent);color:var(--g)}.false{background:color-mix(in srgb,var(--r) 23%,transparent);color:var(--r)}.open{background:color-mix(in srgb,var(--o) 23%,transparent);color:var(--o)}.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.metric{background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:10px}.metric strong{display:block;font-size:18px;margin-top:3px}svg{width:100%;min-height:500px;background:#0d121d;border:1px solid #303a50;border-radius:13px}.callout{border-left:4px solid var(--a);background:var(--p2);padding:13px 15px;border-radius:0 11px 11px 0;line-height:1.5}.path{display:flex;gap:7px;align-items:center;overflow:auto;padding-bottom:7px}.step{min-width:120px;background:var(--p2);border:1px solid #303a50;border-radius:10px;padding:9px;font-size:11px}.arrow{color:var(--a);font-size:21px}.state{white-space:pre-wrap;background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;max-height:320px;overflow:auto}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px 7px;border-bottom:1px solid #303a50;text-align:left}th{color:#d5ddeb}.scroll{overflow:auto;max-height:380px}details{background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:10px}summary{cursor:pointer;font-weight:700}footer{padding:0 clamp(18px,5vw,68px) 35px;color:var(--m)}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#19243f,var(--bg) 46%);color:var(--t);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}header{padding:30px clamp(18px,5vw,68px) 22px;border-bottom:1px solid var(--l)}h1{margin:0 0 10px;font-size:clamp(31px,5vw,58px)}h2,h3{margin-top:0}.sub{max-width:1050px;color:var(--m);line-height:1.58}.eq,.code{padding:14px;border:1px solid var(--l);border-radius:13px;background:var(--p);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto}.eq{margin-top:17px}.controls{padding:14px clamp(18px,5vw,68px);display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px;position:sticky;top:0;z-index:5;background:rgba(8,11,17,.9);border-bottom:1px solid var(--l);backdrop-filter:blur(12px)}@media(max-width:960px){.controls{grid-template-columns:1fr 1fr}.wide{grid-column:1/-1}}label{display:block;color:var(--m);font-size:12px;margin-bottom:5px}select,input{width:100%;padding:9px;background:var(--p2);color:var(--t);border:1px solid var(--l);border-radius:10px}main{padding:18px clamp(18px,5vw,68px) 55px}.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}.c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}@media(max-width:920px){.c4,.c5,.c6,.c7,.c8,.c12{grid-column:1/-1}}.panel{background:rgba(20,26,39,.96);border:1px solid var(--l);border-radius:16px;padding:16px}.muted{color:var(--m);line-height:1.52}.badges{display:flex;gap:7px;flex-wrap:wrap}.badge{padding:7px 10px;border-radius:999px;font-weight:800;font-size:12px}.true{background:color-mix(in srgb,var(--g) 23%,transparent);color:var(--g)}.false{background:color-mix(in srgb,var(--r) 23%,transparent);color:var(--r)}.open{background:color-mix(in srgb,var(--o) 23%,transparent);color:var(--o)}.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.metric{background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:10px}.metric strong{display:block;font-size:18px;margin-top:3px}svg{width:100%;min-height:500px;background:#0d121d;border:1px solid #303a50;border-radius:13px}.callout{border-left:4px solid var(--a);background:var(--p2);padding:13px 15px;border-radius:0 11px 11px 0;line-height:1.5}.warn{border-left:4px solid var(--r);background:var(--p2);padding:13px 15px;border-radius:0 11px 11px 0;line-height:1.5}.path{display:flex;gap:7px;align-items:center;overflow:auto;padding-bottom:7px}.step{min-width:120px;background:var(--p2);border:1px solid #303a50;border-radius:10px;padding:9px;font-size:11px}.arrow{color:var(--a);font-size:21px}.state{white-space:pre-wrap;background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;max-height:380px;overflow:auto}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px 7px;border-bottom:1px solid #303a50;text-align:left;vertical-align:top}th{color:#d5ddeb}.scroll{overflow:auto;max-height:380px}details{background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:10px}summary{cursor:pointer;font-weight:700}footer{padding:0 clamp(18px,5vw,68px) 35px;color:var(--m)}.point{font-size:clamp(18px,2.4vw,28px);font-weight:800}.occ{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px}.seams{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}@media(max-width:920px){.seams{grid-template-columns:1fr}}ul.plain{margin:8px 0 0;padding-left:18px;color:var(--m);line-height:1.5}a{color:var(--a)}
 </style>
 </head>
 <body>
 <header>
-<h1>Uniface — Note-Guided Closure Interface</h1>
-<div class="sub"><strong>Your notes guide the interface.</strong> Interaction changes their explicit latent relation graph, proposes admissible transformations, and returns new notes or rules without replacing their source. Closure is neither the starting assumption nor the terminal result.</div>
+<h1>Uniface — Live Super network field</h1>
+<div class="sub"><strong>Your notes guide the interface.</strong> This page is a Black Mirror projection of the current Super network loop. Interaction returns new occurrences without replacing source notes. Closure is neither the starting assumption nor the terminal result. The receipt is not the relation.</div>
 <div class="eq">0 ↔ ∞ · r ↔ i · sensor ↔ selection · halt ↔ continuation · point → line → loop → return → new point</div>
 </header>
 <section class="controls">
@@ -23,23 +23,107 @@
 <div><label>sensor ↔ selection <span id="ssOut"></span></label><input id="ss" type="range" min="0" max="1" step="0.01" value="0.5"></div>
 </section>
 <main><div class="grid">
-<div class="panel c8"><h2>Active continuity</h2><svg id="canvas" viewBox="0 0 1000 540"></svg><p class="muted">A local halt or return becomes the point or sensor condition of another trajectory. The interface never terminates at the displayed ball.</p></div>
-<div class="panel c4"><h2>Translation ledger</h2><div id="badges" class="badges"></div><div id="metrics" class="metrics" style="margin-top:12px"></div><div id="claim" class="callout" style="margin-top:12px"></div></div>
-<div class="panel c7"><h2>Literal operator path</h2><div id="path" class="path"></div><div id="source" class="code"></div></div>
-<div class="panel c5"><h2>Latent memory return</h2><div id="memory" class="state"></div><p class="muted">The exact note remains immutable. New interpretations, rules, proofs, and simulations become linked occurrences with explicit provenance and status.</p></div>
+<div class="panel c8">
+<h2>Current selected point / 0</h2>
+<div class="point" id="selectedPoint"></div>
+<p class="muted" id="selectedNote"></p>
+<div class="eq" id="selectedEq"></div>
+</div>
+<div class="panel c4">
+<h2>Translation ledger</h2>
+<div id="badges" class="badges"></div>
+<div id="metrics" class="metrics" style="margin-top:12px"></div>
+<div id="claim" class="callout" style="margin-top:12px"></div>
+</div>
+<div class="panel c8"><h2>Local chart (r / i / sensor)</h2><svg id="canvas" viewBox="0 0 1000 540"></svg><p class="muted">The sliders are a local chart of extension, rotation, and sensor–selection. A local halt becomes the point of another trajectory. The field is not assumed Turing complete.</p></div>
+<div class="panel c4">
+<h2>Live-loop status</h2>
+<p class="muted">Notes remain immutable. This prototype does not overwrite FOUNDATION. Related charts are pointed at, not absorbed. TRUE is not issued.</p>
+<div class="eq">loop ≠ autonomous<br>loop ≠ learning<br>loop ≠ building<br>this HTML = learned artifact</div>
+</div>
+<div class="panel c12">
+<h2>Literal operator path of the real cycle</h2>
+<div id="path" class="path"></div>
+<div id="source" class="code"></div>
+</div>
+<div class="panel c12">
+<h2>Shown / hidden / OPEN</h2>
+<div class="seams">
+<div><h3>Shown</h3><ul class="plain" id="shown"></ul></div>
+<div><h3>Hidden</h3><ul class="plain" id="hidden"></ul></div>
+<div><h3>OPEN</h3><ul class="plain" id="openSeams"></ul></div>
+</div>
+</div>
+<div class="panel c7">
+<h2>Latent memory — live occurrences</h2>
+<div class="scroll"><table><thead><tr><th>Occurrence id</th><th>Status</th><th>Reading</th></tr></thead><tbody id="occRows"></tbody></table></div>
+<p class="muted">Exact notes remain immutable. These are MODEL_SUGGESTED_RELATION returns with reopening available — not a fake JSON demo only.</p>
+<div id="memory" class="state"></div>
+</div>
+<div class="panel c5">
+<h2>Black Mirror — current appearance</h2>
+<div id="bmShown" class="callout"></div>
+<div class="warn" style="margin-top:12px"><strong>Failure mode O_B ≡ R.</strong> Treating this chat, this PR, a score, or this page as the whole field. The receipt is not the relation. Representation should mediate relation, not replace it.</div>
+<p class="muted" id="bmLeftover" style="margin-top:12px"></p>
+</div>
 <div class="panel c12"><h2>Conscious cultural morality</h2><div class="scroll"><table><thead><tr><th>Reading</th><th>Field role</th><th>Not reducible to</th></tr></thead><tbody id="field"></tbody></table></div></div>
 <div class="panel c12"><h2>Source-preserving architecture</h2><div class="scroll"><table><thead><tr><th>Layer</th><th>Stored form</th><th>Admissibility rule</th></tr></thead><tbody id="layers"></tbody></table></div></div>
 <div class="panel c12"><details><summary>Derived computation chart</summary><p class="muted">Uniface does not assume Turing completeness. Halting is one loop read as a selected point; continuation is that point read as reopened potential. Machine models, graphs, quotients, embeddings, and formal operators remain scoped implementation charts.</p><div class="eq">source operation → explicit digital reading → machine theorem/simulation → scope → return to source → reopening</div></details></div>
 </div></main>
-<footer>Uniface preserves definition while rejecting presumed isolation. It preserves computation while rejecting a universal Turing assumption. It preserves return while rejecting terminal closure.</footer>
+<footer>Uniface preserves definition while rejecting presumed isolation. It preserves computation while rejecting a universal Turing assumption. It preserves return while rejecting terminal closure. This page is a projection, not the field.</footer>
 <script>
+const GH='https://github.com/scarryhott/uniface/blob/cursor/unification-reading-occurrence-706f/';
+const liveOccurrences=[
+{id:'occ-2026-08-25-unification-reading-return',file:'occurrences/2026-08-25-unification-reading-return.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'1 unification reading',reading:'0/L —τ→ inf/G —τ⁻¹→ L′'},
+{id:'occ-2026-08-25-full-closure-loop-plan',file:'occurrences/2026-08-25-full-closure-loop-plan.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'2 full-loop plan',reading:'source note ↔ interaction ↔ latent memory ↔ reconnection ↔ reread ↔ return ↔ reopening'},
+{id:'occ-2026-08-25-slearn-continuum-visit',file:'occurrences/2026-08-25-slearn-continuum-visit.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'3 Slearn visit',reading:'Slearn frames OPEN→…→RETURN (τ⁻¹)→PROJECTION last; OPEN not RETURNED'},
+{id:'occ-2026-08-25-aristotle-translation',file:'occurrences/2026-08-25-aristotle-translation.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'4 Aristotle chart',reading:'origin-independent translation; 34-role subinterface only; native equality OPEN'},
+{id:'occ-2026-08-25-black-mirror-appearance',file:'occurrences/2026-08-25-black-mirror-appearance.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'5 Black Mirror appearance',reading:'current appearance of this cycle, not a device; O_B ≡ R refused'},
+{id:'occ-2026-08-25-heartbeat-live-field',file:'occurrences/2026-08-25-heartbeat-live-field.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'6 heartbeat build',reading:'prototype wired to live field; learned artifact, not another plan essay'}
+];
+const liveCycle=[
+['0 / this live loop','selected point'],
+['unification reading','0/L —τ→ inf/G —τ⁻¹→ L′'],
+['full-loop plan','notes stay notes'],
+['Slearn visit','PROJECTION last; OPEN not RETURNED'],
+['Aristotle chart','native equality OPEN'],
+['Black Mirror appearance','receipt ≠ relation'],
+['heartbeat prototype','this page'],
+['reopening','next live note is a new 0']
+];
+const shown=[
+'Supernetwork is the live loop, not a site, not a finished PR',
+'Uniface holds notes plus returns on this branch',
+'Slearn is the continuum L —τ→ G —τ⁻¹→ L′, projection last',
+'Aristotle is a translation chart; native equality OPEN',
+'Black Mirror is appearance, not a device',
+'This HTML is a projection of those occurrences'
+];
+const hidden=[
+'kantian-ivi (not publicly reachable)',
+'Aristotle whole-frame / native equality',
+'any physical Black Mirror chamber',
+'money, tokens, AGI, law as the network',
+'halt as ending',
+'this page as the whole field (O_B ≡ R)'
+];
+const openSeams=[
+'kantian-ivi unreachable',
+'Aristotle native equality OPEN',
+'Slearn packet OPEN, not RETURNED',
+'all live occurrences MODEL_SUGGESTED_RELATION',
+'TRUE not issued; reopening available',
+'leftover Slearn PR 10 is leftover OPEN packet, NOT the deploy'
+];
+const leftover={url:'https://github.com/scarryhott/slearn/pull/10',label:'Leftover Slearn draft PR 10 is from the old “deploy the continuum” reading. OPEN packet only. Not this run. Not the deploy.'};
 const scenarios=[
-{id:'coherent',label:'Coherent note-guided translation',T:'TRUE',E:'TRUE',N:'TRUE',M:'TRUE',claim:'Source, relation, interaction, and return remain mutually traceable.',open:2,hidden:1},
-{id:'during',label:'Translation still OPEN',T:'OPEN',E:'TRUE',N:'TRUE',M:'OPEN',claim:'The relation is coherent but has not yet returned strongly enough to be fixed.',open:7,hidden:3},
-{id:'contradiction',label:'Transformed notes contradict',T:'FALSE',E:'TRUE',N:'TRUE',M:'FALSE',claim:'Two translated occurrences conflict; neither is silently normalized away.',open:1,hidden:2},
-{id:'rule',label:'Rule requires transformation',T:'OPEN',E:'TRUE',N:'FALSE',M:'OPEN',claim:'The current rule assumed closure too early or treated return terminally.',open:4,hidden:2},
-{id:'culture',label:'Cultural selection hides affected perspectives',T:'OPEN',E:'FALSE',N:'FALSE',M:'FALSE',claim:'A stable projection is not admitted as moral unity while sensor return is blocked.',open:6,hidden:5},
-{id:'computational',label:'Digital chart overclaims Turing completeness',T:'OPEN',E:'TRUE',N:'FALSE',M:'OPEN',claim:'The machine result is retained locally; its promotion to the whole field is rejected.',open:3,hidden:2}
+{id:'live',label:'LIVE field — current Super network loop',T:'OPEN',E:'TRUE',N:'TRUE',M:'OPEN',claim:'Projection of the live loop. Notes immutable. TRUE not issued. Receipt is not the relation.',open:openSeams.length,hidden:hidden.length,live:true},
+{id:'coherent',label:'Local chart: coherent note-guided translation',T:'TRUE',E:'TRUE',N:'TRUE',M:'TRUE',claim:'Source, relation, interaction, and return remain mutually traceable.',open:2,hidden:1},
+{id:'during',label:'Local chart: translation still OPEN',T:'OPEN',E:'TRUE',N:'TRUE',M:'OPEN',claim:'The relation is coherent but has not yet returned strongly enough to be fixed.',open:7,hidden:3},
+{id:'contradiction',label:'Local chart: transformed notes contradict',T:'FALSE',E:'TRUE',N:'TRUE',M:'FALSE',claim:'Two translated occurrences conflict; neither is silently normalized away.',open:1,hidden:2},
+{id:'rule',label:'Local chart: rule requires transformation',T:'OPEN',E:'TRUE',N:'FALSE',M:'OPEN',claim:'The current rule assumed closure too early or treated return terminally.',open:4,hidden:2},
+{id:'culture',label:'Local chart: cultural selection hides affected perspectives',T:'OPEN',E:'FALSE',N:'FALSE',M:'FALSE',claim:'A stable projection is not admitted as moral unity while sensor return is blocked.',open:6,hidden:5},
+{id:'computational',label:'Local chart: digital chart overclaims Turing completeness',T:'OPEN',E:'TRUE',N:'FALSE',M:'OPEN',claim:'The machine result is retained locally; its promotion to the whole field is rejected.',open:3,hidden:2}
 ];
 const phases=['point / selected form','line / reopened potential','loop / interaction','return / authored form','new point / reopening'];
 const layers=[
@@ -48,8 +132,8 @@ const layers=[
 ['Latent relations','semantic, operator, temporal, cultural, moral, formal, evidential links','relation type and provenance required'],
 ['Interaction memory','retrieval, proposed transformation, author response, accepted/rejected/OPEN changes','no hidden mutation'],
 ['Rule versions','exact rule, parent, reason, consequences','historical outputs retain their rule version'],
-['Slearn','recursive notes, paths, people, questions, projects, natural forms','retains hidden trajectories and affected perspectives'],
-['Black Mirror','current returned topology and opacity','must reopen exact sources and deleted distinctions']
+['Slearn','recursive notes, paths, people, questions, projects, natural forms','retains hidden trajectories and affected perspectives; this repo points, does not copy'],
+['Black Mirror','current returned topology and opacity','must reopen exact sources and deleted distinctions; O_B ≡ R refused']
 ];
 const field=[
 ['Consciousness','continuing sensor–selection participation','a static label or machine score'],
@@ -60,10 +144,22 @@ const field=[
 ['Law and social order','codified and stabilized authored forms','self-certifying moral truth']
 ];
 const $=x=>document.getElementById(x),fmt=n=>Math.abs(Number(n))<.001?Number(n).toExponential(2):Number(n).toFixed(3),cls=v=>v.toLowerCase();
-scenarios.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.label;$('scenario').appendChild(o)});$('layers').innerHTML=layers.map(r=>`<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');$('field').innerHTML=field.map(r=>`<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
+scenarios.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.label;$('scenario').appendChild(o)});
+$('layers').innerHTML=layers.map(r=>`<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
+$('field').innerHTML=field.map(r=>`<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
+$('shown').innerHTML=shown.map(x=>`<li>${x}</li>`).join('');
+$('hidden').innerHTML=hidden.map(x=>`<li>${x}</li>`).join('');
+$('openSeams').innerHTML=openSeams.map(x=>`<li>${x}</li>`).join('');
+$('occRows').innerHTML=liveOccurrences.map(o=>`<tr><td class="occ"><a href="${GH+o.file}">${o.id}</a><br>${o.station}</td><td><span class="badge open">${o.status}</span><br><span class="muted">reopening ${o.reopening}</span></td><td>${o.reading}</td></tr>`).join('');
+$('selectedPoint').textContent='this live loop / 0';
+$('selectedNote').textContent='Current selected point: the Super network loop as stored on this branch. Halt is a reading, not termination.';
+$('selectedEq').textContent='0 / L / selected point  —τ→  inf / ∞ / G / continuation  —τ⁻¹→  L′ / returned local\nnotes stay notes · charts stay charts · residue remaining';
+$('bmShown').textContent='What this cycle currently returns: live occurrence ids above, Slearn OPEN not RETURNED, Aristotle native equality OPEN, leftover Slearn PR 10 named as not-the-deploy. Black Mirror is appearance, not a device.';
+$('bmLeftover').innerHTML=`<a href="${leftover.url}">${leftover.url}</a> — ${leftover.label}`;
 function current(){return scenarios.find(s=>s.id===$('scenario').value)}
-function draw(){const s=current(),p=Number($('phase').value),r=Number($('r').value),i=Number($('i').value),ss=Number($('ss').value);$('rOut').textContent=fmt(r);$('iOut').textContent=fmt(i);$('ssOut').textContent=fmt(ss);const cx=460,cy=260,len=55+46*r,x2=cx+len*Math.cos(i),y2=cy-len*Math.sin(i),rad=52+22*r,ny=105+300*Math.abs(2*ss-1);let out='<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#9fb4ff"/></marker></defs>';out+=`<circle cx="${cx}" cy="${cy}" r="10" fill="#eef3fa"/><text x="${cx}" y="${cy+28}" text-anchor="middle" fill="#aab6c9">point / selection</text>`;out+=`<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#9fb4ff" stroke-width="5" marker-end="url(#a)" opacity="${p>=1?1:.15}"/><text x="${(cx+x2)/2}" y="${(cy+y2)/2-12}" fill="#aab6c9">r-extension / continuation</text>`;out+=`<path d="M ${x2} ${y2} A ${rad} ${rad} 0 1 1 ${x2-.1} ${y2}" fill="none" stroke="#e7bd56" stroke-width="5" opacity="${p>=2?1:.12}"/><text x="${x2+rad+8}" y="${y2}" fill="#e7bd56">i-rotation / sensor loop</text>`;out+=`<circle cx="${x2}" cy="${y2}" r="${rad*(.45+.5*ss)}" fill="rgba(88,211,148,.14)" stroke="#58d394" stroke-width="5" opacity="${p>=3?1:.12}"/><text x="${x2}" y="${y2+5}" text-anchor="middle" fill="#eef3fa" opacity="${p>=3?1:.2}">authored return</text>`;out+=`<path d="M ${x2+rad} ${y2} C 760 95,790 440,860 ${ny}" fill="none" stroke="#ff9fd4" stroke-width="4" marker-end="url(#a)" opacity="${p>=4?1:.1}"/><circle cx="860" cy="${ny}" r="10" fill="#ff9fd4" opacity="${p>=4?1:.1}"/><text x="860" y="${ny+28}" text-anchor="middle" fill="#ff9fd4" opacity="${p>=4?1:.1}">new sensor potential</text>`;out+=`<text x="35" y="43" fill="#eef3fa">${phases[p]}</text><text x="35" y="70" fill="#aab6c9">OPEN relations: ${s.open}</text><text x="35" y="97" fill="#aab6c9">hidden perspectives/residues: ${s.hidden}</text>`;$('canvas').innerHTML=out}
-function render(){const s=current(),p=Number($('phase').value),r=Number($('r').value),i=Number($('i').value),ss=Number($('ss').value);$('badges').innerHTML=[['T',s.T],['E',s.E],['N',s.N],['MEMORY',s.M]].map(x=>`<span class="badge ${cls(x[1])}">${x[0]}: ${x[1]}</span>`).join('');$('metrics').innerHTML=`<div class="metric"><span>phase</span><strong>${p}</strong></div><div class="metric"><span>r</span><strong>${fmt(r)}</strong></div><div class="metric"><span>i</span><strong>${fmt(i)}</strong></div><div class="metric"><span>sensor/selection</span><strong>${fmt(ss)}</strong></div><div class="metric"><span>OPEN</span><strong>${s.open}</strong></div><div class="metric"><span>hidden</span><strong>${s.hidden}</strong></div>`;$('claim').textContent=s.claim;const steps=['source note','r-extension','i-rotation','sensor potential','natural choice','relative selection','authored form','return','reopening'];$('path').innerHTML=steps.map((x,k)=>`<div class="step"><strong>${k+1}. ${x}</strong><br>${k===0?'literal occurrence':k===8?'new latent condition':'active translation'}</div>${k<steps.length-1?'<div class="arrow">→</div>':''}`).join('');$('source').textContent=`SOURCE\nClosure is my notes guiding the interface...\n\nCURRENT READING\n0↔∞ | r↔i | sensor↔selection | halt↔continuation\n\nSTATUS\n${s.T} / ${s.E} / ${s.N} / ${s.M}`;$('memory').textContent=JSON.stringify({original_note:'immutable',retrieved_relations:['axiometric path','interaction history','formal lineage'],proposed_transform:s.id,rule_version:s.N==='FALSE'?'requires revision':'active',author_confirmation:s.T==='TRUE'?'retained':'pending',open_relations:s.open,reopening:'available'},null,2);draw()}
+function draw(){const s=current(),p=Number($('phase').value),r=Number($('r').value),i=Number($('i').value),ss=Number($('ss').value);$('rOut').textContent=fmt(r);$('iOut').textContent=fmt(i);$('ssOut').textContent=fmt(ss);const cx=460,cy=260,len=55+46*r,x2=cx+len*Math.cos(i),y2=cy-len*Math.sin(i),rad=52+22*r,ny=105+300*Math.abs(2*ss-1);let out='<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#9fb4ff"/></marker></defs>';out+=`<circle cx="${cx}" cy="${cy}" r="10" fill="#eef3fa"/><text x="${cx}" y="${cy+28}" text-anchor="middle" fill="#aab6c9">0 / this live loop</text>`;out+=`<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#9fb4ff" stroke-width="5" marker-end="url(#a)" opacity="${p>=1?1:.15}"/><text x="${(cx+x2)/2}" y="${(cy+y2)/2-12}" fill="#aab6c9">r-extension / continuation</text>`;out+=`<path d="M ${x2} ${y2} A ${rad} ${rad} 0 1 1 ${x2-.1} ${y2}" fill="none" stroke="#e7bd56" stroke-width="5" opacity="${p>=2?1:.12}"/><text x="${x2+rad+8}" y="${y2}" fill="#e7bd56">i-rotation / sensor loop</text>`;out+=`<circle cx="${x2}" cy="${y2}" r="${rad*(.45+.5*ss)}" fill="rgba(88,211,148,.14)" stroke="#58d394" stroke-width="5" opacity="${p>=3?1:.12}"/><text x="${x2}" y="${y2+5}" text-anchor="middle" fill="#eef3fa" opacity="${p>=3?1:.2}">authored return</text>`;out+=`<path d="M ${x2+rad} ${y2} C 760 95,790 440,860 ${ny}" fill="none" stroke="#ff9fd4" stroke-width="4" marker-end="url(#a)" opacity="${p>=4?1:.1}"/><circle cx="860" cy="${ny}" r="10" fill="#ff9fd4" opacity="${p>=4?1:.1}"/><text x="860" y="${ny+28}" text-anchor="middle" fill="#ff9fd4" opacity="${p>=4?1:.1}">new 0 / reopening</text>`;out+=`<text x="35" y="43" fill="#eef3fa">${s.live?'LIVE field · ':''}${phases[p]}</text><text x="35" y="70" fill="#aab6c9">OPEN seams: ${s.live?openSeams.length:s.open}</text><text x="35" y="97" fill="#aab6c9">hidden perspectives: ${s.live?hidden.length:s.hidden}</text>`;$('canvas').innerHTML=out}
+function render(){const s=current(),p=Number($('phase').value),r=Number($('r').value),i=Number($('i').value),ss=Number($('ss').value);$('badges').innerHTML=[['T',s.T],['E',s.E],['N',s.N],['MEMORY',s.M]].map(x=>`<span class="badge ${cls(x[1])}">${x[0]}: ${x[1]}</span>`).join('');$('metrics').innerHTML=`<div class="metric"><span>phase</span><strong>${p}</strong></div><div class="metric"><span>r</span><strong>${fmt(r)}</strong></div><div class="metric"><span>i</span><strong>${fmt(i)}</strong></div><div class="metric"><span>sensor/selection</span><strong>${fmt(ss)}</strong></div><div class="metric"><span>live occurrences</span><strong>${liveOccurrences.length}</strong></div><div class="metric"><span>OPEN / hidden</span><strong>${s.live?openSeams.length:s.open} / ${s.live?hidden.length:s.hidden}</strong></div>`;$('claim').textContent=s.claim;const steps=s.live?liveCycle:[['source note','literal occurrence'],['r-extension','local chart'],['i-rotation','local chart'],['sensor potential','active translation'],['natural choice','active translation'],['relative selection','active translation'],['authored form','active translation'],['return','active translation'],['reopening','new latent condition']];$('path').innerHTML=steps.map((x,k)=>`<div class="step"><strong>${k+1}. ${x[0]}</strong><br>${x[1]}</div>${k<steps.length-1?'<div class="arrow">→</div>':''}`).join('');$('source').textContent=s.live?`SELECTED POINT / 0\nthis live loop\n\nOPERATOR PATH\n0/L —τ→ inf/G —τ⁻¹→ L′\nsource note ↔ interaction ↔ latent memory ↔ reconnection ↔ reread ↔ return ↔ reopening\n\nSTATUS\nMODEL_SUGGESTED_RELATION · reopening available · TRUE not issued\nnotes immutable · leftover Slearn PR 10 = OPEN packet, NOT the deploy`:`LOCAL CHART READING\n${s.label}\n\nCURRENT READING\n0↔∞ | r↔i | sensor↔selection | halt↔continuation\n\nLIVE MEMORY STILL SHOWN BELOW\nSTATUS ${s.T} / ${s.E} / ${s.N} / ${s.M}`;$('memory').textContent=JSON.stringify({selected_point:'this live loop / 0',original_notes:'immutable',status:'MODEL_SUGGESTED_RELATION',reopening:'available',TRUE:'not issued',leftover_slearn_pr_10:{url:leftover.url,label:'OPEN packet, NOT the deploy'},occurrences:liveOccurrences.map(o=>({id:o.id,status:o.status,reopening:o.reopening,reading:o.reading})),local_chart:s.live?'live field is the selected scenario':s.id},null,2);draw()}
+$('scenario').value='live';
 ['scenario','phase','r','i','ss'].forEach(id=>$(id).addEventListener('input',render));render();
 </script>
 </body>
