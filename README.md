@@ -2,7 +2,7 @@
 
 **Uniface is a source-preserving latent interface for operating ideas through non-collapse translational continuity.**
 
-Its central correction is precise:
+Its central corrections are precise:
 
 > **Language and definition are not the problem. Their presumed isolation is.**
 >
@@ -25,6 +25,8 @@ point → line → loop → return → new point
 ball ↔ hair
 loop ↔ sensor ↔ selection
 ```
+
+In the source notes, `0` and `∞` are **reciprocal poles**. They are not themselves called axiometries. Their relation is one operation in the wider axiometric network.
 
 The recurring source equations include:
 
@@ -103,7 +105,7 @@ Black Mirror is nonterminal. Its projection immediately re-enters Slearn as a ne
 
 ## Autonomous Closure Supernet runtime
 
-The repository now includes a runnable, continuously cycling runtime rather than only doctrine and a static interface.
+The repository includes a runnable, continuously cycling runtime:
 
 ```text
 exact source occurrence
@@ -141,7 +143,44 @@ closure-supernet serve
 
 Open the live dashboard at `http://localhost:8000/` and API documentation at `http://localhost:8000/docs`.
 
-See [`AUTONOMOUS_RUNTIME.md`](AUTONOMOUS_RUNTIME.md) for the full agent, storage, API, Docker, inbox, and optional interpretation-provider architecture.
+## Digital Supernet integrations
+
+Version `0.2.0` adds a source-neutral connector fabric.
+
+```text
+WEBHOOK_IN
+WEBHOOK_OUT
+GITHUB_REPOSITORY
+HTTP_JSON_FEED
+```
+
+Digital sources enter as immutable occurrences with connector provenance. They do not enter as externally certified truth. The local runtime still performs understanding, interpretation, admission, projection, and reopening.
+
+The integration layer includes:
+
+- a persistent connector registry;
+- enable/disable state;
+- environment-backed secret references;
+- HMAC-signed webhooks;
+- GitHub tree and blob provenance;
+- HTTP JSON/JSONL feeds with ETag and Last-Modified cursors;
+- idempotent delivery receipts;
+- outbound event and projection returns;
+- API, CLI, dashboard, run history, and tests.
+
+Example:
+
+```bash
+closure-supernet integration-add \
+  --name notes-repository \
+  --kind GITHUB_REPOSITORY \
+  --secret-env GITHUB_TOKEN \
+  --config '{"repository":"owner/repo","ref":"main","include":["**/*.md","**/*.lean"]}'
+
+closure-supernet integration-poll
+```
+
+See [`DIGITAL_SUPERNET_INTEGRATIONS.md`](DIGITAL_SUPERNET_INTEGRATIONS.md).
 
 ## Repository map
 
@@ -152,6 +191,7 @@ See [`AUTONOMOUS_RUNTIME.md`](AUTONOMOUS_RUNTIME.md) for the full agent, storage
 - [`LATENT_MEMORY_PROTOCOL.md`](LATENT_MEMORY_PROTOCOL.md) — source, relation, interpretation, configuration, and rule-version records.
 - [`FULL_CLOSURE_DERIVED_INTERFACE.md`](FULL_CLOSURE_DERIVED_INTERFACE.md) — latent-space and UX architecture.
 - [`AUTONOMOUS_RUNTIME.md`](AUTONOMOUS_RUNTIME.md) — executable autonomous runtime.
+- [`DIGITAL_SUPERNET_INTEGRATIONS.md`](DIGITAL_SUPERNET_INTEGRATIONS.md) — digital connector protocol and security boundary.
 - [`closure_supernet/`](closure_supernet/) — runtime package.
 - [`CONSCIOUS_CULTURAL_MORALITY.md`](CONSCIOUS_CULTURAL_MORALITY.md) — the shared foundational field and downstream projections.
 - [`COMPUTATION_AS_DERIVED_CHART.md`](COMPUTATION_AS_DERIVED_CHART.md) — computation without a Turing-completeness assumption.
