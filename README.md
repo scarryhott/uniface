@@ -109,6 +109,7 @@ Slearn interaction
 - [`occurrences/2026-08-25-hourly-pulse-1334.md`](occurrences/2026-08-25-hourly-pulse-1334.md) — 13:34 ET pulse as ORGANIZATION / PLANNING / ACTION on the live field; interpretation return, not source notes.
 - [`occurrences/2026-08-25-nrrf765-problems-as-real.md`](occurrences/2026-08-25-nrrf765-problems-as-real.md) — NRRF765 as a pointed-at derived chart of problems-as-real; interpretation return, not Uniface source, not the network. Neither 764 nor 765 is on public slearn main.
 - [`occurrences/2026-08-25-collective-action-public-surface.md`](occurrences/2026-08-25-collective-action-public-surface.md) — public projection as collective action (Harry / this loop / others), not quantity or quality; interpretation return, not a FOUNDATION rewrite.
+- [`occurrences/2026-08-25-relative-forms-as-interface.md`](occurrences/2026-08-25-relative-forms-as-interface.md) — relative forms as live interface operators; translational truth as relative admission; framework not achieved; interpretation return, not source notes.
 
 ## Status discipline
 
