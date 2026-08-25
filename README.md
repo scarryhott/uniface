@@ -97,6 +97,7 @@ Slearn interaction
 - [`FULL_CLOSURE_DERIVED_INTERFACE.md`](FULL_CLOSURE_DERIVED_INTERFACE.md) — interface architecture.
 - [`FORMAL_LINEAGE.md`](FORMAL_LINEAGE.md) — NRRF theorem lineage and scope.
 - [`docs/index.html`](docs/index.html) — interactive Uniface prototype.
+- [`ledger/`](ledger/) — heartbeat receipts (organization / planning / action). Derived store, not source notes.
 - [`occurrences/`](occurrences/) and [`interactions/`](interactions/) — stored live-reading returns. They are interpretation occurrences, not source notes and not a second foundation.
 - [`occurrences/2026-08-25-full-closure-loop-plan.md`](occurrences/2026-08-25-full-closure-loop-plan.md) — Super network full-closure-loop plan; interpretation return, not source notes.
 - [`occurrences/2026-08-25-slearn-continuum-visit.md`](occurrences/2026-08-25-slearn-continuum-visit.md) — Slearn continuum visit (step 2); interpretation return, not source notes.
