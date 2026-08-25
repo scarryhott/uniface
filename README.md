@@ -1,6 +1,6 @@
 # Uniface
 
-**Uniface is a source-preserving latent interface for operating ideas through non-collapse translational continuity.**
+**Uniface is a source-preserving latent interface and public living network for operating ideas through non-collapse translational continuity.**
 
 Its central corrections are precise:
 
@@ -10,23 +10,20 @@ Its central corrections are precise:
 >
 > **The mathematics may already exist, but its configured unification is an authored process of understanding, interpretation, and interaction.**
 
-Uniface stores exact notes, equations, drawings, variants, formal readings, simulations, and evidence without replacing their source grammar with a familiar external notation.
+Uniface stores exact notes, equations, drawings, variants, formal readings, simulations, public interactions, actions, and returned consequences without replacing their source grammar with a familiar external notation.
 
 ## Foundation
 
-The interface does not begin with an isolated closure object, global language, terminal unity, or privileged calculation. It begins with relative occurrences and their active operations:
+The interface begins with relative occurrences and their active operations:
 
 ```text
-0 ↔ ∞
-r ↔ i
-extension ↔ rotation
+0 ↔ ∞                 reciprocal poles
+r ↔ i                 extension / rotation
 basis ↔ trajectory
 point → line → loop → return → new point
 ball ↔ hair
 loop ↔ sensor ↔ selection
 ```
-
-In the source notes, `0` and `∞` are **reciprocal poles**. They are not themselves called axiometries. Their relation is one operation in the wider axiometric network.
 
 The recurring source equations include:
 
@@ -40,96 +37,86 @@ tan(π/2)                              rotation–extension inter-bound fold
 σ(l_r,g_r,l_i,g_i)=(g_i,l_i,g_r,l_r) predual Fourier exchange
 ```
 
-These are source operations. Classical encodings, quotients, fibres, closure operators, holonomy, category-theoretic naturality, topology, computation, and simulation matrices are permitted only as **derived charts** that preserve the intended operations and return explicitly to source meaning.
+Classical encodings, quotients, fibres, closure operators, holonomy, topology, computation, and simulation matrices are permitted only as **derived charts** that preserve and return to the source operations.
 
 ## Configured unification
-
-Existing mathematics supplies possible forms. It does not automatically decide which forms carry the intended unity.
 
 ```text
 exact source forms
 → understood candidate relations
 → explicit interpretations
 → interactive admission
-→ provisionally forced unity
-→ source-reversible return
+→ provisional return
+→ source-reversible consequence
 → reopening
 ```
 
 - **Understanding** proposes operational correspondences without collapsing them.
-- **Interpretation** records the exact translation, frame, preservation, transformation, omission, and reverse path.
-- **Interaction** admits, revises, rejects, proves, tests, or reopens the interpretation.
-- **Configured admission** is constrained by coherence, covering, saturation, provenance, and contradiction tests.
-
-See [`CONFIGURED_UNIFICATION.md`](CONFIGURED_UNIFICATION.md).
-
-## Non-collapse
-
-Non-collapse does not avoid language, definition, calculation, proof, or identity.
-
-- Language remains a local active chart.
-- Definition remains a relative act occurring during translation.
-- Calculation remains a local witness rather than a universal foundation.
-- Formal proof remains a machine-checked translation under an explicit reading.
-- Identity is derived from what admitted relations cannot separate.
-- Unity preserves differences as mutually translatable forms rather than reducing them to one representation.
-
-The process is not:
-
-```text
-pre-given closure → local forms → final closure
-```
-
-It is:
-
-```text
-apparent isolation ↔ translation ↔ provisional return ↔ reopening ↔ new form
-```
+- **Interpretation** records frame, preservation, transformation, omission, and reverse path.
+- **Interaction** admits, revises, rejects, proves, tests, acts on, or reopens the relation.
+- **Configured admission** remains constrained by coherence, provenance, contradiction, and affected perspectives.
 
 ## Slearn and Black Mirror
 
-### Slearn
+**Slearn** is the active configuration and collective-action continuum: exact notes, real problems, candidate relations, interactions, interpretations, people, perspectives, collective actions, returned consequences, OPEN seams, rules, proofs, and simulations.
 
-Slearn is the active configuration continuum: exact notes, candidate relations, interpretations, interactions, OPEN seams, alternative operator paths, rules, people, projects, proofs, simulations, and newly authored natural forms.
-
-### Black Mirror
-
-Black Mirror is the current topological projection of the configured admission. It displays path classes, loops, partitions, obstructions, invariants, opacity, status, and alternative OPEN configurations without claiming to reconstruct every hidden order or presentation.
+**Black Mirror** is the current nonterminal topology of that configured field. It displays provisional classes, paths, obstructions, opacity, consequences, and OPEN alternatives while retaining a reverse path to exact sources.
 
 ```text
-Slearn       = configuration, trajectory, and reopening
-Black Mirror = current returned topology of that configuration
+Slearn       = configuration, interaction, action, and reopening
+Black Mirror = current returned topology of that living configuration
 ```
 
-Black Mirror is nonterminal. Its projection immediately re-enters Slearn as a new perspective and interaction condition.
+## Public living Closure Supernet — version 0.3.0
 
-## Autonomous Closure Supernet runtime
-
-The repository includes a runnable, continuously cycling runtime:
+The root site is now a public living-network interface rather than only a runtime console.
 
 ```text
-exact source occurrence
+real problem
+→ note / loop step
+→ interaction / solution
+→ collective action
+→ returned consequence
+→ agentic reintegration
+→ reopened problem
+```
+
+The living interface instantiates the current NRRF764–765 reading:
+
+- a problem must present at least one real situation;
+- a note is stored as a self-interaction / loop step;
+- every interaction receives a solution receipt;
+- solutions remain OPEN unless further admission settles them at the current level;
+- collective action replaces likes, rank, money, or quality scoring as the public social return path;
+- returned consequences re-enter the originating problem through an agent-proposed, source-reversible reintegration;
+- affected perspectives omitted from the return remain explicit OPEN seams;
+- participant, problem, action, and reintegration state changes are append-only;
+- exact authored source occurrences are immutable.
+
+Open:
+
+- living public interface: `http://localhost:8000/`
+- autonomous runtime console: `http://localhost:8000/runtime`
+- API documentation: `http://localhost:8000/docs`
+
+See [`LIVING_NETWORK_INTERFACE.md`](LIVING_NETWORK_INTERFACE.md).
+
+## Autonomous runtime
+
+```text
+local/public/digital source
 → autonomous sensing
 → candidate relation
 → source-reversible interpretation
 → constitutional admission
-→ Black Mirror projection
+→ returned-consequence reintegration
+→ living field + Black Mirror projection
 → OPEN seam or provisional class
 → reopening
 → next cycle
 ```
 
-The runtime is autonomous but bounded:
-
-- original occurrences are immutable;
-- notation is never silently normalized;
-- semantic resemblance remains a candidate, not proof;
-- stronger relations remain OPEN until author confirmation, proof, or evidence;
-- rules are versioned rather than overwritten;
-- repeated OPEN seams can generate proposed rule revisions;
-- affected perspectives and projection losses are retained;
-- the runtime does not assume the total field is Turing complete;
-- no local halt or returned class is treated as terminal closure.
+The runtime is autonomous but bounded: it cannot overwrite sources, silently normalize notation, infer global truth from resemblance, omit affected perspectives while claiming completion, assume Turing completeness, or treat a local return as terminal.
 
 Quick start:
 
@@ -141,11 +128,9 @@ cp .env.example .env
 closure-supernet serve
 ```
 
-Open the live dashboard at `http://localhost:8000/` and API documentation at `http://localhost:8000/docs`.
+## Digital integrations
 
-## Digital Supernet integrations
-
-Version `0.2.0` adds a source-neutral connector fabric.
+The source-neutral connector fabric supports:
 
 ```text
 WEBHOOK_IN
@@ -154,31 +139,7 @@ GITHUB_REPOSITORY
 HTTP_JSON_FEED
 ```
 
-Digital sources enter as immutable occurrences with connector provenance. They do not enter as externally certified truth. The local runtime still performs understanding, interpretation, admission, projection, and reopening.
-
-The integration layer includes:
-
-- a persistent connector registry;
-- enable/disable state;
-- environment-backed secret references;
-- HMAC-signed webhooks;
-- GitHub tree and blob provenance;
-- HTTP JSON/JSONL feeds with ETag and Last-Modified cursors;
-- idempotent delivery receipts;
-- outbound event and projection returns;
-- API, CLI, dashboard, run history, and tests.
-
-Example:
-
-```bash
-closure-supernet integration-add \
-  --name notes-repository \
-  --kind GITHUB_REPOSITORY \
-  --secret-env GITHUB_TOKEN \
-  --config '{"repository":"owner/repo","ref":"main","include":["**/*.md","**/*.lean"]}'
-
-closure-supernet integration-poll
-```
+Digital sources enter as immutable occurrences with provenance, not externally certified truth. The local runtime still performs understanding, interpretation, admission, projection, action, and reopening.
 
 See [`DIGITAL_SUPERNET_INTEGRATIONS.md`](DIGITAL_SUPERNET_INTEGRATIONS.md).
 
@@ -187,31 +148,16 @@ See [`DIGITAL_SUPERNET_INTEGRATIONS.md`](DIGITAL_SUPERNET_INTEGRATIONS.md).
 - [`FOUNDATION.md`](FOUNDATION.md) — canonical note-guided foundation.
 - [`CONFIGURED_UNIFICATION.md`](CONFIGURED_UNIFICATION.md) — understanding, interpretation, interaction, and configured admission.
 - [`NON_COLLAPSE_CLOSURE_INTERFACE.md`](NON_COLLAPSE_CLOSURE_INTERFACE.md) — non-collapse philosophy.
-- [`AXIOMETRIC_SOURCE_GRAMMAR.md`](AXIOMETRIC_SOURCE_GRAMMAR.md) — literal symbols, intended operations, and normalization rules.
-- [`LATENT_MEMORY_PROTOCOL.md`](LATENT_MEMORY_PROTOCOL.md) — source, relation, interpretation, configuration, and rule-version records.
+- [`AXIOMETRIC_SOURCE_GRAMMAR.md`](AXIOMETRIC_SOURCE_GRAMMAR.md) — literal symbols and intended operations.
+- [`LATENT_MEMORY_PROTOCOL.md`](LATENT_MEMORY_PROTOCOL.md) — source, relation, interpretation, and rule-version records.
 - [`FULL_CLOSURE_DERIVED_INTERFACE.md`](FULL_CLOSURE_DERIVED_INTERFACE.md) — latent-space and UX architecture.
+- [`LIVING_NETWORK_INTERFACE.md`](LIVING_NETWORK_INTERFACE.md) — public problems, interactions, actions, returns, and reintegration.
 - [`AUTONOMOUS_RUNTIME.md`](AUTONOMOUS_RUNTIME.md) — executable autonomous runtime.
-- [`DIGITAL_SUPERNET_INTEGRATIONS.md`](DIGITAL_SUPERNET_INTEGRATIONS.md) — digital connector protocol and security boundary.
-- [`closure_supernet/`](closure_supernet/) — runtime package.
-- [`CONSCIOUS_CULTURAL_MORALITY.md`](CONSCIOUS_CULTURAL_MORALITY.md) — the shared foundational field and downstream projections.
+- [`DIGITAL_SUPERNET_INTEGRATIONS.md`](DIGITAL_SUPERNET_INTEGRATIONS.md) — connector protocol and security boundary.
+- [`CONSCIOUS_CULTURAL_MORALITY.md`](CONSCIOUS_CULTURAL_MORALITY.md) — shared foundational field and downstream projections.
 - [`COMPUTATION_AS_DERIVED_CHART.md`](COMPUTATION_AS_DERIVED_CHART.md) — computation without a Turing-completeness assumption.
 - [`FORMAL_LINEAGE.md`](FORMAL_LINEAGE.md) — NRRF theorem lineage and formal scope.
-- [`docs/index.html`](docs/index.html) — closure-continuum interface chart.
-
-## Latent-space commitments
-
-Uniface preserves:
-
-1. exact source passages, equations, notation, capitalization, drawings, dates, and context;
-2. notational variants without silent normalization;
-3. candidate relations separately from admitted interpretations;
-4. interpretation witnesses with preservation, transformation, omission, frame, and return path;
-5. author-confirmed relations separately from model-suggested relations;
-6. machine-checked theorems together with the reading they formalize;
-7. simulation assumptions separately from theorem statements;
-8. empirical hypotheses separately from formal closure results;
-9. OPEN wherever translation remains incomplete;
-10. source reversibility and reopening for every projected global relation.
+- [`closure_supernet/`](closure_supernet/) — runtime package.
 
 ## Status discipline
 
@@ -230,10 +176,10 @@ REJECTED_RELATION
 OPEN
 ```
 
-Formal similarity is not physical evidence. A path-dependent appearance is not automatically information transfer. A returned invariant does not reconstruct its individual stages. A local definition does not become universal merely because it is internally clear.
+Formal similarity is not physical evidence. Public agreement is not moral truth. A returned invariant does not reconstruct its individual stages. A local settlement can reopen.
 
-## Scope
+## Scope and progress
 
-Uniface does not claim a new physical law merely by configuring a closure translation. Its foundational claim is translational:
+The repository now instantiates a complete **single-node living-network runtime** with a public web interface, persistent relative forms, autonomous reintegration, source-neutral digital connectors, API, tests, and append-only source history.
 
-> **A law, proof, language, calculation, perspective, sensor reading, or interface is a relative natural form whose truth becomes definite through source-preserving understanding, interpretation, interaction, return, and reopening.**
+It does not yet claim production cryptographic identity, fine-grained encrypted authorization, cloud deployment, replicated multi-node storage, public federation, distributed consensus, or a machine-checked refinement theorem from Python to NRRF764–765. Those are explicit next closure levels rather than hidden behind a claim of terminal completion.
