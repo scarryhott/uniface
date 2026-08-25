@@ -101,6 +101,48 @@ Black Mirror = current returned topology of that configuration
 
 Black Mirror is nonterminal. Its projection immediately re-enters Slearn as a new perspective and interaction condition.
 
+## Autonomous Closure Supernet runtime
+
+The repository now includes a runnable, continuously cycling runtime rather than only doctrine and a static interface.
+
+```text
+exact source occurrence
+→ autonomous sensing
+→ candidate relation
+→ source-reversible interpretation
+→ constitutional admission
+→ Black Mirror projection
+→ OPEN seam or provisional class
+→ reopening
+→ next cycle
+```
+
+The runtime is autonomous but bounded:
+
+- original occurrences are immutable;
+- notation is never silently normalized;
+- semantic resemblance remains a candidate, not proof;
+- stronger relations remain OPEN until author confirmation, proof, or evidence;
+- rules are versioned rather than overwritten;
+- repeated OPEN seams can generate proposed rule revisions;
+- affected perspectives and projection losses are retained;
+- the runtime does not assume the total field is Turing complete;
+- no local halt or returned class is treated as terminal closure.
+
+Quick start:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+cp .env.example .env
+closure-supernet serve
+```
+
+Open the live dashboard at `http://localhost:8000/` and API documentation at `http://localhost:8000/docs`.
+
+See [`AUTONOMOUS_RUNTIME.md`](AUTONOMOUS_RUNTIME.md) for the full agent, storage, API, Docker, inbox, and optional interpretation-provider architecture.
+
 ## Repository map
 
 - [`FOUNDATION.md`](FOUNDATION.md) — canonical note-guided foundation.
@@ -109,10 +151,12 @@ Black Mirror is nonterminal. Its projection immediately re-enters Slearn as a ne
 - [`AXIOMETRIC_SOURCE_GRAMMAR.md`](AXIOMETRIC_SOURCE_GRAMMAR.md) — literal symbols, intended operations, and normalization rules.
 - [`LATENT_MEMORY_PROTOCOL.md`](LATENT_MEMORY_PROTOCOL.md) — source, relation, interpretation, configuration, and rule-version records.
 - [`FULL_CLOSURE_DERIVED_INTERFACE.md`](FULL_CLOSURE_DERIVED_INTERFACE.md) — latent-space and UX architecture.
+- [`AUTONOMOUS_RUNTIME.md`](AUTONOMOUS_RUNTIME.md) — executable autonomous runtime.
+- [`closure_supernet/`](closure_supernet/) — runtime package.
 - [`CONSCIOUS_CULTURAL_MORALITY.md`](CONSCIOUS_CULTURAL_MORALITY.md) — the shared foundational field and downstream projections.
 - [`COMPUTATION_AS_DERIVED_CHART.md`](COMPUTATION_AS_DERIVED_CHART.md) — computation without a Turing-completeness assumption.
 - [`FORMAL_LINEAGE.md`](FORMAL_LINEAGE.md) — NRRF theorem lineage and formal scope.
-- [`docs/index.html`](docs/index.html) — runnable closure-continuum interface.
+- [`docs/index.html`](docs/index.html) — closure-continuum interface chart.
 
 ## Latent-space commitments
 

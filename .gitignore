@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+runtime_data/*.db
+runtime_data/*.db-*
+runtime_data/inbox/*
+!runtime_data/inbox/.gitkeep
+runtime_data/processed/*
+!runtime_data/processed/.gitkeep

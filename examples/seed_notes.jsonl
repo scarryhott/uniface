@@ -1,0 +1,4 @@
+{"source_id":"axiometry","exact_text":"0 ↔ ∞\nr ↔ i\npoint → line → loop → return → new point\nball ↔ hair\nloop ↔ sensor ↔ selection","metadata":{"status":"ORIGINAL_NOTE"}}
+{"source_id":"triangle-time","exact_text":"i = 2^(r - 1)\nS_(k+1) = S_k - 2^(S_(k+1) - 1)","metadata":{"status":"ORIGINAL_NOTE"}}
+{"source_id":"chaitin-kakeya","exact_text":"CK = i e^K\nK_n = P_i^n (P_i - 1)^n\ntan(π/2)","metadata":{"status":"ORIGINAL_NOTE"}}
+{"source_id":"predual-fourier","exact_text":"σ(l_r,g_r,l_i,g_i) = (g_i,l_i,g_r,l_r)\n1 → i → -1 → -i → 1","metadata":{"status":"ORIGINAL_NOTE"}}
