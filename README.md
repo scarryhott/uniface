@@ -106,6 +106,7 @@ Slearn interaction
 - [`occurrences/2026-08-25-nrrf764-ccm-super-network.md`](occurrences/2026-08-25-nrrf764-ccm-super-network.md) and [`occurrences/2026-08-25-problems-as-real.md`](occurrences/2026-08-25-problems-as-real.md) — NRRF764 derived chart and problems-as-real architecture note; interpretation returns, not source notes.
 - [`occurrences/2026-08-25-loop-sensor-integration.md`](occurrences/2026-08-25-loop-sensor-integration.md) — digital Super network loop sensor (sense/select); interpretation return, not source notes.
 - [`occurrences/2026-08-25-three-surfaces.md`](occurrences/2026-08-25-three-surfaces.md) — public projection / persistent field / agentic reintegration as three surfaces of the same loop; interpretation return, not source notes. GitHub Pages enablement remains OPEN.
+- [`occurrences/2026-08-25-hourly-pulse-1334.md`](occurrences/2026-08-25-hourly-pulse-1334.md) — 13:34 ET pulse as ORGANIZATION / PLANNING / ACTION on the live field; interpretation return, not source notes.
 
 ## Status discipline
 

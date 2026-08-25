@@ -4,17 +4,23 @@
   "persistence": "git",
   "not": "a database, a second site, localStorage-as-network, or Turing-complete runtime",
   "field_store": ["ledger/", "occurrences/", "ledger/runs/"],
-  "last_beat": "2026-08-25-1249-et",
-  "last_beat_residue": "occ-2026-08-25-slearn-nrrf656-merged",
-  "next_0": "occ-2026-08-25-three-surfaces",
-  "cursor": 11,
+  "last_beat": "2026-08-25-1334-et",
+  "last_beat_residue": "occ-2026-08-25-three-surfaces",
+  "next_0": "occ-2026-08-25-hourly-pulse-1334",
+  "cursor": 12,
   "pages_seam": "OPEN: GitHub Pages (Settings → Pages, source GitHub Actions or /docs) is not enabled from this PR. Workflow .github/workflows/pages.yml is the in-repo path; it does not rewrite source notes. Do not invent a host. Do not copy Slearn vinext.",
   "open_seams": {
     "T": "OPEN",
     "Turing": "OPEN (not assumed)",
     "O_B_eq_R": "refused",
     "Pages": "OPEN",
+    "kantian-ivi": "unreachable",
     "localStorage": "local continuation only — never the Super network"
   },
-  "learning": "the residue, not a model training loop"
+  "learning": "the residue, not a model training loop",
+  "beat_layers": {
+    "organization": "Selected 0: occ-2026-08-25-three-surfaces (residue of beat 1249). PR 1 open on cursor/unification-reading-occurrence-706f at f291128. Git is the store. Pages OPEN. TRUE not issued. kantian-ivi unreachable.",
+    "planning": "Do not duplicate 1249 / three-surfaces. Project this hour's heartbeat as ORGANIZATION / PLANNING / ACTION on docs/index.html. Update run residue. Pages stays OPEN. No merge. No second site. No new database.",
+    "action": "ledger/beats/2026-08-25-1334-et.md; occ-2026-08-25-hourly-pulse-1334; hourly-pulse panel on docs/index.html; ledger/runs/current.json + docs/field-run.json last_beat=2026-08-25-1334-et."
+  }
 }
