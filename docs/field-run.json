@@ -3,10 +3,10 @@
   "status": "MODEL_SUGGESTED_RELATION",
   "persistence": "git",
   "closure_store": ["ledger/", "occurrences/", "ledger/runs/"],
-  "relative_interaction_store": "supabase uniface-relative / public.uniface_relative_interaction (realtime on; lineage receipts in payload; not closure; not rmf)",
+  "relative_interaction_store": "supabase uniface-relative / public.uniface_relative_interaction (realtime on; not closure; not rmf)",
   "not": "the field, a bidirectional gate, a second site, Rate My Face, a global event chain, or an achieved framework",
-  "last_beat": "2026-08-25-1538-et",
-  "last_beat_residue": "occ-2026-08-25-uniface-relative-store",
+  "last_beat": "2026-08-25-1534-et",
+  "last_beat_residue": "occ-2026-08-25-vercel-public-projection",
   "next_0": "occ-2026-08-25-relative-admission-form",
   "cursor": 19,
   "framework_achieved": false,
@@ -22,7 +22,7 @@
     "Pages": "OPEN",
     "Vercel_MCP": "needsAuth",
     "Vercel_projection": "https://uniface-tawny.vercel.app (named; not the field)",
-    "Supabase": "live relative persist (realtime on); lineage receipts in payload; not rmf; E2E two-person+agent OPEN",
+    "Supabase": "live relative persist (realtime on); not rmf",
     "others_on_site": "OPEN",
     "kantian-ivi": "unreachable",
     "Aristotle_native_equality": "OPEN",
@@ -32,8 +32,8 @@
   },
   "learning": "the residue, not a model training loop",
   "beat_layers": {
-    "organization": "Selected 0: occ-2026-08-25-uniface-relative-store. One relative admission form, not six products.",
-    "planning": "Per-lineage receipts in payload. Realtime INSERT as presence. Reconstruction prepared, not fake-complete.",
-    "action": "occ-2026-08-25-relative-admission-form; last_beat=1538; last_beat_residue=uniface-relative-store; next_0=relative-admission-form."
+    "organization": "Selected 0: occ-2026-08-25-vercel-public-projection (residue of beat 1434). Uniface PR 1 open. Public projection LIVE. Relative persist uniface-relative realtime on. next_0 already occ-2026-08-25-relative-admission-form.",
+    "planning": "Realtime on uniface_relative_interaction as relative admission, not a global event chain. Do not duplicate persist/lineage already in-flight. Git stays closure. Existing 1534 beat file not rewritten.",
+    "action": "1534 beat file already existed (persist wire) so skipped. last_beat=2026-08-25-1534-et; last_beat_residue=occ-2026-08-25-vercel-public-projection; next_0=occ-2026-08-25-relative-admission-form. Realtime on. Persist+lineage continued."
   }
 }
