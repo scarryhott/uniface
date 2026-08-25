@@ -18,17 +18,21 @@ literal occurrence
 
 No source equation is treated as an isolated master formula. No formal analogy is admitted as identity without an explicit operator translation, frame, status, and reverse path.
 
-## 1. Reciprocal readings
+## 1. Reciprocal poles
+
+The notes identify `0` and `∞` as poles.
 
 ```text
 0 ↔ ∞
 ```
 
+is the reciprocal relation between the poles. It is not itself named as the whole axiometry, and neither pole is an original or terminal closure.
+
 - `0`: contraction, selected point, fixed appearance, returned basis.
 - `∞`: projection, reopened line, recursive potential, continuing trajectory.
-- The invariant is their reciprocal relation, not either isolated magnitude.
+- The invariant is the reciprocal pole relation, not either isolated magnitude.
 
-Related reciprocal readings:
+Related reciprocal readings include:
 
 ```text
 point ↔ line
@@ -39,7 +43,9 @@ defined language ↔ open language
 partition ↔ unitary curvature
 ```
 
-These are frame-relative orientations of one active relation, not terminal binary opposites.
+These are frame-relative orientations of one active relation, not terminal binary opposites. The larger axiometry is configured through the interactions among these source operations and their note occurrences; it must not be reduced to the two poles alone.
+
+The runtime retains `ZERO_INFINITY` as a compatibility index for matching source occurrences. Its role label is `reciprocal poles`; the index is not a replacement name for the source notation.
 
 ## 2. Extension and rotation
 
@@ -227,6 +233,7 @@ Semantic similarity alone cannot configure unity.
 
 Uniface must never:
 
+- describe `0` or `∞` as the axiometry rather than as reciprocal poles;
 - replace `i` with `I` without source confirmation;
 - choose `tan` versus `arctan` silently;
 - replace source equations with an equivalent-looking classical formula;
