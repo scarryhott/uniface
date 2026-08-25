@@ -9,12 +9,7 @@ from .models import Verdict
 
 
 class RuntimeLivingNetworkStore(LivingNetworkStore):
-    """Runtime store specialization.
-
-    Kept separate so the first persistent schema remains readable while the
-    executable interaction insertion is tested independently. It can be folded
-    back into ``LivingNetworkStore`` after the public interface stabilizes.
-    """
+    """Runtime-tested interaction insertion for the living store."""
 
     def create_interaction(
         self,
@@ -71,3 +66,8 @@ class RuntimeLivingNetworkStore(LivingNetworkStore):
             )
             self._conn.commit()
         return self.get_interaction(interaction_id)
+
+
+# Patch the base class at package import so existing type annotations and runtime
+# construction keep one public store class while using the corrected insertion.
+LivingNetworkStore.create_interaction = RuntimeLivingNetworkStore.create_interaction
