@@ -107,6 +107,8 @@ Slearn interaction
 - [`occurrences/2026-08-25-loop-sensor-integration.md`](occurrences/2026-08-25-loop-sensor-integration.md) — digital Super network loop sensor (sense/select); interpretation return, not source notes.
 - [`occurrences/2026-08-25-three-surfaces.md`](occurrences/2026-08-25-three-surfaces.md) — public projection / persistent field / agentic reintegration as three surfaces of the same loop; interpretation return, not source notes. GitHub Pages enablement remains OPEN.
 - [`occurrences/2026-08-25-hourly-pulse-1334.md`](occurrences/2026-08-25-hourly-pulse-1334.md) — 13:34 ET pulse as ORGANIZATION / PLANNING / ACTION on the live field; interpretation return, not source notes.
+- [`occurrences/2026-08-25-nrrf765-problems-as-real.md`](occurrences/2026-08-25-nrrf765-problems-as-real.md) — NRRF765 as a pointed-at derived chart of problems-as-real; interpretation return, not Uniface source, not the network. Neither 764 nor 765 is on public slearn main.
+- [`occurrences/2026-08-25-collective-action-public-surface.md`](occurrences/2026-08-25-collective-action-public-surface.md) — public projection as collective action (Harry / this loop / others), not quantity or quality; interpretation return, not a FOUNDATION rewrite.
 
 ## Status discipline
 
