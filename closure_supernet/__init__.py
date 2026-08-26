@@ -1,8 +1,9 @@
-"""Closure Supernet living runtime and digital integration fabric.
+"""Closure Supernet living translational-truth runtime.
 
-Exact source occurrences remain canonical. Public participation, interpretations,
-projections, AI agents, webhooks, repositories, feeds, reopening families and
-iterated residues are source-reversible relative forms rather than authorities
+Exact source occurrences remain canonical. Translation Events are the live
+runtime primitive. Public participation, protocols, APIs, projections, AI
+agents, webhooks, repositories, reopening families and iterated residues are
+source-reversible relative forms or transport charts rather than authorities
 over the field.
 """
 
@@ -13,4 +14,4 @@ from .config import RuntimeConfig
 from .runtime import ClosureSupernetRuntime
 
 __all__ = ["RuntimeConfig", "ClosureSupernetRuntime"]
-__version__ = "0.4.0"
+__version__ = "0.5.0"
