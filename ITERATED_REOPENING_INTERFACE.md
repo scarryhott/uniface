@@ -3,6 +3,13 @@
 This document maps `NRRF768IteratedReopeningAdmissibleFamiliesDependencyOrder`
 into the executable Closure Supernet living runtime.
 
+## Integration status
+
+The NRRF768 digital layer is merged into `main` as Closure Supernet runtime
+version `0.4.0`. The public API, autonomous cycle, persistent reopening store,
+dependency-order classifier, residue projection and residue-relative moral
+connection are exercised by the repository test suite and CI.
+
 The Lean module and the Python implementation have different statuses:
 
 - NRRF768 is machine-checked under its stated formal reading.
