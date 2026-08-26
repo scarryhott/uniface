@@ -79,45 +79,6 @@
       "common_coeff": 2.8
     }
   },
-  "nrrf783": {
-    "lens": "NRRF783",
-    "derived_chart": true,
-    "not_lean": true,
-    "runtime_is_formal_proof": false,
-    "section_carried_as_data": true,
-    "base_site_supplied": true,
-    "site_chosen_by_runtime": false,
-    "classical_choice_required": false,
-    "excluded_middle_required": false,
-    "truth_issued": false,
-    "axiometric_form": {
-      "u1_return": true,
-      "u2_derived": true,
-      "u3_closes": false,
-      "defect": [
-        "reopened-residue"
-      ],
-      "fourfold": [
-        "point",
-        "line",
-        "loop",
-        "twist"
-      ],
-      "hold_idempotent": true,
-      "admissible_form": true
-    },
-    "translational_truth": {
-      "base_site": "sense",
-      "base_site_supplied": true,
-      "relative_potential_complete": true,
-      "cocycle_consistent": true,
-      "unique_shift": true,
-      "overlap_witness_forces_equality": true,
-      "canonical_absolute_level": null,
-      "equal_or_disjoint_decided": false
-    },
-    "live_reading": "relation explicit → witness carried → form determined → translation continued"
-  },
   "chart_not_closure": true,
   "participant": "OPEN",
   "leftover_pr_10": "not this"
