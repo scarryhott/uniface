@@ -145,6 +145,20 @@ def test_field_run_json_is_the_same_occurrence_snapshot():
     assert payload["admissibility_space"]["TRUE"] == "not issued"
     assert payload["admissibility_space"]["two_person_E2E"] == "OPEN"
     assert payload["admissibility_space"]["finite_halt_oracle"] is False
+    assert isinstance(payload["isomorphism_classes"], list)
+    assert payload["isomorphism_classes"] == payload["admissibility_space"]["isomorphism_classes"]
+    assert payload["selected_path"] in payload["selected_class"]
+    assert payload["selected_class"] == payload["admissibility_space"]["selected_class"]
+    for member in payload["selected_class"]:
+        assert member not in payload["unresolved_alternatives"]
+    other = [
+        member
+        for cls in payload["isomorphism_classes"]
+        if payload["selected_path"] not in cls
+        for member in cls
+    ]
+    assert payload["unresolved_alternatives"] == other
+    assert ["rule", "computational"] in payload["isomorphism_classes"]
     assert "Lean" not in FIELD_RUN.read_text(encoding="utf-8").replace("not Lean", "")
     node = shutil.which("node")
     if node is None:
@@ -338,9 +352,15 @@ const realized0 = u.loop.obs.undetermined_string.scenario;
 u.doSelect();
 const p0 = u.loop.path;
 const unresolved0 = p0.unresolved_alternatives;
-if (!Array.isArray(unresolved0) || unresolved0.length !== rem0.length - 1) throw new Error('unresolved is not remainder minus selected');
+if (!Array.isArray(unresolved0) || unresolved0.length < 1) throw new Error('unresolved dropped other classes');
 if (unresolved0.indexOf(p0.formId) >= 0) throw new Error('selected form still in unresolved');
-if (JSON.stringify(unresolved0) !== JSON.stringify(rem0.filter(id => id !== p0.formId))) throw new Error('unresolved != rem - formId');
+if (!Array.isArray(p0.selected_class) || p0.selected_class.indexOf(p0.formId) < 0) throw new Error('selected class missing representative');
+p0.selected_class.forEach(function(id){if (unresolved0.indexOf(id) >= 0) throw new Error('selected class member still a distinct remaining direction');});
+const other0 = rem0.filter(function(id){return p0.selected_class.indexOf(id) < 0;});
+if (JSON.stringify(unresolved0) !== JSON.stringify(other0)) throw new Error('unresolved is not the other isomorphism classes');
+if (p0.selects_over !== 'translational isomorphism classes') throw new Error('selector not over isomorphism classes');
+if (p0.class_count !== p0.isomorphism_classes.length) throw new Error('class_count');
+if (p0.class_count > rem0.length) throw new Error('more classes than remainder');
 if (p0.discarded_linear_leftover !== false) throw new Error('leftover still discarded');
 if (Math.abs(p0.nextSs - 0.8) > 1e-12) throw new Error('halt/continuation must invert ss');
 if (p0.finite_halt_oracle !== false) throw new Error('finite halt oracle');
@@ -413,11 +433,16 @@ def test_root_and_supernet_share_field_wide_sense():
     assert "over:'unified supernet field'" in js
     assert "function remainingPotential" in js
     assert "function liveRemainder" in js
+    assert "function isomorphismClassesOf" in js
+    assert "function translationalSignature" in js
+    assert "function classRemainder" in js
     assert "unresolved_alternatives" in js
     assert "admissibility_space" in js
     assert "remaining_potential" in js
+    assert "selects_over:'translational isomorphism classes'" in js
     assert "function remainingPotential" not in html
     assert "function liveRemainder" not in html
+    assert "function isomorphismClassesOf" not in html
     assert "function unifyField" not in supernet
     assert 'src="closure-field.js"' in supernet
     assert js.count("function uniqueUnitaryPathPartition") == 1
@@ -425,3 +450,86 @@ def test_root_and_supernet_share_field_wide_sense():
     assert "eyJ" not in supernet
     assert "remaining potential" in supernet
     assert "unresolved alternatives as live admissibility space" in supernet
+    assert "translational isomorphism classes of those unresolved admissible translations" in supernet
+
+
+def test_selector_operates_over_translational_isomorphism_classes():
+    import shutil
+    import subprocess
+
+    node = shutil.which("node")
+    if node is None:
+        return
+    script = (
+        "const u=require(" + json.dumps(str(LOOP_JS)) + ");"
+        + r"""
+u.resetLoop();
+u.doSense();
+const rem0 = u.loop.obs.undetermined_string.remainder.slice();
+const classes0 = u.isomorphismClassesOf(rem0, u.loop.obs);
+const ruleClass = classes0.find(function(c){return c.members.indexOf('rule')>=0;});
+if (!ruleClass || ruleClass.members.indexOf('computational')<0) throw new Error('rule and computational must be isomorphic under TENM');
+if (ruleClass.key !== 'OPEN|TRUE|FALSE|OPEN') throw new Error('cycle-0 signature is TENM, not relative_reading');
+if (classes0.length !== 4) throw new Error('expected 4 TENM classes on cycle 0, got '+classes0.length);
+u.doSelect();
+const p0 = u.loop.path;
+if (p0.selects_over !== 'translational isomorphism classes') throw new Error('selects_over');
+if (p0.class_count !== 4) throw new Error('selector still slots remainder length');
+if (p0.slot !== 2) throw new Error('class slot should be 2 under default t');
+if (JSON.stringify(p0.selected_class) !== JSON.stringify(['rule','computational'])) throw new Error('selected class');
+if (p0.formId !== 'rule') throw new Error('representative is first class member');
+if (p0.unresolved_alternatives.indexOf('computational')>=0) throw new Error('isomorphic sibling still a distinct direction');
+if (JSON.stringify(p0.unresolved_alternatives) !== JSON.stringify(['coherent','contradiction','culture'])) throw new Error('other classes dropped');
+if (Math.abs(p0.nextSs + u.loop.obs.undetermined_string.ss - 1) > 1e-12) throw new Error('halt/continuation not inverse');
+if (p0.finite_halt_oracle !== false) throw new Error('finite halt oracle');
+u.loop.te = u.translationEvent();
+if (u.loop.te.TRUE !== 'not issued') throw new Error('TRUE issued');
+if (u.loop.te.two_person_E2E !== 'OPEN') throw new Error('E2E faked');
+u.doReopen();
+u.doSense();
+const o1 = u.loop.obs;
+if (JSON.stringify(o1.undetermined_string.remainder) !== JSON.stringify(['coherent','contradiction','culture'])) throw new Error('next remainder not other classes');
+if (!o1.relative_reading || !o1.relative_reading.path) throw new Error('missing relative_reading');
+const classes1 = u.isomorphismClassesOf(o1.undetermined_string.remainder, o1);
+if (classes1.some(function(c){return c.key.indexOf(',')<0;})) throw new Error('cycle 1 still using TENM key under relative_reading');
+if (classes1.length !== 3) throw new Error('other classes must remain distinct under default relative_reading');
+const stillIso = u.isomorphismClassesOf(['rule','computational','coherent'], o1);
+const stillRule = stillIso.find(function(c){return c.members.indexOf('rule')>=0;});
+if (!stillRule || stillRule.members.indexOf('computational')<0) throw new Error('same TENM must stay isomorphic under relative_reading');
+if (stillRule.members.indexOf('coherent')>=0) throw new Error('distinct TENM merged under default relative_reading');
+const zeroRr = {
+  sense:{sense:0,path:0,returned:0},
+  path:{sense:0,path:0,returned:0},
+  returned:{sense:0,path:0,returned:0}
+};
+const merged = u.isomorphismClassesOf(rem0, Object.assign({}, u.loop.obs, {relative_reading: zeroRr, live_relation:null, selected_path:'during', undetermined_string:Object.assign({}, u.loop.obs.undetermined_string, {scenario:'during'})}));
+const memOpen = merged.find(function(c){return c.members.indexOf('coherent')>=0;});
+if (!memOpen || memOpen.members.indexOf('rule')<0 || memOpen.members.indexOf('computational')<0) throw new Error('zero relative_reading should merge same-M translations');
+const memFalse = merged.find(function(c){return c.members.indexOf('culture')>=0;});
+if (!memFalse || memFalse.members.indexOf('contradiction')<0) throw new Error('zero relative_reading should merge FALSE-memory translations');
+if (merged.length !== 2) throw new Error('zero relative_reading should yield two M-delta classes');
+console.log(JSON.stringify({
+  ok: true,
+  class_count_0: p0.class_count,
+  selected_class: p0.selected_class,
+  unresolved0: p0.unresolved_alternatives,
+  rem1: o1.undetermined_string.remainder,
+  class_count_1: classes1.length,
+  merged_zero: merged.map(function(c){return c.members;}),
+  TRUE: o1.TRUE,
+  two_person_E2E: o1.two_person_E2E
+}));
+"""
+    )
+    result = subprocess.run([node, "-e", script], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout.strip().splitlines()[-1])
+    assert payload["ok"] is True
+    assert payload["class_count_0"] == 4
+    assert payload["selected_class"] == ["rule", "computational"]
+    assert payload["unresolved0"] == ["coherent", "contradiction", "culture"]
+    assert payload["rem1"] == payload["unresolved0"]
+    assert payload["class_count_1"] == 3
+    assert payload["TRUE"] == "not issued"
+    assert payload["two_person_E2E"] == "OPEN"
+
