@@ -27,19 +27,37 @@
   "unresolved_alternatives": [
     "coherent",
     "contradiction",
-    "rule",
-    "computational"
+    "culture"
   ],
-  "admissibility_space": {
-    "realized_closure": "culture",
-    "remaining_potential": [
-      "coherent",
-      "contradiction",
+  "isomorphism_classes": [
+    [
+      "coherent"
+    ],
+    [
+      "contradiction"
+    ],
+    [
       "rule",
       "computational"
     ],
-    "selected_slot": 3,
-    "selected_path": "culture",
+    [
+      "culture"
+    ]
+  ],
+  "selected_class": [
+    "rule",
+    "computational"
+  ],
+  "selected_path": "rule",
+  "admissibility_space": {
+    "realized_closure": "rule",
+    "remaining_potential": [
+      "coherent",
+      "contradiction",
+      "culture"
+    ],
+    "selected_slot": 2,
+    "selected_path": "rule",
     "remainder": [
       "coherent",
       "contradiction",
@@ -47,6 +65,26 @@
       "culture",
       "computational"
     ],
+    "isomorphism_classes": [
+      [
+        "coherent"
+      ],
+      [
+        "contradiction"
+      ],
+      [
+        "rule",
+        "computational"
+      ],
+      [
+        "culture"
+      ]
+    ],
+    "selected_class": [
+      "rule",
+      "computational"
+    ],
+    "selected_class_key": "OPEN|TRUE|FALSE|OPEN",
     "live_potential": true,
     "discarded_linear_leftover": false,
     "halt_continuation": "∞ / line / continuation-as-reading",
@@ -56,7 +94,6 @@
     "TRUE": "not issued",
     "two_person_E2E": "OPEN"
   },
-  "selected_path": "culture",
   "truth_issued": false,
   "two_person_E2E": "OPEN",
   "TRUE": "not issued",
