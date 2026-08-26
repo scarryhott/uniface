@@ -24,6 +24,39 @@
   },
   "relative_scale": -1.400506957,
   "prior_cycle_residues": [],
+  "unresolved_alternatives": [
+    "coherent",
+    "contradiction",
+    "rule",
+    "computational"
+  ],
+  "admissibility_space": {
+    "realized_closure": "culture",
+    "remaining_potential": [
+      "coherent",
+      "contradiction",
+      "rule",
+      "computational"
+    ],
+    "selected_slot": 3,
+    "selected_path": "culture",
+    "remainder": [
+      "coherent",
+      "contradiction",
+      "rule",
+      "culture",
+      "computational"
+    ],
+    "live_potential": true,
+    "discarded_linear_leftover": false,
+    "halt_continuation": "∞ / line / continuation-as-reading",
+    "inverse_sensor_selection": true,
+    "finite_halt_oracle": false,
+    "truth_issued": false,
+    "TRUE": "not issued",
+    "two_person_E2E": "OPEN"
+  },
+  "selected_path": "culture",
   "truth_issued": false,
   "two_person_E2E": "OPEN",
   "TRUE": "not issued",
