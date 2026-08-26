@@ -4,6 +4,7 @@
   "of": "one public root closure loop",
   "stage": "te",
   "cycle": 0,
+  "sense_consumes": "unified supernet field",
   "relative_reading": {
     "sense": {
       "sense": 0,
@@ -22,6 +23,7 @@
     }
   },
   "relative_scale": -1.400506957,
+  "prior_cycle_residues": [],
   "truth_issued": false,
   "two_person_E2E": "OPEN",
   "TRUE": "not issued",
