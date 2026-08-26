@@ -1,6 +1,6 @@
 # Uniface
 
-**Uniface is a source-preserving living translation field for operating ideas through non-collapse translational continuity.**
+**Uniface is a source-preserving living translation field for operating notes, problems, resources, interactions, collective actions, and returned consequences through non-collapse translational continuity.**
 
 Its central corrections are precise:
 
@@ -12,11 +12,9 @@ Its central corrections are precise:
 >
 > **The mathematics may already exist, but its configured unification is an authored process of understanding, interpretation, and interaction.**
 
-Uniface stores exact notes, equations, drawings, variants, formal readings, simulations, public interactions, actions, translations and returned consequences without replacing their source grammar with a familiar external notation.
+Uniface preserves exact sources and operates their relations without replacing them with one external notation, finite resource ontology, canonical language, protocol verdict, or terminal result.
 
 ## Foundation
-
-The interface begins with relative occurrences and their active operations:
 
 ```text
 0 ↔ ∞                 reciprocal poles
@@ -27,7 +25,7 @@ ball ↔ hair
 loop ↔ sensor ↔ selection
 ```
 
-The recurring source equations include:
+Recurring source equations include:
 
 ```text
 i = 2^(r - 1)                         Triangle Time
@@ -39,11 +37,11 @@ tan(π/2)                              rotation–extension inter-bound fold
 σ(l_r,g_r,l_i,g_i)=(g_i,l_i,g_r,l_r) predual Fourier exchange
 ```
 
-Classical encodings, quotients, fibres, closure operators, holonomy, topology, computation, finite implication engines, protocols and simulation matrices are permitted only as **derived charts** that preserve and return to the source operations.
+Classical encodings, closure operators, topology, holonomy, computation, protocols, databases, and simulation matrices are derived charts only. They must preserve and return to the source operations.
 
-## Live translational truth — version 0.5.0
+## Closure Supernet 0.6
 
-The canonical runtime primitive is now `TranslationEvent`:
+The canonical live primitive is `TranslationEvent`:
 
 ```text
 presentation
@@ -55,25 +53,9 @@ presentation
 → reopening
 ```
 
-Every translation retains:
+Every event retains exact sources, relative forms, participants, perspectives, interaction trace, preserved and transformed structure, untranslated structure, frame and admission scope, affected perspectives, predecessor translations, returned form, successor potential, and reopening conditions.
 
-```text
-exact sources
-source and target relative forms
-participants and perspectives
-interaction trace
-preserved structure
-transformed structure
-untranslated structure
-frame and admission scope
-affected perspectives
-predecessor translations
-returned form
-successor potential
-reopening conditions
-```
-
-Translation history is append-only:
+Its history is append-only:
 
 ```text
 PROPOSED
@@ -84,50 +66,9 @@ REOPENED
 REJECTED
 ```
 
-`TRUE`, `FALSE` and `OPEN` remain local verdicts on those states. A `TRUE` return may become new potential and reopen.
+`TRUE`, `FALSE`, and `OPEN` remain relative verdicts. A TRUE return may become new potential and reopen.
 
-The current problem, note, interaction, solution, collective-action, returned-consequence, dependency-order, reopening-family, residue and Black Mirror layers remain active as **relative forms derived from the live translation field**.
-
-Open:
-
-- public living field: `http://localhost:8000/`
-- live translation field: `http://localhost:8000/translation`
-- iterated reopening field: `http://localhost:8000/reopening`
-- autonomous runtime console: `http://localhost:8000/runtime`
-- API documentation: `http://localhost:8000/docs`
-
-See [`TRANSLATIONAL_TRUTH_RUNTIME.md`](TRANSLATIONAL_TRUTH_RUNTIME.md).
-
-## Configured unification
-
-```text
-exact source forms
-→ understood candidate relations
-→ explicit interpretations
-→ interactive admission
-→ provisional return
-→ source-reversible consequence
-→ reopening
-```
-
-- **Understanding** proposes operational correspondences without collapsing them.
-- **Interpretation** records frame, preservation, transformation, omission and reverse path.
-- **Interaction** admits, revises, rejects, proves, tests, acts on or reopens the relation.
-- **Configured admission** remains constrained by coherence, provenance, contradiction and affected perspectives.
-
-## Slearn and Black Mirror
-
-**Slearn** is movement through the live translation field: exact notes, real problems, candidate relations, interactions, interpretations, people, perspectives, collective actions, returned consequences, OPEN seams, rules, proofs and simulations.
-
-**Black Mirror** is the current nonterminal topology returned by that field. It displays provisional classes, paths, obstructions, opacity, consequences and OPEN alternatives while retaining a reverse path to exact sources.
-
-```text
-Slearn       = participation, configuration, action, and reopening
-Black Mirror = current returned topology of live translations
-Closure      = continuity of translational truth through both
-```
-
-## Public living Closure Supernet
+## Public living network
 
 ```text
 real problem
@@ -139,40 +80,82 @@ real problem
 → reopened problem
 ```
 
-The living interface instantiates the current NRRF764–768 reading:
+The public field includes persistent participants and perspectives, nonempty real problems, notes as problem self-interactions, solution receipts constituted by interactions, collective action instead of quantity/quality ranking, returned consequences, affected-perspective accounting, and immutable exact authored occurrences.
 
-- a problem must present at least one real situation;
-- a note is stored as a self-interaction / loop step;
-- every interaction receives a solution receipt;
-- collective action replaces likes, rank, money or quality scoring as the public social return path;
-- returned consequences re-enter the originating problem through source-reversible reintegration;
-- affected perspectives omitted from the return remain explicit OPEN seams;
-- assumptions may be reopened by whole admissible families;
-- dependency order can preserve or change meaning;
-- current residues feed later rounds without a global `FINAL_CORE`;
-- exact authored source occurrences are immutable.
-
-See [`LIVING_NETWORK_INTERFACE.md`](LIVING_NETWORK_INTERFACE.md) and [`ITERATED_REOPENING_INTERFACE.md`](ITERATED_REOPENING_INTERFACE.md).
-
-## Autonomous runtime
+## Iterated reopening
 
 ```text
-local/public/digital source
-→ autonomous sensing
-→ candidate relation
-→ source-reversible interpretation
-→ constitutional admission
-→ returned-consequence reintegration
-→ iterated reopening
-→ Translation Event reconciliation
-→ living field + Black Mirror projection
-→ reopening
-→ next cycle
+ordered assumptions
+→ nonempty admissible reopening family
+→ remainingStar residue
+→ next-round assumptions
+→ further reopening
 ```
 
-The runtime is autonomous but bounded: it cannot overwrite sources, silently normalize notation, infer global truth from resemblance, omit affected perspectives while claiming completion, assume Turing completeness, or treat a local return as terminal.
+The runtime distinguishes content-preserving permutation from meaning-changing dependency order, retains plurality outside the shared residue, and reports `STABLE_AT_CURRENT_FINITE_SCOPE` rather than a global `FINAL_CORE`.
 
-Quick start:
+## Live self-reintegrating resources
+
+Resource forms are author-defined rather than registry-defined:
+
+```text
+form_label
+language_label
+capabilities
+constraints
+```
+
+There is no finite `ResourceKind` enumeration and no externally selected canonical language.
+
+```text
+resource form
+→ active engagement
+→ returned resource form
+→ OPEN translation witness
+→ canonical TranslationEvent
+→ relative admission
+→ natural component
+→ further engagement
+```
+
+Protocol receipts and truth verdicts are stored separately:
+
+```text
+protocol verdict ≠ translational truth verdict
+```
+
+A successful HTTP, webhook, Git, queue, storage, or future transport receipt never creates truth. Natural components arise only from currently admitted translations, while retaining all participating forms, languages, sources, and reverse paths.
+
+Each live stage preserves delivery order as history and computes an order-independent limit signature from exact resource occurrences and admitted translation pairs. The runtime checks that this current live limit matches a full current-batch recomputation without stopping the field.
+
+See [`LIVE_RESOURCE_PROTOCOL.md`](LIVE_RESOURCE_PROTOCOL.md).
+
+## Slearn and Black Mirror
+
+```text
+Slearn       = participation, configuration, learning, action, resource return, and reopening
+Black Mirror = current source-reversible topology of the living translation field
+Closure      = continuity of translational truth through both
+```
+
+## Autonomous cycle
+
+```text
+poll digital transports
+→ sense exact sources and public interaction
+→ reintegrate returned actions and resources
+→ reconcile resource translations into TranslationEvents
+→ advance reopening processes
+→ interpret and admit translations
+→ integrate live resource stage
+→ project Black Mirror and living field
+→ export source-reversible returns
+→ repeat
+```
+
+The runtime may not overwrite sources, silently normalize notation, infer truth from resemblance or transport success, omit affected perspectives while claiming completion, impose a finite resource ontology, select a universal external language, assume Turing completeness, or treat a local return as terminal.
+
+## Run
 
 ```bash
 python -m venv .venv
@@ -182,9 +165,16 @@ cp .env.example .env
 closure-supernet serve
 ```
 
-## Transport-neutral digital integrations
+Open:
 
-The connector fabric supports:
+- public living field: `http://localhost:8000/`
+- canonical translation field: `http://localhost:8000/translation`
+- live resource continuum: `http://localhost:8000/resources`
+- iterated reopening field: `http://localhost:8000/reopening`
+- autonomous runtime console: `http://localhost:8000/runtime`
+- API documentation: `http://localhost:8000/docs`
+
+## Transport-neutral integrations
 
 ```text
 WEBHOOK_IN
@@ -193,26 +183,21 @@ GITHUB_REPOSITORY
 HTTP_JSON_FEED
 ```
 
-These are transports, not Closure. Digital sources enter as immutable occurrences with provenance. The local field still performs understanding, interpretation, admission, translation, action, return and reopening.
-
-See [`DIGITAL_SUPERNET_INTEGRATIONS.md`](DIGITAL_SUPERNET_INTEGRATIONS.md).
+These carry exact sources and projections. They do not define Closure or self-certify admission.
 
 ## Repository map
 
 - [`FOUNDATION.md`](FOUNDATION.md) — canonical note-guided foundation.
-- [`CONFIGURED_UNIFICATION.md`](CONFIGURED_UNIFICATION.md) — understanding, interpretation, interaction and configured admission.
-- [`TRANSLATIONAL_TRUTH_RUNTIME.md`](TRANSLATIONAL_TRUTH_RUNTIME.md) — Translation Event as the live center; protocol as transport.
-- [`NON_COLLAPSE_CLOSURE_INTERFACE.md`](NON_COLLAPSE_CLOSURE_INTERFACE.md) — non-collapse philosophy.
-- [`AXIOMETRIC_SOURCE_GRAMMAR.md`](AXIOMETRIC_SOURCE_GRAMMAR.md) — literal symbols and intended operations.
-- [`LATENT_MEMORY_PROTOCOL.md`](LATENT_MEMORY_PROTOCOL.md) — source, relation, interpretation and rule-version records.
-- [`FULL_CLOSURE_DERIVED_INTERFACE.md`](FULL_CLOSURE_DERIVED_INTERFACE.md) — latent-space and UX architecture.
-- [`LIVING_NETWORK_INTERFACE.md`](LIVING_NETWORK_INTERFACE.md) — public problems, interactions, actions, returns and reintegration.
-- [`ITERATED_REOPENING_INTERFACE.md`](ITERATED_REOPENING_INTERFACE.md) — admissible families, dependency order and residue iteration.
-- [`AUTONOMOUS_RUNTIME.md`](AUTONOMOUS_RUNTIME.md) — executable autonomous runtime.
-- [`DIGITAL_SUPERNET_INTEGRATIONS.md`](DIGITAL_SUPERNET_INTEGRATIONS.md) — transport integrations and security boundary.
-- [`CONSCIOUS_CULTURAL_MORALITY.md`](CONSCIOUS_CULTURAL_MORALITY.md) — shared foundational field and downstream projections.
-- [`COMPUTATION_AS_DERIVED_CHART.md`](COMPUTATION_AS_DERIVED_CHART.md) — computation without a Turing-completeness assumption.
-- [`FORMAL_LINEAGE.md`](FORMAL_LINEAGE.md) — NRRF theorem lineage and formal scope.
+- [`CONFIGURED_UNIFICATION.md`](CONFIGURED_UNIFICATION.md) — understanding, interpretation, interaction, and admission.
+- [`TRANSLATIONAL_TRUTH_RUNTIME.md`](TRANSLATIONAL_TRUTH_RUNTIME.md) — `TranslationEvent` as the canonical live primitive.
+- [`LIVE_RESOURCE_PROTOCOL.md`](LIVE_RESOURCE_PROTOCOL.md) — open-form resources, engagement, return, reintegration, natural components, and live limits.
+- [`LIVING_NETWORK_INTERFACE.md`](LIVING_NETWORK_INTERFACE.md) — public problems, interactions, collective actions, and consequences.
+- [`ITERATED_REOPENING_INTERFACE.md`](ITERATED_REOPENING_INTERFACE.md) — reopening families, dependency order, residues, and moral connection.
+- [`AUTONOMOUS_RUNTIME.md`](AUTONOMOUS_RUNTIME.md) — autonomous executable cycle.
+- [`DIGITAL_SUPERNET_INTEGRATIONS.md`](DIGITAL_SUPERNET_INTEGRATIONS.md) — transports and security boundary.
+- [`AXIOMETRIC_SOURCE_GRAMMAR.md`](AXIOMETRIC_SOURCE_GRAMMAR.md) — literal source symbols and operations.
+- [`LATENT_MEMORY_PROTOCOL.md`](LATENT_MEMORY_PROTOCOL.md) — immutable sources and relational memory.
+- [`FORMAL_LINEAGE.md`](FORMAL_LINEAGE.md) — NRRF theorem lineage and implementation scope.
 - [`closure_supernet/`](closure_supernet/) — runtime package.
 
 ## Status discipline
@@ -228,14 +213,14 @@ EMPIRICALLY_SUPPORTED
 PHYSICAL_HYPOTHESIS
 SOCIOECONOMIC_PROPOSAL
 MORAL_CONSEQUENCE
+PROTOCOL_DELIVERED
+RETURN_REINTEGRATED_OPEN
 REJECTED_RELATION
 OPEN
 ```
 
-Formal similarity is not physical evidence. Protocol compatibility is not truth. Public agreement is not morality. A returned invariant does not reconstruct its individual stages. A local settlement can reopen.
+## Scope
 
-## Scope and progress
+The repository implements a complete **single-node, current-field living translation runtime** with public interfaces, persistent exact sources, canonical TranslationEvents, open-form resources, active engagement, self-reintegration, iterated reopening, transport-neutral connectors, APIs, tests, and source-reversible projections.
 
-The repository instantiates a complete **single-node living translation runtime** with a public web interface, persistent relative forms, autonomous reintegration, iterated reopening, transport-neutral digital connectors, API, tests and append-only source/translation history.
-
-It does not yet claim production cryptographic identity, fine-grained encrypted authorization, cloud deployment, replicated multi-node storage, public federation, or a machine-checked refinement theorem from Python to NRRF761–768. Those remain explicit next closure levels rather than hidden behind terminal completion.
+“Complete” means that every form currently in the executable field is represented and reversible to its source. It does not mean terminal completion, anticipation of all future resources, one complete language, production federation, cryptographic identity, a distributed concurrent event structure, or a machine-checked refinement theorem from Python to NRRF764–769. Those remain explicit next closure levels.
