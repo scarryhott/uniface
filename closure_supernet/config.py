@@ -37,7 +37,7 @@ class RuntimeConfig:
         os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500")
     )
     integration_user_agent: str = os.getenv(
-        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/0.4"
+        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/0.5"
     )
     integration_allow_private_networks: bool = _bool(
         "CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False
@@ -63,6 +63,14 @@ class RuntimeConfig:
     )
     reopening_powerset_limit: int = int(
         os.getenv("CLOSURE_REOPENING_POWERSET_LIMIT", "10")
+    )
+
+    # Translation is the canonical live runtime field. HTTP, WebSocket,
+    # repositories, webhooks and database views remain interchangeable transport
+    # charts. Disabling this flag preserves the older derived interfaces without
+    # claiming that protocol transport is Closure itself.
+    translation_field_enabled: bool = _bool(
+        "CLOSURE_TRANSLATION_FIELD_ENABLED", True
     )
 
     # The field is deliberately not assumed Turing complete. Digital computation
