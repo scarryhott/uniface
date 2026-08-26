@@ -1,29 +1,56 @@
 # Uniface / Closure Supernet
 
-**Uniface is a source-preserving living network in which people, autonomous
-agents, resources, problems, actions, and sensor returns continually translate,
-return, and reopen without being collapsed into one externally selected
-language.**
+**Closure Supernet is one source-preserving continuous integrator whose public
+interface is the living topology of every human, agent, resource, problem,
+translation, selection, action, return, and reopening in the field.**
 
 ```text
-relation
-→ interaction
-→ TranslationEvent
-→ relative admission
-→ natural form
-→ collective or device action
-→ returned consequence
+exact source or returned form
+→ integrate
+→ relation sensing
+→ interactive admissibility
+→ natural form where rigid
+→ path–partition
+→ action / return
 → successor potential
 → reopening
 ```
 
-Closure is not the HTTP protocol, database, AI model, formal proof object, or
-hardware device. Those are relative charts and participants in the active
-translation field.
+Closure is not the web protocol, database, AI model, proof object, UI chart, or
+hardware device. Those carry or render the same active translation field.
 
-## Source forms
+## Version 2.0 — one continuous interface
 
-The interface retains the author's literal operator family:
+The root page `/` and `/supernet` are now a single pan-and-zoom Supernet surface.
+The user can integrate, relate, interact, rigidify, determine, return, reopen,
+focus, and create collective trajectories without leaving the current field.
+
+The same events can be read through:
+
+```text
+field · perspective zoom · point/line/loop · truth diagonal · metavector
+ball/hair · 0/∞ reciprocal poles · light cone · ellipse mirror
+shared architecture · natural-form selector · anatomy tree
+```
+
+These are lenses, not parallel runtimes or competing languages. See
+[`COMPLETE_SUPERNET_INTERFACE.md`](COMPLETE_SUPERNET_INTERFACE.md).
+
+## Natural-form selector
+
+A site-indexed admissibility relation may remain OPEN or become rigid:
+
+```text
+site → several admissible symbols  = branching remains OPEN
+site → exactly one symbol          = rigid at that site
+all selected sites rigid           = fill determines one natural form
+```
+
+The interface records the relation, partial input, rigidity receipt, natural
+form, and unitary path partition. Determination remains `OPEN` and records
+`truth_issued=false`; it does not emit TRUE.
+
+## Source forms retained
 
 ```text
 0 ↔ ∞                 reciprocal poles
@@ -37,70 +64,22 @@ tan(π/2)              rotation–extension seam
 1 → i → -1 → -i → 1  four-i return
 ```
 
-These forms may be related through explicit translations. Mere similarity does
-not silently make them equal or physically verified.
+The interface can relate these through explicit events. Visual proximity,
+embedding similarity, protocol success, or AI output does not self-certify
+truth or physical identity.
 
-## Runtime layers — version 0.9.0
+## Runtime
 
-### Living public network
-
-```text
-real problem
-→ note / loop step
-→ interaction / solution
-→ collective action
-→ returned consequence
-→ agentic reintegration
-→ reopened problem
-```
-
-### Directed translational truth
-
-`TranslationEvent` preserves exact sources, source and target forms,
-participants, interaction paths, preservation, transformation, untranslated
-residue, scope, return, successor potential, and reopening conditions.
-
-### Context-indexed relative equality
-
-A one-way translation is not equality. Relative equality requires a reverse,
-two return-coherence witnesses, and explicit scoped admission. Natural-form
-components select no canonical form or language.
-
-### Open-form living resources
-
-Resources use author-selected form and language labels rather than a finite
-resource registry. Engagement produces returned resources which re-enter the
-TranslationEvent field as OPEN relations.
-
-### Iterated reopening
-
-Admissible reopening families generate closed current residues. Finite-scope
-stability is not a final moral core.
-
-### Black Mirror hardware closure loop
+`SupernetIntegrator.integrate` is the one canonical semantic transition.
+Resources, living problems, directed TranslationEvents, relative equality,
+reopening families, collective actions, agents, Black Mirror, and bounded
+hardware remain adapters and lenses over the append-only field.
 
 ```text
-network sources
-→ source-derived metavector
-→ bounded temporary constraint
-→ deterministic optical/sensor twin
-→ participant admission
-→ operator execution
-→ sensor return
-→ OPEN network reintegration
+(current field, offered form)
+→ integration receipt
+→ replayable successor field
 ```
-
-The shipped hardware layer is simulation-only. It enables no direct physical,
-nuclear, quantum, high-energy laser, voltage, magnetic, cryogenic, radiation,
-plasma, or pressure control. See
-[`HARDWARE_CLOSURE_LOOP.md`](HARDWARE_CLOSURE_LOOP.md).
-
-### Production integration
-
-The service supports durable SQLite storage, authenticated sessions, member and
-operator roles, protected writes, realtime events, readiness/liveness probes,
-backups, Docker, and Railway manifests. See
-[`PRODUCTION_INTEGRATION.md`](PRODUCTION_INTEGRATION.md).
 
 ## Run
 
@@ -114,70 +93,60 @@ closure-supernet serve
 
 Open:
 
-- `/` — living network
-- `/translation` — directed TranslationEvents
-- `/equality` — context-relative equality
-- `/resources` — living resource continuum
-- `/reopening` — admissible reopening families
-- `/hardware` — bounded Black Mirror hardware loop
+- `/` or `/supernet` — complete continuous topology and direct interaction
+- `/translation` — directed TranslationEvent compatibility lens
+- `/resources` — open-form resource compatibility lens
+- `/reopening` — admissible reopening compatibility lens
+- `/equality` — context-relative equality compatibility lens
+- `/hardware` — bounded simulation-only hardware lens
 - `/production` — authentication and operations
-- `/runtime` — autonomous runtime console
+- `/runtime` — autonomous diagnostics
 - `/docs` — API documentation
 
-## Autonomous cycle
+## Main APIs
 
 ```text
-poll transports
-→ sense exact sources and public interaction
-→ reintegrate action, resource, and hardware returns
-→ advance reopening processes
-→ interpret and admit translations
-→ discover contextual equality candidates
-→ update resource, equality, hardware, living-field, and Black Mirror projections
-→ export source-reversible returns
-→ repeat
+POST /supernet/integrate
+POST /supernet/events/{id}/interact
+POST /supernet/relations
+POST /supernet/collective-traces
+POST /supernet/events/{id}/rigidify
+POST /supernet/events/{id}/return
+POST /supernet/events/{id}/reopen
+
+GET  /supernet/topology
+GET  /supernet/events/{id}/context
+GET  /supernet/field
+WS   /supernet/stream
 ```
 
-Autonomy is bounded. The runtime cannot overwrite sources, infer truth from
-transport success or resemblance, omit affected perspectives while claiming
-completion, impose a finite resource ontology, select a universal language,
-automatically execute a hardware constraint, assume Turing completeness, or
-treat a local return as terminal.
+## Boundaries
+
+Autonomy cannot overwrite exact sources, infer truth from resemblance or
+transport success, make determination issue TRUE, select one canonical language,
+omit affected perspectives while claiming completion, automatically execute a
+hardware constraint, assume Turing completeness, or treat a local return as
+terminal.
+
+The hardware implementation remains deterministic and simulation-only. It does
+not directly control nuclear, fusion, quantum, high-energy laser, voltage,
+magnetic, cryogenic, radiation, plasma, pressure, or other hazardous apparatus.
 
 ## Repository map
 
+- [`COMPLETE_SUPERNET_INTERFACE.md`](COMPLETE_SUPERNET_INTERFACE.md) — unified UI and topology operations.
+- [`UNIFIED_SUPERNET_RUNTIME.md`](UNIFIED_SUPERNET_RUNTIME.md) — continuous integrator.
 - [`FOUNDATION.md`](FOUNDATION.md) — note-guided foundation.
 - [`AXIOMETRIC_SOURCE_GRAMMAR.md`](AXIOMETRIC_SOURCE_GRAMMAR.md) — literal source operations.
-- [`TRANSLATIONAL_TRUTH_RUNTIME.md`](TRANSLATIONAL_TRUTH_RUNTIME.md) — directed TranslationEvent field.
-- [`RELATIVE_EQUALITY_CALCULUS.md`](RELATIVE_EQUALITY_CALCULUS.md) — reversible context-relative unity.
-- [`LIVING_NETWORK_INTERFACE.md`](LIVING_NETWORK_INTERFACE.md) — public problems, interactions, and actions.
-- [`LIVE_RESOURCE_PROTOCOL.md`](LIVE_RESOURCE_PROTOCOL.md) — resources, engagement, and return.
+- [`TRANSLATIONAL_TRUTH_RUNTIME.md`](TRANSLATIONAL_TRUTH_RUNTIME.md) — directed TranslationEvents.
+- [`RELATIVE_EQUALITY_CALCULUS.md`](RELATIVE_EQUALITY_CALCULUS.md) — context-relative reversible unity.
+- [`LIVING_NETWORK_INTERFACE.md`](LIVING_NETWORK_INTERFACE.md) — public problems and collective action.
+- [`LIVE_RESOURCE_PROTOCOL.md`](LIVE_RESOURCE_PROTOCOL.md) — open resources and returns.
 - [`ITERATED_REOPENING_INTERFACE.md`](ITERATED_REOPENING_INTERFACE.md) — reopening families and residues.
-- [`HARDWARE_CLOSURE_LOOP.md`](HARDWARE_CLOSURE_LOOP.md) — bounded cyber-physical path.
+- [`HARDWARE_CLOSURE_LOOP.md`](HARDWARE_CLOSURE_LOOP.md) — bounded cyber-physical adapter.
 - [`PRODUCTION_INTEGRATION.md`](PRODUCTION_INTEGRATION.md) — production operation.
-- [`AUTONOMOUS_RUNTIME.md`](AUTONOMOUS_RUNTIME.md) — runtime cycle and storage.
-- [`FORMAL_LINEAGE.md`](FORMAL_LINEAGE.md) — NRRF lineage and scope discipline.
-- [`closure_supernet/`](closure_supernet/) — executable package.
+- [`FORMAL_LINEAGE.md`](FORMAL_LINEAGE.md) — NRRF lineage and scope.
 
-## Status discipline
-
-```text
-ORIGINAL_NOTE
-INTERPRETED_RELATION
-AUTHOR_CONFIRMED_RELATION
-FORMALLY_PROVED_UNDER_READING
-SIMULATED_UNDER_ASSUMPTIONS
-EMPIRICALLY_SUPPORTED
-PHYSICAL_HYPOTHESIS
-MORAL_CONSEQUENCE
-HARDWARE_CONSTRAINT_PROPOSED
-HARDWARE_TWIN_SIMULATED
-HARDWARE_RETURN_REINTEGRATED_OPEN
-REJECTED_RELATION
-OPEN
-```
-
-The repository is a complete single-node current-field implementation: every
-current source and returned form is persisted and reversible. It is not terminal
-completion, a physical-law validation, direct instrument control, a distributed
-causal consensus network, or a substitute for laboratory safety and review.
+The current implementation is a complete single-node current-field Supernet. It
+is not terminal completion, a physical-law validation, or distributed causal
+consensus. Those remain later integrations into the same runtime.
