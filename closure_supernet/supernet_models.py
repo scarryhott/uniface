@@ -33,6 +33,7 @@ class IntegrationLens(StrEnum):
     AGENT = "agent"
     TRADING = "trading"
     RENORMALIZATION = "renormalization"
+    CONSTRUCTIVE = "constructive"
 
 
 class ResourceEnvelope(BaseModel):
