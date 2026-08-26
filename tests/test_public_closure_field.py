@@ -1,11 +1,23 @@
 from pathlib import Path
+import json
 
 
-ROOT = Path(__file__).resolve().parents[1] / "docs" / "index.html"
+DOCS = Path(__file__).resolve().parents[1] / "docs"
+ROOT = DOCS / "index.html"
+LOOP_JS = DOCS / "closure-field.js"
+FIELD_RUN = DOCS / "field-run.json"
+
+
+def _html() -> str:
+    return ROOT.read_text(encoding="utf-8")
+
+
+def _js() -> str:
+    return LOOP_JS.read_text(encoding="utf-8")
 
 
 def test_public_root_is_a_running_closure_field():
-    html = ROOT.read_text(encoding="utf-8")
+    html = _html()
     assert "<title>Uniface — Closure field</title>" in html
     assert "Note-Guided Closure Interface" not in html
     assert "Sense(Obs) → unique unitary path selector → Translation Event (admit → return → reopen) → next Sense" in html
@@ -25,7 +37,7 @@ def test_public_root_is_a_running_closure_field():
 
 
 def test_nrrf781_relative_renormalization_is_inside_the_live_te():
-    html = ROOT.read_text(encoding="utf-8")
+    html = _html()
     assert "function localCutoffFamily" in html
     assert "function pairwiseRelativeRenormalization" in html
     assert "relative_reading" in html
@@ -48,12 +60,69 @@ def test_nrrf781_relative_renormalization_is_inside_the_live_te():
     assert html.index("id=\"teGrid\"") < html.index("id=\"noteReturn\"")
     assert "Harry" not in html
     assert "ChatGPT" not in html
-    # no second public face and no human-gated persist widget
     assert html.count('id="teGrid"') == 1
-    assert "addEventListener('click'" not in html.split("runStage('sense')")[0]
+    assert "addEventListener('click'" not in html.split("function bindPanZoom")[0]
     assert "function doTE" in html
     assert "function doReopen" in html
     assert "relative_renormalization" in html
+
+
+def test_supernet_is_the_same_loop_panzoom_projection():
+    html = _html()
+    js = _js()
+    vercel = json.loads((DOCS / "vercel.json").read_text(encoding="utf-8"))
+    sources = {item["source"]: item["destination"] for item in vercel["rewrites"]}
+    assert sources["/supernet"] == "/index.html"
+    assert sources["/supernet/"] == "/index.html"
+    assert vercel["cleanUrls"] is True
+    assert vercel["trailingSlash"] is False
+    assert not (DOCS / "supernet.html").exists()
+    assert not (DOCS / "supernet" / "index.html").exists()
+    assert "path==='/supernet'" in html
+    assert "function bindPanZoom" in html
+    assert "function fieldRunSnapshot" in html
+    assert "Pan/zoom reading of the same live root closure loop" in html
+    assert 'id="zoomIn"' in html
+    assert 'id="zoomOut"' in html
+    assert 'id="zoomFit"' in html
+    assert 'aria-label="pan zoom reading"' in html
+    assert html.count('id="noteReturn"') == 1
+    assert "write transport receipt" in html.split("Hidden transport evidence")[1]
+    assert html.count("function persistCycle") == 1
+    assert html.count("setInterval(tick,1400)") == 1
+    assert "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" not in js
+    assert FIELD_RUN.is_file()
+
+
+def test_field_run_json_is_the_same_occurrence_snapshot():
+    import shutil
+    import subprocess
+
+    payload = json.loads(FIELD_RUN.read_text(encoding="utf-8"))
+    assert payload["truth_issued"] is False
+    assert payload["two_person_E2E"] == "OPEN"
+    assert payload["TRUE"] == "not issued"
+    assert payload["stage"] in {"sense", "select", "te", "reopen"}
+    assert isinstance(payload["cycle"], int)
+    assert payload["relative_reading"] is not None
+    assert payload["nrrf781"]["derived_chart"] is True
+    assert payload["nrrf781"]["not_lean"] is True
+    assert "not Lean" in payload["nrrf781"]["nrrf781"]
+    assert payload["nrrf781"]["absolute_level"] is None
+    assert payload["nrrf781"]["scheme_selected"] is False
+    assert payload["of"] == "one public root closure loop"
+    assert "Lean" not in FIELD_RUN.read_text(encoding="utf-8").replace("not Lean", "")
+    node = shutil.which("node")
+    if node is None:
+        return
+    script = (
+        "const u=require(" + json.dumps(str(LOOP_JS)) + ");"
+        "process.stdout.write(JSON.stringify(u.fieldRunSnapshot()));"
+    )
+    result = subprocess.run([node, "-e", script], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr or result.stdout
+    live = json.loads(result.stdout)
+    assert live == payload
 
 
 def test_derived_cutoff_family_pairwise_delta_is_constant_and_carries_scale():
@@ -94,14 +163,13 @@ def test_derived_cutoff_family_pairwise_delta_is_constant_and_carries_scale():
 
 
 def test_extracted_root_js_relative_renormalization_runs():
-    import json
     import shutil
     import subprocess
 
     node = shutil.which("node")
     if node is None:
         return
-    html = ROOT.read_text(encoding="utf-8")
+    html = _html()
     js_fns = html[html.index("function r9(") : html.index("function translationEvent(")]
     script = (
         js_fns
