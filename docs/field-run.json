@@ -6,11 +6,11 @@
   "runtime_center": "TranslationEvent",
   "protocol": "transport only",
   "persistence_git": "occurrence/ledger persist (not closure)",
-  "git_store": ["ledger/", "occurrences/", "ledger/runs/"],
+  "git_store": ["ledger/", "occurrences/", "ledger/runs/", "closure_supernet/"],
   "relative_interaction_store": "supabase uniface-relative / public.uniface_relative_interaction (realtime on; not closure; not rmf)",
   "not": "the field, a bidirectional gate, a second site, Rate My Face, a global event chain, or an achieved framework",
-  "last_beat": "2026-08-25-1934-et",
-  "last_beat_residue": "occ-2026-08-25-admitted-prefix-reconstruction",
+  "last_beat": "2026-08-26-0834-et",
+  "last_beat_residue": "occ-2026-08-26-hardware-closure-gateway",
   "selected_0": "occ-2026-08-25-central-note",
   "next_0": "occ-2026-08-25-closure-translational-truth",
   "cursor": 25,
@@ -51,13 +51,15 @@
     "Aristotle_native_equality": "OPEN",
     "Slearn_FRAMEWORK": "OPEN, not RETURNED",
     "NRRF764_NRRF765_on_slearn_main": "OPEN",
-    "hardware_closure_gateway": "closure_supernet/ digital chart (simulated optical ellipse); admissible interpretation ≠ authorized actuation; not Closure; not a physical chamber; last_beat not stolen; TRUE not issued",
+    "hardware_closure_gateway": "closure_supernet/ digital chart (simulated optical ellipse); admissible interpretation ≠ authorized actuation; SafetyEnvelope u_t; not Closure; not a physical chamber; last_beat 2026-08-26-0834-et; TRUE not issued",
+    "two_ai_loop": "OPEN: Uniface field ↔ Aristotle 068068ee (never 0517138e); not two-person human E2E; Lean not copied",
+    "Origin_namespace": "OPEN (blocked; hardware layer lives in Uniface as closure_supernet/)",
     "framework": "not achieved"
   },
   "learning": "the residue, not a model training loop",
   "beat_layers": {
-    "organization": "Selected 0: occ-2026-08-25-note-relative-persist (next_0 from 1834). Uniface PR 1 open; projection LIVE; Note persist wired+smoked; field-loop 1842 stopped the 1834-landing cascade. Slearn PR 12 unmerged. quotes.md pointed-at by URL. OPEN: two-person E2E, Pages, TRUE, FRAMEWORK, 764/765 Lean, kantian-ivi.",
-    "planning": "Reconstruct the admitted prefix from the lineage receipt chain on reload / ?lineage=, not only the last receipt cursor and Note. WHY: 1634 listed admitted prefix not reconstructed from receipts on reload. Will not rewrite 1834 Note wiring, fake two-person join, merge, copy quotes, invent 764/765, or add a new RLS kind.",
-    "action": "reconstructFromReceipts rebuilds S.admitted from admit/interact receipts. Smoke lineage 87ed6a81-20c7-4319-9015-291e6797e18f. two-person E2E remains OPEN."
+    "organization": "INTEGRATE hour 8 weekday ET. Selected 0: occ-2026-08-25-central-note. Live uniface-tawny.vercel.app git persist loaded; lineage ffb0e0a6-3396-44d1-b1d7-61b522050f21. Aristotle ONLY 068068ee (never 0517138e). Slearn PR 13 (764/765) and PR 14 (766-769, 766 lake OPEN) unmerged. 770/772 proved on 068068ee, missing from slearn, copy blocked. Harry 8:30: cyber-physical hardware loop, admissible ≠ authorized, simulated ellipse first. Harry 8:39: two-AI loop (Uniface field ↔ Aristotle 068068ee). OPEN: two-person human E2E, others-on-site, TRUE, Origin namespace, real hardware.",
+    "planning": "This beat integrates the two-AI loop and the in-flight Hardware Closure Gateway package (closure_supernet/), not another proof essay. Will not rewrite FOUNDATION, not use 0517138e, not copy Lean into Uniface, not fake two-person E2E, not actuate a real laser/quantum/fusion device.",
+    "action": "in-flight: closure_supernet Hardware Closure Gateway + two-AI loop (Supernetwork on live Uniface + Aristotle 068068ee). Residue: hardware is simulated ellipse with SafetyEnvelope; two-AI loop is field interaction plus 068068ee next-task reading."
   }
 }
