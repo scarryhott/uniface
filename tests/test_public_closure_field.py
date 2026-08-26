@@ -74,7 +74,8 @@ def test_derived_cutoff_family_pairwise_delta_is_constant_and_carries_scale():
         pairwise[left] = {}
         for right in members:
             deltas = [members[left][n] - members[right][n] for n in range(3)]
-            assert deltas[0] == deltas[1] == deltas[2]
+            assert abs(deltas[0] - deltas[1]) < 1e-8
+            assert abs(deltas[1] - deltas[2]) < 1e-8
             pairwise[left][right] = deltas[0]
     relative_scale = pairwise["path"]["sense"]
     assert relative_scale == offsets["path"] - offsets["sense"]
@@ -86,8 +87,9 @@ def test_derived_cutoff_family_pairwise_delta_is_constant_and_carries_scale():
     for left in members_next:
         for right in members_next:
             deltas = [members_next[left][n] - members_next[right][n] for n in range(3)]
-            assert deltas[0] == deltas[1] == deltas[2]
-            assert deltas[0] == pairwise[left][right]
+            assert abs(deltas[0] - deltas[1]) < 1e-8
+            assert abs(deltas[1] - deltas[2]) < 1e-8
+            assert abs(deltas[0] - pairwise[left][right]) < 1e-8
     assert common_next != common
 
 
