@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "closure-supernet"
-version = "0.4.0"
-description = "Source-preserving public living network with iterated admissible reopening, autonomous runtime, and digital integrations"
+version = "0.5.0"
+description = "Source-preserving living network with open-form resources, self-reintegration, iterated reopening, autonomous runtime, and digital transports"
 readme = "AUTONOMOUS_RUNTIME.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
@@ -21,7 +21,7 @@ dependencies = [
 dev = ["pytest>=8,<9", "pytest-asyncio>=0.24,<1"]
 
 [project.scripts]
-closure-supernet = "closure_supernet.cli_reopening:main"
+closure-supernet = "closure_supernet.cli_resource:main"
 
 [tool.setuptools.packages.find]
 include = ["closure_supernet*"]
