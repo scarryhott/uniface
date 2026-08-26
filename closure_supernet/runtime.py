@@ -25,8 +25,10 @@ from .living_network import LivingNetworkManager
 from .living_store import LivingNetworkStore
 from .models import OccurrenceCreate, RuntimeCycleResult, RuntimeStatus
 from .policy import AdmissionPolicy
-from .providers import build_provider
 from .projection import build_projection
+from .providers import build_provider
+from .reopening_network import IteratedReopeningManager
+from .reopening_store import ReopeningStore
 from .store import EventStore
 
 
@@ -35,14 +37,14 @@ def utcnow() -> str:
 
 
 class ClosureSupernetRuntime:
-    """Autonomous but bounded Closure Supernet.
+    """Autonomous, bounded, living Closure Supernet.
 
-    It continuously senses exact source occurrences from local, public living,
-    and configured digital interfaces; proposes relations; builds
-    source-reversible interpretations; applies constitutional admission rules;
-    reintegrates returned consequences; projects current topology; exports
-    source-reversible returns; and reopens incomplete relations. It never
-    mutates an original occurrence and never assumes terminal closure.
+    The runtime senses exact sources, public living interactions and configured
+    digital interfaces; proposes and interprets relations; applies admission;
+    reintegrates returned consequences; iterates admissible reopening families;
+    projects current topology; and reopens incomplete relations. Original
+    occurrences are never mutated and finite stability is never called a final
+    moral core.
     """
 
     def __init__(self, config: RuntimeConfig | None = None):
@@ -51,6 +53,7 @@ class ClosureSupernetRuntime:
         self.store = EventStore(self.config.database_path)
         self.integration_store = IntegrationStore(self.config.database_path)
         self.living_store = LivingNetworkStore(self.config.database_path)
+        self.iterated_reopening_store = ReopeningStore(self.config.database_path)
         self.provider = build_provider(self.config)
         self.inbox = InboxSensorAgent(self.config, self.store)
         self.understanding = UnderstandingAgent(self.config, self.store)
@@ -61,12 +64,16 @@ class ClosureSupernetRuntime:
         self.rule_review = RuleReviewAgent(self.config, self.store)
         self.projection = ProjectionAgent(self.store)
         self.integrations = DigitalIntegrationManager(
-            self.config,
-            self.store,
-            self.integration_store,
-            self.ingest,
+            self.config, self.store, self.integration_store, self.ingest
         )
         self.living = LivingNetworkManager(self.store, self.living_store, self.ingest)
+        self.iterated_reopening = IteratedReopeningManager(
+            self.config,
+            self.store,
+            self.living_store,
+            self.iterated_reopening_store,
+            self.ingest,
+        )
         self._running = False
         self._task: asyncio.Task[None] | None = None
         self._stop = asyncio.Event()
@@ -105,17 +112,24 @@ class ClosureSupernetRuntime:
             cycle_id = str(uuid.uuid4())
             started_at = utcnow()
             self.store.append_event("RUNTIME_CYCLE_STARTED", "runtime_cycle", cycle_id, {})
-            result = RuntimeCycleResult(cycle_id=cycle_id, started_at=started_at, finished_at=started_at)
+            result = RuntimeCycleResult(
+                cycle_id=cycle_id, started_at=started_at, finished_at=started_at
+            )
 
             pull_runs = await self.integrations.poll_enabled()
             result.integration_pulled = sum(run.pulled for run in pull_runs)
             result.integration_runs = len(pull_runs)
             result.integration_errors = sum(run.errors for run in pull_runs)
-
             result.ingested = self.inbox.run() + result.integration_pulled
 
             if self.config.agentic_reintegration_enabled:
                 result.living_reintegrations = self.living.reintegrate()
+            if self.config.iterated_reopening_enabled:
+                result.reopening_rounds = (
+                    self.iterated_reopening.advance_active_processes(
+                        self.config.reopening_processes_per_cycle
+                    )
+                )
 
             result.candidates = self.understanding.run()
             result.interpretations = await self.interpretation.run()
@@ -128,7 +142,41 @@ class ClosureSupernetRuntime:
             result.projection_classes = len(projection["classes"])
             result.projection_edges = len(projection["edges"])
 
+            reopening_projection = self.iterated_reopening.projection()
+            reopening_stats = reopening_projection["stats"]
+            result.reopening_families = int(reopening_stats["families"])
+            result.reopening_processes = int(reopening_stats["processes"])
+            result.reopening_active_processes = int(
+                reopening_stats["active_processes"]
+            )
+            result.reopening_order_assessments = int(
+                reopening_stats["order_assessments"]
+            )
+            result.reopening_moral_connections = int(
+                reopening_stats["moral_connections"]
+            )
+
             living_projection = self.living.field_projection(projection)
+            living_projection["iterated_reopening"] = reopening_projection
+            living_projection["stats"].update(
+                {
+                    "reopening_families": reopening_stats["families"],
+                    "reopening_rounds": reopening_stats["rounds"],
+                    "active_reopening_processes": reopening_stats[
+                        "active_processes"
+                    ],
+                    "meaning_changing_reorders": reopening_stats[
+                        "meaning_changing_reorders"
+                    ],
+                    "residue_moral_connections": reopening_stats[
+                        "moral_connections"
+                    ],
+                    "final_core_state_available": False,
+                }
+            )
+            living_projection["source_reverse_index"].update(
+                reopening_projection["source_reverse_index"]
+            )
             self.living_store.set_state("living_field_projection", living_projection)
             living_stats = living_projection["stats"]
             result.living_participants = int(living_stats["participants"])
@@ -136,14 +184,24 @@ class ClosureSupernetRuntime:
             result.living_interactions = int(living_stats["interactions"])
             result.living_actions = int(living_stats["actions"])
             result.living_returns = int(living_stats["returns"])
-            result.living_open_reintegration = int(living_stats["open_reintegration"])
+            result.living_open_reintegration = int(
+                living_stats["open_reintegration"]
+            )
 
             push_runs = await self.integrations.push_enabled(
                 {
                     **projection,
                     "living_field": {
                         "stats": living_projection["stats"],
-                        "source_reverse_index": living_projection["source_reverse_index"],
+                        "source_reverse_index": living_projection[
+                            "source_reverse_index"
+                        ],
+                        "iterated_reopening": {
+                            "stats": reopening_stats,
+                            "source_reverse_index": reopening_projection[
+                                "source_reverse_index"
+                            ],
+                        },
                         "nonterminal": True,
                     },
                 }
@@ -171,7 +229,9 @@ class ClosureSupernetRuntime:
         self._stop.clear()
         if self.config.bootstrap_repository:
             await self.bootstrap_markdown()
-        self._task = asyncio.create_task(self._run_loop(), name="closure-supernet-autonomy")
+        self._task = asyncio.create_task(
+            self._run_loop(), name="closure-supernet-autonomy"
+        )
         self.store.append_event(
             "AUTONOMY_STARTED",
             "runtime",
@@ -218,7 +278,10 @@ class ClosureSupernetRuntime:
     def status(self) -> RuntimeStatus:
         recent_runs = self.integration_store.list_runs(limit=1000)
         living_stats = self.living_store.stats()
-        reintegration = self.living_store.list_reintegration_proposals(limit=100_000)
+        reintegration = self.living_store.list_reintegration_proposals(
+            limit=100_000
+        )
+        reopening_stats = self.iterated_reopening_store.stats()
         return RuntimeStatus(
             running=self._running,
             cycle_count=int(self.store.get_state("cycle_count", 0)),
@@ -228,15 +291,23 @@ class ClosureSupernetRuntime:
             enabled_integrations=len(
                 self.integration_store.list_integrations(enabled_only=True)
             ),
-            integration_errors=sum(1 for row in recent_runs if row["status"] == "ERROR"),
+            integration_errors=sum(
+                1 for row in recent_runs if row["status"] == "ERROR"
+            ),
             living_participants=living_stats["participants"],
             living_problems=living_stats["problems"],
             living_actions=living_stats["actions"],
             living_open_reintegration=sum(
                 1 for item in reintegration if item["current_status"] == "OPEN"
             ),
+            reopening_families=reopening_stats["families"],
+            reopening_rounds=reopening_stats["rounds"],
+            reopening_active_processes=reopening_stats["active_processes"],
+            reopening_order_assessments=reopening_stats["order_assessments"],
+            reopening_moral_connections=reopening_stats["moral_connections"],
             public_interface_enabled=self.config.public_interface_enabled,
             agentic_reintegration_enabled=self.config.agentic_reintegration_enabled,
+            iterated_reopening_enabled=self.config.iterated_reopening_enabled,
             turing_complete_assumed=False,
         )
 
@@ -250,9 +321,31 @@ class ClosureSupernetRuntime:
         projection = self.living_store.get_state("living_field_projection")
         if projection is None:
             projection = self.living.field_projection(self.black_mirror())
+            reopening = self.iterated_reopening.projection()
+            projection["iterated_reopening"] = reopening
+            projection["stats"].update(
+                {
+                    "reopening_families": reopening["stats"]["families"],
+                    "reopening_rounds": reopening["stats"]["rounds"],
+                    "active_reopening_processes": reopening["stats"][
+                        "active_processes"
+                    ],
+                    "meaning_changing_reorders": reopening["stats"][
+                        "meaning_changing_reorders"
+                    ],
+                    "residue_moral_connections": reopening["stats"][
+                        "moral_connections"
+                    ],
+                    "final_core_state_available": False,
+                }
+            )
+            projection["source_reverse_index"].update(
+                reopening["source_reverse_index"]
+            )
         return projection
 
     def close(self) -> None:
+        self.iterated_reopening_store.close()
         self.living_store.close()
         self.integration_store.close()
         self.store.close()
