@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "closure-supernet"
-version = "2.0.0"
-description = "One continuous source-preserving Supernet integrator with a zoomable selector, topology, collective-action, agent, resource, reopening and bounded-hardware interface"
+version = "2.1.0"
+description = "One continuous source-preserving Supernet integrator with selector, topology, collective-action, resource, bounded-hardware, and NRRF780 classical value-flow lenses"
 readme = "UNIFIED_SUPERNET_RUNTIME.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}

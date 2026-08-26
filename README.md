@@ -2,7 +2,8 @@
 
 **Closure Supernet is one source-preserving continuous integrator whose public
 interface is the living topology of every human, agent, resource, problem,
-translation, selection, action, return, and reopening in the field.**
+translation, selection, action, return, reopening, hardware reading, and
+classical value-flow event in the field.**
 
 ```text
 exact source or returned form
@@ -16,25 +17,37 @@ exact source or returned form
 → reopening
 ```
 
-Closure is not the web protocol, database, AI model, proof object, UI chart, or
-hardware device. Those carry or render the same active translation field.
+Closure is not the web protocol, database, AI model, proof object, UI chart,
+hardware device, brokerage, or market order. Those carry or render the same
+active translation field.
 
-## Version 2.0 — one continuous interface
+## Version 2.1 — complete interface plus NRRF780 trading lens
 
-The root page `/` and `/supernet` are now a single pan-and-zoom Supernet surface.
-The user can integrate, relate, interact, rigidify, determine, return, reopen,
-focus, and create collective trajectories without leaving the current field.
-
-The same events can be read through:
+The root page `/` and `/supernet` are one pan-and-zoom Supernet surface. The same
+events can be read through:
 
 ```text
 field · perspective zoom · point/line/loop · truth diagonal · metavector
 ball/hair · 0/∞ reciprocal poles · light cone · ellipse mirror
-shared architecture · natural-form selector · anatomy tree
+shared architecture · natural-form selector · anatomy tree · trading value flow
 ```
 
-These are lenses, not parallel runtimes or competing languages. See
-[`COMPLETE_SUPERNET_INTERFACE.md`](COMPLETE_SUPERNET_INTERFACE.md).
+The `trading` lens integrates the formal reading from
+`NRRF780ClassicalTradingSystemLocalPricesInfCostsMultilayerValueFlow`:
+
+```text
+signed size · bid · ask · fill · mark · fee
+→ local price relation
+→ fee + slippage = inf cost
+→ net value flow = −cost
+→ source-reversible OPEN return
+```
+
+It includes rigid quote-side execution (`BUY→ASK`, `SELL→BID`), price-shift and
+numéraire invariance, system friction, price-holonomy circuits, and
+constant-position P&L. It is simulation/evaluation only: no brokerage connection,
+live order routing, or automatic order submission is present. See
+[`TRADING_SUPERNET_NRRF780.md`](TRADING_SUPERNET_NRRF780.md).
 
 ## Natural-form selector
 
@@ -64,22 +77,12 @@ tan(π/2)              rotation–extension seam
 1 → i → -1 → -i → 1  four-i return
 ```
 
-The interface can relate these through explicit events. Visual proximity,
-embedding similarity, protocol success, or AI output does not self-certify
-truth or physical identity.
-
 ## Runtime
 
 `SupernetIntegrator.integrate` is the one canonical semantic transition.
 Resources, living problems, directed TranslationEvents, relative equality,
-reopening families, collective actions, agents, Black Mirror, and bounded
-hardware remain adapters and lenses over the append-only field.
-
-```text
-(current field, offered form)
-→ integration receipt
-→ replayable successor field
-```
+reopening families, collective actions, agents, Black Mirror, bounded hardware,
+and trading remain adapters and lenses over the append-only field.
 
 ## Run
 
@@ -94,6 +97,7 @@ closure-supernet serve
 Open:
 
 - `/` or `/supernet` — complete continuous topology and direct interaction
+- `/trading` — NRRF780 classical value-flow compatibility lens
 - `/translation` — directed TranslationEvent compatibility lens
 - `/resources` — open-form resource compatibility lens
 - `/reopening` — admissible reopening compatibility lens
@@ -103,7 +107,23 @@ Open:
 - `/runtime` — autonomous diagnostics
 - `/docs` — API documentation
 
-## Main APIs
+## Trading APIs
+
+```text
+GET  /network/trading/capabilities
+POST /network/trading/selector
+POST /network/trading/transactions
+GET  /network/trading/transactions
+POST /network/trading/systems
+POST /network/trading/invariance/shift
+POST /network/trading/invariance/numeraire
+POST /network/trading/circuits
+POST /network/trading/pnl
+GET  /network/trading/field
+GET  /supernet/project?lens=trading
+```
+
+## Main Supernet APIs
 
 ```text
 POST /supernet/integrate
@@ -125,17 +145,18 @@ WS   /supernet/stream
 Autonomy cannot overwrite exact sources, infer truth from resemblance or
 transport success, make determination issue TRUE, select one canonical language,
 omit affected perspectives while claiming completion, automatically execute a
-hardware constraint, assume Turing completeness, or treat a local return as
-terminal.
+hardware constraint, submit a market order, assume Turing completeness, or treat
+a local return as terminal.
 
-The hardware implementation remains deterministic and simulation-only. It does
-not directly control nuclear, fusion, quantum, high-energy laser, voltage,
-magnetic, cryogenic, radiation, plasma, pressure, or other hazardous apparatus.
+The hardware implementation remains deterministic and simulation-only. The
+trading implementation remains evaluator/simulator-only and is not financial
+advice or evidence of profitable strategy performance.
 
 ## Repository map
 
 - [`COMPLETE_SUPERNET_INTERFACE.md`](COMPLETE_SUPERNET_INTERFACE.md) — unified UI and topology operations.
 - [`UNIFIED_SUPERNET_RUNTIME.md`](UNIFIED_SUPERNET_RUNTIME.md) — continuous integrator.
+- [`TRADING_SUPERNET_NRRF780.md`](TRADING_SUPERNET_NRRF780.md) — six-layer trading, cost, holonomy and P&L lens.
 - [`FOUNDATION.md`](FOUNDATION.md) — note-guided foundation.
 - [`AXIOMETRIC_SOURCE_GRAMMAR.md`](AXIOMETRIC_SOURCE_GRAMMAR.md) — literal source operations.
 - [`TRANSLATIONAL_TRUTH_RUNTIME.md`](TRANSLATIONAL_TRUTH_RUNTIME.md) — directed TranslationEvents.
@@ -148,5 +169,6 @@ magnetic, cryogenic, radiation, plasma, pressure, or other hazardous apparatus.
 - [`FORMAL_LINEAGE.md`](FORMAL_LINEAGE.md) — NRRF lineage and scope.
 
 The current implementation is a complete single-node current-field Supernet. It
-is not terminal completion, a physical-law validation, or distributed causal
-consensus. Those remain later integrations into the same runtime.
+is not terminal completion, physical-law validation, distributed causal
+consensus, or a live brokerage system. Those remain later integrations into the
+same runtime.

@@ -42,7 +42,7 @@ class RuntimeConfig:
         os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500")
     )
     integration_user_agent: str = os.getenv(
-        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/0.9"
+        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/2.1"
     )
     integration_allow_private_networks: bool = _bool(
         "CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False
@@ -91,9 +91,6 @@ class RuntimeConfig:
         os.getenv("CLOSURE_EQUALITY_PAIRS_PER_CYCLE", "128")
     )
 
-    # The hardware closure loop is a bounded simulation and reintegration layer.
-    # It never enables direct physical, nuclear, quantum, high-energy laser,
-    # voltage, cryogenic, magnetic or plasma actuation.
     hardware_closure_enabled: bool = _bool(
         "CLOSURE_HARDWARE_CLOSURE_ENABLED", True
     )
@@ -109,8 +106,13 @@ class RuntimeConfig:
     hardware_simulation_only: bool = True
     hardware_allow_direct_physical_actuation: bool = False
 
-    # Production is an operational boundary around the living network, not a
-    # replacement formalism. The default remains local/open for development.
+    # NRRF780 is an evaluator/simulator lens. No environment variable can
+    # enable brokerage connectivity or direct market-order execution.
+    trading_enabled: bool = _bool("CLOSURE_TRADING_ENABLED", True)
+    trading_simulation_only: bool = True
+    trading_allow_direct_market_execution: bool = False
+    trading_brokerage_connected: bool = False
+
     environment: str = os.getenv("CLOSURE_ENVIRONMENT", "development").strip().lower()
     service_role: str = os.getenv("CLOSURE_SERVICE_ROLE", "all").strip().lower()
     public_base_url: str | None = os.getenv("CLOSURE_PUBLIC_BASE_URL") or None

@@ -248,6 +248,10 @@ class RuntimeCycleResult(BaseModel):
     hardware_pending_returns: int = 0
     hardware_reintegrations: int = 0
     hardware_expired_constraints: int = 0
+    trading_transactions: int = 0
+    trading_systems: int = 0
+    trading_circuits: int = 0
+    trading_pnl: int = 0
     started_at: str
     finished_at: str
 
@@ -293,6 +297,10 @@ class RuntimeStatus(BaseModel):
     hardware_actuations: int = 0
     hardware_returns: int = 0
     hardware_pending_returns: int = 0
+    trading_transactions: int = 0
+    trading_systems: int = 0
+    trading_circuits: int = 0
+    trading_pnl: int = 0
     public_interface_enabled: bool = True
     agentic_reintegration_enabled: bool = True
     iterated_reopening_enabled: bool = True
@@ -304,5 +312,8 @@ class RuntimeStatus(BaseModel):
     hardware_closure_enabled: bool = True
     hardware_simulation_only: bool = True
     hardware_direct_physical_actuation: bool = False
+    trading_enabled: bool = True
+    trading_simulation_only: bool = True
+    trading_direct_market_execution: bool = False
     protocol_is_transport_only: bool = True
     turing_complete_assumed: bool = False
