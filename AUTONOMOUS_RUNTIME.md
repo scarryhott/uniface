@@ -1,39 +1,73 @@
-# Closure Supernet Autonomous Living Runtime
+# Closure Supernet Autonomous Living Translation Runtime
 
-The repository contains an executable, persistent, public living-network runtime for the Uniface Closure Supernet.
+The repository contains an executable, persistent, public living runtime for the Uniface Closure Supernet.
+
+Closure is not identified with its HTTP, WebSocket, webhook, GitHub, JSON or database protocols. Those are transport charts. The canonical live primitive is a source-reversible `TranslationEvent`.
 
 ## Active cycle
 
 ```text
-poll digital sources
+poll digital transports
 → sense exact local and public occurrences
 → reintegrate returned collective-action consequences
+→ advance admissible reopening families
 → propose candidate relations
 → build source-reversible interpretation witnesses
-→ apply constitutional admission rules
-→ apply participant reintegration decisions
-→ audit affected perspectives
-→ project Black Mirror and the living field
-→ export source-reversible returns
+→ apply relative constitutional admission
+→ reconcile derived forms into Translation Events
+→ return solutions, residues, consequences, and projections
+→ produce successor potential
 → reopen
 → repeat
 ```
 
 Autonomy is bounded. The runtime never:
 
-- mutates an original occurrence;
+- mutates an original occurrence or prior translation state;
 - silently normalizes notation;
-- upgrades semantic likeness into truth;
-- treats public popularity, money, rank, or model confidence as moral authority;
+- upgrades semantic likeness or protocol delivery into truth;
+- treats public popularity, money, rank or model confidence as moral authority;
 - omits affected perspectives while claiming collective completion;
 - activates destructive external actions;
 - assumes the whole field is Turing complete;
-- treats a local halt, settlement, or return as terminal closure;
+- treats a local halt, finite stabilization, settlement or return as terminal closure;
 - turns formal similarity into physical or moral fact.
 
 ## Source note on `0` and `∞`
 
 The source notes identify `0` and `∞` as reciprocal poles. They are not the axiometry by themselves. The wider axiometry is the configured network connecting the poles with `r/i`, Triangle Time, Chaitin–Kakeya, the `tan(π/2)` seam, predual Fourier, four-i, ball–hair, loop–sensor–selection, and metavectorization.
+
+## Live translation field
+
+Each translation records:
+
+```text
+exact source occurrences
+source and target relative forms
+participant and perspective traces
+what is preserved
+what is transformed
+what remains untranslated
+frame and admission scope
+affected perspectives
+predecessor translations
+returned form
+successor potential
+reopening conditions
+```
+
+Its state history is append-only:
+
+```text
+PROPOSED
+INTERPRETED
+ADMITTED
+RETURNED
+REOPENED
+REJECTED
+```
+
+Candidate relations, interpretations, admissions, notes, problem interactions, solutions, collective actions, returned consequences, order assessments and residue rounds are reconciled into this field. See [`TRANSLATIONAL_TRUTH_RUNTIME.md`](TRANSLATIONAL_TRUTH_RUNTIME.md).
 
 ## Agent ecology
 
@@ -45,10 +79,10 @@ The source notes identify `0` and `∞` as reciprocal poles. They are not the ax
 - **ReopeningAgent** — turns incomplete admissions into explicit OPEN seams.
 - **RuleReviewAgent** — proposes versioned rule revisions from repeated seams.
 - **ProjectionAgent** — builds the current source-reversible Black Mirror topology.
-- **DigitalIntegrationManager** — imports and exports digital sources without granting remote systems admission authority.
-- **LivingNetworkManager / reintegration agent** — persists participants, perspectives, real problems, notes, interactions-as-solutions, collective actions, returned consequences, and agentic reintegration proposals.
-
-The living reintegration agent does not declare a consequence to be the final solution. It creates a source-reversible `MORAL_CONSEQUENCE` candidate relation between the returned occurrence and the real problem, identifies missing affected perspectives, and reopens the problem for interpretation and participant decision.
+- **DigitalIntegrationManager** — transports digital sources and returns without granting remote systems admission authority.
+- **LivingNetworkManager** — persists participants, perspectives, real problems, notes, interactions-as-solutions, collective actions, returns, and reintegration proposals.
+- **IteratedReopeningManager** — computes explicit reopening families, dependency-order effects, finite residues, and residue-relative moral connections.
+- **TranslationFieldManager** — reconciles all of those relative forms into the canonical live translation field and preserves their nonterminal history.
 
 ## Quick start
 
@@ -63,13 +97,15 @@ closure-supernet serve
 Open:
 
 - public living field: `http://localhost:8000/`
+- live translation field: `http://localhost:8000/translation`
+- iterated reopening field: `http://localhost:8000/reopening`
 - autonomous runtime console: `http://localhost:8000/runtime`
 - API documentation: `http://localhost:8000/docs`
 - health: `http://localhost:8000/health`
 
 ## Persistent storage
 
-The SQLite runtime is event-sourced and includes the canonical relation engine:
+The SQLite runtime is event-sourced and includes:
 
 ```text
 occurrences
@@ -80,14 +116,11 @@ open_seams
 rules
 runtime_state
 events
-integrations
-integration_receipts
-integration_runs
-```
 
-It also includes the living public field:
+translation_events
+translation_states
+translation_runtime_state
 
-```text
 living_participants
 living_perspectives
 living_problems
@@ -101,55 +134,55 @@ living_action_returns
 living_reintegration_proposals
 living_reintegration_decisions
 living_state
+
+reopening_families
+reopening_variants
+ordered_readings
+order_assessments
+reopening_processes
+residue_rounds
+residue_moral_connections
+reopening_state
+
+integrations
+integration_receipts
+integration_runs
 ```
 
-Exact text remains in immutable `occurrences`. Problem, action, and reintegration state changes are additional records rather than replacements.
+Exact text remains in immutable `occurrences`. Translation, problem, action, residue, and reintegration changes append records rather than replacing prior states.
 
-## Public relative forms
+## Relative forms
 
 ```text
-Problem       = exact source + at least one real situation + remaining discretion
+Problem       = exact source + real situations + remaining discretion
 Note          = immutable occurrence + self-interaction / loop step
-Solution      = receipt constituted by an interaction
-Action        = exact collective intent + participants + affected perspectives + OPEN assumptions
-Return        = exact consequence returned by action
-Reintegration = agent-proposed, participant-decidable translation back into the problem
+Solution      = returned form constituted by an interaction
+Action        = exact collective intent + participants + affected perspectives
+Return        = exact consequence translated back into the problem
+Reopening     = alternate translation family whose shared residue becomes new potential
+Black Mirror  = current nonterminal topology returned by the translation field
 ```
 
-No quantity or quality score is stored as the foundational social value. The social return path is collective action and its consequences.
+No quantity or quality score is stored as the foundational social value.
 
-## Public living API
+## Translation API
 
 ```text
-GET  /network/capabilities
-POST /network/participants
-GET  /network/participants
-POST /network/perspectives
-GET  /network/perspectives
-POST /network/problems
-GET  /network/problems
-GET  /network/problems/{id}/field
-POST /network/problems/{id}/state
-POST /network/problems/{id}/notes
-POST /network/interactions
-GET  /network/interactions
-GET  /network/solutions
-POST /network/actions
-GET  /network/actions
-POST /network/actions/{id}/state
-POST /network/actions/{id}/returns
-GET  /network/returns
-POST /network/reintegrate
-GET  /network/reintegration
-POST /network/reintegration/{id}/decision
-GET  /network/field
+GET  /network/translations/capabilities
+POST /network/translations
+GET  /network/translations
+POST /network/translations/compose
+POST /network/translations/reconcile
+GET  /network/translations/field
+GET  /network/translations/{id}
+POST /network/translations/{id}/state
 ```
 
-The previous source, rule, projection, integration, runtime, and WebSocket APIs remain available.
+The public living, reopening, source, rule, integration, runtime, projection and WebSocket APIs remain available as derived or transport views.
 
-## Digital integrations
+## Transport integrations
 
-Supported connectors:
+Supported transports:
 
 ```text
 WEBHOOK_IN
@@ -158,21 +191,18 @@ GITHUB_REPOSITORY
 HTTP_JSON_FEED
 ```
 
-External assertions enter as immutable sources, not truth claims. Outbound returns include Black Mirror plus living-field statistics and reverse source indexes.
-
-See [`DIGITAL_SUPERNET_INTEGRATIONS.md`](DIGITAL_SUPERNET_INTEGRATIONS.md).
+External assertions enter as immutable sources, not truth claims. Outbound returns include source reverse indexes and explicitly declare that protocol is transport-only.
 
 ## Security and progress boundary
 
 Implemented now:
 
-- single-node durable storage;
+- single-node durable source and translation storage;
 - persistent participant and perspective records;
 - public problem/action/return interface;
-- autonomous reintegration;
-- exact source immutability;
-- append-only state and decision history;
-- digital connectors, API, dashboard, tests, and Docker support.
+- autonomous reintegration and iterated reopening;
+- append-only translation state history;
+- transport-neutral connectors, APIs, live views, tests, and Docker support.
 
 Not yet claimed:
 
@@ -181,7 +211,7 @@ Not yet claimed:
 - public cloud deployment;
 - replicated multi-node storage and federation;
 - signed commitments and action receipts;
-- machine-checked refinement from Python execution to NRRF764–765;
+- machine-checked refinement from Python execution to NRRF761–768;
 - empirical proof of conscious-cultural or moral outcomes.
 
 These remain explicit next closure levels rather than hidden behind a terminal-completion claim.
