@@ -1,0 +1,16 @@
+{
+  "chart_not_closure": true,
+  "TRUE_issued": false,
+  "public_control": "https://uniface-tawny.vercel.app/#hardware-gateway",
+  "buttons": ["Sense ellipse", "Admit interpretation (does not actuate)", "Run SafetyEnvelope cycle"],
+  "persist": "kind=relative_interaction on existing uniface-relative REST (no /api/relative)",
+  "command": "u_t=SafetyEnvelope_D(G_t)",
+  "rule": "admissible as a network interpretation ≠ authorized as a hardware actuation",
+  "device": "simulated_low_energy_optical_ellipse",
+  "real_laser": false,
+  "real_slm": false,
+  "quantum_fusion": "CLOSED",
+  "last_beat": "2026-08-26-0834-et",
+  "two_person_E2E": "OPEN",
+  "real_hardware": "OPEN"
+}

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Uniface — Hardware Closure Gateway (simulated)</title>
+<style>
+:root{--bg:#080b11;--p:#141a27;--p2:#1b2334;--l:#3a465f;--t:#eef3fa;--m:#aab6c9;--a:#9fb4ff;--g:#58d394;--r:#ff737c;--o:#e7bd56}
+*{box-sizing:border-box}body{margin:0;background:#080b11;color:var(--t);font-family:Inter,system-ui,sans-serif}
+header{padding:28px clamp(18px,5vw,68px) 18px;border-bottom:1px solid var(--l)}
+h1{margin:0 0 10px;font-size:clamp(26px,4vw,46px)}
+.sub,.muted{color:var(--m);line-height:1.55;max-width:78ch}
+.warn{border-left:4px solid var(--o);background:var(--p2);padding:12px 14px;border-radius:0 10px 10px 0;margin:16px 0}
+main{padding:18px clamp(18px,5vw,68px) 48px}
+button{padding:10px 14px;background:var(--p2);color:var(--t);border:1px solid var(--l);border-radius:10px;font-weight:800;cursor:pointer;margin:0 8px 8px 0}
+button:hover{border-color:var(--a)}
+.state{white-space:pre-wrap;background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:12px;font-family:ui-monospace,Menlo,monospace;font-size:12px;max-height:520px;overflow:auto}
+a{color:var(--a)}
+.ok{color:var(--g)}.bad{color:var(--r)}
+</style>
+</head>
+<body>
+<header>
+<h1>Hardware Closure Gateway</h1>
+<p class="sub">Public runner for the <strong>simulated</strong> low-energy optical ellipse. Same Uniface loop, not a second site, not Closure, not a real laser.</p>
+<p class="warn"><code>admissible as a network interpretation ≠ authorized as a hardware actuation</code>. Hardware receives <code>u_t = SafetyEnvelope_D(G_t)</code> only. Never raw AI output. Never undifferentiated public consensus. TRUE is not issued. Two-person E2E remains OPEN. Real hardware remains OPEN.</p>
+<p class="muted"><a href="/#hardware-gateway">← live field control (Sense / admit / run)</a> · this page is optional static runner. Persist uses the same uniface-relative REST. Python chart: closure_supernet/. TRUE not issued.</p>
+</header>
+<main>
+<p>
+<button type="button" id="runLoop">Run simulated optical-ellipse loop</button>
+<button type="button" id="runRefuse">Run refused-actuation cases</button>
+</p>
+<p class="muted" id="status">Idle. Click run. Two simulated humans + one autonomous AI + sensor → SafetyEnvelope → simulated actuation → physical-style return → reopen.</p>
+<div class="state" id="out">{}</div>
+</main>
+<script src="hardware.js"></script>
+<script>
+function paint(obj, cls){
+  document.getElementById('out').textContent=JSON.stringify(obj,null,2);
+  const s=document.getElementById('status');
+  s.className='muted '+(cls||'');
+}
+document.getElementById('runLoop').onclick=function(){
+  const api=new UnifaceHardware.HardwareLoopAPI();
+  const out=api.runFirstDeviceLoop();
+  const ok=out.receipt && out.receipt.decision==='actuated' && out.reopening;
+  const view={
+    chart_not_closure:true, TRUE_issued:false, simulated:true,
+    real_laser:false, real_quantum:false, real_fusion:false,
+    interpretation_neq_actuation:true,
+    command:out.envelope&&out.envelope.command,
+    selected_metavector:out.envelope&&out.envelope.selected_metavector,
+    mapped_control_variables:out.envelope&&out.envelope.mapped_control_variables,
+    admission_kind:out.admission&&out.admission.kind,
+    receipt_decision:out.receipt&&out.receipt.decision,
+    applied_controls:out.receipt&&out.receipt.applied_controls,
+    physical_return:out.physical_return&&out.physical_return.sensor_readings,
+    reopening:out.reopening&&out.reopening.next_interaction_id
+  };
+  paint(view, ok?'ok':'bad');
+  document.getElementById('status').textContent=ok
+    ? 'Cycle ran (simulated). Writing kind=relative_interaction…'
+    : 'Loop did not actuate. See JSON.';
+  if(!ok)return;
+  const rest='https://thpzzkaymledzcwsfqhn.supabase.co/rest/v1/uniface_relative_interaction';
+  const anon='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRocHp6a2F5bWxlZHpjd3NmcWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2ODEwOTQsImV4cCI6MjEwMzI1NzA5NH0.cCzfuKbBNmE5yEkMlbQJil90QLaL_zvbGfcRck1yCR8';
+  const receiptId=(crypto.randomUUID&&crypto.randomUUID())||('hw-'+Date.now());
+  const body={
+    kind:'relative_interaction',
+    selected_0:'occ-2026-08-26-hardware-closure-gateway',
+    residue:null, next_0:null, split_reading:'hardware_ellipse', admitted:false,
+    payload:{
+      lineage_id:receiptId, receipt_id:receiptId, inter:'hardware_ellipse_cycle', ui_kind:'hardware_ellipse_cycle',
+      hardware_cycle:view, simulated:true, command:view.command, admission_kind:view.admission_kind,
+      receipt_decision:view.receipt_decision, applied_controls:view.applied_controls,
+      physical_return:view.physical_return, reopening:view.reopening,
+      real_laser:false, quantum_fusion:'CLOSED', TRUE:'not issued', not_closure:true,
+      chart_not_closure:true, not_beat:true, projection:'https://uniface-tawny.vercel.app/hardware.html',
+      table:'public.uniface_relative_interaction'
+    }
+  };
+  fetch(rest,{method:'POST',headers:{apikey:anon,Authorization:'Bearer '+anon,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(body)}).then(function(r){
+    document.getElementById('status').textContent=r.ok
+      ? ('Cycle ran and wrote kind=relative_interaction (HTTP '+r.status+'). Not Closure. TRUE not issued.')
+      : ('Cycle ran locally; persist HTTP '+r.status);
+    paint(Object.assign({relative_persist_http:r.status},view), r.ok?'ok':'bad');
+  }).catch(function(err){
+    document.getElementById('status').textContent='Cycle ran; persist error: '+String(err);
+  });
+};
+document.getElementById('runRefuse').onclick=function(){
+  const r=UnifaceHardware.runRefusals();
+  paint({
+    no_admission:r.no_admission.refused_reason,
+    expired:r.expired.refused_reason,
+    revoked:r.revoked.refused_reason,
+    undefined_form:r.undefined_form.refused_reason,
+    raw_ai_alone:r.raw_ai.refused_reason
+  },'ok');
+  document.getElementById('status').textContent='Refused as required: no admission, expired, revoked, undefined form, raw AI alone. No real device actuated.';
+};
+</script>
+</body>
+</html>

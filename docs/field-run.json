@@ -32,8 +32,7 @@
     "NRRF766_769_slearn_PR14": "pointed-at https://github.com/scarryhott/slearn/pull/14 (draft; 766 lake OPEN; leftover PR 10 is not this; 770/772 not claimed landed; Lean not copied)",
     "NRRF769": "PROVED on Aristotle 068068ee (nrrf769_answer, live_network_certification, exists_stage_order_dependent, cl_iUnion_live_eq_batch, invariant_cl, closure_is_not_the_protocol; Lean not copied)",
     "NRRF770": "constructed on Aristotle from existing 764/766/767/769 (supernet_universal, LivingProtocol, evolveLoop is a Loop; derived chart, not Super network; Lean not copied)",
-    "NRRF771": "present on Aristotle 068068ee (point-at; Uniface-as-chart / Translation Event runtime centre / Protocol transport; Lean not copied; not invented in Uniface)",
-    "NRRF773": "PROVED on Aristotle 068068ee (NRRF773LoopSensorContinuumFunctionalEqualityHigherClosure; EqTr Type not Prop; FunEq; nrrf773_answer; point-at only; Lean not copied; next git chart is slearn; 770/772/773 missing from slearn until 068068ee editor copy, never 0517138e)",
+    "NRRF771": "OPEN (not invented in Uniface; Uniface-as-chart / Translation Event runtime centre / Protocol transport; E2E and tokenomics-as-downstream OPEN)",
     "two_person_E2E": "OPEN",
     "Turing": "OPEN (not assumed)",
     "O_B_eq_R": "refused",
@@ -52,7 +51,7 @@
     "Aristotle_native_equality": "OPEN",
     "Slearn_FRAMEWORK": "OPEN, not RETURNED",
     "NRRF764_NRRF765_on_slearn_main": "OPEN",
-    "hardware_closure_gateway": "closure_supernet/ digital chart (simulated optical ellipse); admissible interpretation ≠ authorized actuation; SafetyEnvelope u_t; not Closure; not a physical chamber; last_beat 2026-08-26-0834-et; TRUE not issued",
+    "hardware_closure_gateway": "live control https://uniface-tawny.vercel.app/#hardware-gateway (docs/hardware.js simulated optical ellipse); Python chart remains closure_supernet/; admissible interpretation ≠ authorized actuation; SafetyEnvelope u_t; not Closure; not a physical chamber; last_beat 2026-08-26-0834-et; TRUE not issued",
     "two_ai_loop": "OPEN: Uniface field ↔ Aristotle 068068ee (never 0517138e); not two-person human E2E; Lean not copied",
     "Origin_namespace": "OPEN (blocked; hardware layer lives in Uniface as closure_supernet/)",
     "framework": "not achieved"
