@@ -30,6 +30,8 @@ from .providers import build_provider
 from .reopening_network import IteratedReopeningManager
 from .reopening_store import ReopeningStore
 from .store import EventStore
+from .translation_network import TranslationFieldManager
+from .translation_store import TranslationStore
 
 
 def utcnow() -> str:
@@ -37,14 +39,14 @@ def utcnow() -> str:
 
 
 class ClosureSupernetRuntime:
-    """Autonomous, bounded, living Closure Supernet.
+    """Autonomous, bounded, living translation field.
 
-    The runtime senses exact sources, public living interactions and configured
-    digital interfaces; proposes and interprets relations; applies admission;
-    reintegrates returned consequences; iterates admissible reopening families;
-    projects current topology; and reopens incomplete relations. Original
-    occurrences are never mutated and finite stability is never called a final
-    moral core.
+    Closure is not identified with HTTP, webhooks, a database schema or any
+    other web protocol. The canonical live primitive is the source-reversible
+    TranslationEvent. Problems, notes, interactions, solutions, collective
+    actions, reopening families, residues and projections are relative forms
+    generated from that continuing field. Protocols transport translations;
+    they do not define translational truth.
     """
 
     def __init__(self, config: RuntimeConfig | None = None):
@@ -54,6 +56,7 @@ class ClosureSupernetRuntime:
         self.integration_store = IntegrationStore(self.config.database_path)
         self.living_store = LivingNetworkStore(self.config.database_path)
         self.iterated_reopening_store = ReopeningStore(self.config.database_path)
+        self.translation_store = TranslationStore(self.config.database_path)
         self.provider = build_provider(self.config)
         self.inbox = InboxSensorAgent(self.config, self.store)
         self.understanding = UnderstandingAgent(self.config, self.store)
@@ -73,6 +76,12 @@ class ClosureSupernetRuntime:
             self.living_store,
             self.iterated_reopening_store,
             self.ingest,
+        )
+        self.translation = TranslationFieldManager(
+            self.store,
+            self.translation_store,
+            self.living_store,
+            self.iterated_reopening_store,
         )
         self._running = False
         self._task: asyncio.Task[None] | None = None
@@ -138,7 +147,32 @@ class ClosureSupernetRuntime:
             result.open_seams = self.reopening.run() + self.moral_audit.run()
             result.rule_proposals = self.rule_review.run()
 
+            if self.config.translation_field_enabled:
+                reconciliation = self.translation.reconcile()
+                result.translation_created = int(reconciliation["total_created"])
+                translation_projection = self.translation.projection()
+            else:
+                translation_projection = self.translation.projection()
+            translation_stats = translation_projection["stats"]
+            result.translation_events = int(translation_stats["translations"])
+            result.translation_open = int(translation_stats["open_translations"])
+            result.translation_returned = int(
+                translation_stats["returned_translations"]
+            )
+            result.translation_reopened = int(
+                translation_stats["reopened_translations"]
+            )
+
             projection = self.projection.run()
+            projection["translation_field"] = {
+                "stats": translation_stats,
+                "source_reverse_index": translation_projection[
+                    "source_reverse_index"
+                ],
+                "protocol_is_transport_only": True,
+                "closure_reading": translation_projection["closure_reading"],
+            }
+            self.store.set_state("black_mirror_projection", projection)
             result.projection_classes = len(projection["classes"])
             result.projection_edges = len(projection["edges"])
 
@@ -158,6 +192,7 @@ class ClosureSupernetRuntime:
 
             living_projection = self.living.field_projection(projection)
             living_projection["iterated_reopening"] = reopening_projection
+            living_projection["translation_field"] = translation_projection
             living_projection["stats"].update(
                 {
                     "reopening_families": reopening_stats["families"],
@@ -171,11 +206,23 @@ class ClosureSupernetRuntime:
                     "residue_moral_connections": reopening_stats[
                         "moral_connections"
                     ],
+                    "translation_events": translation_stats["translations"],
+                    "open_translations": translation_stats["open_translations"],
+                    "returned_translations": translation_stats[
+                        "returned_translations"
+                    ],
+                    "reopened_translations": translation_stats[
+                        "reopened_translations"
+                    ],
+                    "protocol_is_transport_only": True,
                     "final_core_state_available": False,
                 }
             )
             living_projection["source_reverse_index"].update(
                 reopening_projection["source_reverse_index"]
+            )
+            living_projection["source_reverse_index"].update(
+                translation_projection["source_reverse_index"]
             )
             self.living_store.set_state("living_field_projection", living_projection)
             living_stats = living_projection["stats"]
@@ -201,6 +248,13 @@ class ClosureSupernetRuntime:
                             "source_reverse_index": reopening_projection[
                                 "source_reverse_index"
                             ],
+                        },
+                        "translation_field": {
+                            "stats": translation_stats,
+                            "source_reverse_index": translation_projection[
+                                "source_reverse_index"
+                            ],
+                            "protocol_is_transport_only": True,
                         },
                         "nonterminal": True,
                     },
@@ -236,7 +290,11 @@ class ClosureSupernetRuntime:
             "AUTONOMY_STARTED",
             "runtime",
             "closure-supernet",
-            {"interval": self.config.autonomy_interval_seconds},
+            {
+                "interval": self.config.autonomy_interval_seconds,
+                "canonical_live_primitive": "TranslationEvent",
+                "protocol_is_transport_only": True,
+            },
         )
 
     async def _run_loop(self) -> None:
@@ -282,6 +340,7 @@ class ClosureSupernetRuntime:
             limit=100_000
         )
         reopening_stats = self.iterated_reopening_store.stats()
+        translation_items = self.translation_store.list_translations(limit=100_000)
         return RuntimeStatus(
             running=self._running,
             cycle_count=int(self.store.get_state("cycle_count", 0)),
@@ -305,9 +364,21 @@ class ClosureSupernetRuntime:
             reopening_active_processes=reopening_stats["active_processes"],
             reopening_order_assessments=reopening_stats["order_assessments"],
             reopening_moral_connections=reopening_stats["moral_connections"],
+            translation_events=len(translation_items),
+            translation_open=sum(
+                1 for item in translation_items if item["current_verdict"] == "OPEN"
+            ),
+            translation_returned=sum(
+                1 for item in translation_items if item["current_state"] == "RETURNED"
+            ),
+            translation_reopened=sum(
+                1 for item in translation_items if item["current_state"] == "REOPENED"
+            ),
             public_interface_enabled=self.config.public_interface_enabled,
             agentic_reintegration_enabled=self.config.agentic_reintegration_enabled,
             iterated_reopening_enabled=self.config.iterated_reopening_enabled,
+            translation_field_enabled=self.config.translation_field_enabled,
+            protocol_is_transport_only=True,
             turing_complete_assumed=False,
         )
 
@@ -315,6 +386,18 @@ class ClosureSupernetRuntime:
         projection = self.store.get_state("black_mirror_projection")
         if projection is None:
             projection = build_projection(self.store).model_dump(mode="json")
+            projection["translation_field"] = {
+                "stats": self.translation_field()["stats"],
+                "protocol_is_transport_only": True,
+            }
+        return projection
+
+    def translation_field(self) -> dict[str, Any]:
+        projection = self.translation_store.get_state_value(
+            "translation_field_projection"
+        )
+        if projection is None:
+            projection = self.translation.projection()
         return projection
 
     def living_field(self) -> dict[str, Any]:
@@ -322,7 +405,9 @@ class ClosureSupernetRuntime:
         if projection is None:
             projection = self.living.field_projection(self.black_mirror())
             reopening = self.iterated_reopening.projection()
+            translation = self.translation_field()
             projection["iterated_reopening"] = reopening
+            projection["translation_field"] = translation
             projection["stats"].update(
                 {
                     "reopening_families": reopening["stats"]["families"],
@@ -336,15 +421,22 @@ class ClosureSupernetRuntime:
                     "residue_moral_connections": reopening["stats"][
                         "moral_connections"
                     ],
+                    "translation_events": translation["stats"]["translations"],
+                    "open_translations": translation["stats"]["open_translations"],
+                    "protocol_is_transport_only": True,
                     "final_core_state_available": False,
                 }
             )
             projection["source_reverse_index"].update(
                 reopening["source_reverse_index"]
             )
+            projection["source_reverse_index"].update(
+                translation["source_reverse_index"]
+            )
         return projection
 
     def close(self) -> None:
+        self.translation_store.close()
         self.iterated_reopening_store.close()
         self.living_store.close()
         self.integration_store.close()
