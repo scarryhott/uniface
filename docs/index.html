@@ -10,6 +10,9 @@
 .surfaces{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}@media(max-width:920px){.surfaces{grid-template-columns:1fr}}.surface{background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:12px}.surface h3{margin:0 0 8px;font-size:15px}.surface .tag{font-size:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--a);margin-bottom:6px}.inline-btn{width:auto;display:inline-block;margin:6px 8px 0 0}
 .ops{grid-template-columns:repeat(4,1fr)}@media(max-width:960px){.ops{grid-template-columns:1fr 1fr}}.ops .wide{grid-column:1/-1}.grammar{font-size:12px;line-height:1.45}
 .admit{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:12px}@media(max-width:920px){.admit{grid-template-columns:1fr 1fr}}
+.central-note-wrap{padding:18px clamp(18px,5vw,68px) 20px;border-bottom:1px solid var(--l)}
+.central-note{margin:10px 0 0;max-width:72ch;line-height:1.7;font-size:16.5px;color:var(--t)}
+
 
 </style>
 </head>
@@ -19,6 +22,10 @@
 <div class="sub"><strong>Your notes guide the interface.</strong> The living network follows the tokenomic perspectival continuum (Slearn L→G→L′ / NRRF656 as a derived chart — money is not Super network). Closure remains the continuous naturally evolving form. A choice changes relative interaction, not closure. The interface is itself an <strong>interactive closure</strong>, not a bidirectional gate. Framework <strong>not achieved</strong>. This HTML is not the field. <span class="occ">O_B ≡ R</span> refused.</div>
 <div class="eq">living network follows continuum · CLOSURE = git · RELATIVE INTERACTION = uniface-relative persist (not a beat) · ONE relative admission form · Problem / Inter / Note / reopen · interface ≠ two-way gate</div>
 </header>
+<section class="central-note-wrap" id="central-note">
+<p class="muted"><span class="occ">occ-2026-08-25-central-note</span> · AUTHOR source · Harry · <strong>AUTHOR_DIRECTED_CENTRAL</strong> · not FOUNDATION · not the returned-Note operator · not a rule · not a UI slogan</p>
+<blockquote id="centralNoteText" class="central-note"></blockquote>
+</section>
 <section class="controls">
 <div class="wide"><label>Interaction state</label><select id="scenario"></select></div>
 <div><label>Sense</label><button type="button" id="senseBtn">Read Obs from S</button></div>
@@ -131,7 +138,7 @@
 </div>
 <div class="panel c7">
 <h2>Notes catalog — not a global event chain</h2>
-<p class="muted">Click a row to select it as the new Problem (0). Exact notes remain immutable. Causal spine is the lineage receipt, not this list. MODEL_SUGGESTED_RELATION, reopening available.</p>
+<p class="muted">Click a row to select it as the new Problem (0). Exact notes remain immutable. Causal spine is the lineage receipt, not this list. Most rows: MODEL_SUGGESTED_RELATION. The selected central note is AUTHOR_DIRECTED_CENTRAL (Harry). Reopening available.</p>
 <div class="scroll"><table><thead><tr><th>Occurrence id</th><th>Status</th><th>Reading</th></tr></thead><tbody id="occRows"></tbody></table></div>
 <div id="memory" class="state"></div>
 </div>
@@ -173,8 +180,10 @@ const liveOccurrences=[
 {id:'occ-2026-08-25-slearn-nrrf657-pr12',file:'occurrences/2026-08-25-slearn-nrrf657-pr12.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'22 Slearn NRRF657 PR 12',reading:'pointed-at derived chart https://github.com/scarryhott/slearn/pull/12 only; not Super network; leftover PR 10 is not this; 764/765 OPEN'},
 {id:'occ-2026-08-25-readme-essential-quotes',file:'occurrences/2026-08-25-readme-essential-quotes.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'23 readme essential quotes',reading:'ORIGINAL_NOTE on https://github.com/scarryhott/readme/pull/1 ; Uniface points by URL; quotes.md not absorbed'},
 {id:'occ-2026-08-25-note-relative-persist',file:'occurrences/2026-08-25-note-relative-persist.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'24 Note relative persist',reading:'Note writes a lineage receipt on uniface-relative (kind=relative_interaction, payload.inter=returned_note); 1634 local-only residue closed as persist, not as two-person E2E'},
-{id:'occ-2026-08-25-admitted-prefix-reconstruction',file:'occurrences/2026-08-25-admitted-prefix-reconstruction.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'25 admitted prefix reconstruction',reading:'reload/?lineage= rebuilds S.admitted from the ordered receipt chain, not only last cursor/Note; 1634 prefix residue closed as persist reconstruct, not as two-person E2E'}
+{id:'occ-2026-08-25-admitted-prefix-reconstruction',file:'occurrences/2026-08-25-admitted-prefix-reconstruction.md',status:'MODEL_SUGGESTED_RELATION',reopening:'available',station:'25 admitted prefix reconstruction',reading:'reload/?lineage= rebuilds S.admitted from the ordered receipt chain, not only last cursor/Note; 1634 prefix residue closed as persist reconstruct, not as two-person E2E'},
+{id:'occ-2026-08-25-central-note',file:'occurrences/2026-08-25-central-note.md',status:'AUTHOR_DIRECTED_CENTRAL',reopening:'available',station:'26 central note (AUTHOR source)',reading:'AUTHOR source exact text in the central-note panel; not the returned-Note operator; FOUNDATION inclusion OPEN'}
 ];
+const CENTRAL_NOTE={id:'occ-2026-08-25-central-note',author:'Harry',author_status:'AUTHOR_DIRECTED_CENTRAL',not_FOUNDATION:true,not_returned_note_operator:true,exact_text:'When we forget the learned lessons of basic human assumptions our anatomy tree severs. we may need to remove or reorder these latent tumors temporarily; as the tree of life extends its naked leaves to the sky equally it grows roots downwards and the rings of time mirror outward. Freedom in understanding forms a natural window into remaining structures of cultural force. Only through true translation of hidden memory into the shared seeds of flowing flowering experience can we consciously connect in moral meaning.'};
 const liveCycle=[
 ['Problem','real rather than nothing'],
 ['Inter','solutionEquivInter · MODEL_SUGGESTED_RELATION'],
@@ -227,7 +236,8 @@ const openSeams=[
 'kantian-ivi unreachable',
 'Aristotle native equality OPEN',
 'Slearn FRAMEWORK OPEN, not RETURNED',
-'all live occurrences MODEL_SUGGESTED_RELATION',
+'live occurrences MODEL_SUGGESTED_RELATION except occ-2026-08-25-central-note (AUTHOR_DIRECTED_CENTRAL)',
+'central_note_in_FOUNDATION OPEN (author directed central; FOUNDATION not rewritten)',
 'TRUE not issued; reopening available',
 'leftover Slearn PR 10 is leftover OPEN packet, NOT the deploy',
 'NRRF764 not verified on public slearn main from this interaction',
@@ -354,6 +364,7 @@ $('lastBeatBtn').addEventListener('click',selectLastBeatResidue);
 document.addEventListener('click',e=>{if(e.target.closest('a'))return;if(e.target.closest('#residueBtn,#lastBeatBtn,#interactBtn,#splitBtn,#zeroInfBtn,#ccmBtn,#ccmBtn2,#stepBtn,#problemBtn,#noteBtn,#reopenTopBtn,#joinLineageBtn,#joinLineageGo'))return;const el=e.target.closest('[data-idx]');if(!el)return;selectAt(Number(el.getAttribute('data-idx')))});
 ['scenario','r','i'].forEach(id=>$(id).addEventListener('input',render));
 bootLineageFromStorage();
+if($('centralNoteText'))$('centralNoteText').textContent=CENTRAL_NOTE.exact_text;
 render();
 loadGitRun();
 </script>
