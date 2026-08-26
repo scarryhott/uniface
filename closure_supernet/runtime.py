@@ -29,6 +29,8 @@ from .projection import build_projection
 from .providers import build_provider
 from .reopening_network import IteratedReopeningManager
 from .reopening_store import ReopeningStore
+from .resource_protocol import LiveResourceProtocolManager
+from .resource_store import ResourceStore
 from .store import EventStore
 
 
@@ -39,12 +41,13 @@ def utcnow() -> str:
 class ClosureSupernetRuntime:
     """Autonomous, bounded, living Closure Supernet.
 
-    The runtime senses exact sources, public living interactions and configured
-    digital interfaces; proposes and interprets relations; applies admission;
-    reintegrates returned consequences; iterates admissible reopening families;
-    projects current topology; and reopens incomplete relations. Original
-    occurrences are never mutated and finite stability is never called a final
-    moral core.
+    The runtime senses exact sources, public interactions and digital transports;
+    proposes translations; applies relative admission; reintegrates returned
+    consequences and resources; iterates reopening families; projects current
+    topology; and reopens incomplete relations.  Protocols carry the field but
+    do not define translational truth.  Original occurrences are never mutated,
+    finite stability is never called a final core, and no external resource
+    taxonomy or canonical language is imposed.
     """
 
     def __init__(self, config: RuntimeConfig | None = None):
@@ -54,6 +57,7 @@ class ClosureSupernetRuntime:
         self.integration_store = IntegrationStore(self.config.database_path)
         self.living_store = LivingNetworkStore(self.config.database_path)
         self.iterated_reopening_store = ReopeningStore(self.config.database_path)
+        self.resource_store = ResourceStore(self.config.database_path)
         self.provider = build_provider(self.config)
         self.inbox = InboxSensorAgent(self.config, self.store)
         self.understanding = UnderstandingAgent(self.config, self.store)
@@ -72,6 +76,13 @@ class ClosureSupernetRuntime:
             self.store,
             self.living_store,
             self.iterated_reopening_store,
+            self.ingest,
+        )
+        self.resource_protocol = LiveResourceProtocolManager(
+            self.config,
+            self.store,
+            self.living_store,
+            self.resource_store,
             self.ingest,
         )
         self._running = False
@@ -124,6 +135,12 @@ class ClosureSupernetRuntime:
 
             if self.config.agentic_reintegration_enabled:
                 result.living_reintegrations = self.living.reintegrate()
+            if self.config.resource_protocol_enabled:
+                result.resource_reintegrations = (
+                    await self.resource_protocol.reintegrate_pending(
+                        self.config.resource_reintegrations_per_cycle
+                    )
+                )
             if self.config.iterated_reopening_enabled:
                 result.reopening_rounds = (
                     self.iterated_reopening.advance_active_processes(
@@ -156,8 +173,27 @@ class ClosureSupernetRuntime:
                 reopening_stats["moral_connections"]
             )
 
+            if self.config.resource_protocol_enabled:
+                _stage, stage_created = self.resource_protocol.integrate_live_stage(
+                    trigger=f"runtime-cycle:{cycle_id}"
+                )
+                result.resource_stages = int(stage_created)
+            resource_projection = self.resource_protocol.projection()
+            resource_stats = resource_projection["stats"]
+            result.resources = int(resource_stats["resources"])
+            result.resource_engagements = int(resource_stats["engagements"])
+            result.resource_translations = int(resource_stats["translations"])
+            result.resource_returns = int(resource_stats["returns"])
+            result.resource_pending_reintegrations = int(
+                resource_stats["pending_reintegrations"]
+            )
+            result.resource_natural_components = int(
+                resource_stats["natural_components"]
+            )
+
             living_projection = self.living.field_projection(projection)
             living_projection["iterated_reopening"] = reopening_projection
+            living_projection["live_resource_protocol"] = resource_projection
             living_projection["stats"].update(
                 {
                     "reopening_families": reopening_stats["families"],
@@ -171,11 +207,24 @@ class ClosureSupernetRuntime:
                     "residue_moral_connections": reopening_stats[
                         "moral_connections"
                     ],
+                    "resources": resource_stats["resources"],
+                    "resource_engagements": resource_stats["engagements"],
+                    "resource_translations": resource_stats["translations"],
+                    "resource_returns": resource_stats["returns"],
+                    "resource_natural_components": resource_stats[
+                        "natural_components"
+                    ],
+                    "resource_protocol_is_truth": False,
+                    "finite_resource_registry": False,
+                    "canonical_resource_language": None,
                     "final_core_state_available": False,
                 }
             )
             living_projection["source_reverse_index"].update(
                 reopening_projection["source_reverse_index"]
+            )
+            living_projection["source_reverse_index"].update(
+                resource_projection["source_reverse_index"]
             )
             self.living_store.set_state("living_field_projection", living_projection)
             living_stats = living_projection["stats"]
@@ -201,6 +250,14 @@ class ClosureSupernetRuntime:
                             "source_reverse_index": reopening_projection[
                                 "source_reverse_index"
                             ],
+                        },
+                        "live_resource_protocol": {
+                            "stats": resource_stats,
+                            "source_reverse_index": resource_projection[
+                                "source_reverse_index"
+                            ],
+                            "current_stage": resource_projection["current_stage"],
+                            "protocol_is_truth": False,
                         },
                         "nonterminal": True,
                     },
@@ -282,6 +339,8 @@ class ClosureSupernetRuntime:
             limit=100_000
         )
         reopening_stats = self.iterated_reopening_store.stats()
+        resource_stats = self.resource_store.stats()
+        resource_projection = self.resource_protocol.projection()
         return RuntimeStatus(
             running=self._running,
             cycle_count=int(self.store.get_state("cycle_count", 0)),
@@ -305,9 +364,21 @@ class ClosureSupernetRuntime:
             reopening_active_processes=reopening_stats["active_processes"],
             reopening_order_assessments=reopening_stats["order_assessments"],
             reopening_moral_connections=reopening_stats["moral_connections"],
+            resources=resource_stats["resources"],
+            resource_engagements=resource_stats["engagements"],
+            resource_translations=resource_stats["translations"],
+            resource_returns=resource_stats["returns"],
+            resource_pending_reintegrations=resource_stats[
+                "pending_reintegrations"
+            ],
+            resource_stages=resource_stats["stages"],
+            resource_natural_components=resource_projection["stats"][
+                "natural_components"
+            ],
             public_interface_enabled=self.config.public_interface_enabled,
             agentic_reintegration_enabled=self.config.agentic_reintegration_enabled,
             iterated_reopening_enabled=self.config.iterated_reopening_enabled,
+            resource_protocol_enabled=self.config.resource_protocol_enabled,
             turing_complete_assumed=False,
         )
 
@@ -322,7 +393,9 @@ class ClosureSupernetRuntime:
         if projection is None:
             projection = self.living.field_projection(self.black_mirror())
             reopening = self.iterated_reopening.projection()
+            resources = self.resource_protocol.projection()
             projection["iterated_reopening"] = reopening
+            projection["live_resource_protocol"] = resources
             projection["stats"].update(
                 {
                     "reopening_families": reopening["stats"]["families"],
@@ -336,15 +409,29 @@ class ClosureSupernetRuntime:
                     "residue_moral_connections": reopening["stats"][
                         "moral_connections"
                     ],
+                    "resources": resources["stats"]["resources"],
+                    "resource_engagements": resources["stats"]["engagements"],
+                    "resource_translations": resources["stats"]["translations"],
+                    "resource_returns": resources["stats"]["returns"],
+                    "resource_natural_components": resources["stats"][
+                        "natural_components"
+                    ],
+                    "resource_protocol_is_truth": False,
+                    "finite_resource_registry": False,
+                    "canonical_resource_language": None,
                     "final_core_state_available": False,
                 }
             )
             projection["source_reverse_index"].update(
                 reopening["source_reverse_index"]
             )
+            projection["source_reverse_index"].update(
+                resources["source_reverse_index"]
+            )
         return projection
 
     def close(self) -> None:
+        self.resource_store.close()
         self.iterated_reopening_store.close()
         self.living_store.close()
         self.integration_store.close()
