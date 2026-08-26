@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "closure-supernet"
-version = "0.4.0"
-description = "Source-preserving public living network with iterated admissible reopening, autonomous runtime, and digital integrations"
+version = "0.5.0"
+description = "Source-preserving living translation field with relative forms, iterated reopening, autonomous reintegration, and transport-neutral integrations"
 readme = "AUTONOMOUS_RUNTIME.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
