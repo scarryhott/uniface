@@ -3,10 +3,12 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import signal
 from pathlib import Path
 
 import uvicorn
 
+from .backup import create_backup, list_backups, prune_backups
 from .config import RuntimeConfig
 from .integration_models import IntegrationCreate, IntegrationKind
 from .models import OccurrenceCreate
@@ -20,10 +22,12 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--db", help="SQLite database path")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    serve = sub.add_parser("serve", help="Run API, dashboard and autonomous loop")
+    serve = sub.add_parser("serve", help="Run API, public network and autonomous loop")
     serve.add_argument("--host", default="0.0.0.0")
     serve.add_argument("--port", type=int, default=8000)
     serve.add_argument("--no-autonomy", action="store_true")
+
+    sub.add_parser("worker", help="Run only the autonomous reintegration loop")
 
     ingest = sub.add_parser("ingest", help="Ingest an exact source file or literal text")
     ingest.add_argument("source")
@@ -36,6 +40,10 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--interval", type=float, default=1.0)
     sub.add_parser("status", help="Print runtime status")
     sub.add_parser("projection", help="Print current Black Mirror projection")
+
+    backup = sub.add_parser("backup", help="Create a consistent SQLite snapshot")
+    backup.add_argument("--label", default="cli")
+    sub.add_parser("backup-list", help="List available production snapshots")
 
     bootstrap = sub.add_parser("bootstrap", help="Ingest markdown files from a source tree")
     bootstrap.add_argument("root", nargs="?", default=".")
@@ -77,7 +85,18 @@ async def _async_main(args: argparse.Namespace) -> int:
     config = _config(args)
     runtime = ClosureSupernetRuntime(config)
     try:
-        if args.command == "ingest":
+        if args.command == "worker":
+            stop = asyncio.Event()
+            loop = asyncio.get_running_loop()
+            for sig in (signal.SIGINT, signal.SIGTERM):
+                try:
+                    loop.add_signal_handler(sig, stop.set)
+                except (NotImplementedError, RuntimeError):
+                    pass
+            await runtime.start()
+            await stop.wait()
+            await runtime.stop()
+        elif args.command == "ingest":
             if args.text:
                 text = args.source
                 location = None
@@ -104,6 +123,12 @@ async def _async_main(args: argparse.Namespace) -> int:
             print(runtime.status().model_dump_json(indent=2))
         elif args.command == "projection":
             print(json.dumps(runtime.black_mirror(), indent=2, ensure_ascii=False))
+        elif args.command == "backup":
+            manifest = create_backup(config.database_path, config.backup_dir, label=args.label)
+            manifest["pruned"] = prune_backups(config.backup_dir, keep=config.backup_keep)
+            print(json.dumps(manifest, indent=2))
+        elif args.command == "backup-list":
+            print(json.dumps(list_backups(config.backup_dir, limit=config.backup_keep), indent=2))
         elif args.command == "bootstrap":
             print(
                 json.dumps(

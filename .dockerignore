@@ -1,0 +1,11 @@
+.git
+.github
+.venv
+__pycache__
+.pytest_cache
+runtime_data
+*.db
+*.db-wal
+*.db-shm
+.env
+.env.production
