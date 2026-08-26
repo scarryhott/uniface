@@ -3,13 +3,14 @@
 **Closure Supernet is one source-preserving continuous integrator whose public
 interface is the living topology of every human, agent, resource, problem,
 translation, selection, action, return, reopening, hardware reading, classical
-value-flow event, and relative-renormalization closure in the field.**
+value-flow event, relative-renormalization closure, and constructive witness in
+the field.**
 
 ```text
 exact source or returned form
 → integrate
 → relation sensing
-→ interactive admissibility
+→ explicit witness
 → natural form where rigid
 → path–partition
 → action / return
@@ -18,20 +19,58 @@ exact source or returned form
 ```
 
 Closure is not the web protocol, database, AI model, proof object, UI chart,
-hardware device, brokerage, market order, counterterm, or renormalization scheme.
-Those carry or render the same active translation field.
+hardware device, brokerage, market order, counterterm, renormalization scheme,
+or external witness chooser. Those carry or render the same active translation
+field.
 
-## Version 2.2 — complete interface plus NRRF780 and NRRF781 lenses
+## Version 2.3 — NRRF783 constructive witness layer
 
-The root page `/` and `/supernet` are one pan-and-zoom Supernet surface. The same
+The root page `/` and `/supernet` remain one live Supernet occurrence. The same
 events can be read through:
 
 ```text
 field · perspective zoom · point/line/loop · truth diagonal · metavector
 ball/hair · 0/∞ reciprocal poles · light cone · ellipse mirror
 shared architecture · natural-form selector · anatomy tree · trading value flow
-relative renormalization closure
+relative renormalization closure · constructive axiometric form
 ```
+
+### NRRF783 constructive axiometric forms
+
+The `constructive` lens integrates the machine-checked reading from
+`NRRF783AxiometricFormsUnifiedWithoutClassical` and
+`NRRF783TranslationalTruthFormsWithoutClassical` as explicit finite runtime
+witnesses:
+
+```text
+encode + evaluate + U1 return witness
+→ hold = encode ∘ evaluate
+→ U2 derived
+→ U3 read as empty defect
+→ OPEN returned form
+```
+
+An axiometric form carries its section as data. An idempotent translation yields
+a form from its explicit fixed points. A translational closure carries a finite
+commutative-group table, a participant-supplied base site, and a level chart; the
+runtime computes the relative potential and compares alternative charts by an
+explicit common-shift witness.
+
+The runtime records:
+
+```text
+section_carried_as_data = true
+base_site_supplied = true
+site_chosen_by_runtime = false
+classical_choice_required = false
+excluded_middle_required = false
+runtime_is_formal_proof = false
+truth_issued = false
+```
+
+The Lean modules prove and audit the constructive theorems. Python validates the
+submitted finite witnesses; it does not replace the proof. See
+[`CONSTRUCTIVE_SUPERNET_NRRF783.md`](CONSTRUCTIVE_SUPERNET_NRRF783.md).
 
 ### NRRF780 trading
 
@@ -88,8 +127,8 @@ tan(π/2)              rotation–extension seam
 `SupernetIntegrator.integrate` is the one canonical semantic transition.
 Resources, living problems, directed TranslationEvents, relative equality,
 reopening families, collective actions, agents, Black Mirror, bounded hardware,
-trading, and relative renormalization remain adapters and lenses over the
-append-only field.
+trading, relative renormalization, and constructive forms remain adapters and
+lenses over the append-only field.
 
 ## Run
 
@@ -103,8 +142,9 @@ closure-supernet serve
 
 Open:
 
-- `/` or `/supernet` — one live Sense → unique-path → TE → NRRF781 → reopen occurrence (`/` face, `/supernet` pan/zoom reading)
+- `/` or `/supernet` — one live Sense → unique-path → TE → return → reopen occurrence
 - `/field-run.json` — machine-readable snapshot of that same occurrence
+- `/constructive` — NRRF783 explicit-witness compatibility lens
 - `/trading` — NRRF780 classical value-flow compatibility lens
 - `/translation` — directed TranslationEvent compatibility lens
 - `/resources` — open-form resource compatibility lens
@@ -114,6 +154,23 @@ Open:
 - `/production` — authentication and operations
 - `/runtime` — autonomous diagnostics
 - `/docs` — API documentation
+
+## NRRF783 APIs
+
+```text
+GET  /network/constructive/capabilities
+POST /network/constructive/forms
+POST /network/constructive/forms/from-idempotent
+GET  /network/constructive/forms
+GET  /network/constructive/forms/{id}
+POST /network/constructive/translations
+GET  /network/constructive/translations
+GET  /network/constructive/translations/{id}
+POST /network/constructive/translations/{id}/compare
+GET  /network/constructive/comparisons
+GET  /network/constructive/field
+GET  /supernet/project?lens=constructive
+```
 
 ## NRRF781 APIs
 
@@ -154,16 +211,19 @@ Autonomy cannot overwrite exact sources, infer truth from resemblance or
 transport success, make determination issue TRUE, select one canonical language,
 omit affected perspectives while claiming completion, automatically execute a
 hardware constraint, submit a market order, select a counterterm as truth,
-assume Turing completeness, or treat a local return as terminal.
+manufacture a section or base site from a bare existence claim, assume Turing
+completeness, or treat a local return as terminal.
 
 The hardware implementation remains deterministic and simulation-only. Trading
-remains evaluator/simulator-only. The NRRF781 runtime check is finite and scoped:
-it does not establish an empirical universality class outside submitted cutoffs.
+remains evaluator/simulator-only. The NRRF781 runtime check is finite and scoped.
+The NRRF783 runtime layer is an executable finite witness chart, not an axiom
+audit or substitute for the Lean proof.
 
 ## Repository map
 
 - [`COMPLETE_SUPERNET_INTERFACE.md`](COMPLETE_SUPERNET_INTERFACE.md) — unified UI and topology operations.
 - [`UNIFIED_SUPERNET_RUNTIME.md`](UNIFIED_SUPERNET_RUNTIME.md) — continuous integrator.
+- [`CONSTRUCTIVE_SUPERNET_NRRF783.md`](CONSTRUCTIVE_SUPERNET_NRRF783.md) — explicit constructive witness layer.
 - [`TRADING_SUPERNET_NRRF780.md`](TRADING_SUPERNET_NRRF780.md) — six-layer trading lens.
 - [`RENORMALIZATION_SUPERNET_NRRF781.md`](RENORMALIZATION_SUPERNET_NRRF781.md) — common-divergence and scheme-free relative closure.
 - [`FOUNDATION.md`](FOUNDATION.md) — note-guided foundation.
@@ -179,6 +239,6 @@ it does not establish an empirical universality class outside submitted cutoffs.
 
 The current implementation is a complete single-node current-field Supernet. It
 is not terminal completion, physical-law validation, distributed causal
-consensus, a live brokerage system, or an empirical proof of universality beyond
-the submitted renormalization family. Those remain later integrations into the
-same runtime.
+consensus, a live brokerage system, an empirical universality proof, or a
+replacement for the constructive Lean audit. Those remain distinct scopes inside
+the same continuing runtime.
