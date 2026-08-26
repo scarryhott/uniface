@@ -219,6 +219,14 @@ class RuntimeCycleResult(BaseModel):
     reopening_active_processes: int = 0
     reopening_order_assessments: int = 0
     reopening_moral_connections: int = 0
+    resource_reintegrations: int = 0
+    resource_stages: int = 0
+    resources: int = 0
+    resource_engagements: int = 0
+    resource_translations: int = 0
+    resource_returns: int = 0
+    resource_pending_reintegrations: int = 0
+    resource_natural_components: int = 0
     started_at: str
     finished_at: str
 
@@ -240,7 +248,15 @@ class RuntimeStatus(BaseModel):
     reopening_active_processes: int = 0
     reopening_order_assessments: int = 0
     reopening_moral_connections: int = 0
+    resources: int = 0
+    resource_engagements: int = 0
+    resource_translations: int = 0
+    resource_returns: int = 0
+    resource_pending_reintegrations: int = 0
+    resource_stages: int = 0
+    resource_natural_components: int = 0
     public_interface_enabled: bool = True
     agentic_reintegration_enabled: bool = True
     iterated_reopening_enabled: bool = True
+    resource_protocol_enabled: bool = True
     turing_complete_assumed: bool = False
