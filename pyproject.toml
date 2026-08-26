@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "closure-supernet"
-version = "0.9.0"
-description = "Production-operable living Supernet with bounded Black Mirror hardware closure twins, temporary network constraints, and source-reversible physical-return reintegration"
-readme = "AUTONOMOUS_RUNTIME.md"
+version = "1.0.0"
+description = "One continuous source-preserving Supernet integrator with living network, translation, reopening, resource, equality, agent and bounded hardware lenses"
+readme = "UNIFIED_SUPERNET_RUNTIME.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [{name = "scarryhott"}]
@@ -22,7 +22,7 @@ dependencies = [
 dev = ["pytest>=8,<9", "pytest-asyncio>=0.24,<1"]
 
 [project.scripts]
-closure-supernet = "closure_supernet.cli_hardware:main"
+closure-supernet = "closure_supernet.cli_supernet:main"
 
 [tool.setuptools.packages.find]
 include = ["closure_supernet*"]
