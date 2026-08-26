@@ -1,11 +1,10 @@
-"""Closure Supernet living cyber-physical production runtime.
+"""Closure Supernet unified living integration runtime.
 
-Exact source occurrences remain canonical. TranslationEvents remain directed
-interaction; problems, resources, actions and device constraints remain living
-relative forms. The hardware layer adds only bounded deterministic device twins,
-scoped temporary constraints, actuation receipts, and OPEN return reintegration.
-It does not enable direct physical, nuclear, quantum, laser, voltage, magnetic,
-cryogenic, or plasma control.
+Exact source occurrences remain canonical. The runtime's one semantic operation
+is continuous integration: every offered or returned relative form receives an
+append-only integration receipt and contributes to a replayable successor field.
+Living, translation, equality, resource, reopening, agent and bounded hardware
+modules remain adapters and lenses over that field.
 """
 
 from . import living_store_runtime as _living_store_runtime
@@ -15,6 +14,7 @@ from .runtime import ClosureSupernetRuntime
 from . import resource_runtime as _resource_runtime
 from . import equality_runtime as _equality_runtime
 from . import hardware_runtime as _hardware_runtime
+from . import supernet_runtime as _supernet_runtime
 
 __all__ = ["RuntimeConfig", "ClosureSupernetRuntime"]
-__version__ = "0.9.0"
+__version__ = "1.0.0"

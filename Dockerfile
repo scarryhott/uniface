@@ -10,7 +10,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 RUN addgroup --system closure && adduser --system --ingroup closure --home /app closure
 
-COPY pyproject.toml AUTONOMOUS_RUNTIME.md ./
+COPY pyproject.toml UNIFIED_SUPERNET_RUNTIME.md ./
 COPY closure_supernet ./closure_supernet
 RUN pip install --no-cache-dir .
 
