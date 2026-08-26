@@ -77,30 +77,93 @@ NRRF765 problem return
 ↝ collective action consequence reintegrated as an OPEN relation to its source problem
 ```
 
-These are architectural interpretations implemented and software-tested in Python. They are **not yet** a machine-checked refinement theorem from the runtime to NRRF765.
+## Public traces and collective architecture
+
+- **NRRF766** — a public `Site` whose available actions are exactly finite traces of participant interaction; shared architecture as the least field containing all participant trajectories; collective interaction as non-separable relational structure rather than quantity; human and AI autonomy together with collective reachability; closure-relative immutability.
+
+Runtime correspondence:
+
+```text
+Site action
+↝ authenticated or development participant interaction event
+
+finite trace
+↝ append-only interaction and event history
+
+sharedArch
+↝ current living-field projection generated from participant trajectories
+
+interField
+↝ cross-participant problem/action interaction structure, not a score
+
+closure immutability
+↝ already-admitted repetition does not rewrite source history; new interaction creates a later event and return
+```
+
+## Forgotten assumptions, moral connection, and iterated reopening
+
+- **NRRF767** — learned lessons, forgotten assumptions, suspension/reordering, remaining understanding, and moral connection on what survives admissible suspension.
+- **NRRF768** — nonempty families of admissible reopenings; `remainingStar` as the intersection of their closed readings; content-preserving permutation versus meaning-changing dependency reorder; iterated decreasing closed residues; finite stabilization without a universal final core; moral connection as agreement on the general residue while plurality remains outside it.
+
+The executable NRRF768 interface realizes selected correspondences:
+
+```text
+admissible reopening family
+↝ persistent ReopeningFamily with explicit variants and source occurrence IDs
+
+closure of a reopening
+↝ least finite saturation under participant-supplied implication rules
+
+remainingStar
+↝ intersection of every stored variant closure + closedness verification
+
+ordered Reading
+↝ exact reading occurrence + held sequence + dependency edges + meaning key
+
+content-preserving permutation
+↝ same occurrence content, changed order, unchanged declared meaning
+
+meaning-changing reorder
+↝ same occurrence content, changed order, changed declared meaning + OPEN seam
+
+iterate
+↝ persistent ReopeningProcess advanced one ResidueRound at a time
+
+finite stabilization
+↝ STABLE_AT_CURRENT_FINITE_SCOPE, never FINAL_CORE
+
+star moral connection
+↝ both participant understandings contain the residue while their outside-residue plurality remains stored
+```
+
+The finite implication engine and powerset safety bound are derived executable charts. They do not restrict NRRF768’s abstract admissible families or establish that machine-generated semantics exhaust the source notes.
 
 ## Runtime correspondence status
 
-The runtime now contains three connected executable layers:
+The runtime now contains four connected executable layers:
 
 ```text
 canonical source / interpretation / admission engine
 digital connector fabric
 public living problem–interaction–action field
+iterated reopening / dependency-order / residue field
 ```
 
-The agentic reintegration path is:
+The combined nonterminal path is:
 
 ```text
-returned action consequence
+real problem and ordered assumptions
+→ admissible reopening family
+→ current closed residue
+→ residue-relative moral connection
+→ collective interaction and action
+→ returned consequence
 → exact immutable occurrence
-→ MORAL_CONSEQUENCE candidate relation
-→ interpretation witness
-→ constitutional admission
-→ participant confirmation/rejection
-→ Black Mirror and living-field projection
-→ reopened problem
+→ interpretation and admission
+→ new reopening process
 ```
+
+The Python implementation is software-tested, source-reversible and explicitly scoped. It is **not yet** a machine-checked refinement theorem from runtime execution to NRRF764–768.
 
 A future formal bridge should prove selected correspondences such as:
 
@@ -109,7 +172,10 @@ runtime cycle ↔ sensor–selection run
 problem non-emptiness ↔ real Problem witness
 interaction receipt ↔ Solution/Inter equivalence
 note insertion ↔ loop step
-return reintegration ↔ problem self-interaction / language translation
+public action trace ↔ Site trace monoid
+remaining-star computation ↔ explicit finite closure-system instance
+residue iteration ↔ NRRF768 iterate under a proved data refinement
+residue moral connection ↔ star_moral_connect_iff
 append-only memory ↔ admitted latent memory
 living projection ↔ nonterminal returned reading
 ```
@@ -122,7 +188,9 @@ The formal sequence supports:
 
 ```text
 source axiometry
-→ real problems and admitted forms
+→ real problems and ordered assumptions
+→ admitted reopening families
+→ current invariant residue
 → notes and active translations
 → interactions / solutions
 → collective action and consequence
@@ -136,7 +204,7 @@ It does not support:
 ```text
 pre-given closure
 → isolated computation
-→ terminal answer or terminal social order
+→ terminal answer, final moral core, or terminal social order
 ```
 
 ## Status rule
