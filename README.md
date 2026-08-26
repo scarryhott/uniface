@@ -2,8 +2,8 @@
 
 **Closure Supernet is one source-preserving continuous integrator whose public
 interface is the living topology of every human, agent, resource, problem,
-translation, selection, action, return, reopening, hardware reading, and
-classical value-flow event in the field.**
+translation, selection, action, return, reopening, hardware reading, classical
+value-flow event, and relative-renormalization closure in the field.**
 
 ```text
 exact source or returned form
@@ -18,10 +18,10 @@ exact source or returned form
 ```
 
 Closure is not the web protocol, database, AI model, proof object, UI chart,
-hardware device, brokerage, or market order. Those carry or render the same
-active translation field.
+hardware device, brokerage, market order, counterterm, or renormalization scheme.
+Those carry or render the same active translation field.
 
-## Version 2.1 — complete interface plus NRRF780 trading lens
+## Version 2.2 — complete interface plus NRRF780 and NRRF781 lenses
 
 The root page `/` and `/supernet` are one pan-and-zoom Supernet surface. The same
 events can be read through:
@@ -30,24 +30,33 @@ events can be read through:
 field · perspective zoom · point/line/loop · truth diagonal · metavector
 ball/hair · 0/∞ reciprocal poles · light cone · ellipse mirror
 shared architecture · natural-form selector · anatomy tree · trading value flow
+relative renormalization closure
 ```
 
-The `trading` lens integrates the formal reading from
-`NRRF780ClassicalTradingSystemLocalPricesInfCostsMultilayerValueFlow`:
+### NRRF780 trading
+
+The `trading` lens retains signed size, bid, ask, fill, mark, and fee; derives
+local-price/inf-cost flow; records rigid `BUY→ASK` and `SELL→BID` determination;
+and evaluates system friction, price holonomy, and P&L. It is evaluation-only
+with no brokerage or order submission. See
+[`TRADING_SUPERNET_NRRF780.md`](TRADING_SUPERNET_NRRF780.md).
+
+### NRRF781 relative renormalization
+
+The `renormalization` lens accepts a submitted cutoff family, checks whether all
+pairwise differences are cutoff-independent within scope, and when rigid returns:
 
 ```text
-signed size · bid · ask · fill · mark · fee
-→ local price relation
-→ fee + slippage = inf cost
-→ net value flow = −cost
-→ source-reversible OPEN return
+relative pairwise closure
+absolute level = undetermined
+scheme selected = false
+limit required = false
+truth issued = false
 ```
 
-It includes rigid quote-side execution (`BUY→ASK`, `SELL→BID`), price-shift and
-numéraire invariance, system friction, price-holonomy circuits, and
-constant-position P&L. It is simulation/evaluation only: no brokerage connection,
-live order routing, or automatic order submission is present. See
-[`TRADING_SUPERNET_NRRF780.md`](TRADING_SUPERNET_NRRF780.md).
+Counterterm schemes remain noncanonical charts. New cutoff evidence reopens the
+prior scoped closure and creates a successor family. See
+[`RENORMALIZATION_SUPERNET_NRRF781.md`](RENORMALIZATION_SUPERNET_NRRF781.md).
 
 ## Natural-form selector
 
@@ -82,7 +91,8 @@ tan(π/2)              rotation–extension seam
 `SupernetIntegrator.integrate` is the one canonical semantic transition.
 Resources, living problems, directed TranslationEvents, relative equality,
 reopening families, collective actions, agents, Black Mirror, bounded hardware,
-and trading remain adapters and lenses over the append-only field.
+trading, and relative renormalization remain adapters and lenses over the
+append-only field.
 
 ## Run
 
@@ -97,6 +107,7 @@ closure-supernet serve
 Open:
 
 - `/` or `/supernet` — complete continuous topology and direct interaction
+- `/renormalization` — NRRF781 scheme-free relative-closure lens
 - `/trading` — NRRF780 classical value-flow compatibility lens
 - `/translation` — directed TranslationEvent compatibility lens
 - `/resources` — open-form resource compatibility lens
@@ -107,20 +118,18 @@ Open:
 - `/runtime` — autonomous diagnostics
 - `/docs` — API documentation
 
-## Trading APIs
+## NRRF781 APIs
 
 ```text
-GET  /network/trading/capabilities
-POST /network/trading/selector
-POST /network/trading/transactions
-GET  /network/trading/transactions
-POST /network/trading/systems
-POST /network/trading/invariance/shift
-POST /network/trading/invariance/numeraire
-POST /network/trading/circuits
-POST /network/trading/pnl
-GET  /network/trading/field
-GET  /supernet/project?lens=trading
+GET  /network/renormalization/capabilities
+POST /network/renormalization/families
+GET  /network/renormalization/families
+POST /network/renormalization/families/{id}/extend
+GET  /network/renormalization/families/{id}/closure
+POST /network/renormalization/families/{id}/schemes
+GET  /network/renormalization/schemes
+GET  /network/renormalization/field
+GET  /supernet/project?lens=renormalization
 ```
 
 ## Main Supernet APIs
@@ -145,18 +154,19 @@ WS   /supernet/stream
 Autonomy cannot overwrite exact sources, infer truth from resemblance or
 transport success, make determination issue TRUE, select one canonical language,
 omit affected perspectives while claiming completion, automatically execute a
-hardware constraint, submit a market order, assume Turing completeness, or treat
-a local return as terminal.
+hardware constraint, submit a market order, select a counterterm as truth,
+assume Turing completeness, or treat a local return as terminal.
 
-The hardware implementation remains deterministic and simulation-only. The
-trading implementation remains evaluator/simulator-only and is not financial
-advice or evidence of profitable strategy performance.
+The hardware implementation remains deterministic and simulation-only. Trading
+remains evaluator/simulator-only. The NRRF781 runtime check is finite and scoped:
+it does not establish an empirical universality class outside submitted cutoffs.
 
 ## Repository map
 
 - [`COMPLETE_SUPERNET_INTERFACE.md`](COMPLETE_SUPERNET_INTERFACE.md) — unified UI and topology operations.
 - [`UNIFIED_SUPERNET_RUNTIME.md`](UNIFIED_SUPERNET_RUNTIME.md) — continuous integrator.
-- [`TRADING_SUPERNET_NRRF780.md`](TRADING_SUPERNET_NRRF780.md) — six-layer trading, cost, holonomy and P&L lens.
+- [`TRADING_SUPERNET_NRRF780.md`](TRADING_SUPERNET_NRRF780.md) — six-layer trading lens.
+- [`RENORMALIZATION_SUPERNET_NRRF781.md`](RENORMALIZATION_SUPERNET_NRRF781.md) — common-divergence and scheme-free relative closure.
 - [`FOUNDATION.md`](FOUNDATION.md) — note-guided foundation.
 - [`AXIOMETRIC_SOURCE_GRAMMAR.md`](AXIOMETRIC_SOURCE_GRAMMAR.md) — literal source operations.
 - [`TRANSLATIONAL_TRUTH_RUNTIME.md`](TRANSLATIONAL_TRUTH_RUNTIME.md) — directed TranslationEvents.
@@ -170,5 +180,6 @@ advice or evidence of profitable strategy performance.
 
 The current implementation is a complete single-node current-field Supernet. It
 is not terminal completion, physical-law validation, distributed causal
-consensus, or a live brokerage system. Those remain later integrations into the
+consensus, a live brokerage system, or an empirical proof of universality beyond
+the submitted renormalization family. Those remain later integrations into the
 same runtime.

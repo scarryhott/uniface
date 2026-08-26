@@ -42,7 +42,7 @@ class RuntimeConfig:
         os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500")
     )
     integration_user_agent: str = os.getenv(
-        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/2.1"
+        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/2.2"
     )
     integration_allow_private_networks: bool = _bool(
         "CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False
@@ -112,6 +112,13 @@ class RuntimeConfig:
     trading_simulation_only: bool = True
     trading_allow_direct_market_execution: bool = False
     trading_brokerage_connected: bool = False
+
+    # NRRF781 evaluates submitted cutoff families and scheme charts. It cannot
+    # turn a finite runtime check into an unscoped theorem or select an absolute
+    # normalization as truth.
+    renormalization_enabled: bool = _bool("CLOSURE_RENORMALIZATION_ENABLED", True)
+    renormalization_absolute_level_determined: bool = False
+    renormalization_scheme_is_closure: bool = False
 
     environment: str = os.getenv("CLOSURE_ENVIRONMENT", "development").strip().lower()
     service_role: str = os.getenv("CLOSURE_SERVICE_ROLE", "all").strip().lower()
