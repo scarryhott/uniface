@@ -5,14 +5,17 @@ The repository contains an executable, persistent, public living-network runtime
 ## Active cycle
 
 ```text
-poll digital sources
+poll digital transports
 → sense exact local and public occurrences
 → reintegrate returned collective-action consequences
+→ reintegrate returned resource forms
+→ advance admissible reopening processes
 → propose candidate relations
 → build source-reversible interpretation witnesses
 → apply constitutional admission rules
-→ apply participant reintegration decisions
+→ apply participant decisions
 → audit affected perspectives
+→ integrate the current live resource stage
 → project Black Mirror and the living field
 → export source-reversible returns
 → reopen
@@ -23,12 +26,14 @@ Autonomy is bounded. The runtime never:
 
 - mutates an original occurrence;
 - silently normalizes notation;
-- upgrades semantic likeness into truth;
+- upgrades semantic likeness or protocol delivery into truth;
+- forces resources into a finite ontology;
+- selects one external language as canonical;
 - treats public popularity, money, rank, or model confidence as moral authority;
 - omits affected perspectives while claiming collective completion;
 - activates destructive external actions;
 - assumes the whole field is Turing complete;
-- treats a local halt, settlement, or return as terminal closure;
+- treats a local halt, settlement, finite-scope residue, or return as terminal closure;
 - turns formal similarity into physical or moral fact.
 
 ## Source note on `0` and `∞`
@@ -46,9 +51,11 @@ The source notes identify `0` and `∞` as reciprocal poles. They are not the ax
 - **RuleReviewAgent** — proposes versioned rule revisions from repeated seams.
 - **ProjectionAgent** — builds the current source-reversible Black Mirror topology.
 - **DigitalIntegrationManager** — imports and exports digital sources without granting remote systems admission authority.
-- **LivingNetworkManager / reintegration agent** — persists participants, perspectives, real problems, notes, interactions-as-solutions, collective actions, returned consequences, and agentic reintegration proposals.
+- **LivingNetworkManager** — persists participants, perspectives, problems, interactions-as-solutions, actions, returns, and problem reintegration.
+- **IteratedReopeningManager** — advances admissible reopening families and dependency-sensitive closed residues.
+- **LiveResourceProtocolManager** — persists open resource forms, active engagements, returned resources, OPEN reintegration translations, protocol receipts, natural components, and live stages.
 
-The living reintegration agent does not declare a consequence to be the final solution. It creates a source-reversible `MORAL_CONSEQUENCE` candidate relation between the returned occurrence and the real problem, identifies missing affected perspectives, and reopens the problem for interpretation and participant decision.
+Neither reintegration agent declares a return to be the final solution. Each creates a source-reversible OPEN relation and exposes it for interpretation and participant-relative admission.
 
 ## Quick start
 
@@ -63,6 +70,8 @@ closure-supernet serve
 Open:
 
 - public living field: `http://localhost:8000/`
+- live resource continuum: `http://localhost:8000/resources`
+- iterated reopening field: `http://localhost:8000/reopening`
 - autonomous runtime console: `http://localhost:8000/runtime`
 - API documentation: `http://localhost:8000/docs`
 - health: `http://localhost:8000/health`
@@ -85,25 +94,26 @@ integration_receipts
 integration_runs
 ```
 
-It also includes the living public field:
+The living public field adds participant, perspective, problem, interaction,
+action, return and reintegration tables. Iterated reopening adds families,
+variants, ordered readings, order assessments, processes, residue rounds and
+moral connections.
+
+The resource continuum adds:
 
 ```text
-living_participants
-living_perspectives
-living_problems
-living_problem_states
-living_interactions
-living_solution_receipts
-living_problem_notes
-living_actions
-living_action_states
-living_action_returns
-living_reintegration_proposals
-living_reintegration_decisions
-living_state
+resource_forms
+resource_engagements
+resource_translations
+resource_translation_decisions
+resource_returns
+resource_reintegrations
+resource_protocol_receipts
+resource_live_stages
+resource_state
 ```
 
-Exact text remains in immutable `occurrences`. Problem, action, and reintegration state changes are additional records rather than replacements.
+Exact text remains in immutable `occurrences`. State changes and relations are additional records rather than replacements.
 
 ## Public relative forms
 
@@ -113,39 +123,46 @@ Note          = immutable occurrence + self-interaction / loop step
 Solution      = receipt constituted by an interaction
 Action        = exact collective intent + participants + affected perspectives + OPEN assumptions
 Return        = exact consequence returned by action
-Reintegration = agent-proposed, participant-decidable translation back into the problem
+Resource      = exact occurrence + open author-selected form/language labels
+Engagement    = active resource interaction preserving transformation history
+Translation   = frame-to-frame witness whose protocol and truth verdicts remain separate
+ResourceReturn= a new resource form linked to its source and queued for reintegration
+LiveStage     = complete current-field coverage + delivery history + order-independent limit signature
 ```
 
-No quantity or quality score is stored as the foundational social value. The social return path is collective action and its consequences.
+No quantity or quality score is stored as the foundational social value. No resource label or language is treated as complete identity.
 
-## Public living API
+## Public APIs
+
+The public living API remains available under `/network/*`. Iterated reopening is under `/network/reopening/*`. The resource continuum provides:
 
 ```text
-GET  /network/capabilities
-POST /network/participants
-GET  /network/participants
-POST /network/perspectives
-GET  /network/perspectives
-POST /network/problems
-GET  /network/problems
-GET  /network/problems/{id}/field
-POST /network/problems/{id}/state
-POST /network/problems/{id}/notes
-POST /network/interactions
-GET  /network/interactions
-GET  /network/solutions
-POST /network/actions
-GET  /network/actions
-POST /network/actions/{id}/state
-POST /network/actions/{id}/returns
-GET  /network/returns
-POST /network/reintegrate
-GET  /network/reintegration
-POST /network/reintegration/{id}/decision
-GET  /network/field
+GET  /network/resources/capabilities
+POST /network/resources
+GET  /network/resources
+POST /network/resource-engagements
+GET  /network/resource-engagements
+POST /network/resource-translations
+GET  /network/resource-translations
+POST /network/resource-translations/{id}/decision
+POST /network/resource-returns
+GET  /network/resource-returns
+GET  /network/resource-reintegrations
+POST /network/resource-reintegrate
+POST /network/resource-protocol-receipts
+GET  /network/resource-protocol-receipts
+POST /network/resource-live/integrate
+GET  /network/resource-live/stages
+GET  /network/resource-field
 ```
 
-The previous source, rule, projection, integration, runtime, and WebSocket APIs remain available.
+## Protocol/truth boundary
+
+A transport receipt can report success or failure. It cannot directly set a resource translation to TRUE or FALSE. Natural components are generated only from current participant-relative TRUE translation decisions.
+
+The runtime preserves delivery order in every stage while computing the live limit signature from sorted exact resource occurrences and admitted translation pairs. The current signature is compared to a full current-batch recomputation without stopping the network.
+
+See [`LIVE_RESOURCE_PROTOCOL.md`](LIVE_RESOURCE_PROTOCOL.md).
 
 ## Digital integrations
 
@@ -158,7 +175,7 @@ GITHUB_REPOSITORY
 HTTP_JSON_FEED
 ```
 
-External assertions enter as immutable sources, not truth claims. Outbound returns include Black Mirror plus living-field statistics and reverse source indexes.
+External assertions enter as immutable sources, not truth claims. Outbound returns include Black Mirror, living-field statistics, iterated reopening, resource-stage state, and reverse source indexes.
 
 See [`DIGITAL_SUPERNET_INTEGRATIONS.md`](DIGITAL_SUPERNET_INTEGRATIONS.md).
 
@@ -167,12 +184,16 @@ See [`DIGITAL_SUPERNET_INTEGRATIONS.md`](DIGITAL_SUPERNET_INTEGRATIONS.md).
 Implemented now:
 
 - single-node durable storage;
-- persistent participant and perspective records;
+- persistent participants and perspectives;
 - public problem/action/return interface;
-- autonomous reintegration;
+- open-form resources and active engagements;
+- autonomous problem and resource reintegration;
+- iterated reopening and dependency-order readings;
+- protocol/truth separation;
+- live-stage and batch-signature checking;
 - exact source immutability;
 - append-only state and decision history;
-- digital connectors, API, dashboard, tests, and Docker support.
+- digital transports, API, dashboards, tests, and Docker support.
 
 Not yet claimed:
 
@@ -180,8 +201,9 @@ Not yet claimed:
 - encrypted private/community scopes;
 - public cloud deployment;
 - replicated multi-node storage and federation;
-- signed commitments and action receipts;
-- machine-checked refinement from Python execution to NRRF764–765;
+- genuine partially ordered concurrent event structures;
+- signed commitments and resource receipts;
+- machine-checked refinement from Python execution to NRRF764–769;
 - empirical proof of conscious-cultural or moral outcomes.
 
 These remain explicit next closure levels rather than hidden behind a terminal-completion claim.
