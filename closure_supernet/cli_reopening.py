@@ -20,7 +20,7 @@ def main() -> None:
 
             os.environ["CLOSURE_DB_PATH"] = args.db
         uvicorn.run(
-            "closure_supernet.api_reopening:app",
+            "closure_supernet.api_translation:app",
             host=args.host,
             port=args.port,
             reload=False,
