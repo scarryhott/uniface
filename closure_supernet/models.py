@@ -213,6 +213,12 @@ class RuntimeCycleResult(BaseModel):
     living_actions: int = 0
     living_returns: int = 0
     living_open_reintegration: int = 0
+    reopening_rounds: int = 0
+    reopening_families: int = 0
+    reopening_processes: int = 0
+    reopening_active_processes: int = 0
+    reopening_order_assessments: int = 0
+    reopening_moral_connections: int = 0
     started_at: str
     finished_at: str
 
@@ -229,6 +235,12 @@ class RuntimeStatus(BaseModel):
     living_problems: int = 0
     living_actions: int = 0
     living_open_reintegration: int = 0
+    reopening_families: int = 0
+    reopening_rounds: int = 0
+    reopening_active_processes: int = 0
+    reopening_order_assessments: int = 0
+    reopening_moral_connections: int = 0
     public_interface_enabled: bool = True
     agentic_reintegration_enabled: bool = True
+    iterated_reopening_enabled: bool = True
     turing_complete_assumed: bool = False
