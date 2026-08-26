@@ -111,7 +111,7 @@ def test_resource_api_preserves_translation_api(tmp_path: Path) -> None:
     with TestClient(app) as client:
         assert client.get("/translation").status_code == 200
         assert client.get("/resources").status_code == 200
-        translation_capabilities = client.get("/translation/capabilities")
+        translation_capabilities = client.get("/network/translations/capabilities")
         resource_capabilities = client.get("/network/resources/capabilities")
         assert translation_capabilities.status_code == 200
         assert resource_capabilities.status_code == 200
