@@ -1,0 +1,85 @@
+{
+  "occurrence": "Sense(Obs) → unique unitary path selector → Translation Event (admit → return → reopen) → next Sense",
+  "projection": "field-run.json",
+  "of": "one public root closure loop",
+  "stage": "te",
+  "cycle": 0,
+  "relative_reading": {
+    "sense": {
+      "sense": 0,
+      "path": 1.400506957,
+      "returned": -1.649873261
+    },
+    "path": {
+      "sense": -1.400506957,
+      "path": 0,
+      "returned": -3.050380218
+    },
+    "returned": {
+      "sense": 1.649873261,
+      "path": 3.050380218,
+      "returned": 0
+    }
+  },
+  "relative_scale": -1.400506957,
+  "truth_issued": false,
+  "two_person_E2E": "OPEN",
+  "TRUE": "not issued",
+  "nrrf781": {
+    "lens": "NRRF781",
+    "derived_chart": true,
+    "not_lean": true,
+    "nrrf781": "derived chart of the live cycle, not Lean",
+    "absolute_level": null,
+    "scheme_selected": false,
+    "cutoff_independent": true,
+    "cocycle_consistent": true,
+    "scheme_chart": {
+      "noncanonical": true,
+      "scheme_is_closure": false,
+      "never_selected_as_truth": true,
+      "counterterm_member": "sense",
+      "renormalized_display": {
+        "sense": 0,
+        "path": -1.400506957,
+        "returned": 1.649873261
+      },
+      "shift_probe": 1,
+      "shifted_display": {
+        "sense": -1,
+        "path": -2.400506957,
+        "returned": 0.649873261
+      },
+      "shift_moves_absolute": true,
+      "shift_preserves_relative": true
+    },
+    "family": {
+      "cutoff_labels": [
+        "0.0",
+        "0.1",
+        "0.2"
+      ],
+      "members": {
+        "sense": [
+          4.3,
+          7.1,
+          9.9
+        ],
+        "path": [
+          2.899493043,
+          5.699493043,
+          8.499493043
+        ],
+        "returned": [
+          5.949873261,
+          8.749873261,
+          11.549873261
+        ]
+      },
+      "common_coeff": 2.8
+    }
+  },
+  "chart_not_closure": true,
+  "participant": "OPEN",
+  "leftover_pr_10": "not this"
+}

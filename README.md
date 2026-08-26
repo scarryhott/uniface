@@ -103,7 +103,8 @@ closure-supernet serve
 
 Open:
 
-- `/` or `/supernet` — complete continuous topology and direct interaction
+- `/` or `/supernet` — one live Sense → unique-path → TE → NRRF781 → reopen occurrence (`/` face, `/supernet` pan/zoom reading)
+- `/field-run.json` — machine-readable snapshot of that same occurrence
 - `/trading` — NRRF780 classical value-flow compatibility lens
 - `/translation` — directed TranslationEvent compatibility lens
 - `/resources` — open-form resource compatibility lens
