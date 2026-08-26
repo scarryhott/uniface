@@ -134,6 +134,17 @@ def test_field_run_json_is_the_same_occurrence_snapshot():
     assert payload["of"] == "one public root closure loop"
     assert payload["sense_consumes"] == "unified supernet field"
     assert payload["prior_cycle_residues"] == []
+    assert payload["truth_issued"] is False
+    assert payload["two_person_E2E"] == "OPEN"
+    assert isinstance(payload["unresolved_alternatives"], list)
+    assert payload["selected_path"] not in payload["unresolved_alternatives"]
+    assert payload["admissibility_space"]["realized_closure"] == payload["selected_path"]
+    assert payload["admissibility_space"]["remaining_potential"] == payload["unresolved_alternatives"]
+    assert payload["admissibility_space"]["discarded_linear_leftover"] is False
+    assert payload["admissibility_space"]["live_potential"] is True
+    assert payload["admissibility_space"]["TRUE"] == "not issued"
+    assert payload["admissibility_space"]["two_person_E2E"] == "OPEN"
+    assert payload["admissibility_space"]["finite_halt_oracle"] is False
     assert "Lean" not in FIELD_RUN.read_text(encoding="utf-8").replace("not Lean", "")
     node = shutil.which("node")
     if node is None:
@@ -309,6 +320,87 @@ console.log(JSON.stringify({
     assert payload["two_person_E2E"] == "OPEN"
 
 
+def test_te_feeds_unresolved_alternatives_into_unified_field():
+    import shutil
+    import subprocess
+
+    node = shutil.which("node")
+    if node is None:
+        return
+    script = (
+        "const u=require(" + json.dumps(str(LOOP_JS)) + ");"
+        + r"""
+u.resetLoop();
+u.loop.geom.ss = 0.2;
+u.doSense();
+const rem0 = u.loop.obs.undetermined_string.remainder.slice();
+const realized0 = u.loop.obs.undetermined_string.scenario;
+u.doSelect();
+const p0 = u.loop.path;
+const unresolved0 = p0.unresolved_alternatives;
+if (!Array.isArray(unresolved0) || unresolved0.length !== rem0.length - 1) throw new Error('unresolved is not remainder minus selected');
+if (unresolved0.indexOf(p0.formId) >= 0) throw new Error('selected form still in unresolved');
+if (JSON.stringify(unresolved0) !== JSON.stringify(rem0.filter(id => id !== p0.formId))) throw new Error('unresolved != rem - formId');
+if (p0.discarded_linear_leftover !== false) throw new Error('leftover still discarded');
+if (Math.abs(p0.nextSs - 0.8) > 1e-12) throw new Error('halt/continuation must invert ss');
+if (p0.finite_halt_oracle !== false) throw new Error('finite halt oracle');
+u.loop.te = u.translationEvent();
+if (u.loop.te.TRUE !== 'not issued') throw new Error('TRUE issued');
+if (u.loop.te.two_person_E2E !== 'OPEN') throw new Error('E2E faked');
+if (JSON.stringify(u.loop.te.unresolved_alternatives) !== JSON.stringify(unresolved0)) throw new Error('TE dropped unresolved');
+if (u.loop.te.admissibility_space.realized_closure !== p0.formId) throw new Error('TE missing realized closure');
+if (JSON.stringify(u.loop.te.admissibility_space.remaining_potential) !== JSON.stringify(unresolved0)) throw new Error('TE missing remaining potential');
+u.doReopen();
+const field = u.currentUnifiedField();
+if (JSON.stringify(field.unresolved_alternatives) !== JSON.stringify(unresolved0)) throw new Error('field dropped unresolved');
+if (field.selected_path !== p0.formId) throw new Error('field missing selected path');
+if (field.admissibility_space.realized_closure !== p0.formId) throw new Error('field missing realized closure');
+if (JSON.stringify(field.admissibility_space.remaining_potential) !== JSON.stringify(unresolved0)) throw new Error('field missing remaining potential');
+if (field.truth_issued !== false || field.TRUE !== 'not issued' || field.two_person_E2E !== 'OPEN') throw new Error('truth/e2e');
+u.doSense();
+const o1 = u.loop.obs;
+if (JSON.stringify(o1.undetermined_string.remainder) !== JSON.stringify(unresolved0)) throw new Error('next Sense remainder refilled linearly');
+if (o1.undetermined_string.remainder.indexOf(realized0) >= 0) throw new Error('previously realized form reintroduced as leftover');
+if (o1.undetermined_string.remainder.indexOf(p0.formId) >= 0) throw new Error('selected form still in next remainder');
+if (JSON.stringify(o1.unresolved_alternatives) !== JSON.stringify(unresolved0)) throw new Error('Sense did not consume unresolved');
+if (!o1.admissibility_space || o1.admissibility_space.realized_closure !== p0.formId) throw new Error('Sense missing admissibility_space');
+u.doSelect();
+const p1 = u.loop.path;
+if (JSON.stringify(p1.remainder) !== JSON.stringify(unresolved0)) throw new Error('selector did not read remaining potential');
+if (Math.abs(p1.nextSs + o1.undetermined_string.ss - 1) > 1e-12) throw new Error('nextSs is not inverse of ss');
+const withoutAlts = {
+  undetermined_string: o1.undetermined_string,
+  residue_scale: o1.residue_scale,
+  relative_reading: o1.relative_reading,
+  prior_cycle_residues: o1.prior_cycle_residues,
+  live_relation: o1.live_relation,
+  unified_field: Object.assign({}, o1.unified_field, {unresolved_alternatives: [], admissibility_space: null})
+};
+const pNoAlts = u.uniqueUnitaryPathPartition(withoutAlts);
+if (p1.field_unit === pNoAlts.field_unit) throw new Error('remaining potential did not enter the unique path mix');
+console.log(JSON.stringify({
+  ok: true,
+  selected_0: p0.formId,
+  rem0: rem0,
+  unresolved0: unresolved0,
+  rem1: o1.undetermined_string.remainder,
+  TRUE: field.TRUE,
+  two_person_E2E: field.two_person_E2E,
+  truth_issued: field.truth_issued
+}));
+"""
+    )
+    result = subprocess.run([node, "-e", script], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout.strip().splitlines()[-1])
+    assert payload["ok"] is True
+    assert payload["selected_0"] not in payload["unresolved0"]
+    assert payload["rem1"] == payload["unresolved0"]
+    assert payload["TRUE"] == "not issued"
+    assert payload["two_person_E2E"] == "OPEN"
+    assert payload["truth_issued"] is False
+
+
 def test_root_and_supernet_share_field_wide_sense():
     html = _html()
     supernet = (DOCS / "supernet.html").read_text(encoding="utf-8")
@@ -319,8 +411,17 @@ def test_root_and_supernet_share_field_wide_sense():
     assert "function currentUnifiedField" in js
     assert "consumes:'unified supernet field'" in js
     assert "over:'unified supernet field'" in js
+    assert "function remainingPotential" in js
+    assert "function liveRemainder" in js
+    assert "unresolved_alternatives" in js
+    assert "admissibility_space" in js
+    assert "remaining_potential" in js
+    assert "function remainingPotential" not in html
+    assert "function liveRemainder" not in html
     assert "function unifyField" not in supernet
     assert 'src="closure-field.js"' in supernet
     assert js.count("function uniqueUnitaryPathPartition") == 1
     assert "eyJ" not in js
     assert "eyJ" not in supernet
+    assert "remaining potential" in supernet
+    assert "unresolved alternatives as live admissibility space" in supernet
