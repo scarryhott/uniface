@@ -138,15 +138,50 @@ star moral connection
 
 The finite implication engine and powerset safety bound are derived executable charts. They do not restrict NRRF768’s abstract admissible families or establish that machine-generated semantics exhaust the source notes.
 
+## Translational truth rather than protocol
+
+- **NRRF769** — endpoint protocol verdicts are neither necessary nor sufficient for translational truth; faithful protocols agree because they are disciplined by the same truth; closure is invariant under contractive renderings; live integration gives a monotone sequence of closed stages whose limit equals batch integration; the limit is reindexing-invariant even when intermediate stages are delivery-order dependent; live participant readings remain mutually admissible and faithful protocols only certify what the network already shares.
+
+The live resource layer instantiates selected interface commitments:
+
+```text
+Protocol encode / handshake / verdict
+↝ transport label, wire reference and protocol receipt stored separately from truth
+
+TransTruth
+↝ resource translation witness + participant-relative TRUE / OPEN / FALSE admission
+
+Rendering between frames
+↝ authored source frame, target frame, language labels, preservation, transformation and omission
+
+faithfulness
+↝ open named faithfulness dimensions; no finite global scale is treated as truth
+
+live stage
+↝ append-only snapshot of resources, engagements, translations, decisions and delivery order
+
+live limit
+↝ order-independent signature of exact resource occurrences and admitted translation pairs
+
+batch truth correspondence
+↝ each current stage recomputes the same canonical signature from the whole current field
+
+protocol independence
+↝ natural components are generated from admitted translations, not resource types, wire success or one selected language
+```
+
+The runtime preserves delivery order as history while computing the limit signature from sorted sets. This is a software invariant and not yet a machine-checked refinement of `liveLimit_eq_batch` or `live_limit_reindex`.
+
 ## Runtime correspondence status
 
-The runtime now contains four connected executable layers:
+The runtime now contains five connected executable layers:
 
 ```text
 canonical source / interpretation / admission engine
-digital connector fabric
+digital transport and connector fabric
 public living problem–interaction–action field
 iterated reopening / dependency-order / residue field
+open-form live self-reintegrating resource continuum
 ```
 
 The combined nonterminal path is:
@@ -155,15 +190,15 @@ The combined nonterminal path is:
 real problem and ordered assumptions
 → admissible reopening family
 → current closed residue
-→ residue-relative moral connection
-→ collective interaction and action
-→ returned consequence
-→ exact immutable occurrence
-→ interpretation and admission
-→ new reopening process
+→ notes, resources and active engagements
+→ returned resource and collective consequence
+→ OPEN translation witness
+→ relative admission
+→ natural component and current live stage
+→ new reopening and engagement
 ```
 
-The Python implementation is software-tested, source-reversible and explicitly scoped. It is **not yet** a machine-checked refinement theorem from runtime execution to NRRF764–768.
+The Python implementation is software-tested, source-reversible and explicitly scoped. It is **not yet** a machine-checked refinement theorem from runtime execution to NRRF764–769.
 
 A future formal bridge should prove selected correspondences such as:
 
@@ -175,6 +210,9 @@ note insertion ↔ loop step
 public action trace ↔ Site trace monoid
 remaining-star computation ↔ explicit finite closure-system instance
 residue iteration ↔ NRRF768 iterate under a proved data refinement
+resource protocol verdict separation ↔ NRRF769 protocol/truth independence
+resource live-stage limit ↔ NRRF769 liveLimit_eq_batch
+resource limit reindexing ↔ NRRF769 live_limit_reindex
 residue moral connection ↔ star_moral_connect_iff
 append-only memory ↔ admitted latent memory
 living projection ↔ nonterminal returned reading
@@ -191,10 +229,10 @@ source axiometry
 → real problems and ordered assumptions
 → admitted reopening families
 → current invariant residue
-→ notes and active translations
-→ interactions / solutions
-→ collective action and consequence
-→ provisional returned relation
+→ open-form resources and active engagement
+→ translations / interactions / solutions
+→ collective action and returned consequence
+→ live stage and provisional natural components
 → UX projection
 → reopening
 ```
@@ -203,6 +241,8 @@ It does not support:
 
 ```text
 pre-given closure
+→ finite resource ontology or privileged external language
+→ protocol handshake as truth
 → isolated computation
 → terminal answer, final moral core, or terminal social order
 ```
