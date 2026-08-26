@@ -1,10 +1,11 @@
-"""Closure Supernet unified living integration runtime.
+"""Closure Supernet complete continuous living interface.
 
-Exact source occurrences remain canonical. The runtime's one semantic operation
-is continuous integration: every offered or returned relative form receives an
-append-only integration receipt and contributes to a replayable successor field.
-Living, translation, equality, resource, reopening, agent and bounded hardware
-modules remain adapters and lenses over that field.
+Every offered or returned relative form enters one append-only integrator. The
+primary public surface is a zoomable topology over that field: point/line/loop,
+truth diagonal, metavector, ball/hair, reciprocal poles, light cone, ellipse,
+shared architecture, selector and anatomy-tree readings are lenses rather than
+parallel runtimes. Natural-form determination requires a rigidity receipt and
+never emits TRUE merely because the relation became rigid.
 """
 
 from . import living_store_runtime as _living_store_runtime
@@ -15,6 +16,7 @@ from . import resource_runtime as _resource_runtime
 from . import equality_runtime as _equality_runtime
 from . import hardware_runtime as _hardware_runtime
 from . import supernet_runtime as _supernet_runtime
+from . import topology_runtime as _topology_runtime
 
 __all__ = ["RuntimeConfig", "ClosureSupernetRuntime"]
-__version__ = "1.0.0"
+__version__ = "2.0.0"
