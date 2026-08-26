@@ -219,6 +219,11 @@ class RuntimeCycleResult(BaseModel):
     reopening_active_processes: int = 0
     reopening_order_assessments: int = 0
     reopening_moral_connections: int = 0
+    translation_created: int = 0
+    translation_events: int = 0
+    translation_open: int = 0
+    translation_returned: int = 0
+    translation_reopened: int = 0
     started_at: str
     finished_at: str
 
@@ -240,7 +245,13 @@ class RuntimeStatus(BaseModel):
     reopening_active_processes: int = 0
     reopening_order_assessments: int = 0
     reopening_moral_connections: int = 0
+    translation_events: int = 0
+    translation_open: int = 0
+    translation_returned: int = 0
+    translation_reopened: int = 0
     public_interface_enabled: bool = True
     agentic_reintegration_enabled: bool = True
     iterated_reopening_enabled: bool = True
+    translation_field_enabled: bool = True
+    protocol_is_transport_only: bool = True
     turing_complete_assumed: bool = False
