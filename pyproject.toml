@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "closure-supernet"
+version = "0.1.0"
+description = "Digital chart of a hardware closure loop. Not Closure. Simulated first device only."
+requires-python = ">=3.11"
+readme = "closure_supernet/README.md"
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+include = ["closure_supernet*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
