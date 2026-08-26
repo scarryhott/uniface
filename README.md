@@ -43,19 +43,16 @@ with no brokerage or order submission. See
 
 ### NRRF781 relative renormalization
 
-The `renormalization` lens accepts a submitted cutoff family, checks whether all
-pairwise differences are cutoff-independent within scope, and when rigid returns:
+The public root recurrence (`docs/index.html`) folds this lens into each live
+Translation Event. From the current Sense(Obs) and unique path it builds a
+finite local cutoff family, records pairwise Δ(i,j) as `relative_reading` when
+that difference is constant in cutoff index, and carries the residue/scale into
+the next Sense. Absolute level stays null. Scheme charts stay noncanonical.
+TRUE is not issued. There is no second public site or `/renormalization` face
+on the live root.
 
-```text
-relative pairwise closure
-absolute level = undetermined
-scheme selected = false
-limit required = false
-truth issued = false
-```
-
-Counterterm schemes remain noncanonical charts. New cutoff evidence reopens the
-prior scoped closure and creates a successor family. See
+The Python `renormalization` adapter remains a notes/runtime chart for local
+Supernet process use. See
 [`RENORMALIZATION_SUPERNET_NRRF781.md`](RENORMALIZATION_SUPERNET_NRRF781.md).
 
 ## Natural-form selector
@@ -107,7 +104,6 @@ closure-supernet serve
 Open:
 
 - `/` or `/supernet` — complete continuous topology and direct interaction
-- `/renormalization` — NRRF781 scheme-free relative-closure lens
 - `/trading` — NRRF780 classical value-flow compatibility lens
 - `/translation` — directed TranslationEvent compatibility lens
 - `/resources` — open-form resource compatibility lens
@@ -119,6 +115,8 @@ Open:
 - `/docs` — API documentation
 
 ## NRRF781 APIs
+
+Local Python notes/runtime chart only — not the public root face.
 
 ```text
 GET  /network/renormalization/capabilities
