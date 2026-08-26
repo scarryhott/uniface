@@ -72,8 +72,8 @@ def test_supernet_is_the_same_loop_panzoom_projection():
     js = _js()
     vercel = json.loads((DOCS / "vercel.json").read_text(encoding="utf-8"))
     sources = {item["source"]: item["destination"] for item in vercel["rewrites"]}
-    assert sources["/supernet"] == "/index.html"
-    assert sources["/supernet/"] == "/index.html"
+    assert sources["/supernet"] == "/"
+    assert sources["/supernet/"] == "/"
     assert vercel["cleanUrls"] is True
     assert vercel["trailingSlash"] is False
     assert not (DOCS / "supernet.html").exists()

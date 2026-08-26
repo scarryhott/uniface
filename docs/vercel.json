@@ -2,7 +2,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/supernet", "destination": "/index.html" },
-    { "source": "/supernet/", "destination": "/index.html" }
+    { "source": "/supernet", "destination": "/" },
+    { "source": "/supernet/", "destination": "/" }
   ]
 }
