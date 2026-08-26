@@ -240,6 +240,14 @@ class RuntimeCycleResult(BaseModel):
     equality_open: int = 0
     equality_reopened: int = 0
     equality_components: int = 0
+    hardware_devices: int = 0
+    hardware_constraints: int = 0
+    hardware_twin_runs: int = 0
+    hardware_actuations: int = 0
+    hardware_returns: int = 0
+    hardware_pending_returns: int = 0
+    hardware_reintegrations: int = 0
+    hardware_expired_constraints: int = 0
     started_at: str
     finished_at: str
 
@@ -279,6 +287,12 @@ class RuntimeStatus(BaseModel):
     equality_open: int = 0
     equality_reopened: int = 0
     equality_components: int = 0
+    hardware_devices: int = 0
+    hardware_constraints: int = 0
+    hardware_twin_runs: int = 0
+    hardware_actuations: int = 0
+    hardware_returns: int = 0
+    hardware_pending_returns: int = 0
     public_interface_enabled: bool = True
     agentic_reintegration_enabled: bool = True
     iterated_reopening_enabled: bool = True
@@ -287,5 +301,8 @@ class RuntimeStatus(BaseModel):
     relative_equality_enabled: bool = True
     relative_equality_context_indexed: bool = True
     relative_equality_witness_valued: bool = True
+    hardware_closure_enabled: bool = True
+    hardware_simulation_only: bool = True
+    hardware_direct_physical_actuation: bool = False
     protocol_is_transport_only: bool = True
     turing_complete_assumed: bool = False

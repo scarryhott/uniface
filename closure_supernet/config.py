@@ -42,7 +42,7 @@ class RuntimeConfig:
         os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500")
     )
     integration_user_agent: str = os.getenv(
-        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/0.8"
+        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/0.9"
     )
     integration_allow_private_networks: bool = _bool(
         "CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False
@@ -91,6 +91,24 @@ class RuntimeConfig:
         os.getenv("CLOSURE_EQUALITY_PAIRS_PER_CYCLE", "128")
     )
 
+    # The hardware closure loop is a bounded simulation and reintegration layer.
+    # It never enables direct physical, nuclear, quantum, high-energy laser,
+    # voltage, cryogenic, magnetic or plasma actuation.
+    hardware_closure_enabled: bool = _bool(
+        "CLOSURE_HARDWARE_CLOSURE_ENABLED", True
+    )
+    hardware_reintegrations_per_cycle: int = int(
+        os.getenv("CLOSURE_HARDWARE_REINTEGRATIONS_PER_CYCLE", "16")
+    )
+    hardware_constraint_ttl_seconds: int = int(
+        os.getenv("CLOSURE_HARDWARE_CONSTRAINT_TTL_SECONDS", "3600")
+    )
+    hardware_auto_synthesize: bool = _bool(
+        "CLOSURE_HARDWARE_AUTO_SYNTHESIZE", False
+    )
+    hardware_simulation_only: bool = True
+    hardware_allow_direct_physical_actuation: bool = False
+
     # Production is an operational boundary around the living network, not a
     # replacement formalism. The default remains local/open for development.
     environment: str = os.getenv("CLOSURE_ENVIRONMENT", "development").strip().lower()
@@ -137,6 +155,8 @@ class RuntimeConfig:
             raise ValueError("CLOSURE_ENVIRONMENT must be development, test, or production")
         if self.service_role not in {"all", "web", "worker"}:
             raise ValueError("CLOSURE_SERVICE_ROLE must be all, web, or worker")
+        if self.hardware_constraint_ttl_seconds < 1:
+            raise ValueError("CLOSURE_HARDWARE_CONSTRAINT_TTL_SECONDS must be positive")
         self.database_path.parent.mkdir(parents=True, exist_ok=True)
         self.inbox_dir.mkdir(parents=True, exist_ok=True)
         self.backup_dir.mkdir(parents=True, exist_ok=True)
