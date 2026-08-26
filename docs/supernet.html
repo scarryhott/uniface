@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en" data-projection="panzoom">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Uniface — Closure field</title>
+<style>
+:root{--bg:#080b11;--p:#141a27;--p2:#1b2334;--l:#3a465f;--t:#eef3fa;--m:#aab6c9;--a:#9fb4ff;--g:#58d394;--r:#ff737c;--o:#e7bd56}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#19243f,var(--bg) 46%);color:var(--t);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}header{padding:30px clamp(18px,5vw,68px) 22px;border-bottom:1px solid var(--l)}h1{margin:0 0 10px;font-size:clamp(31px,5vw,58px)}h2,h3{margin-top:0}.sub{max-width:1050px;color:var(--m);line-height:1.58}.eq,.code{padding:14px;border:1px solid var(--l);border-radius:13px;background:var(--p);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto}.eq{margin-top:17px}.controls{padding:14px clamp(18px,5vw,68px);display:grid;grid-template-columns:repeat(4,1fr);gap:10px;position:sticky;top:0;z-index:5;background:rgba(8,11,17,.9);border-bottom:1px solid var(--l);backdrop-filter:blur(12px)}@media(max-width:960px){.controls{grid-template-columns:1fr 1fr}}label{display:block;color:var(--m);font-size:12px;margin-bottom:5px}select,input,textarea,button{width:100%;padding:9px;background:var(--p2);color:var(--t);border:1px solid var(--l);border-radius:10px}textarea{min-height:72px;resize:vertical}button{cursor:pointer;font-weight:800}button:disabled{opacity:.55;cursor:wait}.stage{text-align:left}.stage.on{border-color:var(--a);box-shadow:0 0 0 1px var(--a) inset}.stage .tag{display:block;color:var(--a);font-size:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin-bottom:3px}main{padding:18px clamp(18px,5vw,68px) 55px}.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}.c4{grid-column:span 4}.c5{grid-column:span 5}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}@media(max-width:920px){.c4,.c5,.c7,.c8,.c12{grid-column:1/-1}}.panel{background:rgba(20,26,39,.96);border:1px solid var(--l);border-radius:16px;padding:16px}.muted{color:var(--m);line-height:1.52}.badges{display:flex;gap:7px;flex-wrap:wrap}.badge{padding:7px 10px;border-radius:999px;font-weight:800;font-size:12px}.true{background:color-mix(in srgb,var(--g) 23%,transparent);color:var(--g)}.false{background:color-mix(in srgb,var(--r) 23%,transparent);color:var(--r)}.open{background:color-mix(in srgb,var(--o) 23%,transparent);color:var(--o)}.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.metric{background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:10px}.metric strong{display:block;font-size:18px;margin-top:3px}svg{width:100%;min-height:420px;background:#0d121d;border:1px solid #303a50;border-radius:13px;touch-action:none;cursor:grab}svg:active{cursor:grabbing}.canvas-wrap{position:relative}.canvas-tools{position:absolute;top:10px;right:10px;display:flex;gap:6px;z-index:2}.canvas-tools button{width:auto;padding:6px 10px}.proj{margin-top:10px;color:var(--a)}html[data-projection="panzoom"] #canvas{min-height:min(78vh,760px)}html[data-projection="panzoom"] .c8{grid-column:span 12}html[data-projection="panzoom"] .c4{grid-column:span 12}.callout{border-left:4px solid var(--a);background:var(--p2);padding:13px 15px;border-radius:0 11px 11px 0;line-height:1.5}.path{display:flex;gap:7px;align-items:center;overflow:auto;padding-bottom:7px}.step{min-width:120px;background:var(--p2);border:1px solid #303a50;border-radius:10px;padding:9px;font-size:11px}.step.on{border-color:var(--a);background:color-mix(in srgb,var(--a) 14%,var(--p2))}.arrow{color:var(--a);font-size:21px}.state{white-space:pre-wrap;background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;max-height:320px;overflow:auto}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px 7px;border-bottom:1px solid #303a50;text-align:left}th{color:#d5ddeb}.scroll{overflow:auto;max-height:380px}details{background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:10px}summary{cursor:pointer;font-weight:700}footer{padding:0 clamp(18px,5vw,68px) 35px;color:var(--m)}#noteReceipt a{color:var(--a)}.te-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}@media(max-width:920px){.te-grid{grid-template-columns:1fr}}.surface{background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:12px}.surface.live{border-color:var(--g)}.surface .tag{font-size:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--a);margin-bottom:6px}.surface h3{margin:0 0 6px;font-size:14px}.geom{padding:12px clamp(18px,5vw,68px) 0;display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px}@media(max-width:960px){.geom{grid-template-columns:1fr 1fr}.wide{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header>
+<h1>Uniface — Closure field</h1>
+<div class="sub"><strong>Closure is translational truth continuously realized through interaction.</strong> This page is a digital chart of that loop, not Closure. The current Sense is transformed by one unique unitary path selector into one visible Translation Event, then automatically admit → return → reopen into the next Sense. Each TE computes a finite local cutoff family from that Sense and unique path; pairwise Δ constant in cutoff index is the relative reading and becomes the next Sense residue/scale. Absolute level stays null. Scheme charts stay noncanonical. TRUE not issued. Two-person E2E OPEN. Persist is transport only.</div>
+<div class="eq" id="loopEq">Sense(Obs) → unique unitary path selector → Translation Event (admit → return → reopen) → next Sense</div>
+</header>
+<section class="controls" id="stages" aria-label="running loop">
+<button type="button" class="stage" data-stage="sense" id="stageSense"><span class="tag">1</span>Sense(Obs)</button>
+<button type="button" class="stage" data-stage="select" id="stageSelect"><span class="tag">2</span>unique unitary path</button>
+<button type="button" class="stage" data-stage="te" id="stageTe"><span class="tag">3</span>Translation Event</button>
+<button type="button" class="stage" data-stage="reopen" id="stageReopen"><span class="tag">4</span>reopen → next Sense</button>
+</section>
+<main><div class="grid">
+<div class="panel c8">
+<h2>Translation Event</h2>
+<p class="muted">Runtime center of this digital chart. One event at a time. Relative renormalization is a cell of this same event, not a second site. Protocol / git / ?receipt= / uniface-relative are hidden transport. TRUE not issued.</p>
+<div id="teGrid" class="te-grid" aria-live="polite"></div>
+<div class="canvas-wrap" style="margin-top:14px"><svg id="canvas" viewBox="0 0 1000 540" aria-label="live closure field"></svg><div class="canvas-tools" aria-label="pan zoom reading"><button type="button" id="zoomIn">+</button><button type="button" id="zoomOut">−</button><button type="button" id="zoomFit">fit</button></div></div>
+<p class="muted">The geometric chart is the same loop: point → line → loop → return → new point. A local halt is a reading of this split, not a stop.</p>
+</div>
+<div class="panel c4">
+<h2>Sense(Obs)</h2>
+<div id="badges" class="badges"></div>
+<div id="metrics" class="metrics" style="margin-top:12px"></div>
+<div id="claim" class="callout" style="margin-top:12px"></div>
+<div id="senseState" class="state" style="margin-top:10px">Sense has not yet read.</div>
+</div>
+<div class="panel c12">
+<h2>Unique unitary path selector</h2>
+<p class="muted">Input = undetermined string of the current relative instantiation. One unique path through 0/∞ + r (magnitude) + i (direction). Output = determination of relation, not a spacetime object. Not a menu of leftover panels.</p>
+<div id="path" class="path"></div>
+<div id="source" class="code"></div>
+</div>
+<div class="panel c12">
+<details>
+<summary>Geometry of the unique path (chart, not the face)</summary>
+<p class="muted">These are the inverted Sense / r / i / sensor controls. The loop writes them. A visitor may still move them; that becomes the next Sense. The loop does not wait for a note.</p>
+<div class="geom">
+<div class="wide"><label>Interaction state</label><select id="scenario"></select></div>
+<div><label>Natural-form phase</label><input id="phase" type="range" min="0" max="4" step="1" value="2"></div>
+<div><label>r — extension <span id="rOut"></span></label><input id="r" type="range" min="0" max="4" step="0.05" value="1.8"></div>
+<div><label>i — rotation <span id="iOut"></span></label><input id="i" type="range" min="0" max="6.283" step="0.02" value="1.57"></div>
+<div><label>sensor ↔ selection <span id="ssOut"></span></label><input id="ss" type="range" min="0" max="1" step="0.01" value="0.5"></div>
+</div>
+</details>
+</div>
+<div class="panel c12">
+<details>
+<summary>Hidden transport evidence (receipts / lineage / note-return)</summary>
+<p class="muted">Persist may remain as carriage. It is not the primary UI. Participant is not defaulted. TRUE not issued. Two-person E2E OPEN.</p>
+<form id="noteReturn"><label for="noteText">Optional note into transport (not the loop)</label><textarea id="noteText" rows="3" maxlength="4000" placeholder="Optional. The field does not wait for this."></textarea><button type="submit" id="noteSubmit" style="margin-top:8px">write transport receipt</button></form>
+<div id="noteReceipt" class="state" style="margin-top:10px">No transport receipt yet. TRUE not issued. Two-person E2E OPEN.</div>
+</details>
+</div>
+<div class="panel c12">
+<details>
+<summary>Leftover source-preserving panels</summary>
+<h3>Latent memory return</h3>
+<div id="memory" class="state"></div>
+<h3>Conscious cultural morality</h3>
+<div class="scroll"><table><thead><tr><th>Reading</th><th>Field role</th><th>Not reducible to</th></tr></thead><tbody id="field"></tbody></table></div>
+<h3>Source-preserving architecture</h3>
+<div class="scroll"><table><thead><tr><th>Layer</th><th>Stored form</th><th>Admissibility rule</th></tr></thead><tbody id="layers"></tbody></table></div>
+<details style="margin-top:10px"><summary>Derived computation chart</summary><p class="muted">Uniface does not assume Turing completeness. Halting is one loop read as a selected point; continuation is that point read as reopened potential. Machine models, graphs, quotients, embeddings, and formal operators remain scoped implementation charts.</p><div class="eq">source operation → explicit digital reading → machine theorem/simulation → scope → return to source → reopening</div></details>
+</details>
+</div>
+</div></main>
+<footer>Uniface preserves definition while rejecting presumed isolation. It preserves computation while rejecting a universal Turing assumption. It preserves return while rejecting terminal closure. Network is not money, AGI, rules, or law.</footer>
+<script src="closure-field.js"></script>
+</body>
+</html>
