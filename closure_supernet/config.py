@@ -37,7 +37,7 @@ class RuntimeConfig:
         os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500")
     )
     integration_user_agent: str = os.getenv(
-        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/0.4"
+        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/0.5"
     )
     integration_allow_private_networks: bool = _bool(
         "CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False
@@ -63,6 +63,18 @@ class RuntimeConfig:
     )
     reopening_powerset_limit: int = int(
         os.getenv("CLOSURE_REOPENING_POWERSET_LIMIT", "10")
+    )
+
+    # Live resources are open authored forms. This switch governs the software
+    # realization only; it is not a finite registry of admissible resources.
+    resource_protocol_enabled: bool = _bool(
+        "CLOSURE_RESOURCE_PROTOCOL_ENABLED", True
+    )
+    resource_reintegrations_per_cycle: int = int(
+        os.getenv("CLOSURE_RESOURCE_REINTEGRATIONS_PER_CYCLE", "32")
+    )
+    resource_stages_retained: int = int(
+        os.getenv("CLOSURE_RESOURCE_STAGES_RETAINED", "1000")
     )
 
     # The field is deliberately not assumed Turing complete. Digital computation
