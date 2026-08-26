@@ -1,14 +1,18 @@
 # Live Self-Reintegrating Resource Protocol
 
 This layer instantiates resources as living relative forms of the Closure
-Supernet.  It is a protocol for carrying interaction; it is not the closure and
+Supernet. It is a protocol for carrying interaction; it is not the closure and
 it does not define translational truth.
+
+The resource layer is integrated into the canonical `TranslationEvent` field.
+It does not create a parallel truth system.
 
 ```text
 resource form
 → active engagement
 → returned resource form
 → OPEN translation witness
+→ canonical TranslationEvent
 → relative admission
 → natural component
 → further engagement
@@ -24,9 +28,9 @@ truth    = admissible translation among readings
 closure  = the invariant completion transported through those translations
 ```
 
-A successful wire receipt can coexist with an OPEN or FALSE translation.  A
+A successful wire receipt can coexist with an OPEN or FALSE translation. A
 failed or absent protocol receipt does not make an otherwise admitted
-translation false.  Protocol verdicts and truth verdicts are persisted in
+translation false. Protocol verdicts and truth verdicts are persisted in
 separate records.
 
 ## No finite resource ontology
@@ -44,7 +48,7 @@ There is no `ResourceKind` enumeration and no registry that decides in advance
 whether a lesson, proof, service, commitment, compute process, image, material,
 story, action, physical result or future form may participate.
 
-The exact source occurrence remains canonical.  Labels help participants read
+The exact source occurrence remains canonical. Labels help participants read
 and retrieve a resource but do not become its complete identity.
 
 ## No externally selected language
@@ -57,7 +61,7 @@ canonical_form     = null
 canonical_language = null
 ```
 
-A natural component lists every participating form and language.  It does not
+A natural component lists every participating form and language. It does not
 select one as the language into which the others must collapse.
 
 ## Engagement and return
@@ -76,13 +80,34 @@ what is omitted
 affected perspectives
 ```
 
-An engagement never mutates the original resource.  A returned consequence is
+An engagement never mutates the original resource. A returned consequence is
 created as another immutable resource with `parent_resource_id` pointing back
 to its source.
 
 The autonomous reintegration agent then creates an OPEN translation from the
-source form to the returned form.  It preserves both exact occurrences and does
+source form to the returned form. It preserves both exact occurrences and does
 not claim that the return is already globally true or terminal.
+
+## Canonical TranslationEvent bridge
+
+Every resource translation is reconciled into the runtime's canonical
+`TranslationEvent` field:
+
+```text
+resource translation OPEN  → TranslationEvent INTERPRETED / OPEN
+resource translation TRUE  → TranslationEvent ADMITTED / TRUE
+resource translation FALSE → TranslationEvent REJECTED / FALSE
+```
+
+The source and target resource records become explicit relative forms inside
+the event. Transport metadata includes any protocol verdict together with:
+
+```text
+protocol_verdict_is_not_truth = true
+```
+
+This preserves one live truth-translation field rather than creating separate
+resource and non-resource truth systems.
 
 ## Natural unification
 
@@ -96,8 +121,8 @@ verdict is `TRUE`:
 resources + admitted translations → natural components
 ```
 
-`OPEN` translations remain visible edges.  `FALSE` translations remain visible
-rejections.  Every component retains all member sources, form labels and
+`OPEN` translations remain visible edges. `FALSE` translations remain visible
+rejections. Every component retains all member sources, form labels and
 language labels.
 
 This is the executable sense in which the continuum naturally unifies under
@@ -119,8 +144,8 @@ stage signature
 order-independent limit signature
 ```
 
-The stage signature preserves historical arrival order.  The limit signature
-is computed from the set of exact resource occurrences and admitted translation
+The stage signature preserves historical arrival order. The limit signature is
+computed from the set of exact resource occurrences and admitted translation
 pairs after sorting, so reindexing delivery does not change it.
 
 At every current stage, the runtime recomputes the same signature from the full
@@ -165,9 +190,10 @@ resource_live_stages
 resource_state
 ```
 
-Original occurrences remain in the canonical `occurrences` table.  Every
+Original occurrences remain in the canonical `occurrences` table. Every
 resource table stores references and append-only relational history rather than
-rewriting source text.
+rewriting source text. Resource translations additionally receive canonical
+records in the append-only TranslationEvent store.
 
 ## Public interface and API
 
@@ -205,6 +231,9 @@ GET  /network/resource-live/stages
 GET  /network/resource-field
 ```
 
+The canonical TranslationEvent interface remains available at `/translation`
+and `/network/translations/*`.
+
 ## Autonomous cycle
 
 When enabled, each runtime cycle performs:
@@ -214,6 +243,7 @@ poll transports
 → sense exact sources
 → reintegrate returned living actions
 → reintegrate returned resources
+→ reconcile resource translations into TranslationEvents
 → advance reopening processes
 → interpret and admit translations
 → integrate a live resource stage
@@ -243,11 +273,13 @@ None of those statuses silently becomes universal truth.
 ## Formal status
 
 - NRRF769 is machine-checked under its formal reading.
-- Closure Supernet 0.5 is a software-tested realization of selected live
+- Closure Supernet 0.6 is a software-tested realization of selected live
   integration and protocol-separation commitments.
+- The resource layer is integrated into the canonical `TranslationEvent`
+  runtime rather than operating as a parallel truth system.
 - The order-independent limit signature is an executable invariant.
 - A machine-checked refinement theorem from the Python runtime to NRRF769
   remains OPEN.
-- Typed heterogeneous frame translation, graded faithfulness laws and genuine
-  concurrent event structures remain further formal and distributed-runtime
-  work.
+- Typed heterogeneous frame translation laws, graded faithfulness laws and
+  genuine concurrent event structures remain further formal and distributed
+  runtime work.
