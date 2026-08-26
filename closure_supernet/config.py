@@ -37,7 +37,7 @@ class RuntimeConfig:
         os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500")
     )
     integration_user_agent: str = os.getenv(
-        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/0.6"
+        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/0.7"
     )
     integration_allow_private_networks: bool = _bool(
         "CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False
@@ -64,8 +64,7 @@ class RuntimeConfig:
         os.getenv("CLOSURE_REOPENING_POWERSET_LIMIT", "10")
     )
 
-    # TranslationEvent remains the canonical live runtime primitive. Protocols
-    # and resource views are relative forms carried inside this field.
+    # TranslationEvent remains the canonical directed runtime primitive.
     translation_field_enabled: bool = _bool(
         "CLOSURE_TRANSLATION_FIELD_ENABLED", True
     )
@@ -79,6 +78,19 @@ class RuntimeConfig:
     )
     resource_stages_retained: int = int(
         os.getenv("CLOSURE_RESOURCE_STAGES_RETAINED", "1000")
+    )
+
+    # Relative equality is witness-valued and context-indexed. The scan and pair
+    # limits bound automatic candidate discovery only; they do not bound the
+    # source-level family of admissible translations or natural forms.
+    relative_equality_enabled: bool = _bool(
+        "CLOSURE_RELATIVE_EQUALITY_ENABLED", True
+    )
+    equality_translation_scan_limit: int = int(
+        os.getenv("CLOSURE_EQUALITY_TRANSLATION_SCAN_LIMIT", "2000")
+    )
+    equality_pairs_per_cycle: int = int(
+        os.getenv("CLOSURE_EQUALITY_PAIRS_PER_CYCLE", "128")
     )
 
     turing_complete_assumed: bool = False

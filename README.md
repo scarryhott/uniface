@@ -12,7 +12,7 @@ Its central corrections are precise:
 >
 > **The mathematics may already exist, but its configured unification is an authored process of understanding, interpretation, and interaction.**
 
-Uniface preserves exact sources and operates their relations without replacing them with one external notation, finite resource ontology, canonical language, protocol verdict, or terminal result.
+Uniface preserves exact sources and operates their relations without replacing them with one external notation, finite resource ontology, canonical language, protocol verdict, Boolean-only equality, or terminal result.
 
 ## Foundation
 
@@ -39,9 +39,9 @@ tan(π/2)                              rotation–extension inter-bound fold
 
 Classical encodings, closure operators, topology, holonomy, computation, protocols, databases, and simulation matrices are derived charts only. They must preserve and return to the source operations.
 
-## Closure Supernet 0.6
+## Closure Supernet 0.7
 
-The canonical live primitive is `TranslationEvent`:
+The canonical directed live primitive remains `TranslationEvent`:
 
 ```text
 presentation
@@ -67,6 +67,47 @@ REJECTED
 ```
 
 `TRUE`, `FALSE`, and `OPEN` remain relative verdicts. A TRUE return may become new potential and reopen.
+
+## Context-indexed relative equality
+
+Directed translation is not automatically equality.
+
+```text
+Trans_c(x,y) = a TranslationEvent from x to y
+RelEq_c(x,y) = reverse + two return coherences + explicit scoped admission
+```
+
+The full closure relation is:
+
+```text
+x → y
+and y → x
+and (y → x) ∘ (x → y) returns x
+and (x → y) ∘ (y → x) returns y
+and a participant admits the witness in context c
+→ x =_c y
+```
+
+A `RelativeEqualityWitness` preserves the paths, sources, invariant, transformed structure, residue, context, return, and reopening conditions rather than reducing the relation to a Boolean.
+
+The same forms may be TRUE in one context and OPEN or FALSE in another. A later interaction reopens by creating a successor context, never by rewriting the earlier one.
+
+Natural-form components are built only from currently TRUE witnesses:
+
+```text
+relative forms + admitted equality witnesses → connected natural-form components
+```
+
+Every component retains all forms and languages:
+
+```text
+canonical_form     = null
+canonical_language = null
+```
+
+Literal source operators such as `0 ↔ ∞`, `r ↔ i`, `ball ↔ hair`, Triangle Time, Chaitin–Kakeya, `tan(π/2)`, and predual Fourier may be registered as source charts. A chart does not self-certify equivalence to another chart.
+
+See [`RELATIVE_EQUALITY_CALCULUS.md`](RELATIVE_EQUALITY_CALCULUS.md).
 
 ## Public living network
 
@@ -133,8 +174,8 @@ See [`LIVE_RESOURCE_PROTOCOL.md`](LIVE_RESOURCE_PROTOCOL.md).
 ## Slearn and Black Mirror
 
 ```text
-Slearn       = participation, configuration, learning, action, resource return, and reopening
-Black Mirror = current source-reversible topology of the living translation field
+Slearn       = participation, configuration, learning, action, resource return, equality formation, and reopening
+Black Mirror = current source-reversible topology of translations, components, obstructions, and OPEN seams
 Closure      = continuity of translational truth through both
 ```
 
@@ -146,7 +187,10 @@ poll digital transports
 → reintegrate returned actions and resources
 → reconcile resource translations into TranslationEvents
 → advance reopening processes
-→ interpret and admit translations
+→ interpret and admit directed translations
+→ discover reverse TranslationEvent candidates
+→ evaluate return coherence and context-relative equality
+→ build natural-form components
 → integrate live resource stage
 → project Black Mirror and living field
 → export source-reversible returns
@@ -169,6 +213,7 @@ Open:
 
 - public living field: `http://localhost:8000/`
 - canonical translation field: `http://localhost:8000/translation`
+- context-indexed equality field: `http://localhost:8000/equality`
 - live resource continuum: `http://localhost:8000/resources`
 - iterated reopening field: `http://localhost:8000/reopening`
 - autonomous runtime console: `http://localhost:8000/runtime`
@@ -189,7 +234,8 @@ These carry exact sources and projections. They do not define Closure or self-ce
 
 - [`FOUNDATION.md`](FOUNDATION.md) — canonical note-guided foundation.
 - [`CONFIGURED_UNIFICATION.md`](CONFIGURED_UNIFICATION.md) — understanding, interpretation, interaction, and admission.
-- [`TRANSLATIONAL_TRUTH_RUNTIME.md`](TRANSLATIONAL_TRUTH_RUNTIME.md) — `TranslationEvent` as the canonical live primitive.
+- [`TRANSLATIONAL_TRUTH_RUNTIME.md`](TRANSLATIONAL_TRUTH_RUNTIME.md) — `TranslationEvent` as the canonical directed primitive.
+- [`RELATIVE_EQUALITY_CALCULUS.md`](RELATIVE_EQUALITY_CALCULUS.md) — context-indexed reversible equality, return coherence, and natural-form components.
 - [`LIVE_RESOURCE_PROTOCOL.md`](LIVE_RESOURCE_PROTOCOL.md) — open-form resources, engagement, return, reintegration, natural components, and live limits.
 - [`LIVING_NETWORK_INTERFACE.md`](LIVING_NETWORK_INTERFACE.md) — public problems, interactions, collective actions, and consequences.
 - [`ITERATED_REOPENING_INTERFACE.md`](ITERATED_REOPENING_INTERFACE.md) — reopening families, dependency order, residues, and moral connection.
@@ -215,12 +261,16 @@ SOCIOECONOMIC_PROPOSAL
 MORAL_CONSEQUENCE
 PROTOCOL_DELIVERED
 RETURN_REINTEGRATED_OPEN
+RELATIVE_EQUALITY_PROPOSED
+RETURN_COHERENCE_OPEN
+RELATIVE_EQUALITY_TRUE_AT_CONTEXT
+RELATIVE_EQUALITY_REOPENED
 REJECTED_RELATION
 OPEN
 ```
 
 ## Scope
 
-The repository implements a complete **single-node, current-field living translation runtime** with public interfaces, persistent exact sources, canonical TranslationEvents, open-form resources, active engagement, self-reintegration, iterated reopening, transport-neutral connectors, APIs, tests, and source-reversible projections.
+The repository implements a complete **single-node, current-field living translation runtime** with public interfaces, persistent exact sources, canonical TranslationEvents, witness-valued context-indexed relative equality, open-form resources, active engagement, self-reintegration, iterated reopening, transport-neutral connectors, APIs, tests, and source-reversible projections.
 
-“Complete” means that every form currently in the executable field is represented and reversible to its source. It does not mean terminal completion, anticipation of all future resources, one complete language, production federation, cryptographic identity, a distributed concurrent event structure, or a machine-checked refinement theorem from Python to NRRF764–769. Those remain explicit next closure levels.
+“Complete” means that every form currently in the executable field is represented and reversible to its source, and every admitted equality is structurally witnessed at a declared context. It does not mean terminal completion, anticipation of all future resources, one complete language, a proved representation theorem, production federation, cryptographic identity, a distributed concurrent event structure, or a machine-checked refinement theorem from Python to the NRRF lineage. Those remain explicit next closure levels.

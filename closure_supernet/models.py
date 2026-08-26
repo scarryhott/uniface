@@ -232,6 +232,14 @@ class RuntimeCycleResult(BaseModel):
     resource_returns: int = 0
     resource_pending_reintegrations: int = 0
     resource_natural_components: int = 0
+    equality_candidates_created: int = 0
+    equality_contexts: int = 0
+    equality_witnesses: int = 0
+    equality_coherences: int = 0
+    equality_admitted: int = 0
+    equality_open: int = 0
+    equality_reopened: int = 0
+    equality_components: int = 0
     started_at: str
     finished_at: str
 
@@ -264,10 +272,20 @@ class RuntimeStatus(BaseModel):
     resource_pending_reintegrations: int = 0
     resource_stages: int = 0
     resource_natural_components: int = 0
+    equality_contexts: int = 0
+    equality_witnesses: int = 0
+    equality_coherences: int = 0
+    equality_admitted: int = 0
+    equality_open: int = 0
+    equality_reopened: int = 0
+    equality_components: int = 0
     public_interface_enabled: bool = True
     agentic_reintegration_enabled: bool = True
     iterated_reopening_enabled: bool = True
     translation_field_enabled: bool = True
     resource_protocol_enabled: bool = True
+    relative_equality_enabled: bool = True
+    relative_equality_context_indexed: bool = True
+    relative_equality_witness_valued: bool = True
     protocol_is_transport_only: bool = True
     turing_complete_assumed: bool = False

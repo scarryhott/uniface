@@ -1,4 +1,4 @@
-from .cli_resource import main
+from .cli_equality import main
 
 if __name__ == "__main__":
     main()

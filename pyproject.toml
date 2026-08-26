@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "closure-supernet"
-version = "0.6.0"
-description = "Source-preserving living TranslationEvent field with open-form resources, self-reintegration, iterated reopening, and transport-neutral integrations"
+version = "0.7.0"
+description = "Source-preserving TranslationEvent field with context-indexed relative equality, open-form resources, self-reintegration, and iterated reopening"
 readme = "AUTONOMOUS_RUNTIME.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
@@ -21,7 +21,7 @@ dependencies = [
 dev = ["pytest>=8,<9", "pytest-asyncio>=0.24,<1"]
 
 [project.scripts]
-closure-supernet = "closure_supernet.cli_resource:main"
+closure-supernet = "closure_supernet.cli_equality:main"
 
 [tool.setuptools.packages.find]
 include = ["closure_supernet*"]
