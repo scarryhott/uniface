@@ -52,6 +52,7 @@
     "Slearn_FRAMEWORK": "OPEN, not RETURNED",
     "NRRF764_NRRF765_on_slearn_main": "OPEN",
     "hardware_closure_gateway": "live control https://uniface-tawny.vercel.app/#hardware-gateway (docs/hardware.js simulated optical ellipse); Python chart remains closure_supernet/; admissible interpretation ≠ authorized actuation; SafetyEnvelope u_t; not Closure; not a physical chamber; last_beat 2026-08-26-0834-et; TRUE not issued",
+    "sense_persist": "live on https://uniface-tawny.vercel.app (docs/index.html function sense writes kind=relative_interaction, payload.inter=sense); Inter selects from last Sense Obs receipt; not a local re-render only; last_beat stays 2026-08-26-0834-et; TRUE not issued",
     "two_ai_loop": "OPEN: Uniface field ↔ Aristotle 068068ee (never 0517138e); not two-person human E2E; Lean not copied",
     "Origin_namespace": "OPEN (blocked; hardware layer lives in Uniface as closure_supernet/)",
     "framework": "not achieved"
