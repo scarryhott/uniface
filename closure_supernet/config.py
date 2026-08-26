@@ -42,7 +42,7 @@ class RuntimeConfig:
         os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500")
     )
     integration_user_agent: str = os.getenv(
-        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/2.2"
+        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/2.3"
     )
     integration_allow_private_networks: bool = _bool(
         "CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False
@@ -119,6 +119,16 @@ class RuntimeConfig:
     renormalization_enabled: bool = _bool("CLOSURE_RENORMALIZATION_ENABLED", True)
     renormalization_absolute_level_determined: bool = False
     renormalization_scheme_is_closure: bool = False
+
+    # NRRF783 carries sections, base sites, operations, and overlap witnesses as
+    # explicit runtime data. The Lean audit proves the constructive theorem; the
+    # Python chart only validates finite submitted witnesses.
+    constructive_forms_enabled: bool = _bool(
+        "CLOSURE_CONSTRUCTIVE_FORMS_ENABLED", True
+    )
+    constructive_section_carried_as_data: bool = True
+    constructive_classical_choice_required: bool = False
+    constructive_excluded_middle_required: bool = False
 
     environment: str = os.getenv("CLOSURE_ENVIRONMENT", "development").strip().lower()
     service_role: str = os.getenv("CLOSURE_SERVICE_ROLE", "all").strip().lower()

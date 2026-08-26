@@ -3,10 +3,10 @@
 Every offered or returned relative form enters one append-only integrator. The
 primary public surface is a zoomable topology over that field: point/line/loop,
 truth diagonal, metavector, ball/hair, reciprocal poles, light cone, ellipse,
-shared architecture, selector, anatomy-tree, classical value-flow, and
-scheme-free relative-renormalization readings are lenses rather than parallel
-runtimes. Natural-form determination requires a rigidity receipt and never emits
-TRUE merely because the relation became rigid.
+shared architecture, selector, anatomy-tree, classical value-flow,
+scheme-free relative-renormalization, and constructive explicit-witness readings
+are lenses rather than parallel runtimes. Natural-form determination requires a
+rigidity receipt and never emits TRUE merely because the relation became rigid.
 """
 
 from . import living_store_runtime as _living_store_runtime
@@ -20,6 +20,7 @@ from . import supernet_runtime as _supernet_runtime
 from . import topology_runtime as _topology_runtime
 from . import trading_runtime as _trading_runtime
 from . import renormalization_runtime as _renormalization_runtime
+from . import constructive_runtime as _constructive_runtime
 
 __all__ = ["RuntimeConfig", "ClosureSupernetRuntime"]
-__version__ = "2.2.0"
+__version__ = "2.3.0"
