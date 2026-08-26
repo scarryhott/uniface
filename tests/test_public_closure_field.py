@@ -70,27 +70,36 @@ def test_nrrf781_relative_renormalization_is_inside_the_live_te():
 def test_supernet_is_the_same_loop_panzoom_projection():
     html = _html()
     js = _js()
+    supernet = (DOCS / "supernet.html").read_text(encoding="utf-8")
     vercel = json.loads((DOCS / "vercel.json").read_text(encoding="utf-8"))
-    sources = {item["source"]: item["destination"] for item in vercel["rewrites"]}
-    assert sources["/supernet"] == "/index.html"
-    assert sources["/supernet/"] == "/index.html"
     assert vercel["cleanUrls"] is True
     assert vercel["trailingSlash"] is False
-    assert not (DOCS / "supernet.html").exists()
-    assert not (DOCS / "supernet" / "index.html").exists()
-    assert "path==='/supernet'" in html
-    assert "function bindPanZoom" in html
-    assert "function fieldRunSnapshot" in html
-    assert "Pan/zoom reading of the same live root closure loop" in html
-    assert 'id="zoomIn"' in html
-    assert 'id="zoomOut"' in html
-    assert 'id="zoomFit"' in html
-    assert 'aria-label="pan zoom reading"' in html
-    assert html.count('id="noteReturn"') == 1
-    assert "write transport receipt" in html.split("Hidden transport evidence")[1]
+    assert not vercel.get("rewrites")
+    assert (DOCS / "supernet.html").is_file()
+    assert not (DOCS / "supernet").exists()
+    assert 'src="closure-field.js"' in supernet
+    assert "function uniqueUnitaryPathPartition" not in supernet
+    assert "function localCutoffFamily" not in supernet
+    assert "function pairwiseRelativeRenormalization" not in supernet
+    assert "setInterval(tick,1400)" in js
+    assert "path==='/supernet'" in js
+    assert "function bindPanZoom" in js
+    assert "function fieldRunSnapshot" in js
+    assert "Pan/zoom reading of the same live root closure loop" in js
+    assert 'id="zoomIn"' in supernet
+    assert 'id="zoomOut"' in supernet
+    assert 'id="zoomFit"' in supernet
+    assert 'aria-label="pan zoom reading"' in supernet
+    assert 'data-projection="panzoom"' in supernet
+    assert supernet.count('id="noteReturn"') == 1
+    assert "write transport receipt" in supernet.split("Hidden transport evidence")[1]
     assert html.count("function persistCycle") == 1
+    assert js.count("function persistCycle") == 1
     assert html.count("setInterval(tick,1400)") == 1
     assert "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" not in js
+    assert "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" not in supernet
+    assert "TRUE not issued" in supernet
+    assert "truth_issued:false" in js
     assert FIELD_RUN.is_file()
 
 
