@@ -1,7 +1,10 @@
 {
   "kind": "derived_run_log",
   "status": "MODEL_SUGGESTED_RELATION",
-  "closure": "translational truth (not a web protocol, not git)",
+  "closure": "translational truth continuously realized through interaction (not a web protocol, not git)",
+  "digital_chart": "git persist + relative persist + Vercel projection (derived realization, not Closure)",
+  "runtime_center": "TranslationEvent",
+  "protocol": "transport only",
   "persistence_git": "occurrence/ledger persist (not closure)",
   "git_store": ["ledger/", "occurrences/", "ledger/runs/"],
   "relative_interaction_store": "supabase uniface-relative / public.uniface_relative_interaction (realtime on; not closure; not rmf)",
@@ -19,8 +22,11 @@
   "pages_seam": "OPEN: GitHub Pages not enabled from this PR.",
   "open_seams": {
     "T": "OPEN",
+    "TRUE": "not issued",
     "closure_web_protocol": "refused",
     "translational_truth": "OPEN",
+    "NRRF761_768_Lean": "OPEN (not invented; point-at only)",
+    "two_person_E2E": "OPEN",
     "Turing": "OPEN (not assumed)",
     "O_B_eq_R": "refused",
     "Pages": "OPEN",

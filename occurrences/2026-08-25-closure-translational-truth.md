@@ -1,53 +1,28 @@
-# Occurrence: closure is translational truth (AUTHOR source)
+---
+id: occ-2026-08-25-closure-translational-truth
+kind: NOTE
+station: 27
+author_status: AUTHOR_DIRECTED
+selected_0: occ-2026-08-25-central-note
+status: OPEN
+TRUE: not issued
+---
 
-Harry: “Ultimately closure is not a web protocol but a translational truth consider live integration of our current with this principle.” Chat 2026-08-25 ~9:49pm ET. This file stores the author's exact principle. It is not a rewrite of FOUNDATION (FOUNDATION §7 already names translational truth), not leftover Slearn PR 10, and not a claim that TRUE is issued or the framework is achieved.
+Ultimately closure is not a web protocol but a translational truth.
 
-```text
-kind                AUTHOR source
-author              Harry
-author_status       AUTHOR_DIRECTED
-id                  occ-2026-08-25-closure-translational-truth
-not                 FOUNDATION rewrite
-not                 MODEL_SUGGESTED_RELATION (the note itself)
-not                 a web protocol
-not                 leftover Slearn PR 10
-not                 TRUE issued
-not                 FRAMEWORK achieved
-not                 a rewrite of occ-2026-08-25-central-note
-```
+AUTHOR PRINCIPLES (exact; not paraphrased as the note):
 
-## Exact text (author; do not paraphrase)
+1. The current implementation is a digital chart of Closure, not Closure itself.
+2. Closure = translational truth continuously realized through interaction.
+3. Live loop is presentation → interaction → translation → relative admission → return → changed field → reopening. NOT web request → database mutation → API response.
+4. Invert: participant/agent occurrence → Translation Event → relative forms produced by that translation. Problem, Note, Interaction, ReopeningFamily, ResidueRound, MoralConnection, BlackMirrorProjection, Participant are relative views of the evolving translation field.
+5. TRUE/FALSE/OPEN are local readings of an ongoing translation, not Closure. OPEN: translation has not yet completed at this relation. FALSE: the proposed translation fails under the active relation. TRUE: the relation has completed sufficiently to return a form. TRUE → return → new potential, not TRUE → finished.
+6. Closure = continuity by which Slearn movement and Black Mirror topology remain mutually alive. Neither is Closure.
+7. The live agent is a continuous translation participant, not a chatbot. Learning = closure reintegration into explicit relational memory, not hidden retraining.
+8. HTTP ~ WebSocket ~ local IPC ~ federated peer exchange only at transport. Compatibility: Does the translation preserve source, relation, authorship, difference, return and reopening?
+9. Federation is composing translation witnesses T23 ∘ T12, not one global database.
+10. NRRF761–768 are runtime layers of one principle (MODEL_SUGGESTED_RELATION compression, point-at, do not invent Lean): every digital form is a relative presentation; every meaningful state transition is a translation; Closure is the continuing truth of those translations through interaction.
+11. Major correction: make Translation the runtime center; demote Protocol to transport.
 
-```text
-Ultimately closure is not a web protocol but a translational truth
-```
-
-## Canonical occurrence fields
-
-```text
-NoteOccurrence
-  id                 occ-2026-08-25-closure-translational-truth
-  author             Harry
-  author_status      AUTHOR_DIRECTED
-  exact_text         Ultimately closure is not a web protocol but a translational truth
-  date               2026-08-25
-  source_location    live Uniface interaction (Harry, ~9:49pm ET)
-```
-
-## Assistant reading (MODEL_SUGGESTED_RELATION; not the note)
-
-git / Vercel / Supabase are persist and projection, not closure. Closure is translational truth: OPEN = unfinished translation, FALSE = translated forms contradict, TRUE = required relation returned at present level (not terminal). Current field remains OPEN; TRUE not issued. Central note stays selected 0. Two-person E2E still OPEN.
-
-## OPEN seams
-
-```text
-closure_as_web_protocol refused
-translational truth OPEN
-TRUE not issued
-two-person + agent E2E OPEN
-central_note_in_FOUNDATION OPEN
-framework not achieved
-leftover Slearn PR 10 is not the deploy
-```
-
-TRUE is not issued. Reopening remains available.
+MODEL_SUGGESTED_RELATION (separate from the author note; not issued TRUE):
+Current Uniface is a derived digital chart of Closure, not Closure. Git persist, Vercel projection, supabase relative store, and HTTP are transports of that chart. TranslationEvent is the runtime center. Protocol is transport only. TRUE is not issued. Two-person E2E remains OPEN. NRRF761–768 Lean is not invented here (point-at only).
