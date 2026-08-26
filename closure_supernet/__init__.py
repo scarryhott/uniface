@@ -6,8 +6,9 @@ iterated residues are source-reversible relative forms rather than authorities
 over the field.
 """
 
-# Load the tested living-store interaction insertion before runtime construction.
+# Load tested schema specializations before runtime construction.
 from . import living_store_runtime as _living_store_runtime
+from . import reopening_store_runtime as _reopening_store_runtime
 from .config import RuntimeConfig
 from .runtime import ClosureSupernetRuntime
 
