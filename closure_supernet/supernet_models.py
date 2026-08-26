@@ -29,6 +29,7 @@ class IntegrationLens(StrEnum):
     REOPENING = "reopening"
     ACTION = "action"
     HARDWARE = "hardware"
+    TRADING = "trading"
     EQUALITY = "equality"
     AGENT = "agent"
 
