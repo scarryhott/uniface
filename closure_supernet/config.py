@@ -37,7 +37,7 @@ class RuntimeConfig:
         os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500")
     )
     integration_user_agent: str = os.getenv(
-        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/0.5"
+        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/0.6"
     )
     integration_allow_private_networks: bool = _bool(
         "CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False
@@ -53,8 +53,7 @@ class RuntimeConfig:
     )
 
     # NRRF768 is executed as a finite, explicit runtime chart. The POWERSET
-    # bound is an implementation safety limit, not a foundational restriction
-    # on admissible reopening families.
+    # bound is an implementation safety limit, not a foundational restriction.
     iterated_reopening_enabled: bool = _bool(
         "CLOSURE_ITERATED_REOPENING_ENABLED", True
     )
@@ -65,16 +64,23 @@ class RuntimeConfig:
         os.getenv("CLOSURE_REOPENING_POWERSET_LIMIT", "10")
     )
 
-    # Translation is the canonical live runtime field. HTTP, WebSocket,
-    # repositories, webhooks and database views remain interchangeable transport
-    # charts. Disabling this flag preserves the older derived interfaces without
-    # claiming that protocol transport is Closure itself.
+    # TranslationEvent remains the canonical live runtime primitive. Protocols
+    # and resource views are relative forms carried inside this field.
     translation_field_enabled: bool = _bool(
         "CLOSURE_TRANSLATION_FIELD_ENABLED", True
     )
 
-    # The field is deliberately not assumed Turing complete. Digital computation
-    # is one derived chart and local halts reopen into later runtime cycles.
+    # Open-form resources have no finite type registry and no canonical language.
+    resource_protocol_enabled: bool = _bool(
+        "CLOSURE_RESOURCE_PROTOCOL_ENABLED", True
+    )
+    resource_reintegrations_per_cycle: int = int(
+        os.getenv("CLOSURE_RESOURCE_REINTEGRATIONS_PER_CYCLE", "32")
+    )
+    resource_stages_retained: int = int(
+        os.getenv("CLOSURE_RESOURCE_STAGES_RETAINED", "1000")
+    )
+
     turing_complete_assumed: bool = False
 
     def ensure_directories(self) -> None:

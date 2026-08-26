@@ -1,4 +1,4 @@
-from .cli_reopening import main
+from .cli_resource import main
 
 if __name__ == "__main__":
     main()
