@@ -30,8 +30,6 @@ class RuntimeConfig:
     llm_model: str = os.getenv("CLOSURE_LLM_MODEL", "gpt-5-mini")
     request_timeout_seconds: float = float(os.getenv("CLOSURE_LLM_TIMEOUT_SECONDS", "45"))
 
-    # Source-neutral digital integration fabric. Secrets are referenced by
-    # environment-variable name in connector records and are never persisted.
     integration_http_timeout_seconds: float = float(
         os.getenv("CLOSURE_INTEGRATION_HTTP_TIMEOUT_SECONDS", "30")
     )
@@ -39,15 +37,12 @@ class RuntimeConfig:
         os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500")
     )
     integration_user_agent: str = os.getenv(
-        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/0.3"
+        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/0.4"
     )
     integration_allow_private_networks: bool = _bool(
         "CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False
     )
 
-    # Living public network. The first implementation provides durable
-    # participant and perspective records but deliberately does not claim that
-    # production authentication or federation is already complete.
     public_interface_enabled: bool = _bool("CLOSURE_PUBLIC_INTERFACE_ENABLED", True)
     public_development_mode: bool = _bool("CLOSURE_PUBLIC_DEVELOPMENT_MODE", True)
     agentic_reintegration_enabled: bool = _bool(
@@ -55,6 +50,19 @@ class RuntimeConfig:
     )
     public_default_visibility: str = os.getenv(
         "CLOSURE_PUBLIC_DEFAULT_VISIBILITY", "PUBLIC"
+    )
+
+    # NRRF768 is executed as a finite, explicit runtime chart. The POWERSET
+    # bound is an implementation safety limit, not a foundational restriction
+    # on admissible reopening families.
+    iterated_reopening_enabled: bool = _bool(
+        "CLOSURE_ITERATED_REOPENING_ENABLED", True
+    )
+    reopening_processes_per_cycle: int = int(
+        os.getenv("CLOSURE_REOPENING_PROCESSES_PER_CYCLE", "16")
+    )
+    reopening_powerset_limit: int = int(
+        os.getenv("CLOSURE_REOPENING_POWERSET_LIMIT", "10")
     )
 
     # The field is deliberately not assumed Turing complete. Digital computation
