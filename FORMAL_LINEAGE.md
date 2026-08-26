@@ -71,10 +71,10 @@ NRRF765 latent note memory
 ↝ immutable occurrence history + append-only interaction and event records
 
 NRRF765 translational truth
-↝ canonical candidate → interpretation → admission pipeline
+↝ source → interaction → explicit translation → relative admission → return → reopening
 
 NRRF765 problem return
-↝ collective action consequence reintegrated as an OPEN relation to its source problem
+↝ collective action consequence translated back into its source problem
 ```
 
 ## Public traces and collective architecture
@@ -88,16 +88,16 @@ Site action
 ↝ authenticated or development participant interaction event
 
 finite trace
-↝ append-only interaction and event history
+↝ append-only interaction and Translation Event history
 
 sharedArch
 ↝ current living-field projection generated from participant trajectories
 
 interField
-↝ cross-participant problem/action interaction structure, not a score
+↝ cross-participant problem/action translation structure, not a score
 
 closure immutability
-↝ already-admitted repetition does not rewrite source history; new interaction creates a later event and return
+↝ admitted repetition does not rewrite source or translation history; new interaction appends another translation
 ```
 
 ## Forgotten assumptions, moral connection, and iterated reopening
@@ -121,10 +121,10 @@ ordered Reading
 ↝ exact reading occurrence + held sequence + dependency edges + meaning key
 
 content-preserving permutation
-↝ same occurrence content, changed order, unchanged declared meaning
+↝ FRAME_TRANSLATION event remaining OPEN until relative admission
 
 meaning-changing reorder
-↝ same occurrence content, changed order, changed declared meaning + OPEN seam
+↝ ORDER_EFFECT translation + explicit untranslated meaning seam
 
 iterate
 ↝ persistent ReopeningProcess advanced one ResidueRound at a time
@@ -133,42 +133,90 @@ finite stabilization
 ↝ STABLE_AT_CURRENT_FINITE_SCOPE, never FINAL_CORE
 
 star moral connection
-↝ both participant understandings contain the residue while their outside-residue plurality remains stored
+↝ both participant understandings contain the residue while outside-residue plurality remains stored
 ```
 
 The finite implication engine and powerset safety bound are derived executable charts. They do not restrict NRRF768’s abstract admissible families or establish that machine-generated semantics exhaust the source notes.
 
-## Runtime correspondence status
+## Translation-centered runtime
 
-The runtime now contains four connected executable layers:
+Closure Supernet version 0.5 does **not** claim that Closure is the `closure.supernet/v1` envelope, HTTP route set, WebSocket stream, SQLite schema, GitHub integration, or any future peer protocol.
+
+The live runtime commitment is:
 
 ```text
-canonical source / interpretation / admission engine
-digital connector fabric
-public living problem–interaction–action field
-iterated reopening / dependency-order / residue field
+Closure = translational truth continuously realized through interaction
+```
+
+`TranslationEvent` is the canonical executable primitive. It records:
+
+```text
+exact source occurrences
+source and target relative forms
+participant and perspective traces
+preservation, transformation, and untranslated structure
+relative frame and admission scope
+predecessor translations
+returned form and successor potential
+reopening conditions
+evidence and transport metadata
+```
+
+Its state history is append-only:
+
+```text
+PROPOSED → INTERPRETED → ADMITTED / REJECTED → RETURNED → REOPENED
+```
+
+These transitions are runtime forms, not a theorem that every source-level translation has been captured completely.
+
+The runtime automatically reconciles the following derived views into translation events:
+
+```text
+candidate relation
+interpretation and admission
+note / problem interaction / solution receipt
+collective action
+returned consequence
+order assessment
+remainingStar residue round
+```
+
+Transport compatibility is therefore weaker than translational truth. A remote system can carry a translation without self-certifying its admission.
+
+## Runtime correspondence status
+
+The runtime now contains five connected executable layers:
+
+```text
+immutable canonical sources
+canonical live Translation Event field
+source interpretation and relative admission engine
+public problem–interaction–action and iterated reopening forms
+transport-neutral digital connector fabric
 ```
 
 The combined nonterminal path is:
 
 ```text
 real problem and ordered assumptions
-→ admissible reopening family
-→ current closed residue
-→ residue-relative moral connection
-→ collective interaction and action
+→ interaction and candidate translation
+→ explicit interpretation
+→ relative admission
+→ current residue / solution / collective action
 → returned consequence
-→ exact immutable occurrence
-→ interpretation and admission
-→ new reopening process
+→ successor potential
+→ reopening
 ```
 
-The Python implementation is software-tested, source-reversible and explicitly scoped. It is **not yet** a machine-checked refinement theorem from runtime execution to NRRF764–768.
+The Python implementation is software-tested, source-reversible and explicitly scoped. It is **not yet** a machine-checked refinement theorem from runtime execution to NRRF761–768.
 
 A future formal bridge should prove selected correspondences such as:
 
 ```text
 runtime cycle ↔ sensor–selection run
+TranslationEvent composition ↔ admissible translation composition
+translation state history ↔ nonterminal return/reopening reading
 problem non-emptiness ↔ real Problem witness
 interaction receipt ↔ Solution/Inter equivalence
 note insertion ↔ loop step
@@ -177,7 +225,7 @@ remaining-star computation ↔ explicit finite closure-system instance
 residue iteration ↔ NRRF768 iterate under a proved data refinement
 residue moral connection ↔ star_moral_connect_iff
 append-only memory ↔ admitted latent memory
-living projection ↔ nonterminal returned reading
+Black Mirror ↔ source-reversible nonterminal returned topology
 ```
 
 Until such a bridge exists, links are labeled `INTERPRETED_RELATION`, `FORMALLY_PROVED_UNDER_READING`, `SOFTWARE_TESTED`, or `OPEN` according to the evidence attached.
@@ -188,10 +236,11 @@ The formal sequence supports:
 
 ```text
 source axiometry
+→ live interaction and translation
+→ relative admission
 → real problems and ordered assumptions
 → admitted reopening families
 → current invariant residue
-→ notes and active translations
 → interactions / solutions
 → collective action and consequence
 → provisional returned relation
@@ -202,9 +251,10 @@ source axiometry
 It does not support:
 
 ```text
-pre-given closure
-→ isolated computation
-→ terminal answer, final moral core, or terminal social order
+web protocol = Closure
+pre-given closure → isolated computation → terminal answer
+finite stable residue = final moral core
+transport delivery = truth
 ```
 
 ## Status rule
