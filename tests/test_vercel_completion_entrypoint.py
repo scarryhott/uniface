@@ -19,4 +19,8 @@ def test_vercel_asgi_serves_the_latest_completion_integrated_app(monkeypatch) ->
     assert "/network/completion/capabilities" in routes
     assert "/network/completion/systems" in routes
     assert "/completion" in routes
-    assert module.app.version == "2.8.0"
+    assert "/network/handed-life/capabilities" in routes
+    assert "/network/handed-life/systems" in routes
+    assert "/network/handed-life/human-relations" in routes
+    assert "/handed-life" in routes
+    assert module.app.version == "2.9.0"
