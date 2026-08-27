@@ -143,7 +143,7 @@ closure-supernet serve
 Open:
 
 - `/` or `/supernet` — one live Sense → unique-path → TE → return → reopen occurrence
-- `/field-run.json` — machine-readable snapshot of that same occurrence
+- `/field-run.json` — live machine-readable projection of that same occurrence
 - `/constructive` — NRRF783 explicit-witness compatibility lens
 - `/trading` — NRRF780 classical value-flow compatibility lens
 - `/translation` — directed TranslationEvent compatibility lens
