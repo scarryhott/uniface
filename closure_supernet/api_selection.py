@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Annotated, Any
 
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import HTMLResponse
 
 from . import api_embodied as base_api
 from .config import RuntimeConfig
@@ -12,7 +11,6 @@ from .selection_models import (
     SelectionReading,
     SelectionReadingCreate,
 )
-from .selection_web import SELECTION_HTML
 
 
 def attach_selection_routes(app: FastAPI) -> FastAPI:
@@ -26,10 +24,6 @@ def attach_selection_routes(app: FastAPI) -> FastAPI:
         "natural selections, while selecting from a branching reading is "
         "recorded as forced isolation with removed alternatives and a symmetry witness"
     )
-
-    @app.get("/selector-audit", response_class=HTMLResponse, include_in_schema=False)
-    async def selector_audit_interface() -> str:
-        return SELECTION_HTML
 
     @app.get("/network/selections/capabilities")
     async def selection_capabilities() -> dict[str, Any]:

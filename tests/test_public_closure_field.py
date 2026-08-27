@@ -10,6 +10,7 @@ LOOP_JS = DOCS / "closure-field.js"
 FIELD_RUN = DOCS / "field-run.json"
 FIELD_RUN_API = DOCS / "api" / "field-run.js"
 INTERNET_FIELD_API = DOCS / "api" / "internet-field.js"
+TE_API = DOCS / "api" / "te.js"
 
 
 def _html() -> str:
@@ -58,13 +59,30 @@ def _invoke_internet_field_handler(method: str = "GET"):
     return _invoke_handler(INTERNET_FIELD_API, method)
 
 
+def _invoke_te_handler(method: str = "GET", body=None):
+    if body is None:
+        return _invoke_handler(TE_API, method)
+    node = shutil.which("node")
+    if node is None:
+        return None
+    script = (
+        "const handler=require(" + json.dumps(str(TE_API)) + ");"
+        "const headers={}; let out=''; let ended=false;"
+        "const res={statusCode:200,setHeader(k,v){headers[String(k).toLowerCase()]=v},"
+        "end(b){ended=true;out=b==null?'':String(b)}};"
+        "Promise.resolve(handler({method:" + json.dumps(method) + ",body:" + json.dumps(body) + "},res)).then(function(){"
+        "if(!ended)throw new Error('handler did not end');"
+        "process.stdout.write(JSON.stringify({status:res.statusCode,headers:headers,body:out}));"
+        "}).catch(function(err){process.stderr.write(String(err&&err.stack||err));process.exit(1)});"
+    )
+    return _node_json(script)
+
+
 def _assert_widget_free_autonomous_face(html: str) -> None:
     assert "<title>Uniface</title>" in html
     assert "Uniface — Closure field" not in html
     assert "Note-Guided Closure Interface" not in html
     assert "Sense(Obs) → unique unitary path selector → Translation Event (admit → return → reopen) → next Sense" in html
-    assert "TRUE not issued" in html
-    assert "Two-person E2E OPEN" in html
     assert 'src="closure-field.js"' in html
     assert "function uniqueUnitaryPathPartition" not in html
     assert "function persistCycle" not in html
@@ -79,15 +97,16 @@ def _assert_widget_free_autonomous_face(html: str) -> None:
     assert 'id="noteReturn"' not in html
     assert "write transport receipt" not in html
     assert "Leftover source-preserving panels" not in html
-    face = html.split("<main")[0]
-    assert 'id="canvas"' in face
-    assert 'id="brainFace"' in face
-    assert "<input" not in face
-    assert "<summary>Sense loop (chart, not the face)</summary>" in html
-    assert "<summary>Geometry of the unique path (chart, not the face)</summary>" in html
-    assert html.index('id="canvas"') < html.index('id="teGrid"')
-    te_block = html.split('id="teGrid"')[0]
-    assert te_block.rfind("<details>") > te_block.rfind("</details>")
+    assert "<details>" not in html
+    assert "<summary>" not in html
+    assert 'id="teGrid"' not in html
+    assert 'id="noteReceipt"' not in html
+    assert 'id="scenario"' not in html
+    assert "selector-audit" not in html
+    assert "NRRF790" not in html
+    assert 'id="canvas"' in html
+    assert 'id="brainFace"' in html
+    assert "<input" not in html
     assert "Harry" not in html
     assert "ChatGPT" not in html
 
@@ -101,6 +120,9 @@ def test_public_root_is_a_running_closure_field():
     assert "setInterval(tick,1400)" in js
     assert "runtime_center:'TranslationEvent'" in js
     assert "participant:'OPEN'" in js
+    assert "function canvasOccurrence" in js
+    assert "function participantFromCanvasSense" in js
+    assert "Supernetwork" in js
     assert "leftover_pr_10:'not this'" in js
     assert "function currentUnifiedField" in js
     assert "consumes:'unified supernet field'" in js
@@ -125,8 +147,8 @@ def test_nrrf781_relative_renormalization_is_inside_the_live_te():
     assert "cell('relative renormalization'" in js
     assert "residue_scale" in js
     assert "loop.scale" in js
-    assert "TRUE not issued" in html
-    assert "['TRUE','not issued']" in js
+    assert "TRUE not issued" in js
+    assert "truth_issued:false" in js
     assert "scheme_chart" in js
     assert "never_selected_as_truth:true" in js
     assert "derived_chart:true" in js
@@ -134,10 +156,11 @@ def test_nrrf781_relative_renormalization_is_inside_the_live_te():
     assert "/renormalization" not in html
     assert 'id="renormalization"' not in html
     assert "setInterval(tick,1400)" in js
-    assert html.index('id="teGrid"') < html.index('id="noteReceipt"')
+    assert 'id="teGrid"' not in html
+    assert 'id="noteReceipt"' not in html
     assert "Harry" not in html
     assert "ChatGPT" not in html
-    assert html.count('id="teGrid"') == 1
+    assert html.count('id="teGrid"') == 0
     assert "function doTE" in js
     assert "function doReopen" in js
     assert "function doTE" not in html
@@ -185,7 +208,6 @@ def test_supernet_is_the_same_loop_panzoom_projection():
     assert "function bindPanZoom" in js
     assert "function fieldRunSnapshot" in js
     assert "function advancingFieldRunSnapshot" in js
-    assert "Pan/zoom reading of the same live root closure loop" in supernet
     assert "Pan/zoom reading of the same live root closure loop" in js
     _assert_widget_free_autonomous_face(supernet)
     assert 'data-projection="panzoom"' in supernet
@@ -195,16 +217,15 @@ def test_supernet_is_the_same_loop_panzoom_projection():
     assert js.count("function persistCycle") == 1
     assert "function fieldSenseFromPoint" in js
     assert "function applyFieldSense" in js
-    assert "Presence in the canvas is the next Sense" in supernet
-    assert "Presence in the canvas is the next Sense" in html
+    assert "Presence in the canvas is the next Sense" in js
     assert "dblclick" in js
     assert html.count("setInterval(tick,1400)") == 0
     assert js.count("setInterval(tick,1400)") == 1
-    assert "TRUE not issued" in supernet
+    assert "TRUE not issued" in js
     assert "truth_issued:false" in js
     assert not FIELD_RUN.exists()
     assert FIELD_RUN_API.is_file()
-    assert "consumes the currently unified field" in supernet
+    assert "consumes:'unified supernet field'" in js
     assert "function currentUnifiedField" in js
     assert supernet != html
 
@@ -252,6 +273,10 @@ def test_field_run_json_is_live_fieldRunSnapshot_projection():
     assert payload["truth_issued"] is False
     assert payload["two_person_E2E"] == "OPEN"
     assert payload["TRUE"] == "not issued"
+    assert payload["participant"] == "Supernetwork"
+    assert payload["nrrf790"]["derived_chart"] is True
+    assert payload["nrrf790"]["not_audit_page"] is True
+    assert payload["nrrf790"]["truth_issued"] is False
     assert payload["stage"] in {"sense", "select", "te", "reopen"}
     assert isinstance(payload["cycle"], int)
     assert payload["relative_reading"] is not None
@@ -322,7 +347,7 @@ def test_field_run_json_is_live_fieldRunSnapshot_projection():
     assert again["selected_class"] == again["admissibility_space"]["selected_class"]
     assert again["truth_issued"] is False
     assert again["unified"] is True
-    assert again["participant"] == "OPEN"
+    assert again["participant"] == "Supernetwork"
     assert again["two_person_E2E"] == "OPEN"
 
 
@@ -610,10 +635,10 @@ def test_root_and_supernet_share_field_wide_sense():
     assert "eyJ" not in js
     assert "eyJ" not in supernet
     assert "eyJ" not in html
-    assert "remaining potential" in supernet
-    assert "unresolved alternatives as live admissibility space" in supernet
-    assert "translational isomorphism classes of those unresolved admissible translations" in supernet
-    assert "this writing as hidden memory" in supernet
+    assert "remaining_potential" in js
+    assert "unresolved_alternatives" in js
+    assert "selects_over:'translational isomorphism classes'" in js
+    assert "hidden memory translation" in js
     assert "function brainFieldReading" in js
     assert "function brainFieldReading" not in html
     assert "function brainFieldReading" not in supernet
@@ -708,7 +733,8 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     html = _html()
     js = _js()
     supernet = (DOCS / "supernet.html").read_text(encoding="utf-8")
-    assert "not an app and not a join product" in supernet
+    assert "not:'app'" in js
+    assert "not_join:true" in js
     assert "font-family:Inter" not in supernet
     assert "#19243f" not in supernet
     assert "font-family:Palatino" in supernet
@@ -766,7 +792,7 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "BLACK_MIRROR_TRANSLATIONAL_TRUTH.md" not in supernet
     assert not (ROOT.parents[0] / "BLACK_MIRROR_TRANSLATIONAL_TRUTH.md").exists()
     assert "scarryhott/black-mirror" not in supernet
-    assert 'id="teGrid"' in supernet
+    assert 'id="teGrid"' not in supernet
     assert "Sense(Obs) → unique unitary path selector → Translation Event (admit → return → reopen) → next Sense" in supernet
     assert "function uniqueUnitaryPathPartition" not in supernet
     assert "function uniqueUnitaryPathPartition" not in html
@@ -774,10 +800,9 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "function normalizeInternetField" in js
     assert "function setInternetField" in js
     assert "internet_field" in js
-    assert "read-only internet-field ingest" in supernet
-    assert "read-only internet-field ingest" in html
-    assert "public discussion 28" in supernet
-    assert "public repo activity" in supernet
+    assert "read-only public ingest" in js
+    assert "public discussion" in js
+    assert "public repo activity" in js
     assert INTERNET_FIELD_API.is_file()
     assert "require('../closure-field.js')" in INTERNET_FIELD_API.read_text(encoding="utf-8")
     assert "internetFieldSnapshot()" in INTERNET_FIELD_API.read_text(encoding="utf-8")
@@ -790,10 +815,8 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "Purple Rain" not in supernet
     assert "embodied.html" not in supernet
     assert "/embodied" not in supernet
-    assert supernet.index('id="canvas"') < supernet.index('id="teGrid"')
-    assert "<summary>Translation Event cells (chart, not the face)</summary>" in supernet
-    te_block = supernet.split('id="teGrid"')[0]
-    assert te_block.rfind("<details>") > te_block.rfind("</details>")
+    assert "<details>" not in supernet
+    assert 'id="teGrid"' not in supernet
     assert "min-height:100vh" in supernet
     node = shutil.which("node")
     if node is None:
@@ -994,7 +1017,7 @@ const snap = u.fieldRunSnapshot();
 if (snap.truth_issued !== false) throw new Error('field-run truth issued');
 if (snap.TRUE !== 'not issued') throw new Error('TRUE issued in snapshot');
 if (snap.two_person_E2E !== 'OPEN') throw new Error('E2E faked');
-if (snap.participant !== 'OPEN') throw new Error('participant defaulted');
+if (snap.participant !== 'Supernetwork') throw new Error('participant not derived from canvas Sense');
 if (snap.unified !== true) throw new Error('field-run still a frozen te projection');
 if (!Array.isArray(snap.prior_cycle_residues) || snap.prior_cycle_residues.length < 1) throw new Error('field-run missing unified residue');
 if (snap.selected_path !== snap.prior_cycle_residues[snap.prior_cycle_residues.length-1].selected_path) throw new Error('residue path mismatch');
@@ -1023,7 +1046,7 @@ const b = u.fieldRunSnapshot();
 if (JSON.stringify(a) !== JSON.stringify(b)) throw new Error('same-tick snapshots diverged');
 if (a.unified !== true) throw new Error('first snapshot not unified');
 if (!Array.isArray(a.prior_cycle_residues) || a.prior_cycle_residues.length < 1) throw new Error('first snapshot has no residue');
-if (a.truth_issued !== false || a.TRUE !== 'not issued' || a.two_person_E2E !== 'OPEN' || a.participant !== 'OPEN') throw new Error('invariants');
+if (a.truth_issued !== false || a.TRUE !== 'not issued' || a.two_person_E2E !== 'OPEN' || a.participant !== 'Supernetwork') throw new Error('invariants');
 u.doSense();
 u.doSelect();
 u.doTE();
@@ -1034,7 +1057,8 @@ if (c.selected_path !== c.prior_cycle_residues[c.prior_cycle_residues.length-1].
 if (JSON.stringify(c.isomorphism_classes) !== JSON.stringify(c.admissibility_space.isomorphism_classes)) throw new Error('classes');
 if (c.selected_path !== c.admissibility_space.selected_path) throw new Error('selected_path');
 if (c.truth_issued !== false || c.TRUE !== 'not issued' || c.two_person_E2E !== 'OPEN') throw new Error('truth after advance');
-if (c.participant !== 'OPEN') throw new Error('second person faked');
+if (c.participant !== 'Supernetwork') throw new Error('participant not carried');
+if (c.two_person_E2E !== 'OPEN') throw new Error('second person faked');
 console.log(JSON.stringify({
   ok: true,
   residues_a: a.prior_cycle_residues.length,
@@ -1124,7 +1148,7 @@ if (p0.formId && rem.indexOf(p0.formId)<0 && p0.selected_class.indexOf(p0.formId
 if (ids.indexOf(p0.formId)<0) throw new Error('unified selected_path is not a public-internet relation');
 p0.selected_class.forEach(function(id){if (p0.unresolved_alternatives.indexOf(id)>=0) throw new Error('selected class still unresolved');});
 u.loop.te = u.translationEvent();
-if (u.loop.te.TRUE !== 'not issued' || u.loop.te.two_person_E2E !== 'OPEN' || u.loop.te.participant !== 'OPEN') throw new Error('TE invariants');
+if (u.loop.te.TRUE !== 'not issued' || u.loop.te.two_person_E2E !== 'OPEN' || u.loop.te.participant !== 'Supernetwork') throw new Error('TE invariants');
 if (JSON.stringify(u.loop.te.unresolved_alternatives) !== JSON.stringify(p0.unresolved_alternatives)) throw new Error('TE dropped classes');
 if (u.loop.te.selected_path !== p0.formId) throw new Error('TE admit did not carry internet selected relation');
 if (u.loop.te.returned_form.form !== p0.formId) throw new Error('TE return did not carry internet selected relation');
@@ -1136,7 +1160,7 @@ if (field0.selected_path !== p0.formId) throw new Error('unified field dropped i
 u.doSense();
 const rem1 = u.loop.obs.undetermined_string.remainder;
 if (realized && rem1.indexOf(realized)>=0) throw new Error('realized form reintroduced from internet remainder');
-if (u.loop.obs.TRUE !== 'not issued' || u.loop.obs.two_person_E2E !== 'OPEN' || u.loop.obs.participant !== 'OPEN') throw new Error('Sense invariants after reopen');
+if (u.loop.obs.TRUE !== 'not issued' || u.loop.obs.two_person_E2E !== 'OPEN' || u.loop.obs.participant !== 'Supernetwork') throw new Error('Sense invariants after reopen');
 if (u.loop.obs.undetermined_string.scenario !== realized) throw new Error('next Sense did not consume internet selected relation');
 if (u.loop.obs.selected_path !== realized) throw new Error('next Sense selected_path dropped internet relation');
 const field = u.currentUnifiedField();
@@ -1166,7 +1190,7 @@ console.log(JSON.stringify({
     assert payload["ok"] is True
     assert payload["TRUE"] == "not issued"
     assert payload["two_person_E2E"] == "OPEN"
-    assert payload["participant"] == "OPEN"
+    assert payload["participant"] == "Supernetwork"
     assert payload["public_read"] is True
     assert payload["selected"] not in payload["rem1"]
     assert payload["selected"] in payload["remainder"]
@@ -1193,5 +1217,111 @@ console.log(JSON.stringify({
     for cls in net.get("isomorphism_classes") or []:
         for member in cls:
             assert member in {"during", "coherent", "contradiction", "rule", "culture", "computational"}
+
+
+def test_notes_are_undetermined_sense_and_participant_is_derived_before_unique_path():
+    html = _html()
+    js = _js()
+    supernet = (DOCS / "supernet.html").read_text(encoding="utf-8")
+    vercel = json.loads((DOCS / "vercel.json").read_text(encoding="utf-8"))
+    foundation = (DOCS.parent / "FOUNDATION.md").read_text(encoding="utf-8")
+    _assert_widget_free_autonomous_face(html)
+    _assert_widget_free_autonomous_face(supernet)
+    assert not (DOCS / "selector-audit.html").exists()
+    assert not (DOCS / "selection-run.json").exists()
+    assert not (DOCS.parent / "closure_supernet" / "selection_web.py").exists()
+    assert {"source": "/te.json", "destination": "/api/te"} in vercel.get("rewrites")
+    assert vercel.get("functions", {}).get("api/te.js", {}).get("includeFiles") == "closure-field.js"
+    assert TE_API.is_file()
+    assert "function runSenseSelectTE" in js
+    assert "notes as undetermined Sense" in js
+    assert "function participantFromCanvasSense" in js
+    assert "Supernetwork" in js
+    assert "<button" not in html
+    assert "<details>" not in html
+    assert "<form" not in html
+    assert "selector-audit" not in html
+    assert "Harry" not in js
+    assert "ChatGPT" not in js
+    assert "the author’s notes" in foundation
+    node = shutil.which("node")
+    if node is None:
+        return
+    script = (
+        "const u=require(" + json.dumps(str(LOOP_JS)) + ");"
+        + r"""
+u.resetLoop();
+u.doSense();
+if (u.loop.path) throw new Error('unique path ran during Sense');
+if (!u.loop.obs || !u.loop.obs.undetermined_string) throw new Error('no Sense');
+if (u.loop.obs.undetermined_string.of !== 'notes as undetermined Sense') throw new Error('Sense is not notes');
+if (!u.loop.obs.undetermined_string.exact) throw new Error('note exact missing from undetermined string');
+if (!u.loop.obs.undetermined_string.note_id) throw new Error('note id missing');
+if (u.loop.obs.participant !== 'Supernetwork') throw new Error('participant not derived from canvas before unique-path');
+if (u.participantFromCanvasSense(u.loop.obs.canvas_occurrence) !== 'Supernetwork') throw new Error('derivation fn');
+if (u.participantFromCanvasSense({of:'elsewhere'}) !== 'OPEN') throw new Error('derivation should not invent from a form');
+u.doSelect();
+if (u.loop.path.participant !== 'Supernetwork') throw new Error('unique path dropped participant');
+u.loop.te = u.translationEvent();
+if (u.loop.te.participant !== 'Supernetwork') throw new Error('TE dropped participant');
+if (u.loop.te.relative_admission.participant !== 'Supernetwork') throw new Error('admit dropped participant');
+if (u.loop.te.returned_form.participant !== 'Supernetwork') throw new Error('return dropped participant');
+if (u.loop.te.reopening.participant !== 'Supernetwork') throw new Error('reopen dropped participant');
+if (u.loop.te.TRUE !== 'not issued' || u.loop.te.two_person_E2E !== 'OPEN') throw new Error('truth/e2e');
+u.doReopen();
+const field = u.currentUnifiedField();
+if (field.participant !== 'Supernetwork') throw new Error('field dropped participant');
+if (field.truth_issued !== false) throw new Error('truth issued');
+u.resetLoop();
+const transported = u.runSenseSelectTE({
+  of:'https://chatgpt.com/c/6a8f368d-ae98-83e9-a3e5-7dfc19a9a324',
+  kind:'agent-authored Sense'
+});
+if (transported.participant !== 'Supernetwork') throw new Error('transport participant');
+if (transported.truth_issued !== false || transported.TRUE !== 'not issued' || transported.two_person_E2E !== 'OPEN') throw new Error('transport invariants');
+if (!transported.te || !transported.te.relative_admission || !transported.te.returned_form || !transported.te.reopening) throw new Error('TE incomplete');
+if (transported.sense.undetermined_string.of !== 'notes as undetermined Sense') throw new Error('transport Sense not notes');
+if (!transported.sense.agent_sense || transported.sense.agent_sense.of !== 'https://chatgpt.com/c/6a8f368d-ae98-83e9-a3e5-7dfc19a9a324') throw new Error('thread provenance missing');
+console.log(JSON.stringify({
+  ok: true,
+  note_id: transported.sense.undetermined_string.note_id,
+  participant: transported.participant,
+  two_person_E2E: transported.two_person_E2E,
+  truth_issued: transported.truth_issued,
+  selected: transported.path && transported.path.formId
+}));
+"""
+    )
+    result = subprocess.run([node, "-e", script], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout.strip().splitlines()[-1])
+    assert payload["ok"] is True
+    assert payload["participant"] == "Supernetwork"
+    assert payload["two_person_E2E"] == "OPEN"
+    assert payload["truth_issued"] is False
+    served = _invoke_te_handler("GET")
+    assert served is not None
+    te = json.loads(served["body"])
+    assert served["status"] == 200
+    assert te["participant"] == "Supernetwork"
+    assert te["truth_issued"] is False
+    assert te["two_person_E2E"] == "OPEN"
+    assert te["TRUE"] == "not issued"
+    assert te["projection"] == "te.json"
+    posted = _invoke_te_handler(
+        "POST",
+        {
+            "of": "https://chatgpt.com/c/6a8f368d-ae98-83e9-a3e5-7dfc19a9a324",
+            "kind": "agent-authored Sense",
+        },
+    )
+    assert posted is not None
+    body = json.loads(posted["body"])
+    assert posted["status"] == 200
+    assert body["participant"] == "Supernetwork"
+    assert body["sense"]["undetermined_string"]["of"] == "notes as undetermined Sense"
+    assert body["te"]["participant"] == "Supernetwork"
+    assert body["two_person_E2E"] == "OPEN"
+    assert body["truth_issued"] is False
 
 

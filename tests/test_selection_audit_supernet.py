@@ -133,8 +133,7 @@ def test_event_linked_selection_api_and_selector_lens(tmp_path: Path) -> None:
     app = create_app(make_config(tmp_path))
     with TestClient(app) as client:
         page = client.get("/selector-audit")
-        assert page.status_code == 200
-        assert "Natural selection never removes" in page.text
+        assert page.status_code == 404
 
         source = client.post(
             "/supernet/integrate",

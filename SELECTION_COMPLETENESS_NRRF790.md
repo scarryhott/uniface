@@ -97,7 +97,7 @@ POST /supernet/events/{event_id}/select
 GET  /supernet/project?lens=selector
 ```
 
-The compatibility UI is `/selector-audit`.
+NRRF790 remains a derived chart inside `/field-run.json` (`nrrf790`). It is not a public audit page.
 
 ## Exact boundary
 
