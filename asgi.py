@@ -1,4 +1,4 @@
-"""Vercel ASGI entry: the same NRRF800-integrated FastAPI app as `closure-supernet serve`."""
+"""Vercel ASGI entry: the same unified-closure FastAPI app as `closure-supernet serve`."""
 
 from __future__ import annotations
 
