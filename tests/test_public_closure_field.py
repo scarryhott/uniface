@@ -142,16 +142,36 @@ def test_supernet_is_the_same_loop_panzoom_projection():
     assert "function bindPanZoom" in js
     assert "function fieldRunSnapshot" in js
     assert "Pan/zoom reading of the same live root closure loop" in js
-    assert 'id="zoomIn"' in supernet
-    assert 'id="zoomOut"' in supernet
-    assert 'id="zoomFit"' in supernet
-    assert 'aria-label="pan zoom reading"' in supernet
+    assert 'id="zoomIn"' not in supernet
+    assert 'id="zoomOut"' not in supernet
+    assert 'id="zoomFit"' not in supernet
+    assert 'id="stageSense"' not in supernet
+    assert 'id="stageSelect"' not in supernet
+    assert 'id="stageTe"' not in supernet
+    assert 'id="stageReopen"' not in supernet
+    assert 'id="noteReturn"' not in supernet
+    assert "write transport receipt" not in supernet
+    assert "<select" not in supernet
+    assert "<textarea" not in supernet
+    assert "<form" not in supernet
+    assert 'id="scenario"' not in supernet
+    assert 'type="range"' not in supernet
+    assert "Leftover source-preserving panels" not in supernet
+    face = supernet.split("<main")[0]
+    assert 'id="canvas"' in face
+    assert "<button" not in face
+    assert "<textarea" not in face
+    assert "<form" not in face
+    assert "<select" not in face
+    assert "<input" not in face
     assert 'data-projection="panzoom"' in supernet
-    assert supernet.count('id="noteReturn"') == 1
-    assert "write transport receipt" in supernet.split("Hidden transport evidence")[1]
     assert html.count("function persistCycle") == 1
     assert supernet.count("function persistCycle") == 0
     assert js.count("function persistCycle") == 1
+    assert "function fieldSenseFromPoint" in js
+    assert "function applyFieldSense" in js
+    assert "Presence in the canvas is the next Sense" in supernet
+    assert "dblclick" in js
     assert html.count("setInterval(tick,1400)") == 1
     assert "TRUE not issued" in supernet
     assert "truth_issued:false" in js
@@ -857,4 +877,67 @@ def test_public_face_is_not_the_eight_sheaf_dashboard():
         assert "Embodied Eight-Sheaf" in embodied
         assert "anatomy tree, rings of time, drone-wire forest" not in embodied
         assert 'id="brainFace"' not in embodied
+
+
+def test_canvas_presence_is_the_next_sense_not_a_form():
+    supernet = (DOCS / "supernet.html").read_text(encoding="utf-8")
+    js = _js()
+    assert "<button" not in supernet
+    assert "<form" not in supernet
+    assert "<select" not in supernet
+    assert "<textarea" not in supernet
+    assert 'type="range"' not in supernet
+    assert 'id="stageSense"' not in supernet
+    assert 'id="noteReturn"' not in supernet
+    assert "Leftover source-preserving panels" not in supernet
+    face = supernet.split("<main")[0]
+    assert 'id="canvas"' in face
+    assert face.index('id="canvas"') < supernet.index("<main")
+    assert "function fieldSenseFromPoint" in js
+    assert "if(fieldPoint)applyFieldSense(fieldPoint)" in js
+    assert "setInterval(tick,1400)" in js
+    node = shutil.which("node")
+    if node is None:
+        return
+    script = (
+        "const u=require(" + json.dumps(str(LOOP_JS)) + ");"
+        + r"""
+u.resetLoop();
+const before = {r:u.loop.geom.r,i:u.loop.geom.i,ss:u.loop.geom.ss};
+const a = u.fieldSenseFromPoint({x:500,y:270});
+const b = u.fieldSenseFromPoint({x:500,y:270});
+if (Math.abs(a.r-b.r)>1e-12 || Math.abs(a.i-b.i)>1e-12 || Math.abs(a.ss-b.ss)>1e-12) throw new Error('field sense not idempotent');
+if (a.r > 0.02) throw new Error('center should be near r=0');
+if (Math.abs(a.ss-0.5)>1e-12) throw new Error('center ss should be 0.5');
+const far = u.applyFieldSense({x:920,y:80});
+if (!(far.r > before.r)) throw new Error('far point should extend r');
+if (!(far.ss < 0.5)) throw new Error('upper field is sensor pole');
+u.doSense();
+const ustr = u.loop.obs.undetermined_string;
+if (Math.abs(ustr.r-far.r)>1e-12 || Math.abs(ustr.i-far.i)>1e-12 || Math.abs(ustr.ss-far.ss)>1e-12) throw new Error('Sense did not consume field presence');
+u.doSelect();
+if (u.loop.path.selects_over !== 'translational isomorphism classes') throw new Error('selector');
+u.loop.te = u.translationEvent();
+if (u.loop.te.TRUE !== 'not issued') throw new Error('TRUE issued');
+if (u.loop.te.two_person_E2E !== 'OPEN') throw new Error('E2E faked');
+u.doReopen();
+u.doSense();
+if (u.loop.obs.TRUE !== 'not issued') throw new Error('truth issued after reopen');
+u.resetLoop();
+u.loop.stage='te';
+u.doSense();
+u.doSelect();
+u.loop.te=u.translationEvent();
+const snap = u.fieldRunSnapshot();
+if (snap.truth_issued !== false) throw new Error('field-run truth issued');
+if (snap.TRUE !== 'not issued') throw new Error('TRUE issued in snapshot');
+console.log(JSON.stringify({ok:true,r:far.r,ss:far.ss,truth_issued:snap.truth_issued,TRUE:snap.TRUE}));
+"""
+    )
+    result = subprocess.run([node, "-e", script], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout.strip().splitlines()[-1])
+    assert payload["ok"] is True
+    assert payload["truth_issued"] is False
+    assert payload["TRUE"] == "not issued"
 

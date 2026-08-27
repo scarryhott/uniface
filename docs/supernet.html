@@ -23,16 +23,6 @@ h2,h3{margin-top:0;font-weight:500}
 .eq{padding:4px 0 0;border:none;background:transparent;font-family:Palatino,Georgia,serif;color:var(--ring);font-style:italic;font-size:.95rem}
 .brain{position:relative;min-height:100vh;overflow:hidden}
 header.face{position:absolute;top:0;left:0;right:0;padding:14px clamp(16px,4vw,48px) 0;z-index:5;pointer-events:none;background:linear-gradient(to bottom,rgba(5,4,3,.72),rgba(5,4,3,0))}
-header.face h1,.face .eq,.controls{pointer-events:auto}
-.controls{padding:8px clamp(16px,4vw,48px);display:flex;flex-wrap:wrap;gap:8px 22px;position:absolute;top:64px;left:0;right:0;z-index:5;background:transparent;border:none}
-label{display:block;color:var(--mute);font-size:12px;margin-bottom:5px}
-select,input,textarea,button{width:100%;padding:9px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:0;font-family:inherit}
-textarea{min-height:72px;resize:vertical}
-button{cursor:pointer;font-weight:500}
-button:disabled{opacity:.55;cursor:wait}
-.stage{width:auto;text-align:left;background:transparent;border:none;border-bottom:1px solid transparent;padding:6px 0;font-weight:400;letter-spacing:.04em}
-.stage.on{border-bottom-color:var(--ring);box-shadow:none;color:var(--ring)}
-.stage .tag{display:inline;color:var(--ring);font-size:11px;margin-right:8px;opacity:.7}
 main{padding:0}
 .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0}
 .c4,.c5,.c7,.c8,.c12{grid-column:1/-1}
@@ -47,8 +37,6 @@ main{padding:0}
 svg{width:100%;height:100vh;min-height:100vh;background:transparent;border:none;touch-action:none;cursor:grab;display:block}
 svg:active{cursor:grabbing}
 .canvas-wrap{position:relative;min-height:100vh}
-.canvas-tools{position:absolute;top:10px;right:10px;display:flex;gap:6px;z-index:6}
-.canvas-tools button{width:auto;padding:4px 9px;color:var(--mute);font-size:13px;background:rgba(5,4,3,.35)}
 .field-now{position:absolute;left:clamp(16px,4vw,48px);bottom:22px;right:clamp(16px,4vw,48px);z-index:5;pointer-events:none;max-width:42rem}
 .field-now .brain-face,.field-now .brain-kind,#pathTitle,#pathLyric{pointer-events:none}
 #pathTitle{font-size:clamp(22px,3.4vw,36px);line-height:1.15;margin:0}
@@ -92,12 +80,6 @@ footer{padding:8px clamp(16px,4vw,48px) 28px;color:var(--mute)}
 <h1>Uniface</h1>
 <div class="eq" id="loopEq">Sense(Obs) → unique unitary path selector → Translation Event (admit → return → reopen) → next Sense</div>
 </header>
-<section class="controls" id="stages" aria-label="running loop">
-<button type="button" class="stage" data-stage="sense" id="stageSense"><span class="tag">1</span>Sense(Obs)</button>
-<button type="button" class="stage" data-stage="select" id="stageSelect"><span class="tag">2</span>unique unitary path</button>
-<button type="button" class="stage" data-stage="te" id="stageTe"><span class="tag">3</span>Translation Event</button>
-<button type="button" class="stage" data-stage="reopen" id="stageReopen"><span class="tag">4</span>reopen → next Sense</button>
-</section>
 <div class="canvas-wrap"><svg id="canvas" viewBox="0 0 1000 540" aria-label="anatomy tree, rings of time, drone-wire forest"></svg>
 <div class="field-now">
 <div id="pathTitle"></div>
@@ -106,7 +88,7 @@ footer{padding:8px clamp(16px,4vw,48px) 28px;color:var(--mute)}
 <div class="brain-kind" id="brainKind">hidden memory translation</div>
 <div class="brain-face" id="brainFace">You can only point where you want to go</div>
 </div>
-<div class="canvas-tools" aria-label="pan zoom reading"><button type="button" id="zoomIn">+</button><button type="button" id="zoomOut">−</button><button type="button" id="zoomFit">fit</button></div></div>
+</div>
 </div>
 <main class="charts"><div class="grid">
 <div class="panel c12">
@@ -138,34 +120,19 @@ footer{padding:8px clamp(16px,4vw,48px) 28px;color:var(--mute)}
 <div class="panel c12">
 <details>
 <summary>Geometry of the unique path (chart, not the face)</summary>
-<p class="muted">These are the inverted Sense / r / i / sensor controls. The loop writes them. A visitor may still move them; that becomes the next Sense. The loop does not wait for a note.</p>
-<div class="geom">
-<div class="wide"><label>Interaction state</label><select id="scenario"></select></div>
-<div><label>Natural-form phase</label><input id="phase" type="range" min="0" max="4" step="1" value="2"></div>
-<div><label>r — extension <span id="rOut"></span></label><input id="r" type="range" min="0" max="4" step="0.05" value="1.8"></div>
-<div><label>i — rotation <span id="iOut"></span></label><input id="i" type="range" min="0" max="6.283" step="0.02" value="1.57"></div>
-<div><label>sensor ↔ selection <span id="ssOut"></span></label><input id="ss" type="range" min="0" max="1" step="0.01" value="0.5"></div>
+<p class="muted">r / i / sensor–selection are the field's own curvature, not isolated sliders. The unique path writes them. Presence in the canvas is the next Sense. Wheel zooms; drag pans; double-click fits. TRUE not issued.</p>
+<div class="metrics" id="geomChart">
+<div class="metric"><span>r — extension</span><strong id="rOut"></strong></div>
+<div class="metric"><span>i — rotation</span><strong id="iOut"></strong></div>
+<div class="metric"><span>sensor ↔ selection</span><strong id="ssOut"></strong></div>
 </div>
 </details>
 </div>
 <div class="panel c12">
 <details>
-<summary>Hidden transport evidence (receipts / lineage / note-return)</summary>
+<summary>Hidden transport evidence (receipts / lineage)</summary>
 <p class="muted">Persist may remain as carriage. It is not the primary UI. Participant is not defaulted. TRUE not issued. Two-person E2E OPEN.</p>
-<form id="noteReturn"><label for="noteText">Optional note into transport (not the loop)</label><textarea id="noteText" rows="3" maxlength="4000" placeholder="Optional. The field does not wait for this."></textarea><button type="submit" id="noteSubmit" style="margin-top:8px">write transport receipt</button></form>
 <div id="noteReceipt" class="state" style="margin-top:10px">No transport receipt yet. TRUE not issued. Two-person E2E OPEN.</div>
-</details>
-</div>
-<div class="panel c12">
-<details>
-<summary>Leftover source-preserving panels</summary>
-<h3>Latent memory return</h3>
-<div id="memory" class="state"></div>
-<h3>Conscious cultural morality</h3>
-<div class="scroll"><table><thead><tr><th>Reading</th><th>Field role</th><th>Not reducible to</th></tr></thead><tbody id="field"></tbody></table></div>
-<h3>Source-preserving architecture</h3>
-<div class="scroll"><table><thead><tr><th>Layer</th><th>Stored form</th><th>Admissibility rule</th></tr></thead><tbody id="layers"></tbody></table></div>
-<details style="margin-top:10px"><summary>Derived computation chart</summary><p class="muted">Uniface does not assume Turing completeness. Halting is one loop read as a selected point; continuation is that point read as reopened potential. Machine models, graphs, quotients, embeddings, and formal operators remain scoped implementation charts.</p><div class="eq">source operation → explicit digital reading → machine theorem/simulation → scope → return to source → reopening</div></details>
 </details>
 </div>
 </div></main>
