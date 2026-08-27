@@ -37,7 +37,7 @@ class RuntimeConfig:
 
     integration_http_timeout_seconds: float = float(os.getenv("CLOSURE_INTEGRATION_HTTP_TIMEOUT_SECONDS", "30"))
     integration_max_items_per_cycle: int = int(os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500"))
-    integration_user_agent: str = os.getenv("CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/2.5")
+    integration_user_agent: str = os.getenv("CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/2.6")
     integration_allow_private_networks: bool = _bool("CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False)
 
     public_interface_enabled: bool = _bool("CLOSURE_PUBLIC_INTERFACE_ENABLED", True)
@@ -85,15 +85,19 @@ class RuntimeConfig:
     framework_global_assignment_required_for_truth: bool = False
     framework_contextual_truth_retained: bool = True
 
-    # The embodied layer keeps all eight sheaves inside the canonical integrator.
-    # Its reciprocal-translation profile is non-scalar and never infers emotion,
-    # human worth, alien truth, or a physical syntropic force.
     embodied_supernet_enabled: bool = _bool("CLOSURE_EMBODIED_SUPERNET_ENABLED", True)
     embodied_resource_metrics_foundational: bool = False
     embodied_unknown_hypotheses_remain_open: bool = True
     embodied_physical_force_claimed: bool = False
     embodied_emotion_inferred: bool = False
     embodied_human_worth_scored: bool = False
+
+    # NRRF790 audits whether a singleton was already complete or was produced by
+    # authored isolation. Removed alternatives and symmetry witnesses are retained.
+    selection_audit_enabled: bool = _bool("CLOSURE_SELECTION_AUDIT_ENABLED", True)
+    selection_natural_requires_completeness: bool = True
+    selection_forced_isolation_is_natural: bool = False
+    selection_empty_reading_selects_nothing: bool = True
 
     environment: str = os.getenv("CLOSURE_ENVIRONMENT", "development").strip().lower()
     service_role: str = os.getenv("CLOSURE_SERVICE_ROLE", "all").strip().lower()
