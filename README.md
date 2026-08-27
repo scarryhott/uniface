@@ -1,3 +1,7 @@
+Live field (join here): https://uniface-tawny.vercel.app
+
+A second person is on Super network by opening that URL and interacting (Sense / unique path / Translation Event, or the note box). This repo is the chart. The field is the public page. TRUE is not issued. Two-person E2E stays OPEN until two real people are actually there.
+
 # Uniface / Closure Supernet
 
 **Closure Supernet is one source-preserving continuous integrator whose public
