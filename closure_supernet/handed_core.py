@@ -53,6 +53,10 @@ def iterate(
     return trace
 
 
+def trace_state(item: dict[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in item.items() if key != "index"}
+
+
 def ball_completion() -> dict[str, Any]:
     presentations = [str(index) for index in range(4)]
     data = CompletionSystemCreate(
@@ -119,7 +123,7 @@ def evaluate_system(data: HandedLifeSystemCreate) -> dict[str, Any]:
     visited_phases = [item["ball_phase"] for item in left_gate_trace[:-1]]
     roles = [item["temporal_role"] for item in left_gate_trace]
     left_complete = sorted(visited_phases) == [0, 1, 2, 3] and (
-        left_gate_trace[-1] == left_gate_start
+        trace_state(left_gate_trace[-1]) == left_gate_start
     )
     return {
         "initial_state": initial,
@@ -127,9 +131,9 @@ def evaluate_system(data: HandedLifeSystemCreate) -> dict[str, Any]:
         "ball_card": 4,
         "ball_sheaves": 4,
         "ball_step_period": 4,
-        "ball_step_iterate_four_is_identity": ball_trace[-1] == initial,
+        "ball_step_iterate_four_is_identity": trace_state(ball_trace[-1]) == initial,
         "ball_step_ne_identity_below_four": all(
-            ball_trace[index] != initial for index in (1, 2, 3)
+            trace_state(ball_trace[index]) != initial for index in (1, 2, 3)
         ),
         "ball_return_trace": ball_trace,
         "ball_return_never_touches_hand": all(
@@ -155,7 +159,7 @@ def evaluate_system(data: HandedLifeSystemCreate) -> dict[str, Any]:
         "left_gate_alternates_potential_actual": all(
             roles[index] != roles[index + 1] for index in range(len(roles) - 1)
         ),
-        "left_gate_closes_after_four": left_gate_trace[-1] == left_gate_start,
+        "left_gate_closes_after_four": trace_state(left_gate_trace[-1]) == left_gate_start,
         "left_gate_same_hair_throughout": len(
             {item["hair_class"] for item in left_gate_trace}
         )
