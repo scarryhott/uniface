@@ -1,160 +1,142 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-projection="face">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uniface — Closure field</title>
+<title>Uniface</title>
 <style>
-:root{--bg:#080b11;--p:#141a27;--p2:#1b2334;--l:#3a465f;--t:#eef3fa;--m:#aab6c9;--a:#9fb4ff;--g:#58d394;--r:#ff737c;--o:#e7bd56}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#19243f,var(--bg) 46%);color:var(--t);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}header{padding:30px clamp(18px,5vw,68px) 22px;border-bottom:1px solid var(--l)}h1{margin:0 0 10px;font-size:clamp(31px,5vw,58px)}h2,h3{margin-top:0}.sub{max-width:1050px;color:var(--m);line-height:1.58}.eq,.code{padding:14px;border:1px solid var(--l);border-radius:13px;background:var(--p);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto}.eq{margin-top:17px}.controls{padding:14px clamp(18px,5vw,68px);display:grid;grid-template-columns:repeat(4,1fr);gap:10px;position:sticky;top:0;z-index:5;background:rgba(8,11,17,.9);border-bottom:1px solid var(--l);backdrop-filter:blur(12px)}@media(max-width:960px){.controls{grid-template-columns:1fr 1fr}}label{display:block;color:var(--m);font-size:12px;margin-bottom:5px}select,input,textarea,button{width:100%;padding:9px;background:var(--p2);color:var(--t);border:1px solid var(--l);border-radius:10px}textarea{min-height:72px;resize:vertical}button{cursor:pointer;font-weight:800}button:disabled{opacity:.55;cursor:wait}.stage{text-align:left}.stage.on{border-color:var(--a);box-shadow:0 0 0 1px var(--a) inset}.stage .tag{display:block;color:var(--a);font-size:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin-bottom:3px}main{padding:18px clamp(18px,5vw,68px) 55px}.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}.c4{grid-column:span 4}.c5{grid-column:span 5}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}@media(max-width:920px){.c4,.c5,.c7,.c8,.c12{grid-column:1/-1}}.panel{background:rgba(20,26,39,.96);border:1px solid var(--l);border-radius:16px;padding:16px}.muted{color:var(--m);line-height:1.52}.badges{display:flex;gap:7px;flex-wrap:wrap}.badge{padding:7px 10px;border-radius:999px;font-weight:800;font-size:12px}.true{background:color-mix(in srgb,var(--g) 23%,transparent);color:var(--g)}.false{background:color-mix(in srgb,var(--r) 23%,transparent);color:var(--r)}.open{background:color-mix(in srgb,var(--o) 23%,transparent);color:var(--o)}.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.metric{background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:10px}.metric strong{display:block;font-size:18px;margin-top:3px}svg{width:100%;min-height:420px;background:#0d121d;border:1px solid #303a50;border-radius:13px;touch-action:none;cursor:grab}svg:active{cursor:grabbing}.canvas-wrap{position:relative}.canvas-tools{position:absolute;top:10px;right:10px;display:flex;gap:6px;z-index:2}.canvas-tools button{width:auto;padding:6px 10px}.proj{margin-top:10px;color:var(--a)}html[data-projection="panzoom"] #canvas{min-height:min(78vh,760px)}html[data-projection="panzoom"] .c8{grid-column:span 12}html[data-projection="panzoom"] .c4{grid-column:span 12}.callout{border-left:4px solid var(--a);background:var(--p2);padding:13px 15px;border-radius:0 11px 11px 0;line-height:1.5}.path{display:flex;gap:7px;align-items:center;overflow:auto;padding-bottom:7px}.step{min-width:120px;background:var(--p2);border:1px solid #303a50;border-radius:10px;padding:9px;font-size:11px}.step.on{border-color:var(--a);background:color-mix(in srgb,var(--a) 14%,var(--p2))}.arrow{color:var(--a);font-size:21px}.state{white-space:pre-wrap;background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;max-height:320px;overflow:auto}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px 7px;border-bottom:1px solid #303a50;text-align:left}th{color:#d5ddeb}.scroll{overflow:auto;max-height:380px}details{background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:10px}summary{cursor:pointer;font-weight:700}footer{padding:0 clamp(18px,5vw,68px) 35px;color:var(--m)}#noteReceipt a{color:var(--a)}.te-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}@media(max-width:920px){.te-grid{grid-template-columns:1fr}}.surface{background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:12px}.surface.live{border-color:var(--g)}.surface .tag{font-size:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--a);margin-bottom:6px}.surface h3{margin:0 0 6px;font-size:14px}.geom{padding:12px clamp(18px,5vw,68px) 0;display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px}@media(max-width:960px){.geom{grid-template-columns:1fr 1fr}.wide{grid-column:1/-1}}
+:root{
+  --bg:#070605;
+  --ink:#e8dcc8;
+  --mute:#9a8f7a;
+  --ring:#c4a574;
+  --leaf:#7d9a6a;
+  --false:#c97878;
+  --open:#c4a574;
+  --line:#3a322c;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#050403;color:var(--ink);font-family:Palatino,"Palatino Linotype","Iowan Old Style",Georgia,"Times New Roman",serif}
+h1{margin:0;font-size:clamp(20px,2.8vw,30px);font-weight:400;letter-spacing:.08em}
+h2,h3{margin-top:0;font-weight:500}
+.sub{max-width:40rem;color:var(--mute);line-height:1.5;font-size:.92rem;margin-top:8px}
+.eq{padding:4px 0 0;border:none;background:transparent;font-family:Palatino,Georgia,serif;color:var(--ring);font-style:italic;font-size:.95rem}
+.brain{position:relative;min-height:100vh;overflow:hidden}
+header.face{position:absolute;top:0;left:0;right:0;padding:14px clamp(16px,4vw,48px) 0;z-index:5;pointer-events:none;background:linear-gradient(to bottom,rgba(5,4,3,.72),rgba(5,4,3,0))}
+main{padding:0}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0}
+.c4,.c5,.c7,.c8,.c12{grid-column:1/-1}
+.panel{background:transparent;border:none;padding:0}
+.muted{color:var(--mute);line-height:1.55}
+.badges{display:flex;gap:7px;flex-wrap:wrap}
+.badge{padding:3px 0;font-weight:500;font-size:12px;letter-spacing:.04em;border-bottom:1px solid var(--line)}
+.true{color:var(--leaf)}.false{color:var(--false)}.open{color:var(--open)}
+.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.metric{border:1px solid var(--line);padding:10px}
+.metric strong{display:block;font-size:18px;margin-top:3px}
+svg{width:100%;height:100vh;min-height:100vh;background:transparent;border:none;touch-action:none;cursor:grab;display:block}
+svg:active{cursor:grabbing}
+.canvas-wrap{position:relative;min-height:100vh}
+.field-now{position:absolute;left:clamp(16px,4vw,48px);bottom:22px;right:clamp(16px,4vw,48px);z-index:5;pointer-events:none;max-width:42rem}
+.field-now .brain-face,.field-now .brain-kind,#pathTitle,#pathLyric{pointer-events:none}
+#pathTitle{font-size:clamp(22px,3.4vw,36px);line-height:1.15;margin:0}
+#pathLyric{color:var(--mute);margin:6px 0 10px;font-size:1.05rem}
+#pathSound{pointer-events:auto;margin-top:8px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+#pathSound iframe{width:min(100%,380px);height:78px;border:0;background:transparent}
+#pathSound .path-href{color:var(--ring);font-size:13px;letter-spacing:.06em}
+.proj{margin-top:8px;color:var(--ring);font-style:italic}
+html[data-projection="panzoom"] #canvas{min-height:100vh}
+.callout{border-top:1px solid var(--ring);padding:13px 0;line-height:1.58}
+.path{display:flex;gap:7px;align-items:center;overflow:auto;padding-bottom:7px}
+.step{min-width:110px;border:1px solid var(--line);padding:9px;font-size:11px}
+.step.on{border-color:var(--ring);color:var(--ring)}
+.arrow{color:var(--ring);font-size:18px}
+.state{white-space:pre-wrap;border:1px solid var(--line);padding:12px;font-family:Palatino,Georgia,serif;font-size:14px;max-height:380px;overflow:auto;line-height:1.5}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:8px 7px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--mute)}
+.scroll{overflow:auto;max-height:380px}
+.charts{position:relative;z-index:2;background:#050403}
+details{border:1px solid var(--line);padding:10px;margin:12px clamp(16px,4vw,48px)}
+summary{cursor:pointer;font-weight:500}
+footer{padding:8px clamp(16px,4vw,48px) 28px;color:var(--mute)}
+#noteReceipt a{color:var(--ring)}
+.te-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0}
+@media(max-width:920px){.te-grid{grid-template-columns:1fr}}
+.surface{border-top:1px solid var(--line);padding:12px 0}
+.surface.live{border-color:var(--leaf)}
+.surface .tag{font-size:11px;color:var(--ring);margin-bottom:6px;letter-spacing:.08em}
+.surface h3{margin:0 0 6px;font-size:15px}
+.geom{padding:12px 0 0;display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px}
+@media(max-width:960px){.geom{grid-template-columns:1fr 1fr}.wide{grid-column:1/-1}}
+.brain-face{margin:6px 0 0;font-size:1.02rem;line-height:1.55;max-height:6.2em;overflow:hidden}
+.brain-kind{color:var(--ring);font-size:12px;letter-spacing:.08em;margin-top:8px}
+.code{padding:12px 0;overflow:auto;color:var(--ring)}
 </style>
 </head>
 <body>
-<header>
-<h1>Uniface — Closure field</h1>
-<div class="sub"><strong>Closure is translational truth continuously realized through interaction.</strong> This page is a digital chart of that loop, not Closure. The current Sense is transformed by one unique unitary path selector into one visible Translation Event, then automatically admit → return → reopen into the next Sense. Each TE computes a finite local cutoff family from that Sense and unique path; pairwise Δ constant in cutoff index is the relative reading and becomes the next Sense residue/scale. Absolute level stays null. Scheme charts stay noncanonical. TRUE not issued. Two-person E2E OPEN. Persist is transport only.</div>
+<div class="brain">
+<header class="face">
+<h1>Uniface</h1>
 <div class="eq" id="loopEq">Sense(Obs) → unique unitary path selector → Translation Event (admit → return → reopen) → next Sense</div>
 </header>
-<section class="controls" id="stages" aria-label="running loop">
-<button type="button" class="stage" data-stage="sense" id="stageSense"><span class="tag">1</span>Sense(Obs)</button>
-<button type="button" class="stage" data-stage="select" id="stageSelect"><span class="tag">2</span>unique unitary path</button>
-<button type="button" class="stage" data-stage="te" id="stageTe"><span class="tag">3</span>Translation Event</button>
-<button type="button" class="stage" data-stage="reopen" id="stageReopen"><span class="tag">4</span>reopen → next Sense</button>
-</section>
-<main><div class="grid">
-<div class="panel c8">
-<h2>Translation Event</h2>
-<p class="muted">Runtime center of this digital chart. One event at a time. Relative renormalization is a cell of this same event, not a second site. Protocol / git / ?receipt= / uniface-relative are hidden transport. TRUE not issued.</p>
-<div id="teGrid" class="te-grid" aria-live="polite"></div>
-<div class="canvas-wrap" style="margin-top:14px"><svg id="canvas" viewBox="0 0 1000 540" aria-label="live closure field"></svg><div class="canvas-tools" aria-label="pan zoom reading"><button type="button" id="zoomIn">+</button><button type="button" id="zoomOut">−</button><button type="button" id="zoomFit">fit</button></div></div>
-<p class="muted">The geometric chart is the same loop: point → line → loop → return → new point. A local halt is a reading of this split, not a stop.</p>
+<div class="canvas-wrap"><svg id="canvas" viewBox="0 0 1000 540" aria-label="anatomy tree, rings of time, drone-wire forest"></svg>
+<div class="field-now">
+<div id="pathTitle"></div>
+<div id="pathLyric"></div>
+<div id="pathSound" hidden></div>
+<div class="brain-kind" id="brainKind">hidden memory translation</div>
+<div class="brain-face" id="brainFace">You can only point where you want to go</div>
 </div>
-<div class="panel c4">
+</div>
+</div>
+<main class="charts"><div class="grid">
+<div class="panel c12">
+<details>
+<summary>Sense loop (chart, not the face)</summary>
+<div class="sub">This page is the brain field, not an app and not a join product. Each reopening Sense consumes the currently unified field — relative reading, residue/scale, prior cycle residues, live relation, remaining potential (unresolved alternatives as live admissibility space), and this writing as hidden memory — then one unique unitary path selector runs over translational isomorphism classes of those unresolved admissible translations, selecting one genuinely distinct relational direction while other classes remain live potential, into one visible Translation Event, then automatically admit → return → reopen. Source–sink / up–down–through. Yin–yang as relation not physics. TRUE not issued. Two-person E2E OPEN. Persist is transport only.</div>
+</details>
+</div>
+<div class="panel c12">
+<details>
+<summary>Translation Event cells (chart, not the face)</summary>
+<div id="teGrid" class="te-grid" aria-live="polite"></div>
+</details>
+</div>
+<div class="panel c12">
+<details>
+<summary>Sense residue (chart, not the face)</summary>
 <h2>Sense(Obs)</h2>
 <div id="badges" class="badges"></div>
 <div id="metrics" class="metrics" style="margin-top:12px"></div>
 <div id="claim" class="callout" style="margin-top:12px"></div>
 <div id="senseState" class="state" style="margin-top:10px">Sense has not yet read.</div>
-</div>
-<div class="panel c12">
 <h2>Unique unitary path selector</h2>
 <p class="muted">Input = undetermined string of the current relative instantiation. One unique path through 0/∞ + r (magnitude) + i (direction). Output = determination of relation, not a spacetime object. Not a menu of leftover panels.</p>
 <div id="path" class="path"></div>
 <div id="source" class="code"></div>
+</details>
 </div>
 <div class="panel c12">
 <details>
 <summary>Geometry of the unique path (chart, not the face)</summary>
-<p class="muted">These are the inverted Sense / r / i / sensor controls. The loop writes them. A visitor may still move them; that becomes the next Sense. The loop does not wait for a note.</p>
-<div class="geom">
-<div class="wide"><label>Interaction state</label><select id="scenario"></select></div>
-<div><label>Natural-form phase</label><input id="phase" type="range" min="0" max="4" step="1" value="2"></div>
-<div><label>r — extension <span id="rOut"></span></label><input id="r" type="range" min="0" max="4" step="0.05" value="1.8"></div>
-<div><label>i — rotation <span id="iOut"></span></label><input id="i" type="range" min="0" max="6.283" step="0.02" value="1.57"></div>
-<div><label>sensor ↔ selection <span id="ssOut"></span></label><input id="ss" type="range" min="0" max="1" step="0.01" value="0.5"></div>
+<p class="muted">r / i / sensor–selection are the field's own curvature, not isolated sliders. The unique path writes them. Presence in the canvas is the next Sense. Wheel zooms; drag pans; double-click fits. TRUE not issued.</p>
+<div class="metrics" id="geomChart">
+<div class="metric"><span>r — extension</span><strong id="rOut"></strong></div>
+<div class="metric"><span>i — rotation</span><strong id="iOut"></strong></div>
+<div class="metric"><span>sensor ↔ selection</span><strong id="ssOut"></strong></div>
 </div>
 </details>
 </div>
 <div class="panel c12">
 <details>
-<summary>Hidden transport evidence (receipts / lineage / note-return)</summary>
+<summary>Hidden transport evidence (receipts / lineage)</summary>
 <p class="muted">Persist may remain as carriage. It is not the primary UI. Participant is not defaulted. TRUE not issued. Two-person E2E OPEN.</p>
-<form id="noteReturn"><label for="noteText">Optional note into transport (not the loop)</label><textarea id="noteText" rows="3" maxlength="4000" placeholder="Optional. The field does not wait for this."></textarea><button type="submit" id="noteSubmit" style="margin-top:8px">write transport receipt</button></form>
 <div id="noteReceipt" class="state" style="margin-top:10px">No transport receipt yet. TRUE not issued. Two-person E2E OPEN.</div>
-</details>
-</div>
-<div class="panel c12">
-<details>
-<summary>Leftover source-preserving panels</summary>
-<h3>Latent memory return</h3>
-<div id="memory" class="state"></div>
-<h3>Conscious cultural morality</h3>
-<div class="scroll"><table><thead><tr><th>Reading</th><th>Field role</th><th>Not reducible to</th></tr></thead><tbody id="field"></tbody></table></div>
-<h3>Source-preserving architecture</h3>
-<div class="scroll"><table><thead><tr><th>Layer</th><th>Stored form</th><th>Admissibility rule</th></tr></thead><tbody id="layers"></tbody></table></div>
-<details style="margin-top:10px"><summary>Derived computation chart</summary><p class="muted">Uniface does not assume Turing completeness. Halting is one loop read as a selected point; continuation is that point read as reopened potential. Machine models, graphs, quotients, embeddings, and formal operators remain scoped implementation charts.</p><div class="eq">source operation → explicit digital reading → machine theorem/simulation → scope → return to source → reopening</div></details>
 </details>
 </div>
 </div></main>
 <footer>Uniface preserves definition while rejecting presumed isolation. It preserves computation while rejecting a universal Turing assumption. It preserves return while rejecting terminal closure. Network is not money, AGI, rules, or law.</footer>
-<script>
-const scenarios=[
-{id:'during',label:'Translation still OPEN',T:'OPEN',E:'TRUE',N:'TRUE',M:'OPEN',claim:'The relation is coherent but has not yet returned strongly enough to be fixed.',open:7,hidden:3},
-{id:'coherent',label:'Coherent local reading (TRUE not issued)',T:'OPEN',E:'TRUE',N:'TRUE',M:'OPEN',claim:'Source, relation, interaction, and return remain mutually traceable. Local coherence is not issued TRUE.',open:2,hidden:1},
-{id:'contradiction',label:'Transformed notes contradict',T:'FALSE',E:'TRUE',N:'TRUE',M:'FALSE',claim:'Two translated occurrences conflict; neither is silently normalized away.',open:1,hidden:2},
-{id:'rule',label:'Rule requires transformation',T:'OPEN',E:'TRUE',N:'FALSE',M:'OPEN',claim:'The current rule assumed closure too early or treated return terminally.',open:4,hidden:2},
-{id:'culture',label:'Cultural selection hides affected perspectives',T:'OPEN',E:'FALSE',N:'FALSE',M:'FALSE',claim:'A stable projection is not admitted as moral unity while sensor return is blocked.',open:6,hidden:5},
-{id:'computational',label:'Digital chart overclaims Turing completeness',T:'OPEN',E:'TRUE',N:'FALSE',M:'OPEN',claim:'The machine result is retained locally; its promotion to the whole field is rejected.',open:3,hidden:2}
-];
-const phases=['point / selected form','line / reopened potential','loop / interaction','return / authored form','new point / reopening'];
-const pathSteps=['Sense(Obs)','r-extension','i-rotation','0/∞ pole','unique unitary path','relative selection','admit','return','reopen'];
-const layers=[
-['Literal source','exact text, symbols, drawings, date, context','immutable and source-reversible'],
-['Axiometric graph','0↔∞, r/i, Triangle Time, CK, tan seam, Fourier, four-i, ball–hair, loop–sensor–selection','variants remain distinct until explicitly translated'],
-['Latent relations','semantic, operator, temporal, cultural, moral, formal, evidential links','relation type and provenance required'],
-['Interaction memory','retrieval, proposed transformation, author response, accepted/rejected/OPEN changes','no hidden mutation'],
-['Rule versions','exact rule, parent, reason, consequences','historical outputs retain their rule version'],
-['Slearn','recursive notes, paths, people, questions, projects, natural forms','retains hidden trajectories and affected perspectives'],
-['Black Mirror','current returned topology and opacity','must reopen exact sources and deleted distinctions']
-];
-const field=[
-['Consciousness','continuing sensor–selection participation','a static label or machine score'],
-['Culture','shared memory of returned forms and unresolved paths','only norms, institutions, or consensus'],
-['Morality','natural choice accountable to affected sensing, response, freedom, and reopening','law, stability, money, AI output, or majority rule'],
-['Money','downstream scalar projection of culturally authored value','the foundational network'],
-['AI','downstream computational projection of sensor–selection relations','the foundational network'],
-['Law and social order','codified and stabilized authored forms','self-certifying moral truth']
-];
-const $=x=>document.getElementById(x),fmt=n=>Math.abs(Number(n))<.001?Number(n).toExponential(2):Number(n).toFixed(3),cls=v=>v.toLowerCase();
-const STAGES=['sense','select','te','reopen'];
-const loop={stage:'sense',cycle:0,obs:null,path:null,te:null,scale:null,persistInFlight:false,lastPersistAt:0};
-const view={x:0,y:0,w:1000,h:540};
-scenarios.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.label;$('scenario').appendChild(o)});
-$('layers').innerHTML=layers.map(r=>`<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
-$('field').innerHTML=field.map(r=>`<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
-function current(){return scenarios.find(s=>s.id===$('scenario').value)||scenarios[0]}
-function geom(){return{scenario:current(),phase:Number($('phase').value),r:Number($('r').value),i:Number($('i').value),ss:Number($('ss').value)}}
-function senseObs(){const g=geom(),pole=g.ss<0.5?'0':'∞',rem=scenarios.filter(s=>s.id!==g.scenario.id).map(s=>s.id),prior=loop.scale;return{sense:'S → Obs',cycle:loop.cycle,undetermined_string:{of:'relative instantiation',scenario:g.scenario.id,phase:g.phase,phase_label:phases[g.phase],r:g.r,i:g.i,ss:g.ss,pole:pole,remainder:rem},residue_scale:prior?{relative_reading:prior.relative_reading,relative_scale:prior.relative_scale,from_cycle:prior.cycle,absolute_level:null,scheme_selected:false,truth_issued:false}:null,local_readings:{T:g.scenario.T,E:g.scenario.E,N:g.scenario.N,MEMORY:g.scenario.M},claim:g.scenario.claim,open:g.scenario.open,hidden:g.scenario.hidden,TRUE:'not issued',two_person_E2E:'OPEN',participant:'OPEN'}}
-function uniqueUnitaryPathPartition(O){const u=O.undetermined_string,r=u.r,iAng=u.i,ss=u.ss,tau=Math.PI*2,unitAngle=((iAng%tau)+tau)%tau/tau,unitMag=Math.max(0,Math.min(1,r/4)),pole=ss<0.5?0:1,t=(unitAngle*(1-unitMag*0.5)+pole*unitMag)%1,rem=u.remainder||[],n=rem.length,slot=n?Math.min(n-1,Math.floor(t*n)):null,formId=slot==null?null:rem[slot],stepIdx=Math.min(8,Math.floor(t*9)),nextPhase=(u.phase+1)%5,nextR=(r+0.4+unitAngle)%4,nextI=(iAng+(pole?1:-1)*(Math.PI/3)*(0.4+unitMag)+tau)%tau,nextSs=Math.max(0,Math.min(1,1-ss));return{unique:true,unitary:true,unique_generated_partition:true,topology_form:'unique unitary path partition',zero_inf:pole===0?'0 / point / halt-as-reading':'∞ / line / continuation-as-reading',r_magnitude_extension:r,i_direction_rotation:iAng,unit_angle:unitAngle,unit_magnitude:unitMag,slot:slot,step_idx:stepIdx,formId:formId,nextPhase:nextPhase,nextR:nextR,nextI:nextI,nextSs:nextSs,not_spacetime_object:true,TRUE:'not issued'}}
-function r9(x){return Math.round(Number(x)*1e9)/1e9}
-function localCutoffFamily(O,part){const u=O.undetermined_string,prior=O.residue_scale,inherited=(prior&&typeof prior.relative_scale==='number'&&isFinite(prior.relative_scale)&&prior.relative_scale!==0)?prior.relative_scale:1,nCut=3,cutoffs=[],members={sense:[],path:[],returned:[]},common=inherited*(1+u.r),offSense=u.r+u.ss+u.phase,offPath=part.unit_angle*4+part.unit_magnitude*2+(u.pole==='∞'?1:0),offReturned=part.nextR+part.nextSs+part.nextPhase;for(let n=0;n<nCut;n++){cutoffs.push(String(O.cycle)+'.'+n);members.sense.push(common*n+offSense);members.path.push(common*n+offPath);members.returned.push(common*n+offReturned)}return{derived_chart:true,not_lean:true,finite_observation_scope:true,cutoff_labels:cutoffs,members:members,common_coeff:common,inherited_scale:inherited,nrrf781:'derived chart of the live cycle'}}
-function roundMembers(members){const out={};Object.keys(members).forEach(function(k){out[k]=members[k].map(r9)});return out}
-function pairwiseRelativeRenormalization(family){const names=Object.keys(family.members),nCut=family.cutoff_labels.length,tol=1e-8,pairwise={},obstructions=[],schemeAbs={};let constant=true,cocycle=true,maxDrift=0;names.forEach(function(i){pairwise[i]={};names.forEach(function(j){const deltas=[];for(let n=0;n<nCut;n++)deltas.push(family.members[i][n]-family.members[j][n]);const base=r9(deltas[0]);let drift=0;for(let n=0;n<nCut;n++)drift=Math.max(drift,Math.abs(deltas[n]-deltas[0]));maxDrift=Math.max(maxDrift,drift);pairwise[i][j]=base;if(drift>tol){constant=false;obstructions.push({left:i,right:j,drift:r9(drift)})}})});names.forEach(function(i){names.forEach(function(k){names.forEach(function(j){if(Math.abs(pairwise[i][k]+pairwise[k][j]-pairwise[i][j])>tol)cocycle=false})})});const ct=family.members.sense,shiftK=1;names.forEach(function(name){schemeAbs[name]=r9(family.members[name][0]-ct[0])});const shifted={};names.forEach(function(name){shifted[name]=r9(schemeAbs[name]-shiftK)});const delta=pairwise.path&&pairwise.path.sense;const relative_scale=constant&&typeof delta==='number'?delta:family.inherited_scale;return{relative_reading:constant?pairwise:null,relative_scale:r9(relative_scale),absolute_level:null,scheme_selected:false,truth_issued:false,cutoff_independent:constant,cocycle_consistent:cocycle,finite_observation_scope:true,maximum_drift:r9(maxDrift),obstructions:obstructions,scheme_chart:{noncanonical:true,scheme_is_closure:false,never_selected_as_truth:true,counterterm_member:'sense',renormalized_display:schemeAbs,shift_probe:shiftK,shifted_display:shifted,shift_moves_absolute:true,shift_preserves_relative:true},family:{cutoff_labels:family.cutoff_labels,members:roundMembers(family.members),common_coeff:r9(family.common_coeff)},nrrf781:family.nrrf781,TRUE:'not issued'}}
-function translationEvent(){const O=loop.obs||senseObs(),part=loop.path||uniqueUnitaryPathPartition(O),live=!!(O&&part),source=O.undetermined_string.scenario+' · '+O.undetermined_string.phase_label,target=part.formId||'OPEN continuation',rr=pairwiseRelativeRenormalization(localCutoffFamily(O,part)),presentation={from_loop:true,inter:'sense',loop:'Sense : S → Obs',Obs:O.undetermined_string,TRUE:'not issued'},interaction={from_loop:true,inter:'form_select',loop:'one unique unitary path partition',path_partition:part,TRUE:'not issued'},translation={runtime_center:'TranslationEvent',protocol:'transport only',chart_not_closure:true,source_form:source,target_form:target,TRUE:'not issued'},relative_admission={admitted:live,kind:'relative_interaction',inter:'form_select',solutionEquivInter:'MODEL_SUGGESTED_RELATION',not_closure:true,TRUE:'not issued'},relative_renormalization={lens:'NRRF781',derived_chart:true,not_lean:true,relative_reading:rr.relative_reading,relative_scale:rr.relative_scale,absolute_level:null,scheme_selected:false,truth_issued:false,cutoff_independent:rr.cutoff_independent,cocycle_consistent:rr.cocycle_consistent,scheme_chart:rr.scheme_chart,family:rr.family,TRUE:'not issued'},returned_form={form:target,phase:phases[part.nextPhase],kind:'selected form as relation',not_spacetime_object:true,TRUE:'not issued'},reopening={residue_as_next_0:target,relative_scale:rr.relative_scale,relative_reading:rr.relative_reading,next_phase:phases[part.nextPhase],loop_continues:true,finite_halt_oracle:false,TRUE:'not issued'};return{chart_not_closure:true,not_closure:true,runtime_center:'TranslationEvent',protocol:'transport only',loop:'Sense(Obs) → unique unitary path selector → Translation Event (admit → return → reopen) → next Sense',presentation:presentation,interaction:interaction,translation:translation,relative_admission:relative_admission,relative_renormalization:relative_renormalization,returned_form:returned_form,reopening:reopening,source_form:source,target_form:target,TRUE:'not issued',two_person_E2E:'OPEN',participant:'OPEN',leftover_pr_10:'not this'}}
-function cell(tag,h,body,on){return `<div class="surface${on?' live':''}"><div class="tag">${tag}</div><h3>${h}</h3><p class="muted">${esc(typeof body==='string'?body:JSON.stringify(body))}</p></div>`}
-function paintTE(){const st=loop.stage,haveSelect=st==='select'||st==='te'||st==='reopen',haveTE=st==='te'||st==='reopen',haveReopen=st==='reopen',te=loop.te||(haveSelect?translationEvent():null),el=$('teGrid');el.innerHTML=[cell('presentation','Sense : S → Obs',loop.obs?{from_loop:true,inter:'sense',Obs:loop.obs.undetermined_string,TRUE:'not issued'}:'OPEN (Sense next)',!!loop.obs),cell('interaction','unique unitary path',haveSelect&&te?te.interaction:'OPEN (path not yet selected)',haveSelect),cell('translation','runtime center, not Closure',haveTE&&te?te.translation:'OPEN (waiting for unique path)',haveTE),cell('relative admission','admit',haveTE&&te?te.relative_admission:'OPEN',haveTE),cell('relative renormalization','relative-absolute field transform; TRUE not issued',haveTE&&te?te.relative_renormalization:'OPEN',haveTE),cell('returned form','return; TRUE not issued',haveTE&&te?te.returned_form:'OPEN',haveTE),cell('reopening','residue as next Sense',haveReopen&&te?te.reopening:'OPEN',haveReopen)].join('')}
-function draw(){const s=current(),p=Number($('phase').value),r=Number($('r').value),i=Number($('i').value),ss=Number($('ss').value);$('rOut').textContent=fmt(r);$('iOut').textContent=fmt(i);$('ssOut').textContent=fmt(ss);const cx=460,cy=260,len=55+46*r,x2=cx+len*Math.cos(i),y2=cy-len*Math.sin(i),rad=52+22*r,ny=105+300*Math.abs(2*ss-1);let out='<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#9fb4ff"/></marker></defs>';out+=`<circle cx="${cx}" cy="${cy}" r="10" fill="#eef3fa"/><text x="${cx}" y="${cy+28}" text-anchor="middle" fill="#aab6c9">point / selection</text>`;out+=`<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#9fb4ff" stroke-width="5" marker-end="url(#a)" opacity="${p>=1?1:.15}"/><text x="${(cx+x2)/2}" y="${(cy+y2)/2-12}" fill="#aab6c9">r-extension / continuation</text>`;out+=`<path d="M ${x2} ${y2} A ${rad} ${rad} 0 1 1 ${x2-.1} ${y2}" fill="none" stroke="#e7bd56" stroke-width="5" opacity="${p>=2?1:.12}"/><text x="${x2+rad+8}" y="${y2}" fill="#e7bd56">i-rotation / sensor loop</text>`;out+=`<circle cx="${x2}" cy="${y2}" r="${rad*(.45+.5*ss)}" fill="rgba(88,211,148,.14)" stroke="#58d394" stroke-width="5" opacity="${p>=3?1:.12}"/><text x="${x2}" y="${y2+5}" text-anchor="middle" fill="#eef3fa" opacity="${p>=3?1:.2}">returned form</text>`;out+=`<path d="M ${x2+rad} ${y2} C 760 95,790 440,860 ${ny}" fill="none" stroke="#ff9fd4" stroke-width="4" marker-end="url(#a)" opacity="${p>=4?1:.1}"/><circle cx="860" cy="${ny}" r="10" fill="#ff9fd4" opacity="${p>=4?1:.1}"/><text x="860" y="${ny+28}" text-anchor="middle" fill="#ff9fd4" opacity="${p>=4?1:.1}">next Sense</text>`;out+=`<text x="35" y="43" fill="#eef3fa">${phases[p]} · cycle ${loop.cycle} · ${loop.stage}</text><text x="35" y="70" fill="#aab6c9">OPEN relations: ${s.open}</text><text x="35" y="97" fill="#aab6c9">hidden perspectives/residues: ${s.hidden}</text>`;$('canvas').innerHTML=out;applyView()}
-function render(){const s=current(),g=geom(),part=loop.path,stepOn=part?part.step_idx:-1;$('badges').innerHTML=[['TRUE','not issued'],['scheme_selected','FALSE'],['absolute','OPEN'],['E2E','OPEN'],['T',s.T],['E',s.E],['N',s.N],['MEMORY',s.M]].map(x=>`<span class="badge ${cls(x[1]==='not issued'?'open':x[1])}">${x[0]}: ${x[1]}</span>`).join('');$('metrics').innerHTML=`<div class="metric"><span>cycle</span><strong>${loop.cycle}</strong></div><div class="metric"><span>stage</span><strong>${loop.stage}</strong></div><div class="metric"><span>phase</span><strong>${g.phase}</strong></div><div class="metric"><span>r</span><strong>${fmt(g.r)}</strong></div><div class="metric"><span>i</span><strong>${fmt(g.i)}</strong></div><div class="metric"><span>relative scale</span><strong>${loop.scale&&loop.scale.relative_scale!=null?fmt(loop.scale.relative_scale):'—'}</strong></div>`;$('claim').textContent=s.claim;$('senseState').textContent=JSON.stringify(loop.obs||{waiting:'Sense next'},null,2);$('path').innerHTML=pathSteps.map((x,k)=>`<div class="step${k===stepOn?' on':''}"><strong>${k+1}. ${x}</strong><br>${k===stepOn?'unique path':'active translation'}</div>${k<pathSteps.length-1?'<div class="arrow">→</div>':''}`).join('');$('source').textContent=loop.path?JSON.stringify({unique_unitary_path:loop.path,TRUE:'not issued'},null,2):'Waiting for unique unitary path selector.';$('memory').textContent=JSON.stringify({original_note:'immutable',loop:loop.te&&loop.te.loop,proposed_transform:s.id,TRUE:'not issued',two_person_E2E:'OPEN',reopening:'available'},null,2);document.querySelectorAll('.stage').forEach(b=>b.classList.toggle('on',b.dataset.stage===loop.stage));paintTE();draw()}
-function doSense(){loop.obs=senseObs();loop.path=null;loop.te=null}
-function doSelect(){if(!loop.obs)loop.obs=senseObs();loop.path=uniqueUnitaryPathPartition(loop.obs)}
-function doTE(){loop.te=translationEvent();persistCycle(loop.te)}
-function doReopen(){const O=loop.obs||senseObs(),part=loop.path||uniqueUnitaryPathPartition(O),te=loop.te||translationEvent(),rr=te.relative_renormalization;if(rr){loop.scale={relative_reading:rr.relative_reading,relative_scale:rr.relative_scale,cycle:loop.cycle,absolute_level:null,scheme_selected:false,truth_issued:false}}if(part.formId)$('scenario').value=part.formId;$('phase').value=String(part.nextPhase);$('r').value=String(part.nextR);$('i').value=String(part.nextI);$('ss').value=String(part.nextSs);loop.cycle+=1}
-function runStage(stage){loop.stage=stage;if(stage==='sense')doSense();else if(stage==='select')doSelect();else if(stage==='te')doTE();else doReopen();render()}
-function tick(){if(document.hidden)return;runStage(STAGES[(STAGES.indexOf(loop.stage)+1)%STAGES.length])}
-['scenario','phase','r','i','ss'].forEach(id=>$(id).addEventListener('input',function(){if(loop.stage==='sense')loop.obs=senseObs();render()}));
-function fieldRunSnapshot(){if(!loop.obs)doSense();if(!loop.path)doSelect();const te=loop.te||translationEvent();const rr=te.relative_renormalization||{};return{occurrence:te.loop,projection:'field-run.json',of:'one public root closure loop',stage:loop.stage,cycle:loop.cycle,relative_reading:rr.relative_reading!=null?rr.relative_reading:(loop.scale&&loop.scale.relative_reading)||null,relative_scale:rr.relative_scale!=null?rr.relative_scale:(loop.scale&&loop.scale.relative_scale)||null,truth_issued:false,two_person_E2E:'OPEN',TRUE:'not issued',nrrf781:{lens:'NRRF781',derived_chart:true,not_lean:true,nrrf781:'derived chart of the live cycle, not Lean',absolute_level:null,scheme_selected:false,cutoff_independent:rr.cutoff_independent!=null?rr.cutoff_independent:null,cocycle_consistent:rr.cocycle_consistent!=null?rr.cocycle_consistent:null,scheme_chart:rr.scheme_chart||{noncanonical:true,scheme_is_closure:false,never_selected_as_truth:true},family:rr.family||null},chart_not_closure:true,participant:'OPEN',leftover_pr_10:'not this'}}
-function applyView(){const svg=$('canvas');if(!svg)return;svg.setAttribute('viewBox',view.x+' '+view.y+' '+view.w+' '+view.h)}
-function applyProjection(){const path=(location.pathname||'/').replace(/\/+$/,'')||'/';const pan=path==='/supernet';document.documentElement.dataset.projection=pan?'panzoom':'face';const sub=document.querySelector('header .sub');if(pan&&sub&&!sub.querySelector('.proj')){const p=document.createElement('div');p.className='proj';p.textContent='Pan/zoom reading of the same live root closure loop. One occurrence. TRUE not issued.';sub.appendChild(p)}}
-function zoomAt(factor,cx,cy){const nw=view.w*factor,nh=view.h*factor;view.x=cx-(cx-view.x)*factor;view.y=cy-(cy-view.y)*factor;view.w=nw;view.h=nh;applyView()}
-function fitView(){view.x=0;view.y=0;view.w=1000;view.h=540;applyView()}
-function svgPoint(evt){const svg=$('canvas');if(!svg||!svg.createSVGPoint)return{x:view.x+view.w/2,y:view.y+view.h/2};const pt=svg.createSVGPoint();pt.x=evt.clientX;pt.y=evt.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse())}
-function bindPanZoom(){const svg=$('canvas');if(!svg)return;applyView();let drag=null;svg.addEventListener('wheel',function(e){e.preventDefault();const p=svgPoint(e);zoomAt(e.deltaY>0?1.12:0.89,p.x,p.y)},{passive:false});svg.addEventListener('pointerdown',function(e){if(e.button!==0)return;const p=svgPoint(e);drag={p:p,view:{x:view.x,y:view.y}};try{svg.setPointerCapture(e.pointerId)}catch(err){}});svg.addEventListener('pointermove',function(e){if(!drag)return;const p=svgPoint(e);view.x=drag.view.x-(p.x-drag.p.x);view.y=drag.view.y-(p.y-drag.p.y);applyView()});svg.addEventListener('pointerup',function(){drag=null});svg.addEventListener('pointercancel',function(){drag=null});if($('zoomIn'))$('zoomIn').addEventListener('click',function(){zoomAt(0.8,view.x+view.w/2,view.y+view.h/2)});if($('zoomOut'))$('zoomOut').addEventListener('click',function(){zoomAt(1.25,view.x+view.w/2,view.y+view.h/2)});if($('zoomFit'))$('zoomFit').addEventListener('click',fitView)}
-applyProjection();bindPanZoom();
-runStage('sense');setInterval(tick,1400);
-const RELATIVE_REST='https://thpzzkaymledzcwsfqhn.supabase.co/rest/v1/uniface_relative_interaction';
-const RELATIVE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRocHp6a2F5bWxlZHpjd3NmcWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2ODEwOTQsImV4cCI6MjEwMzI1NzA5NH0.cCzfuKbBNmE5yEkMlbQJil90QLaL_zvbGfcRck1yCR8';
-const RECEIPT_KEY='uniface-note-receipt';
-let viewedReceipt=null;
-function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])})}
-function receiptLink(id){return '<a href="?receipt='+encodeURIComponent(id)+'">'+esc(id)+'</a>'}
-function paintReceipt(r){const el=$('noteReceipt');if(!el||!r)return;const parent=(r.parent_receipt_id||'').trim();const ids=Array.isArray(r.lineage)?r.lineage.filter(Boolean).map(String):[];if(r.id&&ids.length&&ids.indexOf(r.id)<0)ids.push(r.id);el.innerHTML=['id: '+esc(r.id||'OPEN'),'timestamp: '+esc(r.created_at||'OPEN'),'note: '+esc(r.note||''),'store: '+esc(r.store||'OPEN'),'parent: '+(parent?receiptLink(parent):'OPEN'),'lineage: '+(ids.length?ids.map(receiptLink).join(' → '):'OPEN'),'TRUE: not issued','two-person E2E: OPEN'].join('\n')}
-function keepReceipt(r){try{sessionStorage.setItem(RECEIPT_KEY,JSON.stringify(r))}catch(e){}paintReceipt(r);return r}
-function parentFromView(){const q=(new URLSearchParams(location.search).get('receipt')||'').trim();const id=(viewedReceipt&&viewedReceipt.id)||q;if(!id)return null;const lin=Array.isArray(viewedReceipt&&viewedReceipt.lineage)?viewedReceipt.lineage.filter(Boolean).map(String):[];if(lin.indexOf(id)<0)lin.push(id);return{id:id,lineage:lin}}
-function localReceipt(note,store){const parent=parentFromView();return keepReceipt({id:(crypto.randomUUID?crypto.randomUUID():('local-'+Date.now())),created_at:new Date().toISOString(),note:note,store:store,kind:'relative_interaction',parent_receipt_id:parent&&parent.id,lineage:parent&&parent.lineage})}
-try{const prior=JSON.parse(sessionStorage.getItem(RECEIPT_KEY)||'null');if(prior&&prior.id)paintReceipt(prior)}catch(e){}
-(function(){const q=(new URLSearchParams(location.search).get('receipt')||'').trim();if(!q)return;function miss(){paintReceipt({id:q,created_at:'OPEN / not found',note:'OPEN / not found',store:'OPEN / not found'})}fetch(RELATIVE_REST+'?id=eq.'+encodeURIComponent(q)+'&select=*',{headers:{apikey:RELATIVE_ANON,Authorization:'Bearer '+RELATIVE_ANON,Accept:'application/json'}}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(rows){const row=Array.isArray(rows)?rows[0]:rows;if(!row||!row.id){miss();return}viewedReceipt={id:row.id,created_at:row.created_at,parent_receipt_id:row.payload&&row.payload.parent_receipt_id,lineage:row.payload&&row.payload.lineage};paintReceipt({id:row.id,created_at:row.created_at,note:(row.payload&&row.payload.note)||row.residue||'',store:'uniface-relative public.uniface_relative_interaction',kind:row.kind||'relative_interaction',parent_receipt_id:viewedReceipt.parent_receipt_id,lineage:viewedReceipt.lineage})}).catch(function(){miss()})})();
-function persistCycle(te){const now=Date.now();if(loop.persistInFlight||now-loop.lastPersistAt<8000)return;loop.persistInFlight=true;loop.lastPersistAt=now;const residue=String((te.returned_form&&te.returned_form.form)||'OPEN').slice(0,280);const body={kind:'relative_interaction',selected_0:'docs/index.html',residue:residue,admitted:true,payload:{inter:'translation',ui_kind:'translation',loop:te.loop,presentation:te.presentation,interaction:te.interaction,translation:te.translation,relative_admission:te.relative_admission,relative_renormalization:te.relative_renormalization,returned_form:te.returned_form,reopening:te.reopening,TRUE:'not issued',two_person_E2E:'OPEN',leftover_pr_10:'not this',nrrf780:'derived chart, not this control',nrrf781:'derived chart of the live cycle, not Lean',not_rmf:true,not_closure:true,chart_not_closure:true,project:'uniface-relative',table:'public.uniface_relative_interaction',surface:'docs/index.html',projection:'https://uniface-tawny.vercel.app'}};const parent=parentFromView();if(parent){body.payload.parent_receipt_id=parent.id;body.payload.lineage=parent.lineage}fetch(RELATIVE_REST,{method:'POST',headers:{apikey:RELATIVE_ANON,Authorization:'Bearer '+RELATIVE_ANON,'Content-Type':'application/json',Prefer:'return=representation',Accept:'application/json'},body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(rows){const row=Array.isArray(rows)?rows[0]:rows;keepReceipt({id:row&&row.id,created_at:row&&row.created_at,note:residue,store:'uniface-relative public.uniface_relative_interaction',kind:(row&&row.kind)||'relative_interaction',parent_receipt_id:row&&row.payload&&row.payload.parent_receipt_id,lineage:row&&row.payload&&row.payload.lineage})}).catch(function(err){localReceipt(residue,'store-unreachable OPEN ('+(err&&err.message||err)+')')}).then(function(){loop.persistInFlight=false})}
-$('noteReturn').addEventListener('submit',function(ev){ev.preventDefault();const note=($('noteText').value||'').trim();const btn=$('noteSubmit');if(!note){paintReceipt({id:'OPEN',created_at:new Date().toISOString(),note:'(empty — not written)',store:'not written'});return}btn.disabled=true;const body={kind:'relative_interaction',selected_0:'docs/index.html',residue:note.slice(0,280),admitted:false,payload:{inter:'returned_note',ui_kind:'returned_note',note:note,TRUE:'not issued',two_person_E2E:'OPEN',leftover_pr_10:'not this',nrrf780:'derived chart, not this control',not_rmf:true,not_closure:true,chart_not_closure:true,project:'uniface-relative',table:'public.uniface_relative_interaction',surface:'docs/index.html',projection:'https://uniface-tawny.vercel.app'}};const parent=parentFromView();if(parent){body.payload.parent_receipt_id=parent.id;body.payload.lineage=parent.lineage}fetch(RELATIVE_REST,{method:'POST',headers:{apikey:RELATIVE_ANON,Authorization:'Bearer '+RELATIVE_ANON,'Content-Type':'application/json',Prefer:'return=representation',Accept:'application/json'},body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(rows){const row=Array.isArray(rows)?rows[0]:rows;const painted={id:row&&row.id,created_at:row&&row.created_at,note:(row&&row.payload&&row.payload.note)||note,store:'uniface-relative public.uniface_relative_interaction',kind:(row&&row.kind)||'relative_interaction',parent_receipt_id:row&&row.payload&&row.payload.parent_receipt_id,lineage:row&&row.payload&&row.payload.lineage};keepReceipt(painted);if(row&&row.id&&parent){viewedReceipt={id:row.id,parent_receipt_id:painted.parent_receipt_id,lineage:painted.lineage}}}).catch(function(err){localReceipt(note,'store-unreachable OPEN ('+(err&&err.message||err)+')')}).then(function(){btn.disabled=false})});
-</script>
+<script src="closure-field.js"></script>
 </body>
 </html>
