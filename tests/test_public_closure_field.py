@@ -198,16 +198,20 @@ def test_field_run_json_is_live_fieldRunSnapshot_projection():
     assert payload["nrrf781"]["scheme_selected"] is False
     assert payload["of"] == "one public root closure loop"
     assert payload["sense_consumes"] == "unified supernet field"
-    assert payload["brain_field"]["of"] == "brain field writing"
+    assert payload["brain_field"]["of"] == "brain field"
     assert payload["brain_field"]["kind"] == "hidden memory translation"
     assert payload["brain_field"]["not"] == "app"
     assert payload["brain_field"]["not_join"] is True
     assert payload["brain_field"]["not_blog"] is True
+    assert payload["brain_field"]["not_catalog"] is True
+    assert payload["brain_field"]["not_playlist"] is True
     assert payload["brain_field"]["TRUE"] == "not issued"
     assert payload["brain_field"]["truth_issued"] is False
     assert payload["brain_field"]["two_person_E2E"] == "OPEN"
     assert payload["brain_field"]["same_family"] is True
     assert "latent tumors" in payload["brain_field"]["occurrence"]["exact"]
+    assert payload["field_relation"]["not_playlist"] is True
+    assert payload["field_relation"]["title"] == "Rising Sun"
     assert payload["prior_cycle_residues"] == []
     assert isinstance(payload["unresolved_alternatives"], list)
     assert payload["selected_path"] not in payload["unresolved_alternatives"]
@@ -337,8 +341,8 @@ def test_reopening_sense_consumes_the_unified_field_not_only_last_te():
 u.resetLoop();
 u.loop.geom.ss = 0.2;
 u.doSense();
-if (!u.loop.obs.brain_field || !u.loop.obs.brain_occurrence) throw new Error('Sense missing brain field writing');
-if (u.loop.obs.brain_field.of !== 'brain field writing') throw new Error('brain field of');
+if (!u.loop.obs.brain_field || !u.loop.obs.brain_occurrence) throw new Error('Sense missing brain field');
+if (u.loop.obs.brain_field.of !== 'brain field') throw new Error('brain field of');
 if ((u.loop.obs.prior_cycle_residues||[]).length !== 0) throw new Error('cycle 0 already has prior residues');
 u.doSelect();
 const p0 = u.loop.path;
@@ -533,7 +537,8 @@ def test_root_and_supernet_share_field_wide_sense():
     assert "function brainFieldReading" not in supernet
     assert "BRAIN_OCCURRENCES" in js
     assert "holllow grounds of night" in js
-    assert "holllow grounds of night" in supernet
+    assert "FIELD_RELATIONS" in js
+    assert "not_playlist:true" in js
 
 
 def test_selector_operates_over_translational_isomorphism_classes():
@@ -621,23 +626,25 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     html = _html()
     js = _js()
     supernet = (DOCS / "supernet.html").read_text(encoding="utf-8")
-    assert "latent tumors" in supernet
-    assert "shared seeds of flowing flowering experience" in supernet
-    assert "tree of life extends its naked leaves to the sky" in supernet
-    assert "shared seeds of flowering experience" in supernet
-    assert "holllow grounds of night" in supernet
-    assert "one light-bulb idea a day as continuous integrated process" in supernet
-    assert "YouTube as indirect network translation" in supernet
-    assert "I write almost every conceptual idea I think of." in supernet
     assert "not an app and not a join product" in supernet
     assert "font-family:Inter" not in supernet
     assert "#19243f" not in supernet
     assert "font-family:Palatino" in supernet
     assert 'id="brainFace"' in supernet
+    assert 'id="pathTitle"' in supernet
+    assert 'id="pathLyric"' in supernet
+    assert 'id="pathSound"' in supernet
     assert "anatomy tree, rings of time, drone-wire forest" in supernet
     assert "Join" not in supernet
     assert "invite" not in supernet.lower()
     assert "Share" not in supernet
+    assert "playlist" not in supernet.lower()
+    assert "INDEX.md" not in supernet
+    assert "suno.com/song" not in supernet
+    assert "Goldfish Don't Fly" not in supernet
+    assert "Check Your Shoulders" not in supernet
+    assert "Common App" not in supernet
+    assert "bitcoin" not in supernet.lower()
     assert "Harry" not in supernet
     assert "ChatGPT" not in supernet
     assert "Harry" not in js
@@ -645,16 +652,26 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "Harry" not in html
     assert "ChatGPT" not in html
     assert "BRAIN_OCCURRENCES" in js
+    assert "FIELD_RELATIONS" in js
+    assert "function fieldRelationOf" in js
     assert "function brainFieldReading" in js
     assert "function currentBrainOccurrence" in js
     assert "same_family:true" in js
     assert "not_two_products:true" in js
     assert "not_join:true" in js
     assert "not_blog:true" in js
+    assert "not_playlist:true" in js
+    assert "not_inventory:true" in js
     assert "holllow grounds of night" in js
     assert "shared seeds of flowing flowering experience" in js
     assert "tree of life extends its naked leaves to the sky" in js
+    assert "You can't let go of who you are" in js
+    assert "Without nature there is no life" in js
+    assert "A Field for Brains" in js
+    assert "Goldfish Don't Fly" in js
+    assert "https://suno.com/song/688e6054-0d09-4669-8f43-d588486658f2" in js
     assert "drone-wire forest" in js
+    assert "source–sink / up–down–through" in js
     assert 'id="teGrid"' in supernet
     assert "Sense(Obs) → unique unitary path selector → Translation Event (admit → return → reopen) → next Sense" in supernet
     assert "function uniqueUnitaryPathPartition" not in supernet
@@ -672,20 +689,28 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert live["TRUE"] == "not issued"
     assert live["two_person_E2E"] == "OPEN"
     brain = live["brain_field"]
-    assert brain["of"] == "brain field writing"
+    assert brain["of"] == "brain field"
     assert brain["not"] == "app"
     assert brain["not_join"] is True
     assert brain["not_blog"] is True
+    assert brain["not_catalog"] is True
+    assert brain["not_playlist"] is True
     assert brain["same_family"] is True
     assert brain["truth_issued"] is False
+    assert live["field_relation"]["title"] == "Rising Sun"
+    assert live["field_relation"]["not_playlist"] is True
+    assert live["field_relation"]["suno"].startswith("https://suno.com/song/")
     ids = [item["id"] for item in brain["occurrences"]]
     assert "hidden-memory-2026-08-26" in ids
     assert "naked-leaves-sky" in ids
     assert "flowering-seeds" in ids
     assert "drone-wire-forest" in ids
+    assert "lyric-cant-let-go" in ids
+    assert "field-for-brains" in ids
     exacts = "\n".join(item["exact"] for item in brain["occurrences"])
     assert "latent tumors" in exacts
     assert "holllow grounds of night" in exacts
     assert "tree of life extends its naked leaves to the sky" in exacts
+    assert "You can only point where you want to go" in exacts
     assert ["rule", "computational"] in live["isomorphism_classes"]
 
