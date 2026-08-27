@@ -15,6 +15,9 @@ os.environ.setdefault(
     "localhost,127.0.0.1,*.vercel.app",
 )
 
-from closure_supernet.api_completion import app  # noqa: E402
+from closure_supernet.api_inversion import app  # noqa: E402
+from closure_supernet.api_completion import attach_completion_routes  # noqa: E402
+
+app = attach_completion_routes(app)
 
 __all__ = ["app"]
