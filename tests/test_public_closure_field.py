@@ -680,6 +680,18 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "function isomorphismClassesOf" in js
     assert "truth_issued:false" in js
     assert "FOUNDATION.md" not in supernet
+    assert "When we forget the learned lessons" not in supernet
+    assert "holllow grounds of night" not in supernet
+    assert "one light-bulb idea a day" not in supernet
+    assert "Three Body Problem" not in supernet
+    assert "Purple Rain" not in supernet
+    assert "embodied.html" not in supernet
+    assert "/embodied" not in supernet
+    assert supernet.index('id="canvas"') < supernet.index('id="teGrid"')
+    assert "<summary>Translation Event cells (chart, not the face)</summary>" in supernet
+    te_block = supernet.split('id="teGrid"')[0]
+    assert te_block.rfind("<details>") > te_block.rfind("</details>")
+    assert "min-height:100vh" in supernet
     node = shutil.which("node")
     if node is None:
         return
@@ -707,6 +719,9 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "drone-wire-forest" in ids
     assert "lyric-cant-let-go" in ids
     assert "field-for-brains" in ids
+    assert "black-mirror-translation" in ids
+    assert "three-body" in ids
+    assert "ocean-winds" in ids
     exacts = "\n".join(item["exact"] for item in brain["occurrences"])
     assert "latent tumors" in exacts
     assert "holllow grounds of night" in exacts
