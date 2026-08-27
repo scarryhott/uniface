@@ -1,0 +1,43 @@
+{
+  "projection": "embodied-run.json",
+  "of": "one continuous Supernet integrator",
+  "version": "2.5",
+  "eight_sheaf_supernet": true,
+  "local_ball": [
+    "HUMAN_INTERACTION",
+    "SLEARN_PERSPECTIVE",
+    "BLACK_MIRROR_SENSOR",
+    "TOKENOMIC_AI"
+  ],
+  "global_hair": [
+    "RESOURCE_WORLD",
+    "AGI_SECOND_BRAIN",
+    "PSYCHOPHENOMENAL",
+    "UNKNOWN_UAP_HYPOTHESIS"
+  ],
+  "memetic_love": {
+    "reading": "source-preserving reciprocal translation with consent, affected perspectives, residue, and reopening",
+    "physical_force_claimed": false,
+    "emotion_inferred": false,
+    "human_worth_scored": false
+  },
+  "syntropic_attractor": {
+    "non_scalar": true,
+    "order": "strict property-set inclusion",
+    "resource_metric_foundational_selector": false
+  },
+  "unknown_hypothesis": {
+    "status": "OPEN",
+    "alien_claim_verified": false,
+    "anomaly_is_not_explanation": true
+  },
+  "loop_sensor": {
+    "absolute_origin_observed": false,
+    "single_sensor_complete": false,
+    "local_halt_reading": "current ball return",
+    "global_continuation_reading": "reopened hair"
+  },
+  "canonical_presentation": null,
+  "truth_issued": false,
+  "chart_not_closure": true
+}
