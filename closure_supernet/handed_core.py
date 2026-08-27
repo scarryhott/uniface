@@ -4,13 +4,13 @@ import json
 from itertools import permutations
 from typing import Any, Callable
 
-from .completion import TranslationalCompletionManager
-from .completion_models import (
-    CompletionSystemCreate,
-    InvariantReadingInput,
-    LocalTranslationStepInput,
-)
 from .handed_models import Hand, HandedLifeSystemCreate
+from .unify_closure import (
+    canonical_unified_closure_instances,
+    evaluate_return_closure,
+)
+from .unify_closure_models import ReturnClosureCreate
+from .completion_models import InvariantReadingInput
 
 
 def stable(value: Any) -> str:
@@ -58,29 +58,23 @@ def trace_state(item: dict[str, Any]) -> dict[str, Any]:
 
 
 def ball_completion() -> dict[str, Any]:
-    presentations = [str(index) for index in range(4)]
-    data = CompletionSystemCreate(
-        name="NRRF800 four-ball one-hair completion",
-        presentations=presentations,
-        steps=[
-            LocalTranslationStepInput(
-                source=str(index),
-                target=str((index + 1) % 4),
-                label="ballStep",
-                admitted_for_completion=True,
-                witness={"phase": index, "next_phase": (index + 1) % 4},
-            )
-            for index in range(4)
-        ],
-        readings=[
-            InvariantReadingInput(
-                name="hairMk",
-                values={item: "hair:unit" for item in presentations},
-                metadata={"one_sheaf": True},
-            )
-        ],
+    carrier = [str(index) for index in range(4)]
+    return evaluate_return_closure(
+        ReturnClosureCreate(
+            name="NRRF800 four-ball one-hair closure instance",
+            carrier=carrier,
+            step={str(index): str((index + 1) % 4) for index in range(4)},
+            step_label="ballStep",
+            readings=[
+                InvariantReadingInput(
+                    name="hairMk",
+                    values={item: "hair:unit" for item in carrier},
+                    metadata={"one_sheaf": True},
+                )
+            ],
+            metadata={"instance": "hair_of_ball", "formal_reading": "NRRF802"},
+        )
     )
-    return TranslationalCompletionManager.evaluate(data).model_dump(mode="json")
 
 
 def commuting_maps_receipt() -> dict[str, Any]:
@@ -118,7 +112,8 @@ def evaluate_system(data: HandedLifeSystemCreate) -> dict[str, Any]:
     left_gate_start = state(Hand.LEFT, data.initial_ball_phase)
     left_gate_trace = iterate(left_gate_start, hair_return, 4)
     limit = self_limit(initial)
-    completion = ball_completion()
+    unified = canonical_unified_closure_instances()
+    completion = unified["hair_of_ball"]["evaluation"]
     classes = completion["classes"]
     visited_phases = [item["ball_phase"] for item in left_gate_trace[:-1]]
     roles = [item["temporal_role"] for item in left_gate_trace]
@@ -171,6 +166,25 @@ def evaluate_system(data: HandedLifeSystemCreate) -> dict[str, Any]:
         ],
         "completion_no_global_jump": completion["no_global_jump"],
         "completion_idempotent": completion["completion_idempotent"],
+        "closure_defined_once": unified["closure_defined_once"],
+        "hair_isClosure": unified["hair_of_ball"]["hair_isClosure"],
+        "hair_eq_closure": unified["hair_of_ball"]["hair_eq_closure"],
+        "hand_isClosure": unified["hand_of_ballReturn"]["hand_isClosure"],
+        "closure_ballReturn_hand": unified["hand_of_ballReturn"][
+            "closure_ballReturn_hand"
+        ],
+        "phase_isClosure": unified["phase_of_selfLimit"]["phase_isClosure"],
+        "closure_selfLimit_phase": unified["phase_of_selfLimit"][
+            "closure_selfLimit_phase"
+        ],
+        "unified_cardinalities": unified["unified_cardinalities"],
+        "closure2_life_subsingleton": unified["closure2_life"][
+            "closure2_life_subsingleton"
+        ],
+        "closure2_life_cardinality": unified["closure2_life"]["cardinality"],
+        "unify_closure": unified["closure2_life"]["unify_closure"],
+        "unify_closure_symm": unified["closure2_life"]["unify_closure_symm"],
+        "unified_closure_instances": unified,
         "canonical_biological_interpretation": None,
         "biological_chirality_claimed": False,
         "biological_life_claimed": False,

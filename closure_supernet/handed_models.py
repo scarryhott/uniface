@@ -138,10 +138,12 @@ class HandedLifeFieldProjection(BaseModel):
     records: list[HandedLifeRecord]
     stats: dict[str, Any]
     source_reverse_index: dict[str, list[str]]
-    formal_readings: list[str] = ["NRRF799", "NRRF800"]
+    formal_readings: list[str] = ["NRRF799", "NRRF800", "NRRF802"]
     canonical_runtime_operation: str = "integrate"
     ball_sheaves: int = 4
     hair_sheaves: int = 1
+    closure_defined_once: bool = True
+    hair_hand_phase_are_instances: bool = True
     biological_claimed: bool = False
     human_law_claimed: bool = False
     truth_issued: bool = False

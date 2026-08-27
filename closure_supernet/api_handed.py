@@ -23,12 +23,12 @@ def attach_handed_life_routes(app: FastAPI) -> FastAPI:
         return app
     runtime = app.state.runtime
     app.state.handed_life_routes_attached = True
-    app.version = "2.9.0"
+    app.version = "3.0.0"
     app.description += (
-        "; NRRF800 is live as a handed temporal-closure lens: the four-phase "
-        "ball step generates one hair class, ball and inverse-hair returns are "
-        "typed separately, self-limit is hand inversion at fixed phase, and "
-        "submitted human relations are read without absolute standing"
+        "; NRRF800 remains the handed temporal-closure chart, while NRRF802 "
+        "proves and executes hair, hand and phase as instances of the one return-"
+        "closure kernel already carried by the completion layer; submitted human "
+        "relations remain relative and no biological interpretation is selected"
     )
 
     @app.get("/handed-life", response_class=HTMLResponse, include_in_schema=False)

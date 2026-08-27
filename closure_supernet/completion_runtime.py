@@ -6,13 +6,14 @@ from .completion import TranslationalCompletionManager
 from .completion_store import CompletionStore
 from .runtime import ClosureSupernetRuntime
 from .supernet_integrator import SupernetIntegrator
+from .unify_closure import UnifyClosureManager
 
 
 _PATCHED = False
 
 
 def install_completion_runtime() -> None:
-    """Attach NRRF798/799 to the one continuous Supernet runtime."""
+    """Attach NRRF798/799 and the NRRF802 one-closure interface to one runtime."""
 
     global _PATCHED
     if _PATCHED:
@@ -38,10 +39,14 @@ def install_completion_runtime() -> None:
             explicit == "completion"
             or "nrrf798" in text
             or "nrrf799" in text
+            or "nrrf802" in text
             or "eqvgen" in text
             or "translational completion" in text
             or "finite reach" in text
             or "local global completion" in text
+            or "unify closure" in text
+            or "closure step" in text
+            or "closure₂" in text
         ):
             return "completion"
         return original_infer_adapter(form_label, metadata)
@@ -58,6 +63,14 @@ def install_completion_runtime() -> None:
                 "completion_functorial": True,
                 "completion_idempotent": True,
                 "directed_occurrence_is_not_automatically_admitted_step": True,
+                "one_return_closure_construction": True,
+                "closure_step_invariant_readings_factor_uniquely": True,
+                "closure_unique_up_to_unique_isomorphism": True,
+                "closure2_available": True,
+                "commuting_returns_unify_order_independently": True,
+                "hair_hand_phase_are_one_closure_instances": True,
+                "unified_closure_cardinalities": {"hair": 1, "hand": 2, "phase": 4},
+                "parallel_closure_runtime_created": False,
                 "canonical_representative_selected": False,
                 "runtime_is_formal_proof": False,
                 "determination_issues_truth": False,
@@ -79,11 +92,13 @@ def install_completion_runtime() -> None:
         original_init(self, config)
         self.completion_store = CompletionStore(self.config.database_path)
         self.completion = TranslationalCompletionManager(self, self.completion_store)
+        self.unify_closure = UnifyClosureManager(self)
         projection_run = self.projection.run
 
         def combined_projection_run() -> dict[str, Any]:
             projection = projection_run()
             completion = self.completion.projection()
+            unified = self.unify_closure.projection()
             projection["natural_translational_completion"] = {
                 "stats": completion["stats"],
                 "source_reverse_index": completion["source_reverse_index"],
@@ -91,6 +106,15 @@ def install_completion_runtime() -> None:
                 "local_global_same_completion": True,
                 "every_global_identification_requires_finite_local_lineage": True,
                 "completion_idempotent": True,
+                "truth_issued": False,
+            }
+            projection["unified_closure"] = {
+                "stats": unified["stats"],
+                "source_reverse_index": unified["source_reverse_index"],
+                "formal_readings": ["NRRF798", "NRRF799", "NRRF800", "NRRF802"],
+                "one_closure_construction": True,
+                "uses_existing_completion_store": True,
+                "parallel_closure_runtime_created": False,
                 "truth_issued": False,
             }
             self.store.set_state("black_mirror_projection", projection)
@@ -101,12 +125,14 @@ def install_completion_runtime() -> None:
     async def cycle(self: ClosureSupernetRuntime):
         result = await original_cycle(self)
         projection = self.completion.projection()
+        unified = self.unify_closure.projection()
         stats = projection["stats"]
         black_mirror = self.projection.run()
         living = self.living_store.get_state("living_field_projection")
         if living is None:
             living = self.living.field_projection(black_mirror)
         living["natural_translational_completion"] = projection
+        living["unified_closure"] = unified
         living.setdefault("stats", {}).update(
             {
                 "completion_systems": stats["systems"],
@@ -116,14 +142,21 @@ def install_completion_runtime() -> None:
                 "completion_maps": stats["maps"],
                 "local_global_same_completion": True,
                 "completion_idempotent": True,
+                "unified_closure_systems": unified["stats"]["systems"],
+                "unified_single_return_closures": unified["stats"]["single_return"],
+                "unified_two_return_closures": unified["stats"]["two_return"],
+                "one_closure_construction": True,
+                "parallel_closure_runtime_created": False,
             }
         )
         living.setdefault("source_reverse_index", {}).update(
             projection["source_reverse_index"]
         )
+        living["source_reverse_index"].update(unified["source_reverse_index"])
         self.living_store.set_state("living_field_projection", living)
         payload = result.model_dump(mode="json")
         payload["completion"] = stats
+        payload["unified_closure"] = unified["stats"]
         self.store.set_state("last_cycle", payload)
         return result
 
@@ -132,12 +165,16 @@ def install_completion_runtime() -> None:
         base = base_status.model_dump(mode="python")
         last_cycle = dict(base.get("last_cycle") or {})
         last_cycle["completion"] = self.completion_store.stats()
+        last_cycle["unified_closure"] = self.unify_closure.projection()["stats"]
         base["last_cycle"] = last_cycle
         return type(base_status)(**base)
 
     def completion_field(self: ClosureSupernetRuntime) -> dict[str, Any]:
         projection = self.completion_store.get_state("completion_field_projection")
         return self.completion.projection() if projection is None else projection
+
+    def unified_closure_field(self: ClosureSupernetRuntime) -> dict[str, Any]:
+        return self.unify_closure.projection()
 
     def black_mirror(self: ClosureSupernetRuntime) -> dict[str, Any]:
         projection = original_black_mirror(self)
@@ -150,6 +187,15 @@ def install_completion_runtime() -> None:
                 "every_global_identification_requires_finite_local_lineage": True,
                 "truth_issued": False,
             }
+        if "unified_closure" not in projection:
+            unified = self.unified_closure_field()
+            projection["unified_closure"] = {
+                "stats": unified["stats"],
+                "source_reverse_index": unified["source_reverse_index"],
+                "one_closure_construction": True,
+                "parallel_closure_runtime_created": False,
+                "truth_issued": False,
+            }
         return projection
 
     def living_field(self: ClosureSupernetRuntime) -> dict[str, Any]:
@@ -159,6 +205,12 @@ def install_completion_runtime() -> None:
             projection["natural_translational_completion"] = completion
             projection.setdefault("source_reverse_index", {}).update(
                 completion["source_reverse_index"]
+            )
+        if "unified_closure" not in projection:
+            unified = self.unified_closure_field()
+            projection["unified_closure"] = unified
+            projection.setdefault("source_reverse_index", {}).update(
+                unified["source_reverse_index"]
             )
         return projection
 
@@ -171,6 +223,7 @@ def install_completion_runtime() -> None:
     ClosureSupernetRuntime.cycle = cycle
     ClosureSupernetRuntime.status = status
     ClosureSupernetRuntime.completion_field = completion_field
+    ClosureSupernetRuntime.unified_closure_field = unified_closure_field
     ClosureSupernetRuntime.black_mirror = black_mirror
     ClosureSupernetRuntime.living_field = living_field
     ClosureSupernetRuntime.close = close
