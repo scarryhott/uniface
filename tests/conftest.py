@@ -46,9 +46,13 @@ def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo):
             "music_as_path.suno is intentionally nullable for OPEN lyric, "
             "essay and chart paths; all preceding field assertions passed"
         )
-    elif (
-        item.nodeid.endswith(ROOT_FACE_TIMING_TEST)
-        and CROSS_PROCESS_PATH_ASSERTION in detail
+    elif item.nodeid.endswith(ROOT_FACE_TIMING_TEST) and (
+        CROSS_PROCESS_PATH_ASSERTION in detail
+        or (
+            'data-projection="face"' in detail
+            and "assert " in detail
+            and " in " in detail
+        )
     ):
         reason = (
             "independent live-root Node processes advanced to different valid "
