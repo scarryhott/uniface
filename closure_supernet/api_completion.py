@@ -18,6 +18,13 @@ from .completion_models import (
 )
 from .completion_web import COMPLETION_HTML
 from .config import RuntimeConfig
+from .unify_closure_models import (
+    ClosurePresentationCreate,
+    ReturnClosureCreate,
+    ReturnClosureMapCreate,
+    TwoReturnClosureCreate,
+)
+from .unify_closure_web import UNIFY_CLOSURE_HTML
 
 
 def attach_completion_routes(app: FastAPI) -> FastAPI:
@@ -25,20 +32,91 @@ def attach_completion_routes(app: FastAPI) -> FastAPI:
         return app
     runtime = app.state.runtime
     app.state.completion_routes_attached = True
-    app.version = "2.8.0"
+    app.version = "3.0.0"
     app.description += (
-        "; NRRF798/799 are live as one generative translational-completion lens: "
-        "bare admitted local steps generate the quotient, every identification "
-        "retains finite path lineage, and local invariance equals global truth"
+        "; NRRF798/799 remain the one generative completion engine, and NRRF802 "
+        "is its deterministic-return interface: Closure step, unique invariant "
+        "factorization, functorial closure maps, unique closure presentations, "
+        "and Closure₂ are all carried by the existing completion store"
     )
 
     @app.get("/completion", response_class=HTMLResponse, include_in_schema=False)
     async def completion_interface() -> str:
         return COMPLETION_HTML
 
+    @app.get("/unify-closure", response_class=HTMLResponse, include_in_schema=False)
+    async def unify_closure_interface() -> str:
+        return UNIFY_CLOSURE_HTML
+
     @app.get("/network/completion/capabilities")
     async def completion_capabilities() -> dict[str, Any]:
-        return runtime.completion.capabilities()
+        return {
+            **runtime.completion.capabilities(),
+            "unified_closure": runtime.unify_closure.capabilities(),
+        }
+
+    @app.get("/network/completion/closure-capabilities")
+    async def unified_closure_capabilities() -> dict[str, Any]:
+        return runtime.unify_closure.capabilities()
+
+    @app.post("/network/completion/closures", response_model=CompletionSystem)
+    async def create_return_closure(data: ReturnClosureCreate) -> CompletionSystem:
+        try:
+            return CompletionSystem.model_validate(
+                await runtime.unify_closure.create_return_closure(data)
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post(
+        "/network/completion/closures/two-return",
+        response_model=CompletionSystem,
+    )
+    async def create_two_return_closure(
+        data: TwoReturnClosureCreate,
+    ) -> CompletionSystem:
+        try:
+            return CompletionSystem.model_validate(
+                await runtime.unify_closure.create_two_return_closure(data)
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/network/completion/closures/maps", response_model=CompletionMap)
+    async def create_return_closure_map(
+        data: ReturnClosureMapCreate,
+    ) -> CompletionMap:
+        try:
+            return CompletionMap.model_validate(
+                await runtime.unify_closure.create_map(data)
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/network/completion/closures/presentations")
+    async def create_closure_presentation(
+        data: ClosurePresentationCreate,
+    ) -> dict[str, Any]:
+        try:
+            return await runtime.unify_closure.create_presentation_witness(data)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/network/completion/closure-instances")
+    async def canonical_closure_instances() -> dict[str, Any]:
+        return runtime.unify_closure.projection()["canonical_instances"]
+
+    @app.get("/network/completion/unified-field")
+    async def unified_closure_field() -> dict[str, Any]:
+        return runtime.unified_closure_field()
 
     @app.post("/network/completion/systems", response_model=CompletionSystem)
     async def create_completion_system(data: CompletionSystemCreate) -> CompletionSystem:
