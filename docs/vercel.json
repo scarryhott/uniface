@@ -9,6 +9,10 @@
     {
       "source": "/internet-field.json",
       "destination": "/api/internet-field"
+    },
+    {
+      "source": "/te.json",
+      "destination": "/api/te"
     }
   ],
   "functions": {
@@ -16,6 +20,9 @@
       "includeFiles": "closure-field.js"
     },
     "api/internet-field.js": {
+      "includeFiles": "closure-field.js"
+    },
+    "api/te.js": {
       "includeFiles": "closure-field.js"
     }
   }

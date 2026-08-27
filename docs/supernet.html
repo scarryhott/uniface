@@ -5,73 +5,26 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Uniface</title>
 <style>
-:root{
-  --bg:#070605;
-  --ink:#e8dcc8;
-  --mute:#9a8f7a;
-  --ring:#c4a574;
-  --leaf:#7d9a6a;
-  --false:#c97878;
-  --open:#c4a574;
-  --line:#3a322c;
-}
 *{box-sizing:border-box}
-html,body{margin:0;background:#050403;color:var(--ink);font-family:Palatino,"Palatino Linotype","Iowan Old Style",Georgia,"Times New Roman",serif}
+html,body{margin:0;background:#050403;color:#e8dcc8;font-family:Palatino,"Palatino Linotype","Iowan Old Style",Georgia,"Times New Roman",serif}
 h1{margin:0;font-size:clamp(20px,2.8vw,30px);font-weight:400;letter-spacing:.08em}
-h2,h3{margin-top:0;font-weight:500}
-.sub{max-width:40rem;color:var(--mute);line-height:1.5;font-size:.92rem;margin-top:8px}
-.eq{padding:4px 0 0;border:none;background:transparent;font-family:Palatino,Georgia,serif;color:var(--ring);font-style:italic;font-size:.95rem}
+.eq{padding:4px 0 0;font-style:italic;font-size:.95rem;color:#c4a574}
 .brain{position:relative;min-height:100vh;overflow:hidden}
 header.face{position:absolute;top:0;left:0;right:0;padding:14px clamp(16px,4vw,48px) 0;z-index:5;pointer-events:none;background:linear-gradient(to bottom,rgba(5,4,3,.72),rgba(5,4,3,0))}
-main{padding:0}
-.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0}
-.c4,.c5,.c7,.c8,.c12{grid-column:1/-1}
-.panel{background:transparent;border:none;padding:0}
-.muted{color:var(--mute);line-height:1.55}
-.badges{display:flex;gap:7px;flex-wrap:wrap}
-.badge{padding:3px 0;font-weight:500;font-size:12px;letter-spacing:.04em;border-bottom:1px solid var(--line)}
-.true{color:var(--leaf)}.false{color:var(--false)}.open{color:var(--open)}
-.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.metric{border:1px solid var(--line);padding:10px}
-.metric strong{display:block;font-size:18px;margin-top:3px}
 svg{width:100%;height:100vh;min-height:100vh;background:transparent;border:none;touch-action:none;cursor:grab;display:block}
 svg:active{cursor:grabbing}
 .canvas-wrap{position:relative;min-height:100vh}
 .field-now{position:absolute;left:clamp(16px,4vw,48px);bottom:22px;right:clamp(16px,4vw,48px);z-index:5;pointer-events:none;max-width:42rem}
 .field-now .brain-face,.field-now .brain-kind,#pathTitle,#pathLyric{pointer-events:none}
 #pathTitle{font-size:clamp(22px,3.4vw,36px);line-height:1.15;margin:0}
-#pathLyric{color:var(--mute);margin:6px 0 10px;font-size:1.05rem}
+#pathLyric{color:#9a8f7a;margin:6px 0 10px;font-size:1.05rem}
 #pathSound{pointer-events:auto;margin-top:8px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
 #pathSound iframe{width:min(100%,380px);height:78px;border:0;background:transparent}
-#pathSound .path-href{color:var(--ring);font-size:13px;letter-spacing:.06em}
-.proj{margin-top:8px;color:var(--ring);font-style:italic}
+#pathSound .path-href{color:#c4a574;font-size:13px;letter-spacing:.06em}
 html[data-projection="panzoom"] #canvas{min-height:100vh}
-.callout{border-top:1px solid var(--ring);padding:13px 0;line-height:1.58}
-.path{display:flex;gap:7px;align-items:center;overflow:auto;padding-bottom:7px}
-.step{min-width:110px;border:1px solid var(--line);padding:9px;font-size:11px}
-.step.on{border-color:var(--ring);color:var(--ring)}
-.arrow{color:var(--ring);font-size:18px}
-.state{white-space:pre-wrap;border:1px solid var(--line);padding:12px;font-family:Palatino,Georgia,serif;font-size:14px;max-height:380px;overflow:auto;line-height:1.5}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th,td{padding:8px 7px;border-bottom:1px solid var(--line);text-align:left}
-th{color:var(--mute)}
-.scroll{overflow:auto;max-height:380px}
-.charts{position:relative;z-index:2;background:#050403}
-details{border:1px solid var(--line);padding:10px;margin:12px clamp(16px,4vw,48px)}
-summary{cursor:pointer;font-weight:500}
-footer{padding:8px clamp(16px,4vw,48px) 28px;color:var(--mute)}
-#noteReceipt a{color:var(--ring)}
-.te-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0}
-@media(max-width:920px){.te-grid{grid-template-columns:1fr}}
-.surface{border-top:1px solid var(--line);padding:12px 0}
-.surface.live{border-color:var(--leaf)}
-.surface .tag{font-size:11px;color:var(--ring);margin-bottom:6px;letter-spacing:.08em}
-.surface h3{margin:0 0 6px;font-size:15px}
-.geom{padding:12px 0 0;display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px}
-@media(max-width:960px){.geom{grid-template-columns:1fr 1fr}.wide{grid-column:1/-1}}
+footer{padding:8px clamp(16px,4vw,48px) 28px;color:#9a8f7a}
 .brain-face{margin:6px 0 0;font-size:1.02rem;line-height:1.55;max-height:6.2em;overflow:hidden}
-.brain-kind{color:var(--ring);font-size:12px;letter-spacing:.08em;margin-top:8px}
-.code{padding:12px 0;overflow:auto;color:var(--ring)}
+.brain-kind{color:#c4a574;font-size:12px;letter-spacing:.08em;margin-top:8px}
 </style>
 </head>
 <body>
@@ -85,57 +38,11 @@ footer{padding:8px clamp(16px,4vw,48px) 28px;color:var(--mute)}
 <div id="pathTitle"></div>
 <div id="pathLyric"></div>
 <div id="pathSound" hidden></div>
-<div class="brain-kind" id="brainKind">hidden memory translation</div>
-<div class="brain-face" id="brainFace">You can only point where you want to go</div>
+<div class="brain-kind" id="brainKind"></div>
+<div class="brain-face" id="brainFace"></div>
 </div>
 </div>
 </div>
-<main class="charts"><div class="grid">
-<div class="panel c12">
-<details>
-<summary>Sense loop (chart, not the face)</summary>
-<div class="sub">Pan/zoom reading of the same live root closure loop. One occurrence. This page is the brain field, not an app and not a join product. Each reopening Sense consumes the currently unified field — relative reading, residue/scale, prior cycle residues, live relation, remaining potential (unresolved alternatives as live admissibility space), this writing as hidden memory, and a read-only internet-field ingest of the live tawny field, public discussion 28, and public repo activity, already normalized into the same remainder / admissibility / isomorphism classes — then one unique unitary path selector runs over translational isomorphism classes of those unresolved admissible translations, selecting one genuinely distinct relational direction while other classes remain live potential, into one visible Translation Event, then automatically admit → return → reopen. Source–sink / up–down–through. Yin–yang as relation not physics. TRUE not issued. Two-person E2E OPEN. Persist is transport only.</div>
-</details>
-</div>
-<div class="panel c12">
-<details>
-<summary>Translation Event cells (chart, not the face)</summary>
-<div id="teGrid" class="te-grid" aria-live="polite"></div>
-</details>
-</div>
-<div class="panel c12">
-<details>
-<summary>Sense residue (chart, not the face)</summary>
-<h2>Sense(Obs)</h2>
-<div id="badges" class="badges"></div>
-<div id="metrics" class="metrics" style="margin-top:12px"></div>
-<div id="claim" class="callout" style="margin-top:12px"></div>
-<div id="senseState" class="state" style="margin-top:10px">Sense has not yet read.</div>
-<h2>Unique unitary path selector</h2>
-<p class="muted">Input = undetermined string of the current relative instantiation. One unique path through 0/∞ + r (magnitude) + i (direction). Output = determination of relation, not a spacetime object. Not a menu of leftover panels.</p>
-<div id="path" class="path"></div>
-<div id="source" class="code"></div>
-</details>
-</div>
-<div class="panel c12">
-<details>
-<summary>Geometry of the unique path (chart, not the face)</summary>
-<p class="muted">r / i / sensor–selection are the field's own curvature, not isolated sliders. The unique path writes them. Presence in the canvas is the next Sense. Wheel zooms; drag pans; double-click fits. TRUE not issued.</p>
-<div class="metrics" id="geomChart">
-<div class="metric"><span>r — extension</span><strong id="rOut"></strong></div>
-<div class="metric"><span>i — rotation</span><strong id="iOut"></strong></div>
-<div class="metric"><span>sensor ↔ selection</span><strong id="ssOut"></strong></div>
-</div>
-</details>
-</div>
-<div class="panel c12">
-<details>
-<summary>Hidden transport evidence (receipts / lineage)</summary>
-<p class="muted">Persist may remain as carriage. It is not the primary UI. Participant is not defaulted. TRUE not issued. Two-person E2E OPEN.</p>
-<div id="noteReceipt" class="state" style="margin-top:10px">No transport receipt yet. TRUE not issued. Two-person E2E OPEN.</div>
-</details>
-</div>
-</div></main>
 <footer>Uniface preserves definition while rejecting presumed isolation. It preserves computation while rejecting a universal Turing assumption. It preserves return while rejecting terminal closure. Network is not money, AGI, rules, or law.</footer>
 <script src="closure-field.js"></script>
 </body>
