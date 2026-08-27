@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class HandedLifeManager(HandedActionMixin):
-    """Finite executable NRRF799/800 chart inside the one Supernet runtime."""
+    """Finite NRRF800 chart, now derived through the one NRRF802 closure kernel."""
 
     def __init__(self, runtime: "ClosureSupernetRuntime", store: HandedLifeStore):
         self.runtime = runtime
@@ -23,13 +23,13 @@ class HandedLifeManager(HandedActionMixin):
 
     def capabilities(self) -> dict[str, Any]:
         return {
-            "formal_readings": ["NRRF799", "NRRF800"],
+            "formal_readings": ["NRRF799", "NRRF800", "NRRF802"],
             "canonical_runtime_operation": "integrate",
             "ball": "ZMod 4",
             "ball_sheaves": 4,
             "ball_step": "phase + 1 mod 4",
             "ball_step_order_exact": 4,
-            "hair": "natural completion of the ball step",
+            "hair": "Closure ballStep",
             "hair_sheaves": 1,
             "hair_reading_universal_for_ball_step_invariants": True,
             "hand": [Hand.LEFT.value, Hand.RIGHT.value],
@@ -40,6 +40,13 @@ class HandedLifeManager(HandedActionMixin):
             "left_handed_potential_gate": True,
             "human_relation_mapping": True,
             "common_shift_observed": False,
+            "closure_defined_once": True,
+            "hair_is_closure_ball_step": True,
+            "hand_is_closure_ball_return": True,
+            "phase_is_closure_self_limit": True,
+            "unified_cardinalities": {"hair": 1, "hand": 2, "phase": 4},
+            "closure2_life_subsingleton": True,
+            "parallel_closure_runtime_created": False,
             "biological_chirality_claimed": False,
             "biological_life_claimed": False,
             "human_law_claimed": False,
@@ -68,16 +75,18 @@ class HandedLifeManager(HandedActionMixin):
                     {
                         "NRRF799": "natural translational completion from local ball step",
                         "NRRF800": "handed life ball return hair potential gate temporal closure",
+                        "NRRF802": "hair hand and phase as instances of one closure construction",
                         "name": data.name,
                         "initial": evaluation["initial_state"],
                         "ball": evaluation["ball_carrier"],
                         "hair_classes": evaluation["hair_classes"],
+                        "unified_cardinalities": evaluation["unified_cardinalities"],
                         "left_gate_trace": evaluation["left_handed_gate_trace"],
                     }
                 ),
                 authored_by=data.authored_by,
-                form_label="handed life temporal closure",
-                language_label="NRRF799/800 four-ball one-hair chart",
+                form_label="handed life temporal closure instance",
+                language_label="NRRF799/800/802 one-closure chart",
                 source_id="handed-life-supernet",
                 perspective_id=data.perspective_id,
                 problem_id=data.problem_id,
@@ -85,10 +94,12 @@ class HandedLifeManager(HandedActionMixin):
                     "generate one hair from the four-phase ball step",
                     "apply ball and inverse-hair returns",
                     "derive the self-limit hand inversion",
+                    "derive hair hand and phase through one closure kernel",
                     "retain finite completion lineage",
                 ],
                 constraints=[
                     "finite ZMod 4 / two-hand executable chart",
+                    "uses the existing completion engine",
                     "no biological interpretation inferred",
                     "no universal human law inferred",
                     "determination does not issue TRUE",
@@ -96,6 +107,8 @@ class HandedLifeManager(HandedActionMixin):
                 relation_hints=[
                     "NRRF799",
                     "NRRF800",
+                    "NRRF802",
+                    "Closure step",
                     "ballReturn",
                     "hairReturn",
                     "left-handed potential gate",
@@ -110,9 +123,11 @@ class HandedLifeManager(HandedActionMixin):
                 metadata={
                     **data.metadata,
                     "system_id": system_id,
-                    "formal_readings": ["NRRF799", "NRRF800"],
+                    "formal_readings": ["NRRF799", "NRRF800", "NRRF802"],
                     "evaluation": evaluation,
                     "source_ids": source_ids,
+                    "closure_defined_once": True,
+                    "parallel_closure_runtime_created": False,
                     "runtime_is_formal_proof": False,
                     "truth_issued": False,
                 },
@@ -134,6 +149,8 @@ class HandedLifeManager(HandedActionMixin):
                 "evaluation": evaluation,
                 "metadata": {
                     **data.metadata,
+                    "closure_defined_once": True,
+                    "formal_readings": ["NRRF799", "NRRF800", "NRRF802"],
                     "canonical_biological_interpretation": None,
                     "truth_issued": False,
                 },
@@ -148,6 +165,7 @@ class HandedLifeManager(HandedActionMixin):
                 "one generated hair class",
                 "ball/hair return equations",
                 "self-limit hand inversion",
+                "one closure kernel for hair hand and phase",
             ],
             rigidity_receipt={
                 "ball_card": 4,
@@ -159,6 +177,13 @@ class HandedLifeManager(HandedActionMixin):
                 ],
                 "self_limit_order_exact": 2,
                 "left_handed_gate_complete": evaluation["left_handed_gate_complete"],
+                "closure_defined_once": evaluation["closure_defined_once"],
+                "hair_isClosure": evaluation["hair_isClosure"],
+                "hand_isClosure": evaluation["hand_isClosure"],
+                "phase_isClosure": evaluation["phase_isClosure"],
+                "closure2_life_subsingleton": evaluation[
+                    "closure2_life_subsingleton"
+                ],
                 "biological_interpretation_selected": False,
                 "truth_issued": False,
             },
@@ -169,18 +194,22 @@ class HandedLifeManager(HandedActionMixin):
                 "ball_return": "same hand / phase + 1 mod 4",
                 "hair_return": "inverse hand / phase - 1 mod 4",
                 "self_limit": "hand inversion / fixed ball phase",
+                "unified_cardinalities": evaluation["unified_cardinalities"],
                 "canonical_biological_interpretation": None,
             },
             unitary_path_partition={
                 "ball_cycle": [0, 1, 2, 3, 0],
                 "hair_completion_classes": 1,
+                "hand_completion_classes": 2,
+                "phase_completion_classes": 4,
+                "joint_life_completion_classes": 1,
                 "left_gate_trace": evaluation["left_handed_gate_trace"],
                 "local_halt": "four-step ball return",
                 "global_continuation": "same hair reopened through next state",
             },
             reason=(
-                "The four-phase ball step generates one hair class and the stated "
-                "return equations determine the handed temporal trace"
+                "The four-phase ball, hand, phase and joint life closures are "
+                "instances of the one generated return-closure construction"
             ),
         )
         self.runtime.supernet_integrator.transition(
@@ -188,7 +217,7 @@ class HandedLifeManager(HandedActionMixin):
             IntegrationStateCreate(
                 stage=IntegrationStage.RETURNED,
                 verdict=Verdict.OPEN,
-                reason="The handed-life chart returns as reopenable successor potential",
+                reason="The unified handed-life closure chart returns as reopenable successor potential",
                 actor_id=data.authored_by,
                 returned_resource_ids=[system_id],
                 successor_potential=[
@@ -197,10 +226,12 @@ class HandedLifeManager(HandedActionMixin):
                         "system_id": system_id,
                         "next": "ballReturn or hairReturn",
                         "hair_class": "hair:unit",
+                        "closure_kernel": "NRRF802",
                     }
                 ],
                 metadata={
                     "truth_issued": False,
+                    "parallel_closure_runtime_created": False,
                     "biological_life_claimed": False,
                     "human_law_claimed": False,
                 },
@@ -226,10 +257,15 @@ class HandedLifeManager(HandedActionMixin):
                     for item in records
                 },
             },
-            "formal_readings": ["NRRF799", "NRRF800"],
+            "formal_readings": ["NRRF799", "NRRF800", "NRRF802"],
             "canonical_runtime_operation": "integrate",
             "ball_sheaves": 4,
             "hair_sheaves": 1,
+            "closure_defined_once": True,
+            "hair_hand_phase_are_instances": True,
+            "unified_cardinalities": {"hair": 1, "hand": 2, "phase": 4},
+            "closure2_life_subsingleton": True,
+            "parallel_closure_runtime_created": False,
             "biological_claimed": False,
             "human_law_claimed": False,
             "truth_issued": False,
