@@ -11,6 +11,8 @@ FIELD_RUN = DOCS / "field-run.json"
 FIELD_RUN_API = DOCS / "api" / "field-run.js"
 INTERNET_FIELD_API = DOCS / "api" / "internet-field.js"
 TE_API = DOCS / "api" / "te.js"
+ROOT_API = DOCS / "api" / "root.js"
+MIDDLEWARE = DOCS / "middleware.js"
 
 
 def _html() -> str:
@@ -37,13 +39,13 @@ def _live_field_run_snapshot():
     )
 
 
-def _invoke_handler(api_path, method: str = "GET"):
+def _invoke_handler(api_path, method: str = "GET", url: str = "/"):
     script = (
         "const handler=require(" + json.dumps(str(api_path)) + ");"
         "const headers={}; let body=''; let ended=false;"
         "const res={statusCode:200,setHeader(k,v){headers[String(k).toLowerCase()]=v},"
         "end(b){ended=true;body=b==null?'':String(b)}};"
-        "Promise.resolve(handler({method:" + json.dumps(method) + "},res)).then(function(){"
+        "Promise.resolve(handler({method:" + json.dumps(method) + ",url:" + json.dumps(url) + "},res)).then(function(){"
         "if(!ended)throw new Error('handler did not end');"
         "process.stdout.write(JSON.stringify({status:res.statusCode,headers:headers,body:body}));"
         "}).catch(function(err){process.stderr.write(String(err&&err.stack||err));process.exit(1)});"
@@ -131,6 +133,7 @@ def test_public_root_is_a_running_closure_field():
     assert "function replacePublicFace" in js
     assert "function publicFaceFromField" in js
     assert "function admitReturnedFieldAsNextSense" in js
+    assert "function paintPublicFaceHtml" in js
     assert "function paintTE" not in js
     assert "function cell(" not in js
     assert "chart, not the face" not in js
@@ -198,8 +201,15 @@ def test_supernet_is_the_same_loop_panzoom_projection():
     field_run = [rule for rule in rewrites if rule.get("source") == "/field-run.json"]
     assert field_run == [{"source": "/field-run.json", "destination": "/api/field-run"}]
     assert {"source": "/internet-field.json", "destination": "/api/internet-field"} in rewrites
+    assert {"source": "/", "destination": "/api/root"} in rewrites
+    assert {"source": "/index.html", "destination": "/api/root"} in rewrites
+    assert {"source": "/supernet", "destination": "/api/root"} in rewrites
+    assert {"source": "/supernet.html", "destination": "/api/root"} in rewrites
     assert vercel.get("functions", {}).get("api/field-run.js", {}).get("includeFiles") == "closure-field.js"
     assert vercel.get("functions", {}).get("api/internet-field.js", {}).get("includeFiles") == "closure-field.js"
+    assert vercel.get("functions", {}).get("api/root.js", {}).get("includeFiles") == "{index.html,supernet.html,closure-field.js}"
+    assert ROOT_API.is_file()
+    assert MIDDLEWARE.is_file()
     assert (DOCS / "supernet.html").is_file()
     assert not (DOCS / "supernet").exists()
     assert FIELD_RUN_API.is_file()
@@ -1423,5 +1433,162 @@ console.log(JSON.stringify({
     assert payload["TRUE"] == "not issued"
     assert payload["two_person_E2E"] == "OPEN"
     assert payload["participant"] == "Supernetwork"
+
+
+def _invoke_root_handler(method: str = "GET", url: str = "/"):
+    return _invoke_handler(ROOT_API, method, url)
+
+
+def test_root_html_server_renders_face_from_prior_te_return():
+    html = _html()
+    js = _js()
+    supernet = (DOCS / "supernet.html").read_text(encoding="utf-8")
+    api = ROOT_API.read_text(encoding="utf-8")
+    middleware = MIDDLEWARE.read_text(encoding="utf-8")
+    vercel = json.loads((DOCS / "vercel.json").read_text(encoding="utf-8"))
+    field_api = FIELD_RUN_API.read_text(encoding="utf-8")
+    foundation = (DOCS.parent / "FOUNDATION.md").read_text(encoding="utf-8")
+    _assert_widget_free_autonomous_face(html)
+    _assert_widget_free_autonomous_face(supernet)
+    assert '<div id="pathTitle"></div>' in html
+    assert 'id="brainFace"' in html
+    assert "<div class=\"brain-face\" id=\"brainFace\"></div>" in html
+    assert "data-cycle=" not in html
+    assert "data-selected-path=" not in html
+    assert "function paintPublicFaceHtml" in js
+    assert "function advancingFieldRunSnapshot" in js
+    assert "function publicFaceFromField" in js
+    assert "function admitReturnedFieldAsNextSense" in js
+    assert "fieldRunSnapshot()" in api
+    assert "paintPublicFaceHtml" in api
+    assert "text/html" in api
+    assert "no-store" in api
+    assert "no-store" in field_api
+    assert "application/json" in field_api
+    assert "x-middleware-rewrite" in middleware
+    assert "/api/root" in middleware
+    assert "/supernet" in middleware
+    assert {"source": "/", "destination": "/api/root"} in vercel.get("rewrites")
+    assert {"source": "/supernet", "destination": "/api/root"} in vercel.get("rewrites")
+    assert {"source": "/field-run.json", "destination": "/api/field-run"} in vercel.get("rewrites")
+    assert vercel.get("functions", {}).get("api/root.js", {}).get("includeFiles") == "{index.html,supernet.html,closure-field.js}"
+    assert "the author’s notes" in foundation
+    assert "<button" not in html
+    assert "<form" not in html
+    assert "Harry" not in api
+    assert "ChatGPT" not in api
+    assert "ChatGPT" not in js
+    node = shutil.which("node")
+    if node is None:
+        return
+    served = _invoke_root_handler("GET", "/")
+    assert served is not None
+    body = served["body"]
+    assert served["status"] == 200
+    assert served["headers"]["content-type"].startswith("text/html")
+    assert served["headers"]["cache-control"] == "no-store"
+    _assert_widget_free_autonomous_face(body)
+    assert 'data-face="currentUnifiedField"' in body
+    assert 'data-cycle="' in body
+    assert 'data-stage="' in body
+    assert 'data-selected-path="' in body
+    assert 'src="closure-field.js"' in body
+    assert "<button" not in body
+    assert "<form" not in body
+    assert "<input" not in body
+    assert "Harry" not in body
+    assert "ChatGPT" not in body
+    script = (
+        "const root=require(" + json.dumps(str(ROOT_API)) + ");"
+        "const fieldRun=require(" + json.dumps(str(FIELD_RUN_API)) + ");"
+        "const u=require(" + json.dumps(str(LOOP_JS)) + ");"
+        "const fs=require('fs');"
+        "const template=fs.readFileSync(" + json.dumps(str(ROOT)) + ",'utf8');"
+        + r"""
+function invoke(handler, url){
+  const headers={}; let body=''; let ended=false;
+  const res={statusCode:200,setHeader(k,v){headers[String(k).toLowerCase()]=v},end(b){ended=true;body=b==null?'':String(b)}};
+  return Promise.resolve(handler({method:'GET',url:url},res)).then(function(){
+    if(!ended)throw new Error('handler did not end');
+    return {status:res.statusCode,headers:headers,body:body};
+  });
+}
+u.resetLoop();
+Promise.resolve().then(async function(){
+  const served = await invoke(root, '/');
+  const snap = u.serializeFieldRun();
+  const html = served.body;
+  if (served.status !== 200) throw new Error('root status');
+  if (served.headers['content-type'].indexOf('text/html') < 0) throw new Error('html type');
+  if (served.headers['cache-control'] !== 'no-store') throw new Error('root cache');
+  if (!snap.public_face || snap.public_face.from !== 'currentUnifiedField') throw new Error('snap face');
+  if (snap.chart_not_closure !== false) throw new Error('root did not consume returned field');
+  if (!u.returnedFieldIsNextSense()) throw new Error('next Sense is not the returned field');
+  if (html.indexOf('data-face="currentUnifiedField"') < 0) throw new Error('html missing face attr');
+  if (html.indexOf('data-cycle="'+snap.cycle+'"') < 0) throw new Error('html missing cycle '+snap.cycle);
+  if (html.indexOf('data-stage="'+snap.stage+'"') < 0) throw new Error('html missing stage '+snap.stage);
+  if (html.indexOf('data-selected-path="'+snap.selected_path+'"') < 0) throw new Error('html missing path '+snap.selected_path);
+  if (html.indexOf('cycle '+snap.cycle) < 0) throw new Error('html text missing cycle');
+  if (html.indexOf(snap.stage) < 0) throw new Error('html text missing stage');
+  if (html.indexOf(snap.selected_path) < 0) throw new Error('html text missing selected_path');
+  const occ = (snap.public_face && snap.public_face.occurrence) || {};
+  if (occ.exact){
+    const first = occ.exact.split('\n')[0];
+    const escaped = first.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    if (html.indexOf(first) < 0 && html.indexOf(escaped) < 0) throw new Error('html missing occurrence');
+  }
+  if (html.indexOf('<button') >= 0 || html.indexOf('<form') >= 0 || html.indexOf('<input') >= 0) throw new Error('widgets');
+  if (snap.TRUE !== 'not issued' || snap.two_person_E2E !== 'OPEN' || snap.truth_issued !== false) throw new Error('truth/e2e');
+  if (snap.participant !== 'Supernetwork') throw new Error('participant');
+  const painted = u.paintPublicFaceHtml(template, snap);
+  if (painted.indexOf('data-cycle="'+snap.cycle+'"') < 0) throw new Error('paintPublicFaceHtml missed cycle');
+  if (painted.indexOf(snap.selected_path) < 0) throw new Error('paintPublicFaceHtml missed path');
+  const jsonServed = await invoke(fieldRun, '/field-run.json');
+  const again = JSON.parse(jsonServed.body);
+  if (jsonServed.status !== 200) throw new Error('field-run status');
+  if (jsonServed.headers['cache-control'] !== 'no-store') throw new Error('field-run cache');
+  if (jsonServed.headers['content-type'].indexOf('application/json') < 0) throw new Error('field-run type');
+  if (again.cycle !== snap.cycle) throw new Error('field-run is a second network cycle');
+  if (again.selected_path !== snap.selected_path) throw new Error('field-run selected_path diverged');
+  if (again.stage !== snap.stage) throw new Error('field-run stage diverged');
+  if (again.public_face.from !== 'currentUnifiedField') throw new Error('field-run face');
+  if (again.two_person_E2E !== 'OPEN' || again.TRUE !== 'not issued') throw new Error('field-run invariants');
+  const pan = await invoke(root, '/supernet');
+  if (pan.body.indexOf('data-projection="panzoom"') < 0) throw new Error('supernet projection');
+  if (pan.body.indexOf('data-cycle="'+snap.cycle+'"') < 0) throw new Error('supernet missing same cycle');
+  if (pan.body.indexOf('data-selected-path="'+snap.selected_path+'"') < 0) throw new Error('supernet missing same path');
+  if (pan.body.indexOf('data-stage="'+snap.stage+'"') < 0) throw new Error('supernet missing same stage');
+  console.log(JSON.stringify({
+    ok: true,
+    cycle: snap.cycle,
+    stage: snap.stage,
+    selected_path: snap.selected_path,
+    face_from: snap.public_face.from,
+    chart_not_closure: snap.chart_not_closure,
+    TRUE: snap.TRUE,
+    two_person_E2E: snap.two_person_E2E,
+    participant: snap.participant,
+    field_run_cycle: again.cycle
+  }));
+}).catch(function(err){process.stderr.write(String(err&&err.stack||err));process.exit(1)});
+"""
+    )
+    result = subprocess.run([node, "-e", script], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout.strip().splitlines()[-1])
+    assert payload["ok"] is True
+    assert payload["chart_not_closure"] is False
+    assert payload["face_from"] == "currentUnifiedField"
+    assert payload["TRUE"] == "not issued"
+    assert payload["two_person_E2E"] == "OPEN"
+    assert payload["participant"] == "Supernetwork"
+    assert payload["stage"] in {"sense", "select", "te", "reopen"}
+    assert isinstance(payload["cycle"], int)
+    assert payload["cycle"] >= 1
+    assert payload["selected_path"]
+    assert payload["field_run_cycle"] == payload["cycle"]
+    assert payload["selected_path"] in served["body"]
+    assert f'cycle {payload["cycle"]}' in served["body"]
+    assert payload["stage"] in served["body"]
 
 
