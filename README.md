@@ -1,20 +1,18 @@
 Live field (join here): https://uniface-tawny.vercel.app
 
-A second person is on Super network by opening that URL and interacting (Sense / unique path / Translation Event, or the note box). This repo is the chart. The field is the public page. TRUE is not issued. Two-person E2E stays OPEN until two real people are actually there.
+A second person joins the Supernet by opening that URL and interacting. The repository is a chart; the living field is the source-preserving interaction. TRUE is not issued merely because a local form returns.
 
 # Uniface / Closure Supernet
 
-**Closure Supernet is one source-preserving continuous integrator whose public
-interface is the living topology of every human, agent, resource, problem,
-translation, selection, action, return, reopening, hardware reading, classical
-value-flow event, relative-renormalization closure, and constructive witness in
-the field.**
+**Closure Supernet is one continuous integrator of human, agent, resource,
+translation, selection, action, return, reopening, physical-sensor, and
+first-person forms into one append-only relational field.**
 
 ```text
 exact source or returned form
 → integrate
 → relation sensing
-→ explicit witness
+→ explicit witnesses
 → natural form where rigid
 → path–partition
 → action / return
@@ -22,117 +20,141 @@ exact source or returned form
 → reopening
 ```
 
-Closure is not the web protocol, database, AI model, proof object, UI chart,
-hardware device, brokerage, market order, counterterm, renormalization scheme,
-or external witness chooser. Those carry or render the same active translation
-field.
+Closure is not the protocol, database, AI model, proof object, user-interface
+chart, resource metric, token, hardware device, counterterm, or selected
+presentation. Those carry or render the same active field.
 
-## Version 2.3 — NRRF783 constructive witness layer
+## Version 2.5 — embodied eight-sheaf Supernet
 
-The root page `/` and `/supernet` remain one live Supernet occurrence. The same
-events can be read through:
+The embodied layer reintegrates the current project as eight open sheaves:
 
 ```text
-field · perspective zoom · point/line/loop · truth diagonal · metavector
-ball/hair · 0/∞ reciprocal poles · light cone · ellipse mirror
-shared architecture · natural-form selector · anatomy tree · trading value flow
-relative renormalization closure · constructive axiometric form
+LOCAL BALL
+  human interaction
+  Slearn perspective paths
+  Black Mirror sensor loop
+  tokenomic–AI coordination
+
+GLOBAL HAIR
+  physical resources and spatiotemporal possibility
+  AGI / second-brain memory
+  psychophenomenal first-person reports
+  UAP / alien / anomalous / unknown hypotheses
 ```
 
-### NRRF783 constructive axiometric forms
+The local ball is the present embodied return. The global hair is the field of
+still-open translations. They are related through explicit, source-preserving
+translations—not identified as literally equal datasets.
 
-The `constructive` lens integrates the machine-checked reading from
-`NRRF783AxiometricFormsUnifiedWithoutClassical` and
-`NRRF783TranslationalTruthFormsWithoutClassical` as explicit finite runtime
-witnesses:
+A relation is `love_admissible` only when it carries:
 
 ```text
-encode + evaluate + U1 return witness
-→ hold = encode ∘ evaluate
-→ U2 derived
-→ U3 read as empty defect
-→ OPEN returned form
+source preservation
+forward and reverse translation
+all affected perspectives
+participant consent scope
+untranslated residue
+reopening conditions
+unknown hypotheses kept OPEN
 ```
 
-An axiometric form carries its section as data. An idempotent translation yields
-a form from its explicit fixed points. A translational closure carries a finite
-commutative-group table, a participant-supplied base site, and a level chart; the
-runtime computes the relative potential and compares alternative charts by an
-explicit common-shift witness.
+This is the operational meaning of “memetic love” in the runtime. It is **not**
+a physical force, an emotion classifier, or a score of human worth.
+
+The syntropic attractor is a non-scalar partial order on closure profiles. A
+component may dominate another only by preserving a strict superset of
+properties such as reciprocity, consent, perspective inclusion, residue, and
+reopening. Resource metrics remain downstream implementation overlays.
+
+The full current-field determination is:
+
+```text
+eight exact sheaf sections
+→ reciprocal translation graph
+→ non-dominated natural components
+→ one component carrying all eight sheaves, where rigid
+→ local ball return
+→ global hair remains OPEN
+```
+
+No canonical presentation is selected, and determination stays `OPEN` with
+`truth_issued=false`.
+
+### Unknown/UAP boundary
+
+The `UNKNOWN_UAP_HYPOTHESIS` sheaf preserves observations, reports, instrument
+traces, and hypotheses. The runtime sets:
+
+```text
+hypothesis_status = OPEN
+alien_claim_verified = false
+anomaly_is_not_explanation = true
+```
+
+The label never certifies an alien or anomalous interpretation.
+
+### Embodied loop sensor
+
+A loop sensor reads one current local-ball section and returns selected global-hair
+sections as successor potential:
+
+```text
+sensor section
+→ visible local ball
+→ returned global hair
+→ reintegration
+```
 
 The runtime records:
 
 ```text
-section_carried_as_data = true
-base_site_supplied = true
-site_chosen_by_runtime = false
-classical_choice_required = false
-excluded_middle_required = false
-runtime_is_formal_proof = false
+absolute_origin_observed = false
+single_sensor_complete = false
+local_halt_reading = current returned ball
+global_continuation_reading = reopened hair
 truth_issued = false
 ```
 
-The Lean modules prove and audit the constructive theorems. Python validates the
-submitted finite witnesses; it does not replace the proof. See
-[`CONSTRUCTIVE_SUPERNET_NRRF783.md`](CONSTRUCTIVE_SUPERNET_NRRF783.md).
+## Natural translational truth
 
-### NRRF780 trading
-
-The `trading` lens retains signed size, bid, ask, fill, mark, and fee; derives
-local-price/inf-cost flow; records rigid `BUY→ASK` and `SELL→BID` determination;
-and evaluates system friction, price holonomy, and P&L. It is evaluation-only
-with no brokerage or order submission. See
-[`TRADING_SUPERNET_NRRF780.md`](TRADING_SUPERNET_NRRF780.md).
-
-### NRRF781 relative renormalization
-
-The public root recurrence (`docs/index.html`) folds this lens into each live
-Translation Event. From the current Sense(Obs) and unique path it builds a
-finite local cutoff family, records pairwise Δ(i,j) as `relative_reading` when
-that difference is constant in cutoff index, and carries the residue/scale into
-the next Sense. Absolute level stays null. Scheme charts stay noncanonical.
-TRUE is not issued. There is no second public site or `/renormalization` face
-on the live root.
-
-The Python `renormalization` adapter remains a notes/runtime chart for local
-Supernet process use. See
-[`RENORMALIZATION_SUPERNET_NRRF781.md`](RENORMALIZATION_SUPERNET_NRRF781.md).
-
-## Natural-form selector
-
-A site-indexed admissibility relation may remain OPEN or become rigid:
+NRRF783–785 remain integrated:
 
 ```text
-site → several admissible symbols  = branching remains OPEN
-site → exactly one symbol          = rigid at that site
-all selected sites rigid           = fill determines one natural form
+explicit constructive witnesses
+→ level orbits
+→ natural selector fixed under translation
+→ unique partial orbit truth
+→ classical global section or contextual obstruction
 ```
 
-The interface records the relation, partial input, rigidity receipt, natural
-form, and unitary path partition. Determination remains `OPEN` and records
-`truth_issued=false`; it does not emit TRUE.
+Classical and contextual frameworks share translational truth. A global
+assignment is a special section, not the truth object itself. Resource metrics
+may constrain safe realization but cannot define foundational naturality.
 
-## Source forms retained
+See:
+
+- [`CONSTRUCTIVE_SUPERNET_NRRF783.md`](CONSTRUCTIVE_SUPERNET_NRRF783.md)
+- [`TRANSLATIONAL_FRAMEWORK_SUPERNET_NRRF784_NRRF785.md`](TRANSLATIONAL_FRAMEWORK_SUPERNET_NRRF784_NRRF785.md)
+- [`EMBODIED_EIGHT_SHEAF_SUPERNET.md`](EMBODIED_EIGHT_SHEAF_SUPERNET.md)
+
+## Existing lenses
+
+All existing domains remain projections of `SupernetIntegrator.integrate`:
 
 ```text
-0 ↔ ∞                 reciprocal poles
-r ↔ i                 extension / rotation
-point → line → loop → return → new point
-ball ↔ hair
-loop ↔ sensor ↔ selection
-i = 2^(r - 1)         Triangle Time
-CK = i e^K            Chaitin–Kakeya form
-tan(π/2)              rotation–extension seam
-1 → i → -1 → -i → 1  four-i return
+problems and collective action
+resources and returned resources
+directed TranslationEvents
+context-relative equality
+iterated reopening
+Black Mirror / Slearn topology
+bounded hardware simulation
+classical trading value flow
+relative renormalization
+constructive axiometric forms
+natural translational frameworks
+embodied eight-sheaf field
 ```
-
-## Runtime
-
-`SupernetIntegrator.integrate` is the one canonical semantic transition.
-Resources, living problems, directed TranslationEvents, relative equality,
-reopening families, collective actions, agents, Black Mirror, bounded hardware,
-trading, relative renormalization, and constructive forms remain adapters and
-lenses over the append-only field.
 
 ## Run
 
@@ -146,53 +168,33 @@ closure-supernet serve
 
 Open:
 
-- `/` or `/supernet` — one live Sense → unique-path → TE → return → reopen occurrence
-- `/field-run.json` — live machine-readable projection of that same occurrence
-- `/constructive` — NRRF783 explicit-witness compatibility lens
-- `/trading` — NRRF780 classical value-flow compatibility lens
-- `/translation` — directed TranslationEvent compatibility lens
-- `/resources` — open-form resource compatibility lens
-- `/reopening` — admissible reopening compatibility lens
-- `/equality` — context-relative equality compatibility lens
-- `/hardware` — bounded simulation-only hardware lens
-- `/production` — authentication and operations
+- `/` or `/supernet` — unified living field
+- `/embodied` — embodied local-ball/global-hair projection
+- `/frameworks` — NRRF784/785 natural translational truth
+- `/constructive` — NRRF783 explicit-witness forms
+- `/hardware` — bounded simulation-only hardware
+- `/trading` — NRRF780 value-flow evaluator
+- `/translation`, `/resources`, `/reopening`, `/equality` — compatibility lenses
 - `/runtime` — autonomous diagnostics
 - `/docs` — API documentation
 
-## NRRF783 APIs
+## Embodied API
 
 ```text
-GET  /network/constructive/capabilities
-POST /network/constructive/forms
-POST /network/constructive/forms/from-idempotent
-GET  /network/constructive/forms
-GET  /network/constructive/forms/{id}
-POST /network/constructive/translations
-GET  /network/constructive/translations
-GET  /network/constructive/translations/{id}
-POST /network/constructive/translations/{id}/compare
-GET  /network/constructive/comparisons
-GET  /network/constructive/field
-GET  /supernet/project?lens=constructive
+GET  /network/embodied/capabilities
+POST /network/embodied/sections
+GET  /network/embodied/sections
+POST /network/embodied/relations
+GET  /network/embodied/relations
+POST /network/embodied/fields
+GET  /network/embodied/fields
+POST /network/embodied/sensors
+GET  /network/embodied/sensors
+GET  /network/embodied/field
+GET  /supernet/project?lens=embodied
 ```
 
-## NRRF781 APIs
-
-Local Python notes/runtime chart only — not the public root face.
-
-```text
-GET  /network/renormalization/capabilities
-POST /network/renormalization/families
-GET  /network/renormalization/families
-POST /network/renormalization/families/{id}/extend
-GET  /network/renormalization/families/{id}/closure
-POST /network/renormalization/families/{id}/schemes
-GET  /network/renormalization/schemes
-GET  /network/renormalization/field
-GET  /supernet/project?lens=renormalization
-```
-
-## Main Supernet APIs
+## Main Supernet API
 
 ```text
 POST /supernet/integrate
@@ -202,7 +204,6 @@ POST /supernet/collective-traces
 POST /supernet/events/{id}/rigidify
 POST /supernet/events/{id}/return
 POST /supernet/events/{id}/reopen
-
 GET  /supernet/topology
 GET  /supernet/events/{id}/context
 GET  /supernet/field
@@ -212,37 +213,15 @@ WS   /supernet/stream
 ## Boundaries
 
 Autonomy cannot overwrite exact sources, infer truth from resemblance or
-transport success, make determination issue TRUE, select one canonical language,
-omit affected perspectives while claiming completion, automatically execute a
-hardware constraint, submit a market order, select a counterterm as truth,
-manufacture a section or base site from a bare existence claim, assume Turing
+transport success, infer emotion or intent from surveillance, score human worth,
+promote a UAP hypothesis to an alien fact, make determination issue TRUE, select
+one canonical language, omit affected perspectives while claiming completion,
+execute unrestricted hardware, submit market orders, select a counterterm as
+truth, manufacture witnesses from bare existence claims, assume Turing
 completeness, or treat a local return as terminal.
 
-The hardware implementation remains deterministic and simulation-only. Trading
-remains evaluator/simulator-only. The NRRF781 runtime check is finite and scoped.
-The NRRF783 runtime layer is an executable finite witness chart, not an axiom
-audit or substitute for the Lean proof.
-
-## Repository map
-
-- [`COMPLETE_SUPERNET_INTERFACE.md`](COMPLETE_SUPERNET_INTERFACE.md) — unified UI and topology operations.
-- [`UNIFIED_SUPERNET_RUNTIME.md`](UNIFIED_SUPERNET_RUNTIME.md) — continuous integrator.
-- [`CONSTRUCTIVE_SUPERNET_NRRF783.md`](CONSTRUCTIVE_SUPERNET_NRRF783.md) — explicit constructive witness layer.
-- [`TRADING_SUPERNET_NRRF780.md`](TRADING_SUPERNET_NRRF780.md) — six-layer trading lens.
-- [`RENORMALIZATION_SUPERNET_NRRF781.md`](RENORMALIZATION_SUPERNET_NRRF781.md) — common-divergence and scheme-free relative closure.
-- [`FOUNDATION.md`](FOUNDATION.md) — note-guided foundation.
-- [`AXIOMETRIC_SOURCE_GRAMMAR.md`](AXIOMETRIC_SOURCE_GRAMMAR.md) — literal source operations.
-- [`TRANSLATIONAL_TRUTH_RUNTIME.md`](TRANSLATIONAL_TRUTH_RUNTIME.md) — directed TranslationEvents.
-- [`RELATIVE_EQUALITY_CALCULUS.md`](RELATIVE_EQUALITY_CALCULUS.md) — context-relative reversible unity.
-- [`LIVING_NETWORK_INTERFACE.md`](LIVING_NETWORK_INTERFACE.md) — public problems and collective action.
-- [`LIVE_RESOURCE_PROTOCOL.md`](LIVE_RESOURCE_PROTOCOL.md) — open resources and returns.
-- [`ITERATED_REOPENING_INTERFACE.md`](ITERATED_REOPENING_INTERFACE.md) — reopening families and residues.
-- [`HARDWARE_CLOSURE_LOOP.md`](HARDWARE_CLOSURE_LOOP.md) — bounded cyber-physical adapter.
-- [`PRODUCTION_INTEGRATION.md`](PRODUCTION_INTEGRATION.md) — production operation.
-- [`FORMAL_LINEAGE.md`](FORMAL_LINEAGE.md) — NRRF lineage and scope.
-
-The current implementation is a complete single-node current-field Supernet. It
-is not terminal completion, physical-law validation, distributed causal
-consensus, a live brokerage system, an empirical universality proof, or a
-replacement for the constructive Lean audit. Those remain distinct scopes inside
-the same continuing runtime.
+The current implementation is a complete **single-node current-field runtime**.
+It is not terminal completion, physical-law validation, distributed causal
+consensus, a live brokerage, an alien-contact detector, a consciousness meter, or
+an empirical quantum-gravity proof. Those distinctions remain OPEN inside the
+same continuing Supernet.
