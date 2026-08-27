@@ -1,4 +1,15 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/field-run.json",
+      "destination": "/api/field-run"
+    }
+  ],
+  "functions": {
+    "api/field-run.js": {
+      "includeFiles": "closure-field.js"
+    }
+  }
 }

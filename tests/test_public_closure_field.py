@@ -1,11 +1,14 @@
 from pathlib import Path
 import json
+import shutil
+import subprocess
 
 
 DOCS = Path(__file__).resolve().parents[1] / "docs"
 ROOT = DOCS / "index.html"
 LOOP_JS = DOCS / "closure-field.js"
 FIELD_RUN = DOCS / "field-run.json"
+FIELD_RUN_API = DOCS / "api" / "field-run.js"
 
 
 def _html() -> str:
@@ -14,6 +17,34 @@ def _html() -> str:
 
 def _js() -> str:
     return LOOP_JS.read_text(encoding="utf-8")
+
+
+def _node_json(script: str):
+    node = shutil.which("node")
+    if node is None:
+        return None
+    result = subprocess.run([node, "-e", script], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr or result.stdout
+    return json.loads(result.stdout)
+
+
+def _live_field_run_snapshot():
+    return _node_json(
+        "const u=require(" + json.dumps(str(LOOP_JS)) + ");"
+        "process.stdout.write(JSON.stringify(u.fieldRunSnapshot()));"
+    )
+
+
+def _invoke_field_run_handler(method: str = "GET"):
+    script = (
+        "const handler=require(" + json.dumps(str(FIELD_RUN_API)) + ");"
+        "const headers={}; let body='';"
+        "const res={statusCode:200,setHeader(k,v){headers[String(k).toLowerCase()]=v},"
+        "end(b){body=b==null?'':String(b)}};"
+        "handler({method:" + json.dumps(method) + "},res);"
+        "process.stdout.write(JSON.stringify({status:res.statusCode,headers:headers,body:body}));"
+    )
+    return _node_json(script)
 
 
 def test_public_root_is_a_running_closure_field():
@@ -83,9 +114,19 @@ def test_supernet_is_the_same_loop_panzoom_projection():
     vercel = json.loads((DOCS / "vercel.json").read_text(encoding="utf-8"))
     assert vercel["cleanUrls"] is True
     assert vercel["trailingSlash"] is False
-    assert not vercel.get("rewrites")
+    rewrites = vercel.get("rewrites") or []
+    assert not any(
+        str(rule.get("source", "")).rstrip("/") in {"/supernet", "/supernet.html"}
+        and str(rule.get("destination", "")).rstrip("/") in {"", "/", "/index", "/index.html"}
+        for rule in rewrites
+    )
+    field_run = [rule for rule in rewrites if rule.get("source") == "/field-run.json"]
+    assert field_run == [{"source": "/field-run.json", "destination": "/api/field-run"}]
+    assert vercel.get("functions", {}).get("api/field-run.js", {}).get("includeFiles") == "closure-field.js"
     assert (DOCS / "supernet.html").is_file()
     assert not (DOCS / "supernet").exists()
+    assert FIELD_RUN_API.is_file()
+    assert not FIELD_RUN.exists()
     assert 'src="closure-field.js"' in supernet
     assert "function uniqueUnitaryPathPartition" not in supernet
     assert "function uniqueUnitaryPathPartition" in html
@@ -109,17 +150,41 @@ def test_supernet_is_the_same_loop_panzoom_projection():
     assert html.count("setInterval(tick,1400)") == 1
     assert "TRUE not issued" in supernet
     assert "truth_issued:false" in js
-    assert FIELD_RUN.is_file()
+    assert not FIELD_RUN.exists()
+    assert FIELD_RUN_API.is_file()
     assert "consumes the currently unified field" in supernet
     assert "function uniqueUnitaryPathPartition" not in supernet
     assert "function currentUnifiedField" in js
 
 
-def test_field_run_json_is_the_same_occurrence_snapshot():
-    import shutil
-    import subprocess
+def test_field_run_json_is_live_fieldRunSnapshot_projection():
+    api = FIELD_RUN_API.read_text(encoding="utf-8")
+    vercel = json.loads((DOCS / "vercel.json").read_text(encoding="utf-8"))
+    assert not FIELD_RUN.exists()
+    assert FIELD_RUN_API.is_file()
+    assert "require('../closure-field.js')" in api
+    assert "fieldRunSnapshot()" in api
+    assert "application/json" in api
+    assert "no-store" in api
+    assert "eyJ" not in api
+    rewrites = vercel.get("rewrites") or []
+    assert {"source": "/field-run.json", "destination": "/api/field-run"} in rewrites
+    assert not any(
+        str(rule.get("source", "")).startswith("/supernet")
+        and str(rule.get("destination", "")).rstrip("/") in {"", "/", "/index", "/index.html"}
+        for rule in rewrites
+    )
 
-    payload = json.loads(FIELD_RUN.read_text(encoding="utf-8"))
+    live = _live_field_run_snapshot()
+    if live is None:
+        return
+    served = _invoke_field_run_handler("GET")
+    assert served is not None
+    payload = json.loads(served["body"])
+    assert served["status"] == 200
+    assert served["headers"]["content-type"].startswith("application/json")
+    assert served["headers"]["cache-control"] == "no-store"
+    assert payload == live
     assert payload["truth_issued"] is False
     assert payload["two_person_E2E"] == "OPEN"
     assert payload["TRUE"] == "not issued"
@@ -134,8 +199,6 @@ def test_field_run_json_is_the_same_occurrence_snapshot():
     assert payload["of"] == "one public root closure loop"
     assert payload["sense_consumes"] == "unified supernet field"
     assert payload["prior_cycle_residues"] == []
-    assert payload["truth_issued"] is False
-    assert payload["two_person_E2E"] == "OPEN"
     assert isinstance(payload["unresolved_alternatives"], list)
     assert payload["selected_path"] not in payload["unresolved_alternatives"]
     assert payload["admissibility_space"]["realized_closure"] == payload["selected_path"]
@@ -159,18 +222,14 @@ def test_field_run_json_is_the_same_occurrence_snapshot():
     ]
     assert payload["unresolved_alternatives"] == other
     assert ["rule", "computational"] in payload["isomorphism_classes"]
-    assert "Lean" not in FIELD_RUN.read_text(encoding="utf-8").replace("not Lean", "")
-    node = shutil.which("node")
-    if node is None:
-        return
-    script = (
-        "const u=require(" + json.dumps(str(LOOP_JS)) + ");"
-        "process.stdout.write(JSON.stringify(u.fieldRunSnapshot()));"
-    )
-    result = subprocess.run([node, "-e", script], capture_output=True, text=True, check=False)
-    assert result.returncode == 0, result.stderr or result.stdout
-    live = json.loads(result.stdout)
-    assert live == payload
+    dumped = json.dumps(payload)
+    assert "Lean" not in dumped.replace("not Lean", "")
+
+    again = json.loads(_invoke_field_run_handler("GET")["body"])
+    assert again == live
+    assert again["isomorphism_classes"] == live["isomorphism_classes"]
+    assert again["selected_class"] == live["selected_class"]
+    assert again["truth_issued"] is False
 
 
 def test_derived_cutoff_family_pairwise_delta_is_constant_and_carries_scale():
