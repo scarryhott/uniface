@@ -18,9 +18,15 @@ def test_vercel_asgi_serves_the_latest_completion_integrated_app(monkeypatch) ->
     assert "/network/inversion/capabilities" in routes
     assert "/network/completion/capabilities" in routes
     assert "/network/completion/systems" in routes
+    assert "/network/completion/closures" in routes
+    assert "/network/completion/closures/two-return" in routes
+    assert "/network/completion/closures/maps" in routes
+    assert "/network/completion/closure-instances" in routes
+    assert "/network/completion/unified-field" in routes
     assert "/completion" in routes
+    assert "/unify-closure" in routes
     assert "/network/handed-life/capabilities" in routes
     assert "/network/handed-life/systems" in routes
     assert "/network/handed-life/human-relations" in routes
     assert "/handed-life" in routes
-    assert module.app.version == "2.9.0"
+    assert module.app.version == "3.0.0"
