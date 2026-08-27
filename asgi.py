@@ -1,4 +1,4 @@
-"""Vercel ASGI entry: the same completion-integrated FastAPI app as `closure-supernet serve`."""
+"""Vercel ASGI entry: the same NRRF800-integrated FastAPI app as `closure-supernet serve`."""
 
 from __future__ import annotations
 
@@ -17,7 +17,8 @@ os.environ.setdefault(
 
 from closure_supernet.api_inversion import app  # noqa: E402
 from closure_supernet.api_completion import attach_completion_routes  # noqa: E402
+from closure_supernet.api_handed import attach_handed_life_routes  # noqa: E402
 
-app = attach_completion_routes(app)
+app = attach_handed_life_routes(attach_completion_routes(app))
 
 __all__ = ["app"]
