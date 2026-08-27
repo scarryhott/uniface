@@ -211,6 +211,9 @@ def test_field_run_json_is_live_fieldRunSnapshot_projection():
     assert payload["brain_field"]["same_family"] is True
     assert "latent tumors" in payload["brain_field"]["occurrence"]["exact"]
     assert payload["field_relation"]["not_playlist"] is True
+    assert payload["music_as_path"]["not_mp3"] is True
+    assert payload["music_as_path"]["suno"].startswith("https://suno.com/song/")
+    assert payload["not_mp3"] is True
     assert payload["field_relation"]["title"] == "Rising Sun"
     assert payload["prior_cycle_residues"] == []
     assert isinstance(payload["unresolved_alternatives"], list)
@@ -733,6 +736,29 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert live["field_relation"]["title"] == "Rising Sun"
     assert live["field_relation"]["not_playlist"] is True
     assert live["field_relation"]["suno"].startswith("https://suno.com/song/")
+    assert live["field_relation"]["not_mp3"] is True
+    assert live["field_relation"]["not_lfs"] is True
+    assert live["field_relation"]["official_pages"] is True
+    assert live["field_relation"]["style"] == "You can't let go of who you are"
+    assert live["music_as_path"]["title"] == "Rising Sun"
+    assert live["music_as_path"]["suno"] == live["field_relation"]["suno"]
+    assert live["not_mp3"] is True
+    assert live["not_lfs"] is True
+    assert live["not_playlist"] is True
+    assert "https://suno.com/song/2c2bc9b0-b18b-4e8e-b347-4db1ef4c387e" in js
+    assert "https://suno.com/song/cb02239a-7c30-4fd2-aa41-c3b2498a16ee" in js
+    assert "https://suno.com/song/c3522059-b222-4990-8108-4ffbaa4d74a3" in js
+    assert "https://suno.com/song/3cfa0f34-2fc3-4cf7-8e3c-fc306f2d42f9" in js
+    assert "Three Body Problem" in js
+    assert "Purple Rain" in js
+    assert "Another Mother Running Roads" in js
+    assert "Blue Grey Melodies" in js
+    assert "Ocean Winds" in js
+    assert "Mushroom Clouds" in js
+    assert "Remove Section" not in supernet
+    assert "*.mp3" in (DOCS.parent / ".gitignore").read_text(encoding="utf-8")
+    assert not list(DOCS.rglob("*.mp3"))
+    assert not list(DOCS.parent.glob("*.mp3"))
     ids = [item["id"] for item in brain["occurrences"]]
     assert "hidden-memory-2026-08-26" in ids
     assert "naked-leaves-sky" in ids
