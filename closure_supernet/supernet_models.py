@@ -34,6 +34,7 @@ class IntegrationLens(StrEnum):
     TRADING = "trading"
     RENORMALIZATION = "renormalization"
     CONSTRUCTIVE = "constructive"
+    FRAMEWORK = "framework"
 
 
 class ResourceEnvelope(BaseModel):
