@@ -35,100 +35,57 @@ class RuntimeConfig:
     llm_model: str = os.getenv("CLOSURE_LLM_MODEL", "gpt-5-mini")
     request_timeout_seconds: float = float(os.getenv("CLOSURE_LLM_TIMEOUT_SECONDS", "45"))
 
-    integration_http_timeout_seconds: float = float(
-        os.getenv("CLOSURE_INTEGRATION_HTTP_TIMEOUT_SECONDS", "30")
-    )
-    integration_max_items_per_cycle: int = int(
-        os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500")
-    )
-    integration_user_agent: str = os.getenv(
-        "CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/2.3"
-    )
-    integration_allow_private_networks: bool = _bool(
-        "CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False
-    )
+    integration_http_timeout_seconds: float = float(os.getenv("CLOSURE_INTEGRATION_HTTP_TIMEOUT_SECONDS", "30"))
+    integration_max_items_per_cycle: int = int(os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500"))
+    integration_user_agent: str = os.getenv("CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/2.4")
+    integration_allow_private_networks: bool = _bool("CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False)
 
     public_interface_enabled: bool = _bool("CLOSURE_PUBLIC_INTERFACE_ENABLED", True)
     public_development_mode: bool = _bool("CLOSURE_PUBLIC_DEVELOPMENT_MODE", True)
-    agentic_reintegration_enabled: bool = _bool(
-        "CLOSURE_AGENTIC_REINTEGRATION_ENABLED", True
-    )
-    public_default_visibility: str = os.getenv(
-        "CLOSURE_PUBLIC_DEFAULT_VISIBILITY", "PUBLIC"
-    )
+    agentic_reintegration_enabled: bool = _bool("CLOSURE_AGENTIC_REINTEGRATION_ENABLED", True)
+    public_default_visibility: str = os.getenv("CLOSURE_PUBLIC_DEFAULT_VISIBILITY", "PUBLIC")
 
-    iterated_reopening_enabled: bool = _bool(
-        "CLOSURE_ITERATED_REOPENING_ENABLED", True
-    )
-    reopening_processes_per_cycle: int = int(
-        os.getenv("CLOSURE_REOPENING_PROCESSES_PER_CYCLE", "16")
-    )
-    reopening_powerset_limit: int = int(
-        os.getenv("CLOSURE_REOPENING_POWERSET_LIMIT", "10")
-    )
+    iterated_reopening_enabled: bool = _bool("CLOSURE_ITERATED_REOPENING_ENABLED", True)
+    reopening_processes_per_cycle: int = int(os.getenv("CLOSURE_REOPENING_PROCESSES_PER_CYCLE", "16"))
+    reopening_powerset_limit: int = int(os.getenv("CLOSURE_REOPENING_POWERSET_LIMIT", "10"))
 
-    translation_field_enabled: bool = _bool(
-        "CLOSURE_TRANSLATION_FIELD_ENABLED", True
-    )
+    translation_field_enabled: bool = _bool("CLOSURE_TRANSLATION_FIELD_ENABLED", True)
 
-    resource_protocol_enabled: bool = _bool(
-        "CLOSURE_RESOURCE_PROTOCOL_ENABLED", True
-    )
-    resource_reintegrations_per_cycle: int = int(
-        os.getenv("CLOSURE_RESOURCE_REINTEGRATIONS_PER_CYCLE", "32")
-    )
-    resource_stages_retained: int = int(
-        os.getenv("CLOSURE_RESOURCE_STAGES_RETAINED", "1000")
-    )
+    resource_protocol_enabled: bool = _bool("CLOSURE_RESOURCE_PROTOCOL_ENABLED", True)
+    resource_reintegrations_per_cycle: int = int(os.getenv("CLOSURE_RESOURCE_REINTEGRATIONS_PER_CYCLE", "32"))
+    resource_stages_retained: int = int(os.getenv("CLOSURE_RESOURCE_STAGES_RETAINED", "1000"))
 
-    relative_equality_enabled: bool = _bool(
-        "CLOSURE_RELATIVE_EQUALITY_ENABLED", True
-    )
-    equality_translation_scan_limit: int = int(
-        os.getenv("CLOSURE_EQUALITY_TRANSLATION_SCAN_LIMIT", "2000")
-    )
-    equality_pairs_per_cycle: int = int(
-        os.getenv("CLOSURE_EQUALITY_PAIRS_PER_CYCLE", "128")
-    )
+    relative_equality_enabled: bool = _bool("CLOSURE_RELATIVE_EQUALITY_ENABLED", True)
+    equality_translation_scan_limit: int = int(os.getenv("CLOSURE_EQUALITY_TRANSLATION_SCAN_LIMIT", "2000"))
+    equality_pairs_per_cycle: int = int(os.getenv("CLOSURE_EQUALITY_PAIRS_PER_CYCLE", "128"))
 
-    hardware_closure_enabled: bool = _bool(
-        "CLOSURE_HARDWARE_CLOSURE_ENABLED", True
-    )
-    hardware_reintegrations_per_cycle: int = int(
-        os.getenv("CLOSURE_HARDWARE_REINTEGRATIONS_PER_CYCLE", "16")
-    )
-    hardware_constraint_ttl_seconds: int = int(
-        os.getenv("CLOSURE_HARDWARE_CONSTRAINT_TTL_SECONDS", "3600")
-    )
-    hardware_auto_synthesize: bool = _bool(
-        "CLOSURE_HARDWARE_AUTO_SYNTHESIZE", False
-    )
+    hardware_closure_enabled: bool = _bool("CLOSURE_HARDWARE_CLOSURE_ENABLED", True)
+    hardware_reintegrations_per_cycle: int = int(os.getenv("CLOSURE_HARDWARE_REINTEGRATIONS_PER_CYCLE", "16"))
+    hardware_constraint_ttl_seconds: int = int(os.getenv("CLOSURE_HARDWARE_CONSTRAINT_TTL_SECONDS", "3600"))
+    hardware_auto_synthesize: bool = _bool("CLOSURE_HARDWARE_AUTO_SYNTHESIZE", False)
     hardware_simulation_only: bool = True
     hardware_allow_direct_physical_actuation: bool = False
 
-    # NRRF780 is an evaluator/simulator lens. No environment variable can
-    # enable brokerage connectivity or direct market-order execution.
     trading_enabled: bool = _bool("CLOSURE_TRADING_ENABLED", True)
     trading_simulation_only: bool = True
     trading_allow_direct_market_execution: bool = False
     trading_brokerage_connected: bool = False
 
-    # NRRF781 evaluates submitted cutoff families and scheme charts. It cannot
-    # turn a finite runtime check into an unscoped theorem or select an absolute
-    # normalization as truth.
     renormalization_enabled: bool = _bool("CLOSURE_RENORMALIZATION_ENABLED", True)
     renormalization_absolute_level_determined: bool = False
     renormalization_scheme_is_closure: bool = False
 
-    # NRRF783 carries sections, base sites, operations, and overlap witnesses as
-    # explicit runtime data. The Lean audit proves the constructive theorem; the
-    # Python chart only validates finite submitted witnesses.
-    constructive_forms_enabled: bool = _bool(
-        "CLOSURE_CONSTRUCTIVE_FORMS_ENABLED", True
-    )
+    constructive_forms_enabled: bool = _bool("CLOSURE_CONSTRUCTIVE_FORMS_ENABLED", True)
     constructive_section_carried_as_data: bool = True
     constructive_classical_choice_required: bool = False
     constructive_excluded_middle_required: bool = False
+
+    # NRRF784/785 share one orbit layer. Resource metrics remain operational
+    # overlays, and a global assignment is never required for translational truth.
+    translational_frameworks_enabled: bool = _bool("CLOSURE_TRANSLATIONAL_FRAMEWORKS_ENABLED", True)
+    framework_resource_metrics_foundational: bool = False
+    framework_global_assignment_required_for_truth: bool = False
+    framework_contextual_truth_retained: bool = True
 
     environment: str = os.getenv("CLOSURE_ENVIRONMENT", "development").strip().lower()
     service_role: str = os.getenv("CLOSURE_SERVICE_ROLE", "all").strip().lower()
@@ -139,30 +96,21 @@ class RuntimeConfig:
     auth_jwks_url: str | None = os.getenv("CLOSURE_AUTH_JWKS_URL") or None
     auth_issuer: str | None = os.getenv("CLOSURE_AUTH_ISSUER") or None
     auth_audience: str | None = os.getenv("CLOSURE_AUTH_AUDIENCE") or None
-    auth_jwt_algorithms: tuple[str, ...] = _csv(
-        "CLOSURE_AUTH_JWT_ALGORITHMS", "RS256,HS256"
-    )
+    auth_jwt_algorithms: tuple[str, ...] = _csv("CLOSURE_AUTH_JWT_ALGORITHMS", "RS256,HS256")
     session_secret: str | None = os.getenv("CLOSURE_SESSION_SECRET") or None
     session_ttl_seconds: int = int(os.getenv("CLOSURE_SESSION_TTL_SECONDS", "43200"))
     allow_anonymous_read: bool = _bool("CLOSURE_ALLOW_ANONYMOUS_READ", True)
     allow_anonymous_write: bool = _bool("CLOSURE_ALLOW_ANONYMOUS_WRITE", False)
     allow_self_registration: bool = _bool("CLOSURE_ALLOW_SELF_REGISTRATION", False)
     public_only_mode: bool = _bool("CLOSURE_PUBLIC_ONLY_MODE", True)
-    trusted_hosts: tuple[str, ...] = _csv(
-        "CLOSURE_TRUSTED_HOSTS", "localhost,127.0.0.1,testserver"
-    )
+    trusted_hosts: tuple[str, ...] = _csv("CLOSURE_TRUSTED_HOSTS", "localhost,127.0.0.1,testserver")
     cors_origins: tuple[str, ...] = _csv("CLOSURE_CORS_ORIGINS", "")
-    rate_limit_read_per_minute: int = int(
-        os.getenv("CLOSURE_RATE_LIMIT_READ_PER_MINUTE", "300")
-    )
-    rate_limit_write_per_minute: int = int(
-        os.getenv("CLOSURE_RATE_LIMIT_WRITE_PER_MINUTE", "60")
-    )
+    rate_limit_read_per_minute: int = int(os.getenv("CLOSURE_RATE_LIMIT_READ_PER_MINUTE", "300"))
+    rate_limit_write_per_minute: int = int(os.getenv("CLOSURE_RATE_LIMIT_WRITE_PER_MINUTE", "60"))
     max_request_bytes: int = int(os.getenv("CLOSURE_MAX_REQUEST_BYTES", "2097152"))
     content_security_policy: str = os.getenv(
         "CLOSURE_CONTENT_SECURITY_POLICY",
-        "default-src 'self'; connect-src 'self' ws: wss:; img-src 'self' data:; "
-        "style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'",
+        "default-src 'self'; connect-src 'self' ws: wss:; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'",
     )
     backup_dir: Path = Path(os.getenv("CLOSURE_BACKUP_DIR", "runtime_data/backups"))
     backup_keep: int = int(os.getenv("CLOSURE_BACKUP_KEEP", "30"))
