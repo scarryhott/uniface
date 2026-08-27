@@ -27,6 +27,9 @@ closure-supernet = "closure_supernet.cli_supernet:main"
 [tool.setuptools.packages.find]
 include = ["closure_supernet*"]
 
+[tool.vercel]
+entrypoint = "asgi:app"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
