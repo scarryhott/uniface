@@ -1,0 +1,45 @@
+{
+  "of": "one public root closure loop",
+  "formal_readings": ["NRRF798", "NRRF799"],
+  "derived_chart": true,
+  "not_lean": true,
+  "runtime_is_formal_proof": false,
+  "starts_from_bare_local_step_relation": true,
+  "equivalence_assumed": false,
+  "path": [
+    "local step",
+    "finite symmetric reach",
+    "generated equivalence",
+    "natural completion",
+    "translational truth",
+    "return",
+    "reopen"
+  ],
+  "generative_continuity": {
+    "stages_monotone": true,
+    "identifications_withdrawn": false,
+    "every_identification_has_finite_local_path": true,
+    "uniform_global_finite_bound_claimed": false,
+    "global_jump": false
+  },
+  "local_global": {
+    "local_invariance_iff_global_translationality": true,
+    "local_truths_recover_global_completion": true,
+    "same_quotient": true,
+    "universal_factorization": true
+  },
+  "towards_closure": {
+    "pushed_step_generates_only_equality": true,
+    "completion_closed": true,
+    "completion_idempotent": true,
+    "new_local_steps_may_reopen": true
+  },
+  "human_interaction_boundary": {
+    "directed_occurrence_is_admitted_translation": false,
+    "one_way_observation_generates_equivalence": false,
+    "admission_witness_required": true
+  },
+  "canonical_representative": null,
+  "TRUE": "not issued",
+  "truth_issued": false
+}
