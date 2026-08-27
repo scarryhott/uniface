@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from decimal import Decimal
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -70,13 +71,12 @@ def test_relation_derives_one_inversion_and_exact_self_limit(tmp_path: Path) -> 
 def test_pure_scale_and_pure_hair_saturate_their_own_readings(tmp_path: Path) -> None:
     runtime = ClosureSupernetRuntime(make_config(tmp_path))
     try:
+        tolerance = Decimal("1e-24")
         scale = runtime.inversion.evaluate_relation(
-            [[2, 0, 0], [0, 2, 0], [0, 0, 2]],
-            make_config(tmp_path).hardware_constraint_ttl_seconds * 0 + __import__("decimal").Decimal("1e-24"),
+            [[2, 0, 0], [0, 2, 0], [0, 0, 2]], tolerance
         )
         hair = runtime.inversion.evaluate_relation(
-            [[0, -3, 2], [3, 0, -1], [-2, 1, 0]],
-            __import__("decimal").Decimal("1e-24"),
+            [[0, -3, 2], [3, 0, -1], [-2, 1, 0]], tolerance
         )
         assert scale.pure_scale is True
         assert scale.scale_saturation is True
