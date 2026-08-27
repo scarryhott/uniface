@@ -1,4 +1,4 @@
-"""Vercel ASGI entry: the same FastAPI app as `closure-supernet serve`."""
+"""Vercel ASGI entry: the same completion-integrated FastAPI app as `closure-supernet serve`."""
 
 from __future__ import annotations
 
@@ -15,6 +15,6 @@ os.environ.setdefault(
     "localhost,127.0.0.1,*.vercel.app",
 )
 
-from closure_supernet.api_inversion import app  # noqa: E402
+from closure_supernet.api_completion import app  # noqa: E402
 
 __all__ = ["app"]
