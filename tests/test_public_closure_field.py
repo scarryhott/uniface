@@ -672,6 +672,16 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "https://suno.com/song/688e6054-0d09-4669-8f43-d588486658f2" in js
     assert "drone-wire forest" in js
     assert "source–sink / up–down–through" in js
+    assert "yin–yang as relation not physics" in js
+    assert "not_physics:true" in js
+    assert "id=\"glass\"" in js
+    assert "mirrored-looking device" in js
+    assert "the third is through" in js
+    assert "Local representation with global action through agentic second brains." in js
+    assert "BLACK_MIRROR_TRANSLATIONAL_TRUTH" not in js
+    assert "BLACK_MIRROR_TRANSLATIONAL_TRUTH.md" not in supernet
+    assert not (ROOT.parents[0] / "BLACK_MIRROR_TRANSLATIONAL_TRUTH.md").exists()
+    assert "scarryhott/black-mirror" not in supernet
     assert 'id="teGrid"' in supernet
     assert "Sense(Obs) → unique unitary path selector → Translation Event (admit → return → reopen) → next Sense" in supernet
     assert "function uniqueUnitaryPathPartition" not in supernet
@@ -709,6 +719,13 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert brain["not_playlist"] is True
     assert brain["same_family"] is True
     assert brain["truth_issued"] is False
+    assert brain["not_physics"] is True
+    assert brain["alternative"] == "translational truth"
+    assert brain["capture"] == "relative representation mistaken for the whole relation"
+    assert brain["device"] == "mirrored-looking device"
+    assert brain["through"] == "the third is through"
+    assert "yin–yang as relation not physics" in brain["grammar"]
+    assert "mirrored-looking device" in brain["visual"]
     assert live["field_relation"]["title"] == "Rising Sun"
     assert live["field_relation"]["not_playlist"] is True
     assert live["field_relation"]["suno"].startswith("https://suno.com/song/")
@@ -720,6 +737,8 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "lyric-cant-let-go" in ids
     assert "field-for-brains" in ids
     assert "black-mirror-translation" in ids
+    assert "black-mirror-through" in ids
+    assert "black-mirror-local-global" in ids
     assert "three-body" in ids
     assert "ocean-winds" in ids
     exacts = "\n".join(item["exact"] for item in brain["occurrences"])
