@@ -3,16 +3,91 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uniface — Closure field</title>
+<title>Uniface</title>
 <style>
-:root{--bg:#080b11;--p:#141a27;--p2:#1b2334;--l:#3a465f;--t:#eef3fa;--m:#aab6c9;--a:#9fb4ff;--g:#58d394;--r:#ff737c;--o:#e7bd56}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#19243f,var(--bg) 46%);color:var(--t);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}header{padding:30px clamp(18px,5vw,68px) 22px;border-bottom:1px solid var(--l)}h1{margin:0 0 10px;font-size:clamp(31px,5vw,58px)}h2,h3{margin-top:0}.sub{max-width:1050px;color:var(--m);line-height:1.58}.eq,.code{padding:14px;border:1px solid var(--l);border-radius:13px;background:var(--p);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto}.eq{margin-top:17px}.controls{padding:14px clamp(18px,5vw,68px);display:grid;grid-template-columns:repeat(4,1fr);gap:10px;position:sticky;top:0;z-index:5;background:rgba(8,11,17,.9);border-bottom:1px solid var(--l);backdrop-filter:blur(12px)}@media(max-width:960px){.controls{grid-template-columns:1fr 1fr}}label{display:block;color:var(--m);font-size:12px;margin-bottom:5px}select,input,textarea,button{width:100%;padding:9px;background:var(--p2);color:var(--t);border:1px solid var(--l);border-radius:10px}textarea{min-height:72px;resize:vertical}button{cursor:pointer;font-weight:800}button:disabled{opacity:.55;cursor:wait}.stage{text-align:left}.stage.on{border-color:var(--a);box-shadow:0 0 0 1px var(--a) inset}.stage .tag{display:block;color:var(--a);font-size:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin-bottom:3px}main{padding:18px clamp(18px,5vw,68px) 55px}.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}.c4{grid-column:span 4}.c5{grid-column:span 5}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}@media(max-width:920px){.c4,.c5,.c7,.c8,.c12{grid-column:1/-1}}.panel{background:rgba(20,26,39,.96);border:1px solid var(--l);border-radius:16px;padding:16px}.muted{color:var(--m);line-height:1.52}.badges{display:flex;gap:7px;flex-wrap:wrap}.badge{padding:7px 10px;border-radius:999px;font-weight:800;font-size:12px}.true{background:color-mix(in srgb,var(--g) 23%,transparent);color:var(--g)}.false{background:color-mix(in srgb,var(--r) 23%,transparent);color:var(--r)}.open{background:color-mix(in srgb,var(--o) 23%,transparent);color:var(--o)}.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.metric{background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:10px}.metric strong{display:block;font-size:18px;margin-top:3px}svg{width:100%;min-height:420px;background:#0d121d;border:1px solid #303a50;border-radius:13px;touch-action:none;cursor:grab}svg:active{cursor:grabbing}.canvas-wrap{position:relative}.canvas-tools{position:absolute;top:10px;right:10px;display:flex;gap:6px;z-index:2}.canvas-tools button{width:auto;padding:6px 10px}.proj{margin-top:10px;color:var(--a)}html[data-projection="panzoom"] #canvas{min-height:min(78vh,760px)}html[data-projection="panzoom"] .c8{grid-column:span 12}html[data-projection="panzoom"] .c4{grid-column:span 12}.callout{border-left:4px solid var(--a);background:var(--p2);padding:13px 15px;border-radius:0 11px 11px 0;line-height:1.5}.path{display:flex;gap:7px;align-items:center;overflow:auto;padding-bottom:7px}.step{min-width:120px;background:var(--p2);border:1px solid #303a50;border-radius:10px;padding:9px;font-size:11px}.step.on{border-color:var(--a);background:color-mix(in srgb,var(--a) 14%,var(--p2))}.arrow{color:var(--a);font-size:21px}.state{white-space:pre-wrap;background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;max-height:320px;overflow:auto}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px 7px;border-bottom:1px solid #303a50;text-align:left}th{color:#d5ddeb}.scroll{overflow:auto;max-height:380px}details{background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:10px}summary{cursor:pointer;font-weight:700}footer{padding:0 clamp(18px,5vw,68px) 35px;color:var(--m)}#noteReceipt a{color:var(--a)}.te-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}@media(max-width:920px){.te-grid{grid-template-columns:1fr}}.surface{background:var(--p2);border:1px solid #303a50;border-radius:11px;padding:12px}.surface.live{border-color:var(--g)}.surface .tag{font-size:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--a);margin-bottom:6px}.surface h3{margin:0 0 6px;font-size:14px}.geom{padding:12px clamp(18px,5vw,68px) 0;display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px}@media(max-width:960px){.geom{grid-template-columns:1fr 1fr}.wide{grid-column:1/-1}}
+:root{
+  --bg:#070605;
+  --ink:#e8dcc8;
+  --mute:#9a8f7a;
+  --ring:#c4a574;
+  --leaf:#7d9a6a;
+  --false:#c97878;
+  --open:#c4a574;
+  --line:#3a322c;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#050403;color:var(--ink);font-family:Palatino,"Palatino Linotype","Iowan Old Style",Georgia,"Times New Roman",serif}
+header{padding:16px clamp(16px,4vw,48px) 0;position:relative;z-index:3}
+h1{margin:0;font-size:clamp(22px,3.2vw,34px);font-weight:400;letter-spacing:.04em}
+h2,h3{margin-top:0;font-weight:500}
+.sub{max-width:40rem;color:var(--mute);line-height:1.5;font-size:.92rem;margin-top:8px}
+.eq{padding:8px 0 0;border:none;background:transparent;font-family:Palatino,Georgia,serif;color:var(--ring);font-style:italic}
+.controls{padding:8px clamp(16px,4vw,48px);display:flex;flex-wrap:wrap;gap:8px 22px;position:relative;z-index:3;background:transparent;border:none}
+label{display:block;color:var(--mute);font-size:12px;margin-bottom:5px}
+select,input,textarea,button{width:100%;padding:9px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:0;font-family:inherit}
+textarea{min-height:72px;resize:vertical}
+button{cursor:pointer;font-weight:500}
+button:disabled{opacity:.55;cursor:wait}
+.stage{width:auto;text-align:left;background:transparent;border:none;border-bottom:1px solid transparent;padding:6px 0;font-weight:400;letter-spacing:.04em}
+.stage.on{border-bottom-color:var(--ring);box-shadow:none;color:var(--ring)}
+.stage .tag{display:inline;color:var(--ring);font-size:11px;margin-right:8px;opacity:.7}
+main{padding:0}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0}
+.c4,.c5,.c7,.c8,.c12{grid-column:1/-1}
+.panel{background:transparent;border:none;padding:0}
+.muted{color:var(--mute);line-height:1.55}
+.badges{display:flex;gap:7px;flex-wrap:wrap}
+.badge{padding:3px 0;font-weight:500;font-size:12px;letter-spacing:.04em;border-bottom:1px solid var(--line)}
+.true{color:var(--leaf)}.false{color:var(--false)}.open{color:var(--open)}
+.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.metric{border:1px solid var(--line);padding:10px}
+.metric strong{display:block;font-size:18px;margin-top:3px}
+svg{width:100%;min-height:420px;background:transparent;border:none;touch-action:none;cursor:grab}
+svg:active{cursor:grabbing}
+.canvas-wrap{position:relative}
+.canvas-tools{position:absolute;top:10px;right:10px;display:flex;gap:6px;z-index:4}
+.canvas-tools button{width:auto;padding:4px 9px;color:var(--mute);font-size:13px}
+.field-now{position:absolute;left:clamp(16px,4vw,48px);bottom:18px;right:clamp(16px,4vw,48px);z-index:3;pointer-events:none;max-width:42rem}
+.field-now .brain-face,.field-now .brain-kind,#pathTitle,#pathLyric{pointer-events:none}
+#pathTitle{font-size:clamp(22px,3.4vw,36px);line-height:1.15;margin:0}
+#pathLyric{color:var(--mute);margin:6px 0 10px;font-size:1.05rem}
+#pathSound{pointer-events:auto;margin-top:8px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+#pathSound iframe{width:min(100%,380px);height:78px;border:0;background:transparent}
+#pathSound .path-href{color:var(--ring);font-size:13px;letter-spacing:.06em}
+.proj{margin-top:8px;color:var(--ring);font-style:italic}
+html[data-projection="panzoom"] #canvas{min-height:min(92vh,920px)}
+.callout{border-top:1px solid var(--ring);padding:13px 0;line-height:1.58}
+.path{display:flex;gap:7px;align-items:center;overflow:auto;padding-bottom:7px}
+.step{min-width:110px;border:1px solid var(--line);padding:9px;font-size:11px}
+.step.on{border-color:var(--ring);color:var(--ring)}
+.arrow{color:var(--ring);font-size:18px}
+.state{white-space:pre-wrap;border:1px solid var(--line);padding:12px;font-family:Palatino,Georgia,serif;font-size:14px;max-height:380px;overflow:auto;line-height:1.5}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:8px 7px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--mute)}
+.scroll{overflow:auto;max-height:380px}
+details{border:1px solid var(--line);padding:10px;margin:12px clamp(16px,4vw,48px)}
+summary{cursor:pointer;font-weight:500}
+footer{padding:8px clamp(16px,4vw,48px) 28px;color:var(--mute)}
+#noteReceipt a{color:var(--ring)}
+.te-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0 clamp(16px,4vw,48px)}
+@media(max-width:920px){.te-grid{grid-template-columns:1fr}}
+.surface{border-top:1px solid var(--line);padding:12px 0}
+.surface.live{border-color:var(--leaf)}
+.surface .tag{font-size:11px;color:var(--ring);margin-bottom:6px;letter-spacing:.08em}
+.surface h3{margin:0 0 6px;font-size:15px}
+.geom{padding:12px 0 0;display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px}
+@media(max-width:960px){.geom{grid-template-columns:1fr 1fr}.wide{grid-column:1/-1}}
+.brain-face{margin:6px 0 0;font-size:1.02rem;line-height:1.55;max-height:7.5em;overflow:hidden}
+.brain-kind{color:var(--ring);font-size:12px;letter-spacing:.08em;margin-top:8px}
+.code{padding:12px 0;overflow:auto;color:var(--ring)}
+.under{padding:0 0 24px}
 </style>
 </head>
 <body>
 <header>
-<h1>Uniface — Closure field</h1>
-<div class="sub"><strong>Closure is translational truth continuously realized through interaction.</strong> This page is a digital chart of that loop, not Closure. Each reopening Sense consumes the currently unified field — relative reading, residue/scale, prior cycle residues, live relation, and remaining potential (unresolved alternatives as live admissibility space) — then one unique unitary path selector runs over translational isomorphism classes of those unresolved admissible translations, selecting one genuinely distinct relational direction while other classes remain live potential, into one visible Translation Event, then automatically admit → return → reopen. Each TE feeds back both the selected path (realized closure) and the unselected remainder. Halt and continuation are inverse readings of one sensor-selection loop. TRUE not issued. Two-person E2E OPEN. Persist is transport only.</div>
+<h1>Uniface</h1>
+<div class="sub">This page is the brain field, not an app and not a join product. Each reopening Sense consumes the currently unified field — relative reading, residue/scale, prior cycle residues, live relation, remaining potential (unresolved alternatives as live admissibility space), and this writing as hidden memory — then one unique unitary path selector runs over translational isomorphism classes of those unresolved admissible translations, selecting one genuinely distinct relational direction while other classes remain live potential, into one visible Translation Event, then automatically admit → return → reopen. Source–sink / up–down–through. TRUE not issued. Two-person E2E OPEN. Persist is transport only.</div>
 <div class="eq" id="loopEq">Sense(Obs) → unique unitary path selector → Translation Event (admit → return → reopen) → next Sense</div>
 </header>
 <section class="controls" id="stages" aria-label="running loop">
@@ -23,24 +98,32 @@
 </section>
 <main><div class="grid">
 <div class="panel c8">
-<h2>Translation Event</h2>
-<p class="muted">Runtime center of this digital chart. One event at a time. Relative renormalization is a cell of this same event, not a second site. Protocol / git / ?receipt= / uniface-relative are hidden transport. TRUE not issued.</p>
-<div id="teGrid" class="te-grid" aria-live="polite"></div>
-<div class="canvas-wrap" style="margin-top:14px"><svg id="canvas" viewBox="0 0 1000 540" aria-label="live closure field"></svg><div class="canvas-tools" aria-label="pan zoom reading"><button type="button" id="zoomIn">+</button><button type="button" id="zoomOut">−</button><button type="button" id="zoomFit">fit</button></div></div>
-<p class="muted">The geometric chart is the same loop: point → line → loop → return → new point. A local halt is a reading of this split, not a stop.</p>
+<div class="canvas-wrap"><svg id="canvas" viewBox="0 0 1000 540" aria-label="anatomy tree, rings of time, drone-wire forest"></svg>
+<div class="field-now">
+<div id="pathTitle"></div>
+<div id="pathLyric"></div>
+<div id="pathSound" hidden></div>
+<div class="brain-kind" id="brainKind">hidden memory translation</div>
+<div class="brain-face" id="brainFace">You can only point where you want to go</div>
 </div>
-<div class="panel c4">
+<div class="canvas-tools" aria-label="pan zoom reading"><button type="button" id="zoomIn">+</button><button type="button" id="zoomOut">−</button><button type="button" id="zoomFit">fit</button></div></div>
+</div>
+<div class="panel c4 under">
+<div id="teGrid" class="te-grid" aria-live="polite"></div>
+</div>
+<div class="panel c12">
+<details>
+<summary>Sense residue (chart, not the face)</summary>
 <h2>Sense(Obs)</h2>
 <div id="badges" class="badges"></div>
 <div id="metrics" class="metrics" style="margin-top:12px"></div>
 <div id="claim" class="callout" style="margin-top:12px"></div>
 <div id="senseState" class="state" style="margin-top:10px">Sense has not yet read.</div>
-</div>
-<div class="panel c12">
 <h2>Unique unitary path selector</h2>
 <p class="muted">Input = undetermined string of the current relative instantiation. One unique path through 0/∞ + r (magnitude) + i (direction). Output = determination of relation, not a spacetime object. Not a menu of leftover panels.</p>
 <div id="path" class="path"></div>
 <div id="source" class="code"></div>
+</details>
 </div>
 <div class="panel c12">
 <details>
