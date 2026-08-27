@@ -13,6 +13,22 @@
     {
       "source": "/te.json",
       "destination": "/api/te"
+    },
+    {
+      "source": "/",
+      "destination": "/api/root"
+    },
+    {
+      "source": "/index.html",
+      "destination": "/api/root"
+    },
+    {
+      "source": "/supernet",
+      "destination": "/api/root"
+    },
+    {
+      "source": "/supernet.html",
+      "destination": "/api/root"
     }
   ],
   "functions": {
@@ -24,6 +40,9 @@
     },
     "api/te.js": {
       "includeFiles": "closure-field.js"
+    },
+    "api/root.js": {
+      "includeFiles": "{index.html,supernet.html,closure-field.js}"
     }
   }
 }
