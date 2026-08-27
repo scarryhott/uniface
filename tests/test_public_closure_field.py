@@ -1072,6 +1072,10 @@ def test_sense_ingests_public_internet_field_into_the_same_classes():
     assert "ChatGPT" not in js
     assert "function ingestInternetField" in js
     assert "function normalizeInternetField" in js
+    assert "function admitInternetRemainder" in js
+    assert "function internetOccurrenceIds" in js
+    assert "function uniqueUnitaryPathPartition" in js
+    assert js.count("function uniqueUnitaryPathPartition") == 1
     assert "selects_over:'translational isomorphism classes'" in js
     assert "not_roster:true" in js
     assert {"source": "/internet-field.json", "destination": "/api/internet-field"} in vercel.get("rewrites")
@@ -1102,6 +1106,9 @@ ids.forEach(function(id){if (['during','coherent','contradiction','rule','cultur
 if (ids.indexOf('during')<0 && ids.indexOf('culture')<0) throw new Error('discussion did not enter culture/during');
 if (ids.indexOf('rule')<0) throw new Error('unique unitary did not enter rule');
 if (ids.indexOf('computational')<0) throw new Error('field-run.json did not enter computational');
+if (!canned.admissibility_space || !canned.admissibility_space.selected_path) throw new Error('internet selected_path still null while remainder exists');
+if (ids.indexOf(canned.admissibility_space.selected_path)<0) throw new Error('internet selected_path is not a public-internet remainder relation');
+if (!Array.isArray(canned.admissibility_space.selected_class) || canned.admissibility_space.selected_class.indexOf(canned.admissibility_space.selected_path)<0) throw new Error('internet selected_class missing selected_path');
 const classes = u.isomorphismClassesOf(ids, {undetermined_string:{scenario:'during'}});
 if (!classes.length) throw new Error('no isomorphism classes');
 u.setInternetField(canned);
@@ -1114,24 +1121,37 @@ const p0 = u.loop.path;
 if (p0.selects_over !== 'translational isomorphism classes') throw new Error('selector not over classes');
 if (JSON.stringify(p0.remainder) !== JSON.stringify(rem)) throw new Error('selector remainder diverged from Sense');
 if (p0.formId && rem.indexOf(p0.formId)<0 && p0.selected_class.indexOf(p0.formId)<0) throw new Error('selected outside sensed classes');
+if (ids.indexOf(p0.formId)<0) throw new Error('unified selected_path is not a public-internet relation');
 p0.selected_class.forEach(function(id){if (p0.unresolved_alternatives.indexOf(id)>=0) throw new Error('selected class still unresolved');});
 u.loop.te = u.translationEvent();
 if (u.loop.te.TRUE !== 'not issued' || u.loop.te.two_person_E2E !== 'OPEN' || u.loop.te.participant !== 'OPEN') throw new Error('TE invariants');
 if (JSON.stringify(u.loop.te.unresolved_alternatives) !== JSON.stringify(p0.unresolved_alternatives)) throw new Error('TE dropped classes');
+if (u.loop.te.selected_path !== p0.formId) throw new Error('TE admit did not carry internet selected relation');
+if (u.loop.te.returned_form.form !== p0.formId) throw new Error('TE return did not carry internet selected relation');
+if (u.loop.te.reopening.selected_path !== p0.formId) throw new Error('TE reopen did not carry internet selected relation');
 u.doReopen();
 const realized = p0.formId;
+const field0 = u.currentUnifiedField();
+if (field0.selected_path !== p0.formId) throw new Error('unified field dropped internet selected relation');
 u.doSense();
 const rem1 = u.loop.obs.undetermined_string.remainder;
 if (realized && rem1.indexOf(realized)>=0) throw new Error('realized form reintroduced from internet remainder');
 if (u.loop.obs.TRUE !== 'not issued' || u.loop.obs.two_person_E2E !== 'OPEN' || u.loop.obs.participant !== 'OPEN') throw new Error('Sense invariants after reopen');
+if (u.loop.obs.undetermined_string.scenario !== realized) throw new Error('next Sense did not consume internet selected relation');
+if (u.loop.obs.selected_path !== realized) throw new Error('next Sense selected_path dropped internet relation');
 const field = u.currentUnifiedField();
 if (field.internet_field.of !== 'internet field') throw new Error('unified field dropped internet Sense');
 if (field.truth_issued !== false) throw new Error('truth issued');
+const localOnly = {undetermined_string: Object.assign({}, u.loop.obs.undetermined_string, {remainder:['culture'], scenario:'during'}), unresolved_alternatives:['culture'], internet_field:canned, residue_scale:u.loop.obs.residue_scale, relative_reading:u.loop.obs.relative_reading, brain_field:u.loop.obs.brain_field};
+const pDisplaced = u.uniqueUnitaryPathPartition(localOnly);
+ids.forEach(function(id){if (id!=='during' && pDisplaced.remainder.indexOf(id)<0) throw new Error('local leftover displaced internet occurrence '+id);});
+if (pDisplaced.formId && ids.indexOf(pDisplaced.formId)<0) throw new Error('selector from union did not choose a public-internet relation');
 console.log(JSON.stringify({
   ok: true,
   remainder: rem,
   classes: p0.isomorphism_classes,
   selected: p0.formId,
+  internet_selected: canned.admissibility_space.selected_path,
   rem1: rem1,
   public_read: canned.public_read,
   TRUE: field.TRUE,
@@ -1149,6 +1169,8 @@ console.log(JSON.stringify({
     assert payload["participant"] == "OPEN"
     assert payload["public_read"] is True
     assert payload["selected"] not in payload["rem1"]
+    assert payload["selected"] in payload["remainder"]
+    assert payload["internet_selected"] in payload["remainder"]
     served = _invoke_internet_field_handler("GET")
     if served is None:
         return
@@ -1165,6 +1187,9 @@ console.log(JSON.stringify({
     assert "login" not in json.dumps(net)
     for item in net.get("remainder") or []:
         assert item in {"during", "coherent", "contradiction", "rule", "culture", "computational"}
+    if net.get("remainder"):
+        selected = (net.get("admissibility_space") or {}).get("selected_path")
+        assert selected in set(net["remainder"])
     for cls in net.get("isomorphism_classes") or []:
         for member in cls:
             assert member in {"during", "coherent", "contradiction", "rule", "culture", "computational"}
