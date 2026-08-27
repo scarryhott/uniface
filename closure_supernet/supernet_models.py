@@ -37,6 +37,7 @@ class IntegrationLens(StrEnum):
     FRAMEWORK = "framework"
     EMBODIED = "embodied"
     INVERSION = "inversion"
+    COMPLETION = "completion"
 
 
 class ResourceEnvelope(BaseModel):

@@ -37,7 +37,7 @@ class RuntimeConfig:
 
     integration_http_timeout_seconds: float = float(os.getenv("CLOSURE_INTEGRATION_HTTP_TIMEOUT_SECONDS", "30"))
     integration_max_items_per_cycle: int = int(os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500"))
-    integration_user_agent: str = os.getenv("CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/2.7")
+    integration_user_agent: str = os.getenv("CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/2.8")
     integration_allow_private_networks: bool = _bool("CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False)
 
     public_interface_enabled: bool = _bool("CLOSURE_PUBLIC_INTERFACE_ENABLED", True)
@@ -104,6 +104,14 @@ class RuntimeConfig:
     inversion_representation_required: bool = False
     inversion_physical_law_claimed: bool = False
     inversion_runtime_is_formal_proof: bool = False
+
+    # NRRF798/799 begin from admitted local steps, generate the finite completion,
+    # retain path witnesses and expose local/global invariant readings as one lens.
+    translational_completion_enabled: bool = _bool("CLOSURE_TRANSLATIONAL_COMPLETION_ENABLED", True)
+    completion_equivalence_assumed: bool = False
+    completion_finite_path_witness_required: bool = True
+    completion_canonical_representative_selected: bool = False
+    completion_truth_issued: bool = False
 
     environment: str = os.getenv("CLOSURE_ENVIRONMENT", "development").strip().lower()
     service_role: str = os.getenv("CLOSURE_SERVICE_ROLE", "all").strip().lower()
