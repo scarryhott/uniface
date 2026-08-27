@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "closure-supernet"
-version = "2.8.0"
-description = "One continuous source-preserving Supernet integrator with generative local-to-global translational completion and finite path lineage"
+version = "2.9.0"
+description = "One continuous source-preserving Supernet integrator with generative translational completion and handed four-ball/one-hair temporal closure"
 readme = "UNIFIED_SUPERNET_RUNTIME.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
