@@ -99,6 +99,7 @@ def _assert_widget_free_autonomous_face(html: str) -> None:
     assert "Leftover source-preserving panels" not in html
     assert "<details>" not in html
     assert "<summary>" not in html
+    assert "chart, not the face" not in html
     assert 'id="teGrid"' not in html
     assert 'id="noteReceipt"' not in html
     assert 'id="scenario"' not in html
@@ -127,6 +128,12 @@ def test_public_root_is_a_running_closure_field():
     assert "function currentUnifiedField" in js
     assert "consumes:'unified supernet field'" in js
     assert "function advancingFieldRunSnapshot" in js
+    assert "function replacePublicFace" in js
+    assert "function publicFaceFromField" in js
+    assert "function admitReturnedFieldAsNextSense" in js
+    assert "function paintTE" not in js
+    assert "function cell(" not in js
+    assert "chart, not the face" not in js
     assert "Harry" not in js
     assert "ChatGPT" not in js
     assert "eyJ" not in js
@@ -143,8 +150,9 @@ def test_nrrf781_relative_renormalization_is_inside_the_live_te():
     assert "absolute_level:null" in js
     assert "scheme_selected:false" in js
     assert "truth_issued:false" in js
-    assert "relative renormalization" in js
-    assert "cell('relative renormalization'" in js
+    assert "relative_renormalization" in js
+    assert "function cell(" not in js
+    assert "function paintTE" not in js
     assert "residue_scale" in js
     assert "loop.scale" in js
     assert "TRUE not issued" in js
@@ -349,6 +357,12 @@ def test_field_run_json_is_live_fieldRunSnapshot_projection():
     assert again["unified"] is True
     assert again["participant"] == "Supernetwork"
     assert again["two_person_E2E"] == "OPEN"
+    assert payload["chart_not_closure"] is False
+    assert payload["public_face"]["from"] == "currentUnifiedField"
+    assert payload["public_face"]["chart_not_closure"] is False
+    assert payload["public_face"]["TRUE"] == "not issued"
+    assert payload["public_face"]["two_person_E2E"] == "OPEN"
+    assert again["chart_not_closure"] is False
 
 
 def test_derived_cutoff_family_pairwise_delta_is_constant_and_carries_scale():
@@ -816,6 +830,7 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "embodied.html" not in supernet
     assert "/embodied" not in supernet
     assert "<details>" not in supernet
+    assert "chart, not the face" not in supernet
     assert 'id="teGrid"' not in supernet
     assert "min-height:100vh" in supernet
     node = shutil.which("node")
@@ -1323,5 +1338,90 @@ console.log(JSON.stringify({
     assert body["te"]["participant"] == "Supernetwork"
     assert body["two_person_E2E"] == "OPEN"
     assert body["truth_issued"] is False
+    assert body["chart_not_closure"] is False
+    assert body["next_sense"]["unified_field"] is not None
+    assert body["face"]["from"] == "currentUnifiedField"
+    assert body["face"]["TRUE"] == "not issued"
+    assert body["te"]["TRUE"] == "not issued"
+    assert body["te"]["two_person_E2E"] == "OPEN"
+
+
+def test_te_recurrence_replaces_public_face_from_returned_field_as_next_sense():
+    html = _html()
+    js = _js()
+    supernet = (DOCS / "supernet.html").read_text(encoding="utf-8")
+    foundation = (DOCS.parent / "FOUNDATION.md").read_text(encoding="utf-8")
+    _assert_widget_free_autonomous_face(html)
+    _assert_widget_free_autonomous_face(supernet)
+    assert "chart, not the face" not in html
+    assert "chart, not the face" not in supernet
+    assert "chart, not the face" not in js
+    assert "function paintTE" not in js
+    assert "function cell(" not in js
+    assert 'id="teGrid"' not in html
+    assert 'id="rOut"' not in html
+    assert "<button" not in html
+    assert "<form" not in html
+    assert "the author’s notes" in foundation
+    node = shutil.which("node")
+    if node is None:
+        return
+    script = (
+        "const u=require(" + json.dumps(str(LOOP_JS)) + ");"
+        + r"""
+u.resetLoop();
+u.doSense();
+if (u.loop.obs.unified_field === u.loop.field) throw new Error('cycle 0 Sense consumed a returned field that does not exist');
+if (u.loop.obs.chart_not_closure !== true) throw new Error('cycle 0 already claimed not-chart');
+if (u.returnedFieldIsNextSense(u.loop.obs) !== false) throw new Error('cycle 0 continuity invented');
+u.doSelect();
+u.loop.te = u.translationEvent();
+if (u.loop.te.chart_not_closure !== true) throw new Error('TE before return flipped the flag');
+if (u.loop.te.TRUE !== 'not issued' || u.loop.te.two_person_E2E !== 'OPEN') throw new Error('truth/e2e before return');
+u.doReopen();
+const returned = u.loop.field;
+if (!returned || returned.unified !== true) throw new Error('no returned field');
+if (!u.loop.nextSense) throw new Error('reopen did not Sense the returned field');
+if (u.loop.nextSense.unified_field !== returned) throw new Error('next Sense is not the same returned field object');
+if (u.returnedFieldIsNextSense(u.loop.nextSense) !== true) throw new Error('continuity not proven');
+if (u.loop.chart_not_closure !== false) throw new Error('flag not cleared by same-field Sense');
+if (returned.chart_not_closure !== false) throw new Error('returned field still marked chart');
+if (u.loop.te.chart_not_closure !== false) throw new Error('TE chart flag not updated after returned field became next Sense');
+const face = u.publicFaceFromField(returned);
+if (face.from !== 'currentUnifiedField') throw new Error('face not from currentUnifiedField');
+if (face.chart_not_closure !== false) throw new Error('face still a chart');
+if (face.TRUE !== 'not issued' || face.two_person_E2E !== 'OPEN' || face.truth_issued !== false) throw new Error('face invariants');
+if (u.currentUnifiedField() !== returned) throw new Error('currentUnifiedField lost returned identity');
+u.doSense();
+if (u.loop.obs.unified_field !== returned) throw new Error('following Sense dropped returned field identity');
+if (u.loop.obs.consumes_returned_field !== true) throw new Error('following Sense did not consume returned field');
+if (u.loop.chart_not_closure !== false) throw new Error('flag flipped back cosmetically');
+if (u.loop.obs.TRUE !== 'not issued' || u.loop.obs.two_person_E2E !== 'OPEN' || u.loop.obs.participant !== 'Supernetwork') throw new Error('Sense invariants');
+const snap = u.serializeFieldRun();
+if (snap.chart_not_closure !== false) throw new Error('field-run still a chart after continuity');
+if (!snap.public_face || snap.public_face.from !== 'currentUnifiedField') throw new Error('field-run missing face from field');
+if (snap.truth_issued !== false || snap.TRUE !== 'not issued' || snap.two_person_E2E !== 'OPEN') throw new Error('field-run invariants');
+u.resetLoop();
+if (u.loop.chart_not_closure !== true) throw new Error('reset lost honest initial chart flag');
+if (u.returnedFieldIsNextSense() !== false) throw new Error('reset invented continuity');
+console.log(JSON.stringify({
+  ok: true,
+  chart_not_closure: snap.chart_not_closure,
+  face_from: snap.public_face.from,
+  TRUE: snap.TRUE,
+  two_person_E2E: snap.two_person_E2E,
+  participant: snap.participant
+}));
+"""
+    )
+    result = subprocess.run([node, "-e", script], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout.strip().splitlines()[-1])
+    assert payload["ok"] is True
+    assert payload["chart_not_closure"] is False
+    assert payload["face_from"] == "currentUnifiedField"
+    assert payload["TRUE"] == "not issued"
+    assert payload["two_person_E2E"] == "OPEN"
+    assert payload["participant"] == "Supernetwork"
 
 
