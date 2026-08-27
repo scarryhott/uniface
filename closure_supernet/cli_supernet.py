@@ -18,7 +18,7 @@ def main() -> None:
             os.environ["CLOSURE_DB_PATH"] = args.db
         port = int(os.getenv("PORT", str(args.port)))
         uvicorn.run(
-            "closure_supernet.api_selection:app",
+            "closure_supernet.api_inversion:app",
             host=args.host,
             port=port,
             reload=False,

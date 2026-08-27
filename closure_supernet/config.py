@@ -37,7 +37,7 @@ class RuntimeConfig:
 
     integration_http_timeout_seconds: float = float(os.getenv("CLOSURE_INTEGRATION_HTTP_TIMEOUT_SECONDS", "30"))
     integration_max_items_per_cycle: int = int(os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500"))
-    integration_user_agent: str = os.getenv("CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/2.6")
+    integration_user_agent: str = os.getenv("CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/2.7")
     integration_allow_private_networks: bool = _bool("CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False)
 
     public_interface_enabled: bool = _bool("CLOSURE_PUBLIC_INTERFACE_ENABLED", True)
@@ -92,12 +92,18 @@ class RuntimeConfig:
     embodied_emotion_inferred: bool = False
     embodied_human_worth_scored: bool = False
 
-    # NRRF790 audits whether a singleton was already complete or was produced by
-    # authored isolation. Removed alternatives and symmetry witnesses are retained.
     selection_audit_enabled: bool = _bool("CLOSURE_SELECTION_AUDIT_ENABLED", True)
     selection_natural_requires_completeness: bool = True
     selection_forced_isolation_is_natural: bool = False
     selection_empty_reading_selects_nothing: bool = True
+
+    # NRRF795/796 derive finite local-relation readings without selecting a
+    # representation. Construction names remain definition-scoped and do not
+    # become physical-law verdicts.
+    inversion_self_limit_enabled: bool = _bool("CLOSURE_INVERSION_SELF_LIMIT_ENABLED", True)
+    inversion_representation_required: bool = False
+    inversion_physical_law_claimed: bool = False
+    inversion_runtime_is_formal_proof: bool = False
 
     environment: str = os.getenv("CLOSURE_ENVIRONMENT", "development").strip().lower()
     service_role: str = os.getenv("CLOSURE_SERVICE_ROLE", "all").strip().lower()
