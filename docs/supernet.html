@@ -51,8 +51,9 @@ svg:active{cursor:grabbing}
 .field-now .brain-face,.field-now .brain-kind,#pathTitle,#pathLyric{pointer-events:none}
 #pathTitle{font-size:clamp(22px,3.4vw,36px);line-height:1.15;margin:0}
 #pathLyric{color:var(--mute);margin:6px 0 10px;font-size:1.05rem}
-#pathSound{pointer-events:auto;margin-top:8px}
-#pathSound iframe{width:min(100%,380px);height:78px;border:0;background:transparent;filter:grayscale(.2) contrast(1.05)}
+#pathSound{pointer-events:auto;margin-top:8px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+#pathSound iframe{width:min(100%,380px);height:78px;border:0;background:transparent}
+#pathSound .path-href{color:var(--ring);font-size:13px;letter-spacing:.06em}
 .proj{margin-top:8px;color:var(--ring);font-style:italic}
 html[data-projection="panzoom"] #canvas{min-height:min(92vh,920px)}
 .callout{border-top:1px solid var(--ring);padding:13px 0;line-height:1.58}
