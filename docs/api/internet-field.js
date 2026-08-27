@@ -1,23 +1,21 @@
 'use strict';
-const { fieldRunSnapshot, ingestInternetField } = require('../closure-field.js');
+const { ingestInternetField, internetFieldSnapshot } = require('../closure-field.js');
 
 const HEADERS = {
   'Content-Type': 'application/json; charset=utf-8',
   'Cache-Control': 'no-store',
 };
 
-async function fieldRunBody() {
-  try {
-    await ingestInternetField();
-  } catch (err) {}
-  return JSON.stringify(fieldRunSnapshot());
-}
-
 function applyHeaders(res, extra) {
   const headers = extra ? Object.assign({}, HEADERS, extra) : HEADERS;
   Object.keys(headers).forEach(function (key) {
     res.setHeader(key, headers[key]);
   });
+}
+
+async function internetFieldBody() {
+  await ingestInternetField();
+  return JSON.stringify(internetFieldSnapshot());
 }
 
 async function handler(req, res) {
@@ -28,12 +26,12 @@ async function handler(req, res) {
     res.end();
     return;
   }
-  const body = await fieldRunBody();
+  const body = await internetFieldBody();
   applyHeaders(res);
   res.statusCode = 200;
   res.end(method === 'HEAD' ? '' : body);
 }
 
 module.exports = handler;
-module.exports.fieldRunBody = fieldRunBody;
+module.exports.internetFieldBody = internetFieldBody;
 module.exports.HEADERS = HEADERS;

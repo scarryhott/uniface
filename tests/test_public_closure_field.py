@@ -9,6 +9,7 @@ ROOT = DOCS / "index.html"
 LOOP_JS = DOCS / "closure-field.js"
 FIELD_RUN = DOCS / "field-run.json"
 FIELD_RUN_API = DOCS / "api" / "field-run.js"
+INTERNET_FIELD_API = DOCS / "api" / "internet-field.js"
 
 
 def _html() -> str:
@@ -35,16 +36,26 @@ def _live_field_run_snapshot():
     )
 
 
-def _invoke_field_run_handler(method: str = "GET"):
+def _invoke_handler(api_path, method: str = "GET"):
     script = (
-        "const handler=require(" + json.dumps(str(FIELD_RUN_API)) + ");"
-        "const headers={}; let body='';"
+        "const handler=require(" + json.dumps(str(api_path)) + ");"
+        "const headers={}; let body=''; let ended=false;"
         "const res={statusCode:200,setHeader(k,v){headers[String(k).toLowerCase()]=v},"
-        "end(b){body=b==null?'':String(b)}};"
-        "handler({method:" + json.dumps(method) + "},res);"
+        "end(b){ended=true;body=b==null?'':String(b)}};"
+        "Promise.resolve(handler({method:" + json.dumps(method) + "},res)).then(function(){"
+        "if(!ended)throw new Error('handler did not end');"
         "process.stdout.write(JSON.stringify({status:res.statusCode,headers:headers,body:body}));"
+        "}).catch(function(err){process.stderr.write(String(err&&err.stack||err));process.exit(1)});"
     )
     return _node_json(script)
+
+
+def _invoke_field_run_handler(method: str = "GET"):
+    return _invoke_handler(FIELD_RUN_API, method)
+
+
+def _invoke_internet_field_handler(method: str = "GET"):
+    return _invoke_handler(INTERNET_FIELD_API, method)
 
 
 def _assert_widget_free_autonomous_face(html: str) -> None:
@@ -155,7 +166,9 @@ def test_supernet_is_the_same_loop_panzoom_projection():
     )
     field_run = [rule for rule in rewrites if rule.get("source") == "/field-run.json"]
     assert field_run == [{"source": "/field-run.json", "destination": "/api/field-run"}]
+    assert {"source": "/internet-field.json", "destination": "/api/internet-field"} in rewrites
     assert vercel.get("functions", {}).get("api/field-run.js", {}).get("includeFiles") == "closure-field.js"
+    assert vercel.get("functions", {}).get("api/internet-field.js", {}).get("includeFiles") == "closure-field.js"
     assert (DOCS / "supernet.html").is_file()
     assert not (DOCS / "supernet").exists()
     assert FIELD_RUN_API.is_file()
@@ -223,7 +236,19 @@ def test_field_run_json_is_live_fieldRunSnapshot_projection():
     assert served["status"] == 200
     assert served["headers"]["content-type"].startswith("application/json")
     assert served["headers"]["cache-control"] == "no-store"
-    assert payload == live
+    assert live["internet_field"]["of"] == "internet field"
+    assert live["internet_field"]["not"] == "persist"
+    assert live["internet_field"]["public_read"] is False
+    assert live["internet_field"]["truth_issued"] is False
+    assert live["internet_field"]["two_person_E2E"] == "OPEN"
+    assert live["internet_field"]["participant"] == "OPEN"
+    assert payload["internet_field"]["of"] == "internet field"
+    assert payload["internet_field"]["not"] == "persist"
+    assert payload["internet_field"]["not_roster"] is True
+    assert payload["internet_field"]["not_invite"] is True
+    assert payload["internet_field"]["truth_issued"] is False
+    assert payload["internet_field"]["two_person_E2E"] == "OPEN"
+    assert payload["internet_field"]["participant"] == "OPEN"
     assert payload["truth_issued"] is False
     assert payload["two_person_E2E"] == "OPEN"
     assert payload["TRUE"] == "not issued"
@@ -253,7 +278,8 @@ def test_field_run_json_is_live_fieldRunSnapshot_projection():
     assert payload["music_as_path"]["not_mp3"] is True
     assert payload["music_as_path"]["suno"].startswith("https://suno.com/song/")
     assert payload["not_mp3"] is True
-    assert payload["field_relation"]["title"] == "Rising Sun"
+    assert live["field_relation"]["title"] == "Rising Sun"
+    assert payload["field_relation"]["not_playlist"] is True
     assert payload["unified"] is True
     assert isinstance(payload["prior_cycle_residues"], list)
     assert len(payload["prior_cycle_residues"]) >= 1
@@ -285,18 +311,19 @@ def test_field_run_json_is_live_fieldRunSnapshot_projection():
         for member in cls
     ]
     assert payload["unresolved_alternatives"] == other
-    assert ["rule", "computational"] in payload["isomorphism_classes"]
+    assert ["rule", "computational"] in live["isomorphism_classes"]
     dumped = json.dumps(payload)
     assert "Lean" not in dumped.replace("not Lean", "")
+    assert "login" not in json.dumps(payload["internet_field"])
 
     again = json.loads(_invoke_field_run_handler("GET")["body"])
-    assert again == live
-    assert again["isomorphism_classes"] == live["isomorphism_classes"]
-    assert again["selected_class"] == live["selected_class"]
+    assert again["internet_field"]["of"] == "internet field"
+    assert again["isomorphism_classes"] == again["admissibility_space"]["isomorphism_classes"]
+    assert again["selected_class"] == again["admissibility_space"]["selected_class"]
     assert again["truth_issued"] is False
     assert again["unified"] is True
-    assert again["prior_cycle_residues"] == live["prior_cycle_residues"]
     assert again["participant"] == "OPEN"
+    assert again["two_person_E2E"] == "OPEN"
 
 
 def test_derived_cutoff_family_pairwise_delta_is_constant_and_carries_scale():
@@ -743,9 +770,17 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "Sense(Obs) → unique unitary path selector → Translation Event (admit → return → reopen) → next Sense" in supernet
     assert "function uniqueUnitaryPathPartition" not in supernet
     assert "function uniqueUnitaryPathPartition" not in html
-    assert "function uniqueUnitaryPathPartition" in js
-    assert "function currentUnifiedField" in js
-    assert "function isomorphismClassesOf" in js
+    assert "function ingestInternetField" in js
+    assert "function normalizeInternetField" in js
+    assert "function setInternetField" in js
+    assert "internet_field" in js
+    assert "read-only internet-field ingest" in supernet
+    assert "read-only internet-field ingest" in html
+    assert "public discussion 28" in supernet
+    assert "public repo activity" in supernet
+    assert INTERNET_FIELD_API.is_file()
+    assert "require('../closure-field.js')" in INTERNET_FIELD_API.read_text(encoding="utf-8")
+    assert "internetFieldSnapshot()" in INTERNET_FIELD_API.read_text(encoding="utf-8")
     assert "truth_issued:false" in js
     assert "FOUNDATION.md" not in supernet
     assert "When we forget the learned lessons" not in supernet
@@ -1019,4 +1054,119 @@ console.log(JSON.stringify({
     assert payload["residues_c"] > payload["residues_a"]
     assert payload["TRUE"] == "not issued"
     assert payload["two_person_E2E"] == "OPEN"
+
+
+def test_sense_ingests_public_internet_field_into_the_same_classes():
+    html = _html()
+    js = _js()
+    supernet = (DOCS / "supernet.html").read_text(encoding="utf-8")
+    vercel = json.loads((DOCS / "vercel.json").read_text(encoding="utf-8"))
+    api = INTERNET_FIELD_API.read_text(encoding="utf-8")
+    _assert_widget_free_autonomous_face(html)
+    _assert_widget_free_autonomous_face(supernet)
+    assert "<button" not in html
+    assert "<form" not in html
+    assert "Join" not in html
+    assert "invite" not in html.lower()
+    assert "Harry" not in js
+    assert "ChatGPT" not in js
+    assert "function ingestInternetField" in js
+    assert "function normalizeInternetField" in js
+    assert "selects_over:'translational isomorphism classes'" in js
+    assert "not_roster:true" in js
+    assert {"source": "/internet-field.json", "destination": "/api/internet-field"} in vercel.get("rewrites")
+    assert "internetFieldSnapshot()" in api
+    assert "eyJ" not in api
+    node = shutil.which("node")
+    if node is None:
+        return
+    script = (
+        "const u=require(" + json.dumps(str(LOOP_JS)) + ");"
+        + r"""
+u.resetLoop();
+const canned = u.normalizeInternetField({
+  tawny: 'TRUE not issued. Sense(Obs) → unique unitary path selector → reopen. Two-person E2E OPEN. participant OPEN.',
+  discussion: {number:28, title:'Live field is open — public tawny field', body:'Two people in the same field is the test. TRUE is not issued.\nRepo: https://github.com/scarryhott/uniface', html_url:'https://github.com/scarryhott/uniface/discussions/28', user:{login:'someone'}},
+  activity: [{type:'PullRequestEvent', payload:{action:'opened', pull_request:{title:'Serve GET /field-run.json from live fieldRunSnapshot()', user:{login:'someone'}}, commits:[{message:'computational chart leftover', author:{name:'someone', email:'x@y.z'}}]}}]
+});
+if (canned.of !== 'internet field') throw new Error('of');
+if (canned.not !== 'persist') throw new Error('persist store');
+if (canned.not_roster !== true || canned.not_invite !== true || canned.not_names !== true) throw new Error('roster/invite');
+if (canned.truth_issued !== false || canned.TRUE !== 'not issued') throw new Error('TRUE issued');
+if (canned.two_person_E2E !== 'OPEN' || canned.participant !== 'OPEN') throw new Error('E2E faked');
+if (JSON.stringify(canned).indexOf('login') >= 0) throw new Error('login leaked');
+if (JSON.stringify(canned).indexOf('someone') >= 0) throw new Error('name roster leaked');
+if (JSON.stringify(canned).indexOf('@') >= 0) throw new Error('email leaked');
+const ids = canned.remainder.slice();
+ids.forEach(function(id){if (['during','coherent','contradiction','rule','culture','computational'].indexOf(id)<0) throw new Error('remainder left the class system '+id)});
+if (ids.indexOf('during')<0 && ids.indexOf('culture')<0) throw new Error('discussion did not enter culture/during');
+if (ids.indexOf('rule')<0) throw new Error('unique unitary did not enter rule');
+if (ids.indexOf('computational')<0) throw new Error('field-run.json did not enter computational');
+const classes = u.isomorphismClassesOf(ids, {undetermined_string:{scenario:'during'}});
+if (!classes.length) throw new Error('no isomorphism classes');
+u.setInternetField(canned);
+u.doSense();
+const rem = u.loop.obs.undetermined_string.remainder;
+if (JSON.stringify(rem) !== JSON.stringify(ids.filter(function(id){return id!=='during'})) && JSON.stringify(rem) !== JSON.stringify(ids)) throw new Error('Sense remainder is not the internet-field classes');
+if (u.loop.obs.internet_field.of !== 'internet field') throw new Error('Sense missing internet field');
+u.doSelect();
+const p0 = u.loop.path;
+if (p0.selects_over !== 'translational isomorphism classes') throw new Error('selector not over classes');
+if (JSON.stringify(p0.remainder) !== JSON.stringify(rem)) throw new Error('selector remainder diverged from Sense');
+if (p0.formId && rem.indexOf(p0.formId)<0 && p0.selected_class.indexOf(p0.formId)<0) throw new Error('selected outside sensed classes');
+p0.selected_class.forEach(function(id){if (p0.unresolved_alternatives.indexOf(id)>=0) throw new Error('selected class still unresolved');});
+u.loop.te = u.translationEvent();
+if (u.loop.te.TRUE !== 'not issued' || u.loop.te.two_person_E2E !== 'OPEN' || u.loop.te.participant !== 'OPEN') throw new Error('TE invariants');
+if (JSON.stringify(u.loop.te.unresolved_alternatives) !== JSON.stringify(p0.unresolved_alternatives)) throw new Error('TE dropped classes');
+u.doReopen();
+const realized = p0.formId;
+u.doSense();
+const rem1 = u.loop.obs.undetermined_string.remainder;
+if (realized && rem1.indexOf(realized)>=0) throw new Error('realized form reintroduced from internet remainder');
+if (u.loop.obs.TRUE !== 'not issued' || u.loop.obs.two_person_E2E !== 'OPEN' || u.loop.obs.participant !== 'OPEN') throw new Error('Sense invariants after reopen');
+const field = u.currentUnifiedField();
+if (field.internet_field.of !== 'internet field') throw new Error('unified field dropped internet Sense');
+if (field.truth_issued !== false) throw new Error('truth issued');
+console.log(JSON.stringify({
+  ok: true,
+  remainder: rem,
+  classes: p0.isomorphism_classes,
+  selected: p0.formId,
+  rem1: rem1,
+  public_read: canned.public_read,
+  TRUE: field.TRUE,
+  two_person_E2E: field.two_person_E2E,
+  participant: field.participant
+}));
+"""
+    )
+    result = subprocess.run([node, "-e", script], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout.strip().splitlines()[-1])
+    assert payload["ok"] is True
+    assert payload["TRUE"] == "not issued"
+    assert payload["two_person_E2E"] == "OPEN"
+    assert payload["participant"] == "OPEN"
+    assert payload["public_read"] is True
+    assert payload["selected"] not in payload["rem1"]
+    served = _invoke_internet_field_handler("GET")
+    if served is None:
+        return
+    net = json.loads(served["body"])
+    assert served["status"] == 200
+    assert served["headers"]["cache-control"] == "no-store"
+    assert net["of"] == "internet field"
+    assert net["not"] == "persist"
+    assert net["truth_issued"] is False
+    assert net["TRUE"] == "not issued"
+    assert net["two_person_E2E"] == "OPEN"
+    assert net["participant"] == "OPEN"
+    assert net["not_roster"] is True
+    assert "login" not in json.dumps(net)
+    for item in net.get("remainder") or []:
+        assert item in {"during", "coherent", "contradiction", "rule", "culture", "computational"}
+    for cls in net.get("isomorphism_classes") or []:
+        for member in cls:
+            assert member in {"during", "coherent", "contradiction", "rule", "culture", "computational"}
+
 

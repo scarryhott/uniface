@@ -5,10 +5,17 @@
     {
       "source": "/field-run.json",
       "destination": "/api/field-run"
+    },
+    {
+      "source": "/internet-field.json",
+      "destination": "/api/internet-field"
     }
   ],
   "functions": {
     "api/field-run.js": {
+      "includeFiles": "closure-field.js"
+    },
+    "api/internet-field.js": {
       "includeFiles": "closure-field.js"
     }
   }
