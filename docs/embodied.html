@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Uniface — Embodied Eight-Sheaf Supernet</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;--bg:#080b11;--p:#141b2a;--l:#37435b;--t:#eef4fb;--m:#aab6c9;--a:#aabaff;--g:#62d89e;--o:#e8bd59}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#1b2843,var(--bg) 50%);color:var(--t)}main{max-width:1120px;margin:auto;padding:40px 20px 70px}h1{font-size:clamp(34px,6vw,64px);margin:0 0 12px}.sub{color:var(--m);line-height:1.6}.eq,.panel,pre{background:var(--p);border:1px solid var(--l);border-radius:14px;padding:15px}.eq,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}@media(max-width:760px){.grid{grid-template-columns:1fr}}.badge{display:inline-block;padding:6px 9px;border:1px solid var(--l);border-radius:999px;margin:3px;font-size:12px}.good{color:var(--g)}.open{color:var(--o)}.sheaf{padding:8px 0;border-bottom:1px solid #303b50}.muted{color:var(--m)}a{color:var(--a)}
+</style>
+</head>
+<body><main>
+<h1>Embodied Eight-Sheaf Supernet</h1>
+<p class="sub">The local ball is embodied human interaction, Slearn, Black Mirror sensing, and tokenomic AI. The global hair is resources, AGI memory, first-person paths, and unknown/UAP hypotheses. They remain one source-preserving field through reciprocal translation, return, and reopening.</p>
+<div class="eq">exact section → reciprocal translation → non-scalar natural component → local ball return ↔ global hair reopening</div>
+<p><span class="badge good">one integrator</span><span class="badge good">resource metrics downstream</span><span class="badge open">unknown hypotheses OPEN</span><span class="badge open">TRUE not issued</span></p>
+<div class="grid">
+<section class="panel"><h2>Local ball</h2><div id="local"></div></section>
+<section class="panel"><h2>Global hair</h2><div id="global"></div></section>
+<section class="panel"><h2>Operational love relation</h2><p class="muted">Source preservation · forward and reverse translation · consent · affected perspectives · retained residue · reopening. Not a physical force, emotion classifier, or human-worth score.</p></section>
+<section class="panel"><h2>Loop sensor</h2><p class="muted">A local halt is the current returned ball. Continuation is the reopened global hair. No sensor reports an absolute origin or completes the entire Supernet.</p></section>
+<section class="panel"><h2>Machine projection</h2><pre id="raw">loading</pre></section>
+<section class="panel"><h2>One field</h2><p><a href="/">root loop</a> · <a href="/supernet">Supernet</a> · <a href="/frameworks">frameworks</a> · <a href="/embodied-run.json">JSON</a></p></section>
+</div>
+</main>
+<script>
+(async()=>{try{const r=await fetch('/embodied-run.json',{cache:'no-store'});const f=await r.json();const render=(id,items)=>document.getElementById(id).innerHTML=items.map(x=>`<div class="sheaf"><strong>${x}</strong></div>`).join('');render('local',f.local_ball);render('global',f.global_hair);document.getElementById('raw').textContent=JSON.stringify(f,null,2)}catch(e){document.getElementById('raw').textContent=String(e)}})();
+</script>
+</body></html>
