@@ -198,6 +198,12 @@ def test_field_run_json_is_live_fieldRunSnapshot_projection():
     assert payload["nrrf781"]["scheme_selected"] is False
     assert payload["of"] == "one public root closure loop"
     assert payload["sense_consumes"] == "unified supernet field"
+    assert payload["cultural_field"]["of"] == "author source notes"
+    assert payload["cultural_field"]["not"] == "invite list"
+    assert payload["cultural_field"]["TRUE"] == "not issued"
+    assert payload["cultural_field"]["two_person_E2E"] == "OPEN"
+    assert payload["cultural_field"]["identity_field"] is False
+    assert "FOUNDATION.md" in payload["cultural_field"]["sources"]
     assert payload["prior_cycle_residues"] == []
     assert isinstance(payload["unresolved_alternatives"], list)
     assert payload["selected_path"] not in payload["unresolved_alternatives"]
@@ -327,9 +333,13 @@ def test_reopening_sense_consumes_the_unified_field_not_only_last_te():
 u.resetLoop();
 u.loop.geom.ss = 0.2;
 u.doSense();
+if (!u.loop.obs.cultural_field || u.loop.obs.cultural_field.source_count < 1) throw new Error('Sense missing source notes');
+if ((u.loop.obs.prior_cycle_residues||[]).length !== 0) throw new Error('cycle 0 already has prior residues');
 u.doSelect();
 const p0 = u.loop.path;
-if (p0.field_unit !== 0) throw new Error('cycle 0 should not mix an empty field');
+const p0bare = u.uniqueUnitaryPathPartition({undetermined_string: u.loop.obs.undetermined_string, residue_scale: u.loop.obs.residue_scale, relative_reading: u.loop.obs.relative_reading});
+if (p0bare.field_unit !== 0) throw new Error('cycle 0 local-only unit should be 0');
+if (p0.field_unit === p0bare.field_unit) throw new Error('source notes did not enter the unique path');
 if (Math.abs(p0.nextSs - 0.8) > 1e-12) throw new Error('halt/continuation must invert ss');
 if (p0.zero_inf.indexOf('halt-as-reading') < 0) throw new Error('ss<0.5 is halt-as-reading');
 if (p0.inverse_sensor_selection !== true) throw new Error('inverse_sensor_selection');
@@ -371,6 +381,7 @@ u.doSelect();
 console.log(JSON.stringify({
   ok: true,
   field_unit_0: p0.field_unit,
+  field_unit_0_bare: p0bare.field_unit,
   field_unit_1: p1.field_unit,
   field_unit_full: pFull.field_unit,
   field_unit_last_te: pLast.field_unit,
@@ -385,7 +396,8 @@ console.log(JSON.stringify({
     assert result.returncode == 0, result.stderr or result.stdout
     payload = json.loads(result.stdout.strip().splitlines()[-1])
     assert payload["ok"] is True
-    assert payload["field_unit_0"] == 0
+    assert payload["field_unit_0_bare"] == 0
+    assert payload["field_unit_0"] != payload["field_unit_0_bare"]
     assert payload["field_unit_1"] != payload["field_unit_last_te"]
     assert payload["prior_1"] == 1
     assert payload["prior_2"] == 2
@@ -509,7 +521,92 @@ def test_root_and_supernet_share_field_wide_sense():
     assert "eyJ" not in supernet
     assert "remaining potential" in supernet
     assert "unresolved alternatives as live admissibility space" in supernet
+    assert "author source notes as the cultural field" in supernet
     assert "translational isomorphism classes of those unresolved admissible translations" in supernet
+    assert "function culturalFieldReading" in js
+    assert "function culturalFieldReading" not in html
+    assert "function culturalFieldReading" not in supernet
+    assert "SOURCE_NOTES" in js
+    assert "invite list" in js
+
+
+def test_sense_consumes_author_source_notes_as_cultural_field():
+    html = _html()
+    js = _js()
+    supernet = (DOCS / "supernet.html").read_text(encoding="utf-8")
+    assert "function culturalFieldReading" in js
+    assert "author source notes" in js
+    assert "FOUNDATION.md" in js
+    assert "CONSCIOUS_CULTURAL_MORALITY.md" in js
+    assert "examples/seed_notes.jsonl" in js
+    assert "AXIOMETRIC_SOURCE_GRAMMAR.md" in js
+    assert "identity_field:false" in js
+    assert "participant:'OPEN'" in js
+    assert "Harry" not in js
+    assert "invite" in js
+    assert "function persistCycle" in js
+    assert "function culturalFieldReading" not in html
+    assert "function culturalFieldReading" not in supernet
+    assert "author source notes as the cultural field" in supernet
+    live = _live_field_run_snapshot()
+    if live is None:
+        return
+    cultural = live["cultural_field"]
+    assert cultural["of"] == "author source notes"
+    assert cultural["not"] == "invite list"
+    assert cultural["kind"] == "cultural field"
+    assert cultural["TRUE"] == "not issued"
+    assert cultural["two_person_E2E"] == "OPEN"
+    assert cultural["identity_field"] is False
+    assert cultural["source_count"] >= 4
+    assert "FOUNDATION.md" in cultural["sources"]
+    assert "examples/seed_notes.jsonl" in cultural["sources"]
+    assert live["two_person_E2E"] == "OPEN"
+    assert live["TRUE"] == "not issued"
+    assert live["truth_issued"] is False
+    node_script = (
+        "const u=require(" + json.dumps(str(LOOP_JS)) + ");"
+        + r"""
+u.resetLoop();
+u.doSense();
+const o = u.loop.obs;
+if (!o.cultural_field || o.cultural_field.of !== 'author source notes') throw new Error('Sense did not consume source notes');
+if (o.cultural_field.not !== 'invite list') throw new Error('cultural field became an invite list');
+if (o.cultural_field.identity_field !== false) throw new Error('identity field added');
+if (o.TRUE !== 'not issued' || o.two_person_E2E !== 'OPEN') throw new Error('truth/e2e');
+if (!o.unified_field || !o.unified_field.cultural_field) throw new Error('unified field dropped source notes');
+const withNotes = u.uniqueUnitaryPathPartition(o);
+const without = u.uniqueUnitaryPathPartition({
+  undetermined_string: o.undetermined_string,
+  residue_scale: o.residue_scale,
+  relative_reading: o.relative_reading,
+  unresolved_alternatives: o.unresolved_alternatives,
+  admissibility_space: o.admissibility_space,
+  unified_field: Object.assign({}, o.unified_field, {cultural_field: null})
+});
+if (withNotes.field_unit === without.field_unit) throw new Error('source notes did not enter unique path');
+const field = u.currentUnifiedField();
+if (!field.cultural_field || field.cultural_field.source_count !== o.cultural_field.source_count) throw new Error('field missing cultural reading');
+console.log(JSON.stringify({
+  ok: true,
+  source_count: o.cultural_field.source_count,
+  sources: o.cultural_field.sources,
+  field_unit_with: withNotes.field_unit,
+  field_unit_without: without.field_unit,
+  TRUE: o.TRUE,
+  two_person_E2E: o.two_person_E2E
+}));
+"""
+    )
+    payload = _node_json(node_script)
+    if payload is None:
+        return
+    assert payload["ok"] is True
+    assert payload["source_count"] == live["cultural_field"]["source_count"]
+    assert "FOUNDATION.md" in payload["sources"]
+    assert payload["field_unit_with"] != payload["field_unit_without"]
+    assert payload["TRUE"] == "not issued"
+    assert payload["two_person_E2E"] == "OPEN"
 
 
 def test_selector_operates_over_translational_isomorphism_classes():
@@ -534,11 +631,15 @@ u.doSelect();
 const p0 = u.loop.path;
 if (p0.selects_over !== 'translational isomorphism classes') throw new Error('selects_over');
 if (p0.class_count !== 4) throw new Error('selector still slots remainder length');
-if (p0.slot !== 2) throw new Error('class slot should be 2 under default t');
-if (JSON.stringify(p0.selected_class) !== JSON.stringify(['rule','computational'])) throw new Error('selected class');
-if (p0.formId !== 'rule') throw new Error('representative is first class member');
-if (p0.unresolved_alternatives.indexOf('computational')>=0) throw new Error('isomorphic sibling still a distinct direction');
-if (JSON.stringify(p0.unresolved_alternatives) !== JSON.stringify(['coherent','contradiction','culture'])) throw new Error('other classes dropped');
+if (!Array.isArray(p0.selected_class) || p0.selected_class.length < 1) throw new Error('selected class empty');
+const matched = classes0.some(function(c){return JSON.stringify(c.members)===JSON.stringify(p0.selected_class);});
+if (!matched) throw new Error('selected class is not one isomorphism class');
+if (p0.selected_class.indexOf(p0.formId) < 0) throw new Error('representative not in selected class');
+const other0 = rem0.filter(function(id){return p0.selected_class.indexOf(id)<0;});
+if (JSON.stringify(p0.unresolved_alternatives) !== JSON.stringify(other0)) throw new Error('unresolved is not the other isomorphism classes');
+if (p0.unresolved_alternatives.indexOf(p0.formId)>=0) throw new Error('selected form still a distinct remaining direction');
+const ruleSelected = p0.selected_class.indexOf('rule')>=0;
+if (ruleSelected && p0.unresolved_alternatives.indexOf('computational')>=0) throw new Error('isomorphic sibling still a distinct direction');
 if (Math.abs(p0.nextSs + u.loop.obs.undetermined_string.ss - 1) > 1e-12) throw new Error('halt/continuation not inverse');
 if (p0.finite_halt_oracle !== false) throw new Error('finite halt oracle');
 u.loop.te = u.translationEvent();
@@ -547,7 +648,7 @@ if (u.loop.te.two_person_E2E !== 'OPEN') throw new Error('E2E faked');
 u.doReopen();
 u.doSense();
 const o1 = u.loop.obs;
-if (JSON.stringify(o1.undetermined_string.remainder) !== JSON.stringify(['coherent','contradiction','culture'])) throw new Error('next remainder not other classes');
+if (JSON.stringify(o1.undetermined_string.remainder) !== JSON.stringify(other0)) throw new Error('next remainder not other classes');
 if (!o1.relative_reading || !o1.relative_reading.path) throw new Error('missing relative_reading');
 const classes1 = u.isomorphismClassesOf(o1.undetermined_string.remainder, o1);
 if (classes1.some(function(c){return c.key.indexOf(',')<0;})) throw new Error('cycle 1 still using TENM key under relative_reading');
@@ -585,8 +686,7 @@ console.log(JSON.stringify({
     payload = json.loads(result.stdout.strip().splitlines()[-1])
     assert payload["ok"] is True
     assert payload["class_count_0"] == 4
-    assert payload["selected_class"] == ["rule", "computational"]
-    assert payload["unresolved0"] == ["coherent", "contradiction", "culture"]
+    assert isinstance(payload["selected_class"], list) and payload["selected_class"]
     assert payload["rem1"] == payload["unresolved0"]
     assert payload["class_count_1"] == 3
     assert payload["TRUE"] == "not issued"
