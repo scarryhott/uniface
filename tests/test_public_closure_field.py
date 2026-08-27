@@ -120,6 +120,11 @@ def test_supernet_is_the_same_loop_panzoom_projection():
         and str(rule.get("destination", "")).rstrip("/") in {"", "/", "/index", "/index.html"}
         for rule in rewrites
     )
+    assert not any(
+        str(rule.get("source", "")).rstrip("/") in {"/supernet", "/supernet.html", "/", ""}
+        and "/embodied" in str(rule.get("destination", "")).rstrip("/")
+        for rule in rewrites
+    )
     field_run = [rule for rule in rewrites if rule.get("source") == "/field-run.json"]
     assert field_run == [{"source": "/field-run.json", "destination": "/api/field-run"}]
     assert vercel.get("functions", {}).get("api/field-run.js", {}).get("includeFiles") == "closure-field.js"
@@ -665,6 +670,8 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "not_blog:true" in js
     assert "not_playlist:true" in js
     assert "not_inventory:true" in js
+    assert "not_eight_sheaf:true" in js
+    assert "not_trading:true" in js
     assert "holllow grounds of night" in js
     assert "shared seeds of flowing flowering experience" in js
     assert "tree of life extends its naked leaves to the sky" in js
@@ -732,6 +739,8 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert brain["not_invite"] is True
     assert brain["money_not_network"] is True
     assert brain["not_product_spec"] is True
+    assert brain["not_eight_sheaf"] is True
+    assert brain["not_trading"] is True
     assert brain["drive_notes"] == "same brain field"
     assert live["field_relation"]["title"] == "Rising Sun"
     assert live["field_relation"]["not_playlist"] is True
@@ -800,5 +809,52 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "bitcoin" not in supernet.lower()
     assert "bitcoin" not in js.lower()
     assert "Join" not in supernet
+    assert "Embodied Eight-Sheaf" not in supernet
+    assert "Embodied Eight-Sheaf" not in html
+    assert "Local ball" not in supernet
+    assert "Global hair" not in supernet
+    assert "trading" not in supernet.lower()
+    assert "TRADING_ENABLED" not in supernet
+    assert "TRADING_ENABLED" not in html
+    assert "embodied.html" not in supernet
+    assert 'href="/embodied' not in supernet
     assert ["rule", "computational"] in live["isomorphism_classes"]
+
+
+def test_public_face_is_not_the_eight_sheaf_dashboard():
+    html = _html()
+    js = _js()
+    supernet = (DOCS / "supernet.html").read_text(encoding="utf-8")
+    vercel = json.loads((DOCS / "vercel.json").read_text(encoding="utf-8"))
+    rewrites = vercel.get("rewrites") or []
+    assert "not_eight_sheaf:true" in js
+    assert "not_trading:true" in js
+    assert "anatomy tree, rings of time, drone-wire forest" in supernet
+    assert 'id="brainFace"' in supernet
+    assert "Sense(Obs) → unique unitary path selector" in js
+    assert "Embodied Eight-Sheaf" not in supernet
+    assert "Embodied Eight-Sheaf" not in html
+    assert "Local ball" not in supernet
+    assert "Local ball" not in html
+    assert "Global hair" not in supernet
+    assert "Global hair" not in html
+    assert "trading" not in supernet.lower()
+    assert "TRADING_ENABLED" not in supernet
+    assert "TRADING_ENABLED" not in html
+    assert "TRADING_ENABLED" not in js
+    assert "embodied.html" not in supernet
+    assert 'href="/embodied' not in supernet
+    assert not any(
+        str(rule.get("source", "")).rstrip("/") in {"/supernet", "/supernet.html", "/", ""}
+        and "/embodied" in str(rule.get("destination", "")).rstrip("/")
+        for rule in rewrites
+    )
+    leftover = DOCS / "embodied.html"
+    if leftover.is_file():
+        embodied = leftover.read_text(encoding="utf-8")
+        assert embodied != supernet
+        assert embodied != html
+        assert "Embodied Eight-Sheaf" in embodied
+        assert "anatomy tree, rings of time, drone-wire forest" not in embodied
+        assert 'id="brainFace"' not in embodied
 
