@@ -35,6 +35,7 @@ class IntegrationLens(StrEnum):
     RENORMALIZATION = "renormalization"
     CONSTRUCTIVE = "constructive"
     FRAMEWORK = "framework"
+    EMBODIED = "embodied"
 
 
 class ResourceEnvelope(BaseModel):
