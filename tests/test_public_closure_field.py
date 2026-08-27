@@ -120,6 +120,11 @@ def test_supernet_is_the_same_loop_panzoom_projection():
         and str(rule.get("destination", "")).rstrip("/") in {"", "/", "/index", "/index.html"}
         for rule in rewrites
     )
+    assert not any(
+        str(rule.get("source", "")).rstrip("/") in {"/supernet", "/supernet.html", "/", ""}
+        and "/embodied" in str(rule.get("destination", "")).rstrip("/")
+        for rule in rewrites
+    )
     field_run = [rule for rule in rewrites if rule.get("source") == "/field-run.json"]
     assert field_run == [{"source": "/field-run.json", "destination": "/api/field-run"}]
     assert vercel.get("functions", {}).get("api/field-run.js", {}).get("includeFiles") == "closure-field.js"
@@ -211,6 +216,9 @@ def test_field_run_json_is_live_fieldRunSnapshot_projection():
     assert payload["brain_field"]["same_family"] is True
     assert "latent tumors" in payload["brain_field"]["occurrence"]["exact"]
     assert payload["field_relation"]["not_playlist"] is True
+    assert payload["music_as_path"]["not_mp3"] is True
+    assert payload["music_as_path"]["suno"].startswith("https://suno.com/song/")
+    assert payload["not_mp3"] is True
     assert payload["field_relation"]["title"] == "Rising Sun"
     assert payload["prior_cycle_residues"] == []
     assert isinstance(payload["unresolved_alternatives"], list)
@@ -662,6 +670,8 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "not_blog:true" in js
     assert "not_playlist:true" in js
     assert "not_inventory:true" in js
+    assert "not_eight_sheaf:true" in js
+    assert "not_trading:true" in js
     assert "holllow grounds of night" in js
     assert "shared seeds of flowing flowering experience" in js
     assert "tree of life extends its naked leaves to the sky" in js
@@ -672,6 +682,16 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "https://suno.com/song/688e6054-0d09-4669-8f43-d588486658f2" in js
     assert "drone-wire forest" in js
     assert "source–sink / up–down–through" in js
+    assert "yin–yang as relation not physics" in js
+    assert "not_physics:true" in js
+    assert "id=\"glass\"" in js
+    assert "mirrored-looking device" in js
+    assert "the third is through" in js
+    assert "Local representation with global action through agentic second brains." in js
+    assert "BLACK_MIRROR_TRANSLATIONAL_TRUTH" not in js
+    assert "BLACK_MIRROR_TRANSLATIONAL_TRUTH.md" not in supernet
+    assert not (ROOT.parents[0] / "BLACK_MIRROR_TRANSLATIONAL_TRUTH.md").exists()
+    assert "scarryhott/black-mirror" not in supernet
     assert 'id="teGrid"' in supernet
     assert "Sense(Obs) → unique unitary path selector → Translation Event (admit → return → reopen) → next Sense" in supernet
     assert "function uniqueUnitaryPathPartition" not in supernet
@@ -680,6 +700,18 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "function isomorphismClassesOf" in js
     assert "truth_issued:false" in js
     assert "FOUNDATION.md" not in supernet
+    assert "When we forget the learned lessons" not in supernet
+    assert "holllow grounds of night" not in supernet
+    assert "one light-bulb idea a day" not in supernet
+    assert "Three Body Problem" not in supernet
+    assert "Purple Rain" not in supernet
+    assert "embodied.html" not in supernet
+    assert "/embodied" not in supernet
+    assert supernet.index('id="canvas"') < supernet.index('id="teGrid"')
+    assert "<summary>Translation Event cells (chart, not the face)</summary>" in supernet
+    te_block = supernet.split('id="teGrid"')[0]
+    assert te_block.rfind("<details>") > te_block.rfind("</details>")
+    assert "min-height:100vh" in supernet
     node = shutil.which("node")
     if node is None:
         return
@@ -697,9 +729,45 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert brain["not_playlist"] is True
     assert brain["same_family"] is True
     assert brain["truth_issued"] is False
+    assert brain["not_physics"] is True
+    assert brain["alternative"] == "translational truth"
+    assert brain["capture"] == "relative representation mistaken for the whole relation"
+    assert brain["device"] == "mirrored-looking device"
+    assert brain["through"] == "the third is through"
+    assert "yin–yang as relation not physics" in brain["grammar"]
+    assert "mirrored-looking device" in brain["visual"]
+    assert brain["not_invite"] is True
+    assert brain["money_not_network"] is True
+    assert brain["not_product_spec"] is True
+    assert brain["not_eight_sheaf"] is True
+    assert brain["not_trading"] is True
+    assert brain["drive_notes"] == "same brain field"
     assert live["field_relation"]["title"] == "Rising Sun"
     assert live["field_relation"]["not_playlist"] is True
     assert live["field_relation"]["suno"].startswith("https://suno.com/song/")
+    assert live["field_relation"]["not_mp3"] is True
+    assert live["field_relation"]["not_lfs"] is True
+    assert live["field_relation"]["official_pages"] is True
+    assert live["field_relation"]["style"] == "You can't let go of who you are"
+    assert live["music_as_path"]["title"] == "Rising Sun"
+    assert live["music_as_path"]["suno"] == live["field_relation"]["suno"]
+    assert live["not_mp3"] is True
+    assert live["not_lfs"] is True
+    assert live["not_playlist"] is True
+    assert "https://suno.com/song/2c2bc9b0-b18b-4e8e-b347-4db1ef4c387e" in js
+    assert "https://suno.com/song/cb02239a-7c30-4fd2-aa41-c3b2498a16ee" in js
+    assert "https://suno.com/song/c3522059-b222-4990-8108-4ffbaa4d74a3" in js
+    assert "https://suno.com/song/3cfa0f34-2fc3-4cf7-8e3c-fc306f2d42f9" in js
+    assert "Three Body Problem" in js
+    assert "Purple Rain" in js
+    assert "Another Mother Running Roads" in js
+    assert "Blue Grey Melodies" in js
+    assert "Ocean Winds" in js
+    assert "Mushroom Clouds" in js
+    assert "Remove Section" not in supernet
+    assert "*.mp3" in (DOCS.parent / ".gitignore").read_text(encoding="utf-8")
+    assert not list(DOCS.rglob("*.mp3"))
+    assert not list(DOCS.parent.glob("*.mp3"))
     ids = [item["id"] for item in brain["occurrences"]]
     assert "hidden-memory-2026-08-26" in ids
     assert "naked-leaves-sky" in ids
@@ -707,10 +775,86 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "drone-wire-forest" in ids
     assert "lyric-cant-let-go" in ids
     assert "field-for-brains" in ids
+    assert "black-mirror-translation" in ids
+    assert "black-mirror-through" in ids
+    assert "black-mirror-local-global" in ids
+    assert "three-body" in ids
+    assert "ocean-winds" in ids
+    assert "closure-doc-nature" in ids
+    assert "closure-doc-unification" in ids
+    assert "closure-doc-moral" in ids
+    assert "originlessness" in ids
+    assert "ball-thrown" in ids
+    assert "color-collapse" in ids
+    assert "closure-doc-mirror" in ids
+    assert "lyric-style-is-brain" in ids
     exacts = "\n".join(item["exact"] for item in brain["occurrences"])
     assert "latent tumors" in exacts
     assert "holllow grounds of night" in exacts
     assert "tree of life extends its naked leaves to the sky" in exacts
     assert "You can only point where you want to go" in exacts
+    assert "Without nature there is no life" in exacts
+    assert "thermodynamic potential gate" in exacts
+    assert "We who share moral truth will not law suffering" in exacts
+    assert "unification of axiom and geometry" in exacts
+    assert "Style is the brain." in exacts
+    assert "Flip the triangle so the base is in the sky." in exacts
+    assert "a black mirror" in exacts
+    assert "Style is the brain." in js
+    assert "thermodynamic potential gate" not in supernet
+    assert "Common App" not in supernet
+    assert "Empathy" not in supernet
+    assert "MainStreet" not in supernet
+    assert "Untitled" not in supernet
+    assert "bitcoin" not in supernet.lower()
+    assert "bitcoin" not in js.lower()
+    assert "Join" not in supernet
+    assert "Embodied Eight-Sheaf" not in supernet
+    assert "Embodied Eight-Sheaf" not in html
+    assert "Local ball" not in supernet
+    assert "Global hair" not in supernet
+    assert "trading" not in supernet.lower()
+    assert "TRADING_ENABLED" not in supernet
+    assert "TRADING_ENABLED" not in html
+    assert "embodied.html" not in supernet
+    assert 'href="/embodied' not in supernet
     assert ["rule", "computational"] in live["isomorphism_classes"]
+
+
+def test_public_face_is_not_the_eight_sheaf_dashboard():
+    html = _html()
+    js = _js()
+    supernet = (DOCS / "supernet.html").read_text(encoding="utf-8")
+    vercel = json.loads((DOCS / "vercel.json").read_text(encoding="utf-8"))
+    rewrites = vercel.get("rewrites") or []
+    assert "not_eight_sheaf:true" in js
+    assert "not_trading:true" in js
+    assert "anatomy tree, rings of time, drone-wire forest" in supernet
+    assert 'id="brainFace"' in supernet
+    assert "Sense(Obs) → unique unitary path selector" in js
+    assert "Embodied Eight-Sheaf" not in supernet
+    assert "Embodied Eight-Sheaf" not in html
+    assert "Local ball" not in supernet
+    assert "Local ball" not in html
+    assert "Global hair" not in supernet
+    assert "Global hair" not in html
+    assert "trading" not in supernet.lower()
+    assert "TRADING_ENABLED" not in supernet
+    assert "TRADING_ENABLED" not in html
+    assert "TRADING_ENABLED" not in js
+    assert "embodied.html" not in supernet
+    assert 'href="/embodied' not in supernet
+    assert not any(
+        str(rule.get("source", "")).rstrip("/") in {"/supernet", "/supernet.html", "/", ""}
+        and "/embodied" in str(rule.get("destination", "")).rstrip("/")
+        for rule in rewrites
+    )
+    leftover = DOCS / "embodied.html"
+    if leftover.is_file():
+        embodied = leftover.read_text(encoding="utf-8")
+        assert embodied != supernet
+        assert embodied != html
+        assert "Embodied Eight-Sheaf" in embodied
+        assert "anatomy tree, rings of time, drone-wire forest" not in embodied
+        assert 'id="brainFace"' not in embodied
 
