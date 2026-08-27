@@ -37,7 +37,7 @@ class RuntimeConfig:
 
     integration_http_timeout_seconds: float = float(os.getenv("CLOSURE_INTEGRATION_HTTP_TIMEOUT_SECONDS", "30"))
     integration_max_items_per_cycle: int = int(os.getenv("CLOSURE_INTEGRATION_MAX_ITEMS", "500"))
-    integration_user_agent: str = os.getenv("CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/2.4")
+    integration_user_agent: str = os.getenv("CLOSURE_INTEGRATION_USER_AGENT", "closure-supernet/2.5")
     integration_allow_private_networks: bool = _bool("CLOSURE_INTEGRATION_ALLOW_PRIVATE_NETWORKS", False)
 
     public_interface_enabled: bool = _bool("CLOSURE_PUBLIC_INTERFACE_ENABLED", True)
@@ -80,12 +80,20 @@ class RuntimeConfig:
     constructive_classical_choice_required: bool = False
     constructive_excluded_middle_required: bool = False
 
-    # NRRF784/785 share one orbit layer. Resource metrics remain operational
-    # overlays, and a global assignment is never required for translational truth.
     translational_frameworks_enabled: bool = _bool("CLOSURE_TRANSLATIONAL_FRAMEWORKS_ENABLED", True)
     framework_resource_metrics_foundational: bool = False
     framework_global_assignment_required_for_truth: bool = False
     framework_contextual_truth_retained: bool = True
+
+    # The embodied layer keeps all eight sheaves inside the canonical integrator.
+    # Its reciprocal-translation profile is non-scalar and never infers emotion,
+    # human worth, alien truth, or a physical syntropic force.
+    embodied_supernet_enabled: bool = _bool("CLOSURE_EMBODIED_SUPERNET_ENABLED", True)
+    embodied_resource_metrics_foundational: bool = False
+    embodied_unknown_hypotheses_remain_open: bool = True
+    embodied_physical_force_claimed: bool = False
+    embodied_emotion_inferred: bool = False
+    embodied_human_worth_scored: bool = False
 
     environment: str = os.getenv("CLOSURE_ENVIRONMENT", "development").strip().lower()
     service_role: str = os.getenv("CLOSURE_SERVICE_ROLE", "all").strip().lower()
