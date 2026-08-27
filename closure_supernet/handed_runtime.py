@@ -12,7 +12,7 @@ _PATCHED = False
 
 
 def install_handed_life_runtime() -> None:
-    """Attach NRRF800 to the one continuous Supernet runtime."""
+    """Attach NRRF800 as NRRF802 closure instances to the one Supernet runtime."""
 
     global _PATCHED
     if _PATCHED:
@@ -59,6 +59,10 @@ def install_handed_life_runtime() -> None:
                 "self_limit_is_hand_inversion_at_fixed_ball_phase": True,
                 "left_handed_potential_gate": True,
                 "human_relation_mapping_available": True,
+                "handed_closures_use_nrrf802_kernel": True,
+                "handed_unified_cardinalities": {"hair": 1, "hand": 2, "phase": 4},
+                "handed_joint_closure_subsingleton": True,
+                "parallel_closure_runtime_created": False,
                 "biological_chirality_claimed": False,
                 "biological_life_claimed": False,
                 "human_law_claimed": False,
@@ -90,10 +94,13 @@ def install_handed_life_runtime() -> None:
             projection["handed_life_temporal_closure"] = {
                 "stats": handed["stats"],
                 "source_reverse_index": handed["source_reverse_index"],
-                "formal_readings": ["NRRF799", "NRRF800"],
+                "formal_readings": ["NRRF799", "NRRF800", "NRRF802"],
                 "ball_sheaves": 4,
                 "hair_sheaves": 1,
                 "hair_is_ball_completion": True,
+                "closure_defined_once": True,
+                "hair_hand_phase_are_instances": True,
+                "parallel_closure_runtime_created": False,
                 "biological_claimed": False,
                 "human_law_claimed": False,
                 "truth_issued": False,
@@ -121,6 +128,8 @@ def install_handed_life_runtime() -> None:
                 "human_relation_readings": stats["human_relations"],
                 "handed_ball_returns": stats["ball_returns"],
                 "handed_hair_returns": stats["hair_returns"],
+                "handed_closure_defined_once": True,
+                "handed_joint_closure_subsingleton": True,
                 "biological_life_claimed": False,
                 "human_law_claimed": False,
             }
@@ -158,6 +167,9 @@ def install_handed_life_runtime() -> None:
                 "ball_sheaves": 4,
                 "hair_sheaves": 1,
                 "hair_is_ball_completion": True,
+                "closure_defined_once": True,
+                "hair_hand_phase_are_instances": True,
+                "parallel_closure_runtime_created": False,
                 "truth_issued": False,
             }
         return projection
