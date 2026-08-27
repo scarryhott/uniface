@@ -1,0 +1,21 @@
+{
+  "formal_readings": ["NRRF795", "NRRF796"],
+  "canonical_runtime_operation": "integrate",
+  "source_relation_preserved": true,
+  "representation_required": false,
+  "return_inversion": "-transpose",
+  "decomposition": ["scale", "normalized-hair", "neutral"],
+  "self_limit_chart": "Frobenius-squared orthogonal sector content",
+  "one_hair_reading_under_declared_conditions": true,
+  "constructions": [
+    "ENTANGLEMENT_ORDER_DEFECT",
+    "SUPERPOSITION_HAIR_SUM",
+    "SINGULARITY_SEAM_HAIR",
+    "DEMON_NEUTRAL_NO_GAIN"
+  ],
+  "constructions_are_definition_scoped": true,
+  "runtime_is_formal_proof": false,
+  "physical_law_claimed": false,
+  "physical_realization": "OPEN",
+  "truth_issued": false
+}
