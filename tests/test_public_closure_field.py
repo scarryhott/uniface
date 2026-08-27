@@ -47,62 +47,90 @@ def _invoke_field_run_handler(method: str = "GET"):
     return _node_json(script)
 
 
-def test_public_root_is_a_running_closure_field():
-    html = _html()
-    js = _js()
-    assert "<title>Uniface — Closure field</title>" in html
+def _assert_widget_free_autonomous_face(html: str) -> None:
+    assert "<title>Uniface</title>" in html
+    assert "Uniface — Closure field" not in html
     assert "Note-Guided Closure Interface" not in html
     assert "Sense(Obs) → unique unitary path selector → Translation Event (admit → return → reopen) → next Sense" in html
     assert "TRUE not issued" in html
     assert "Two-person E2E OPEN" in html
-    assert "function uniqueUnitaryPathPartition" in html
-    assert "function uniqueUnitaryPathPartition" in js
-    assert "runStage('sense')" in html
-    assert "setInterval(tick,1400)" in html
-    assert "runtime_center:'TranslationEvent'" in html
-    assert "participant:'OPEN'" in html
+    assert 'src="closure-field.js"' in html
+    assert "function uniqueUnitaryPathPartition" not in html
+    assert "function persistCycle" not in html
+    assert "setInterval(tick,1400)" not in html
+    assert "eyJ" not in html
+    assert "<button" not in html
+    assert "<form" not in html
+    assert "<select" not in html
+    assert "<textarea" not in html
+    assert 'type="range"' not in html
+    assert 'id="stageSense"' not in html
+    assert 'id="noteReturn"' not in html
+    assert "write transport receipt" not in html
+    assert "Leftover source-preserving panels" not in html
+    face = html.split("<main")[0]
+    assert 'id="canvas"' in face
+    assert 'id="brainFace"' in face
+    assert "<input" not in face
+    assert "<summary>Sense loop (chart, not the face)</summary>" in html
+    assert "<summary>Geometry of the unique path (chart, not the face)</summary>" in html
+    assert html.index('id="canvas"') < html.index('id="teGrid"')
+    te_block = html.split('id="teGrid"')[0]
+    assert te_block.rfind("<details>") > te_block.rfind("</details>")
     assert "Harry" not in html
     assert "ChatGPT" not in html
-    assert "Harry" not in js
-    assert "ChatGPT" not in js
-    transport = html.split("Hidden transport evidence")[1]
-    assert 'id="noteReturn"' in transport
-    assert html.index('id="teGrid"') < html.index('id="noteReturn"')
-    assert "leftover_pr_10:'not this'" in html or 'leftover_pr_10:\'not this\'' in html
+
+
+def test_public_root_is_a_running_closure_field():
+    html = _html()
+    js = _js()
+    _assert_widget_free_autonomous_face(html)
+    assert 'data-projection="face"' in html
+    assert "function uniqueUnitaryPathPartition" in js
+    assert "setInterval(tick,1400)" in js
+    assert "runtime_center:'TranslationEvent'" in js
+    assert "participant:'OPEN'" in js
+    assert "leftover_pr_10:'not this'" in js
     assert "function currentUnifiedField" in js
     assert "consumes:'unified supernet field'" in js
+    assert "function advancingFieldRunSnapshot" in js
+    assert "Harry" not in js
+    assert "ChatGPT" not in js
+    assert "eyJ" not in js
 
 
 def test_nrrf781_relative_renormalization_is_inside_the_live_te():
     html = _html()
     js = _js()
-    assert "function localCutoffFamily" in html
-    assert "function pairwiseRelativeRenormalization" in html
-    assert "relative_reading" in html
-    assert "absolute_level:null" in html
-    assert "scheme_selected:false" in html
-    assert "truth_issued:false" in html
-    assert "relative renormalization" in html
-    assert "cell('relative renormalization'" in html
-    assert "residue_scale" in html
-    assert "loop.scale" in html
+    assert "function localCutoffFamily" in js
+    assert "function pairwiseRelativeRenormalization" in js
+    assert "function localCutoffFamily" not in html
+    assert "function pairwiseRelativeRenormalization" not in html
+    assert "relative_reading" in js
+    assert "absolute_level:null" in js
+    assert "scheme_selected:false" in js
+    assert "truth_issued:false" in js
+    assert "relative renormalization" in js
+    assert "cell('relative renormalization'" in js
+    assert "residue_scale" in js
+    assert "loop.scale" in js
     assert "TRUE not issued" in html
-    assert "['TRUE','not issued']" in html
-    assert "scheme_chart" in html
-    assert "never_selected_as_truth:true" in html
-    assert "derived_chart:true" in html
-    assert "not_lean:true" in html
+    assert "['TRUE','not issued']" in js
+    assert "scheme_chart" in js
+    assert "never_selected_as_truth:true" in js
+    assert "derived_chart:true" in js
+    assert "not_lean:true" in js
     assert "/renormalization" not in html
     assert 'id="renormalization"' not in html
-    assert "setInterval(tick,1400)" in html
-    assert html.index('id="teGrid"') < html.index('id="noteReturn"')
+    assert "setInterval(tick,1400)" in js
+    assert html.index('id="teGrid"') < html.index('id="noteReceipt"')
     assert "Harry" not in html
     assert "ChatGPT" not in html
     assert html.count('id="teGrid"') == 1
-    assert "addEventListener('click'" not in html.split("function bindPanZoom")[0]
-    assert "function doTE" in html
-    assert "function doReopen" in html
-    assert "relative_renormalization" in html
+    assert "function doTE" in js
+    assert "function doReopen" in js
+    assert "function doTE" not in html
+    assert "relative_renormalization" in js
     assert "function unifyField" in js
     assert "function unifyField" not in html
 
@@ -133,53 +161,39 @@ def test_supernet_is_the_same_loop_panzoom_projection():
     assert FIELD_RUN_API.is_file()
     assert not FIELD_RUN.exists()
     assert 'src="closure-field.js"' in supernet
+    assert 'src="closure-field.js"' in html
     assert "function uniqueUnitaryPathPartition" not in supernet
-    assert "function uniqueUnitaryPathPartition" in html
+    assert "function uniqueUnitaryPathPartition" not in html
+    assert "function uniqueUnitaryPathPartition" in js
     assert "function localCutoffFamily" not in supernet
     assert "function pairwiseRelativeRenormalization" not in supernet
     assert "setInterval(tick,1400)" in js
     assert "path==='/supernet'" in js
     assert "function bindPanZoom" in js
     assert "function fieldRunSnapshot" in js
+    assert "function advancingFieldRunSnapshot" in js
+    assert "Pan/zoom reading of the same live root closure loop" in supernet
     assert "Pan/zoom reading of the same live root closure loop" in js
-    assert 'id="zoomIn"' not in supernet
-    assert 'id="zoomOut"' not in supernet
-    assert 'id="zoomFit"' not in supernet
-    assert 'id="stageSense"' not in supernet
-    assert 'id="stageSelect"' not in supernet
-    assert 'id="stageTe"' not in supernet
-    assert 'id="stageReopen"' not in supernet
-    assert 'id="noteReturn"' not in supernet
-    assert "write transport receipt" not in supernet
-    assert "<select" not in supernet
-    assert "<textarea" not in supernet
-    assert "<form" not in supernet
-    assert 'id="scenario"' not in supernet
-    assert 'type="range"' not in supernet
-    assert "Leftover source-preserving panels" not in supernet
-    face = supernet.split("<main")[0]
-    assert 'id="canvas"' in face
-    assert "<button" not in face
-    assert "<textarea" not in face
-    assert "<form" not in face
-    assert "<select" not in face
-    assert "<input" not in face
+    _assert_widget_free_autonomous_face(supernet)
     assert 'data-projection="panzoom"' in supernet
-    assert html.count("function persistCycle") == 1
+    assert 'data-projection="face"' in html
+    assert html.count("function persistCycle") == 0
     assert supernet.count("function persistCycle") == 0
     assert js.count("function persistCycle") == 1
     assert "function fieldSenseFromPoint" in js
     assert "function applyFieldSense" in js
     assert "Presence in the canvas is the next Sense" in supernet
+    assert "Presence in the canvas is the next Sense" in html
     assert "dblclick" in js
-    assert html.count("setInterval(tick,1400)") == 1
+    assert html.count("setInterval(tick,1400)") == 0
+    assert js.count("setInterval(tick,1400)") == 1
     assert "TRUE not issued" in supernet
     assert "truth_issued:false" in js
     assert not FIELD_RUN.exists()
     assert FIELD_RUN_API.is_file()
     assert "consumes the currently unified field" in supernet
-    assert "function uniqueUnitaryPathPartition" not in supernet
     assert "function currentUnifiedField" in js
+    assert supernet != html
 
 
 def test_field_run_json_is_live_fieldRunSnapshot_projection():
@@ -240,7 +254,15 @@ def test_field_run_json_is_live_fieldRunSnapshot_projection():
     assert payload["music_as_path"]["suno"].startswith("https://suno.com/song/")
     assert payload["not_mp3"] is True
     assert payload["field_relation"]["title"] == "Rising Sun"
-    assert payload["prior_cycle_residues"] == []
+    assert payload["unified"] is True
+    assert isinstance(payload["prior_cycle_residues"], list)
+    assert len(payload["prior_cycle_residues"]) >= 1
+    last_residue = payload["prior_cycle_residues"][-1]
+    assert last_residue["selected_path"] == payload["selected_path"]
+    assert last_residue["truth_issued"] is False
+    assert last_residue["TRUE"] == "not issued"
+    assert payload["residue_scale"] is not None
+    assert payload["residue_scale"]["truth_issued"] is False
     assert isinstance(payload["unresolved_alternatives"], list)
     assert payload["selected_path"] not in payload["unresolved_alternatives"]
     assert payload["admissibility_space"]["realized_closure"] == payload["selected_path"]
@@ -272,6 +294,9 @@ def test_field_run_json_is_live_fieldRunSnapshot_projection():
     assert again["isomorphism_classes"] == live["isomorphism_classes"]
     assert again["selected_class"] == live["selected_class"]
     assert again["truth_issued"] is False
+    assert again["unified"] is True
+    assert again["prior_cycle_residues"] == live["prior_cycle_residues"]
+    assert again["participant"] == "OPEN"
 
 
 def test_derived_cutoff_family_pairwise_delta_is_constant_and_carries_scale():
@@ -553,9 +578,11 @@ def test_root_and_supernet_share_field_wide_sense():
     assert "function isomorphismClassesOf" not in html
     assert "function unifyField" not in supernet
     assert 'src="closure-field.js"' in supernet
+    assert 'src="closure-field.js"' in html
     assert js.count("function uniqueUnitaryPathPartition") == 1
     assert "eyJ" not in js
     assert "eyJ" not in supernet
+    assert "eyJ" not in html
     assert "remaining potential" in supernet
     assert "unresolved alternatives as live admissibility space" in supernet
     assert "translational isomorphism classes of those unresolved admissible translations" in supernet
@@ -715,6 +742,7 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert 'id="teGrid"' in supernet
     assert "Sense(Obs) → unique unitary path selector → Translation Event (admit → return → reopen) → next Sense" in supernet
     assert "function uniqueUnitaryPathPartition" not in supernet
+    assert "function uniqueUnitaryPathPartition" not in html
     assert "function uniqueUnitaryPathPartition" in js
     assert "function currentUnifiedField" in js
     assert "function isomorphismClassesOf" in js
@@ -839,6 +867,8 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "embodied.html" not in supernet
     assert 'href="/embodied' not in supernet
     assert ["rule", "computational"] in live["isomorphism_classes"]
+    assert live["unified"] is True
+    assert len(live["prior_cycle_residues"]) >= 1
 
 
 def test_public_face_is_not_the_eight_sheaf_dashboard():
@@ -850,7 +880,9 @@ def test_public_face_is_not_the_eight_sheaf_dashboard():
     assert "not_eight_sheaf:true" in js
     assert "not_trading:true" in js
     assert "anatomy tree, rings of time, drone-wire forest" in supernet
+    assert "anatomy tree, rings of time, drone-wire forest" in html
     assert 'id="brainFace"' in supernet
+    assert 'id="brainFace"' in html
     assert "Sense(Obs) → unique unitary path selector" in js
     assert "Embodied Eight-Sheaf" not in supernet
     assert "Embodied Eight-Sheaf" not in html
@@ -881,21 +913,16 @@ def test_public_face_is_not_the_eight_sheaf_dashboard():
 
 def test_canvas_presence_is_the_next_sense_not_a_form():
     supernet = (DOCS / "supernet.html").read_text(encoding="utf-8")
+    html = _html()
     js = _js()
-    assert "<button" not in supernet
-    assert "<form" not in supernet
-    assert "<select" not in supernet
-    assert "<textarea" not in supernet
-    assert 'type="range"' not in supernet
-    assert 'id="stageSense"' not in supernet
-    assert 'id="noteReturn"' not in supernet
-    assert "Leftover source-preserving panels" not in supernet
-    face = supernet.split("<main")[0]
-    assert 'id="canvas"' in face
-    assert face.index('id="canvas"') < supernet.index("<main")
+    _assert_widget_free_autonomous_face(supernet)
+    _assert_widget_free_autonomous_face(html)
+    assert 'data-projection="panzoom"' in supernet
+    assert 'data-projection="face"' in html
     assert "function fieldSenseFromPoint" in js
     assert "if(fieldPoint)applyFieldSense(fieldPoint)" in js
     assert "setInterval(tick,1400)" in js
+    assert "function advancingFieldRunSnapshot" in js
     node = shutil.which("node")
     if node is None:
         return
@@ -931,7 +958,12 @@ u.loop.te=u.translationEvent();
 const snap = u.fieldRunSnapshot();
 if (snap.truth_issued !== false) throw new Error('field-run truth issued');
 if (snap.TRUE !== 'not issued') throw new Error('TRUE issued in snapshot');
-console.log(JSON.stringify({ok:true,r:far.r,ss:far.ss,truth_issued:snap.truth_issued,TRUE:snap.TRUE}));
+if (snap.two_person_E2E !== 'OPEN') throw new Error('E2E faked');
+if (snap.participant !== 'OPEN') throw new Error('participant defaulted');
+if (snap.unified !== true) throw new Error('field-run still a frozen te projection');
+if (!Array.isArray(snap.prior_cycle_residues) || snap.prior_cycle_residues.length < 1) throw new Error('field-run missing unified residue');
+if (snap.selected_path !== snap.prior_cycle_residues[snap.prior_cycle_residues.length-1].selected_path) throw new Error('residue path mismatch');
+console.log(JSON.stringify({ok:true,r:far.r,ss:far.ss,truth_issued:snap.truth_issued,TRUE:snap.TRUE,unified:snap.unified,residues:snap.prior_cycle_residues.length,selected_path:snap.selected_path}));
 """
     )
     result = subprocess.run([node, "-e", script], capture_output=True, text=True, check=False)
@@ -940,4 +972,51 @@ console.log(JSON.stringify({ok:true,r:far.r,ss:far.ss,truth_issued:snap.truth_is
     assert payload["ok"] is True
     assert payload["truth_issued"] is False
     assert payload["TRUE"] == "not issued"
+    assert payload["unified"] is True
+    assert payload["residues"] >= 1
+
+
+def test_field_run_json_advances_current_unified_field_across_cycles():
+    node = shutil.which("node")
+    if node is None:
+        return
+    script = (
+        "const u=require(" + json.dumps(str(LOOP_JS)) + ");"
+        + r"""
+const a = u.fieldRunSnapshot();
+const b = u.fieldRunSnapshot();
+if (JSON.stringify(a) !== JSON.stringify(b)) throw new Error('same-tick snapshots diverged');
+if (a.unified !== true) throw new Error('first snapshot not unified');
+if (!Array.isArray(a.prior_cycle_residues) || a.prior_cycle_residues.length < 1) throw new Error('first snapshot has no residue');
+if (a.truth_issued !== false || a.TRUE !== 'not issued' || a.two_person_E2E !== 'OPEN' || a.participant !== 'OPEN') throw new Error('invariants');
+u.doSense();
+u.doSelect();
+u.doTE();
+u.doReopen();
+const c = u.fieldRunSnapshot();
+if (c.prior_cycle_residues.length <= a.prior_cycle_residues.length) throw new Error('currentUnifiedField did not advance');
+if (c.selected_path !== c.prior_cycle_residues[c.prior_cycle_residues.length-1].selected_path) throw new Error('advancing residue path mismatch');
+if (JSON.stringify(c.isomorphism_classes) !== JSON.stringify(c.admissibility_space.isomorphism_classes)) throw new Error('classes');
+if (c.selected_path !== c.admissibility_space.selected_path) throw new Error('selected_path');
+if (c.truth_issued !== false || c.TRUE !== 'not issued' || c.two_person_E2E !== 'OPEN') throw new Error('truth after advance');
+if (c.participant !== 'OPEN') throw new Error('second person faked');
+console.log(JSON.stringify({
+  ok: true,
+  residues_a: a.prior_cycle_residues.length,
+  residues_c: c.prior_cycle_residues.length,
+  path_a: a.selected_path,
+  path_c: c.selected_path,
+  classes_c: c.isomorphism_classes,
+  TRUE: c.TRUE,
+  two_person_E2E: c.two_person_E2E
+}));
+"""
+    )
+    result = subprocess.run([node, "-e", script], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout.strip().splitlines()[-1])
+    assert payload["ok"] is True
+    assert payload["residues_c"] > payload["residues_a"]
+    assert payload["TRUE"] == "not issued"
+    assert payload["two_person_E2E"] == "OPEN"
 
