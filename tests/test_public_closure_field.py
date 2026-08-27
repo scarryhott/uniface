@@ -726,6 +726,10 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert brain["through"] == "the third is through"
     assert "yin–yang as relation not physics" in brain["grammar"]
     assert "mirrored-looking device" in brain["visual"]
+    assert brain["not_invite"] is True
+    assert brain["money_not_network"] is True
+    assert brain["not_product_spec"] is True
+    assert brain["drive_notes"] == "same brain field"
     assert live["field_relation"]["title"] == "Rising Sun"
     assert live["field_relation"]["not_playlist"] is True
     assert live["field_relation"]["suno"].startswith("https://suno.com/song/")
@@ -741,10 +745,34 @@ def test_sense_consumes_brain_field_writing_on_the_public_page():
     assert "black-mirror-local-global" in ids
     assert "three-body" in ids
     assert "ocean-winds" in ids
+    assert "closure-doc-nature" in ids
+    assert "closure-doc-unification" in ids
+    assert "closure-doc-moral" in ids
+    assert "originlessness" in ids
+    assert "ball-thrown" in ids
+    assert "color-collapse" in ids
+    assert "closure-doc-mirror" in ids
+    assert "lyric-style-is-brain" in ids
     exacts = "\n".join(item["exact"] for item in brain["occurrences"])
     assert "latent tumors" in exacts
     assert "holllow grounds of night" in exacts
     assert "tree of life extends its naked leaves to the sky" in exacts
     assert "You can only point where you want to go" in exacts
+    assert "Without nature there is no life" in exacts
+    assert "thermodynamic potential gate" in exacts
+    assert "We who share moral truth will not law suffering" in exacts
+    assert "unification of axiom and geometry" in exacts
+    assert "Style is the brain." in exacts
+    assert "Flip the triangle so the base is in the sky." in exacts
+    assert "a black mirror" in exacts
+    assert "Style is the brain." in js
+    assert "thermodynamic potential gate" not in supernet
+    assert "Common App" not in supernet
+    assert "Empathy" not in supernet
+    assert "MainStreet" not in supernet
+    assert "Untitled" not in supernet
+    assert "bitcoin" not in supernet.lower()
+    assert "bitcoin" not in js.lower()
+    assert "Join" not in supernet
     assert ["rule", "computational"] in live["isomorphism_classes"]
 
