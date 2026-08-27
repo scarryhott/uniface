@@ -72,12 +72,16 @@ def test_pure_scale_and_pure_hair_saturate_their_own_readings(tmp_path: Path) ->
     runtime = ClosureSupernetRuntime(make_config(tmp_path))
     try:
         tolerance = Decimal("1e-24")
-        scale = runtime.inversion.evaluate_relation(
-            [[2, 0, 0], [0, 2, 0], [0, 0, 2]], tolerance
+        scale_input = LocalRelationCreate(
+            name="pure scale",
+            matrix=[[2, 0, 0], [0, 2, 0], [0, 0, 2]],
         )
-        hair = runtime.inversion.evaluate_relation(
-            [[0, -3, 2], [3, 0, -1], [-2, 1, 0]], tolerance
+        hair_input = LocalRelationCreate(
+            name="pure hair",
+            matrix=[[0, -3, 2], [3, 0, -1], [-2, 1, 0]],
         )
+        scale = runtime.inversion.evaluate_relation(scale_input.matrix, tolerance)
+        hair = runtime.inversion.evaluate_relation(hair_input.matrix, tolerance)
         assert scale.pure_scale is True
         assert scale.scale_saturation is True
         assert scale.neutral_zero is True
