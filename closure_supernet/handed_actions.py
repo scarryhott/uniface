@@ -64,25 +64,42 @@ class HandedActionMixin:
             or ((end["hand"] != start["hand"]) == (data.steps % 2 == 1)),
             "closed_full_state": end == start,
             "transition_class": data.motion.value,
+            "foundation_status": system["evaluation"].get(
+                "foundation_status", "UNBOUND_FINITE_CHART"
+            ),
+            "finite_chart_only": True,
+            "internal_external_defined": bool(
+                system["evaluation"].get("translational_truth_prior")
+            ),
+            "temporal_role_assigned_from_hand": False,
+            "potential_actual_defined": False,
+            "global_hair_zero_not_hair_cardinality_one": True,
+            "local_ball_infinity_not_ball_cardinality_four": True,
             "truth_issued": False,
         }
         receipt = await self.runtime.integrate_resource(
             ResourceEnvelope(
                 exact_text=stable(
                     {
-                        "NRRF800": "handed-life motion trace",
+                        "NRRF800": "finite handed motion chart",
+                        "NRRF805_scope": "motion chart is downstream of translational truth",
                         "system_id": data.system_id,
                         "motion": data.motion.value,
                         "trace": trace,
                     }
                 ),
                 authored_by=data.authored_by,
-                form_label="handed life motion trace",
-                language_label="NRRF800 return trace",
+                form_label="handed finite motion chart",
+                language_label="NRRF800 chart under NRRF805 priority",
                 source_id="handed-life-supernet",
-                capabilities=["apply exact handed-life return"],
-                constraints=["finite submitted trace", "truth is not issued"],
-                relation_hints=["NRRF800", data.motion.value],
+                capabilities=["apply exact finite handed return chart"],
+                constraints=[
+                    "finite submitted trace",
+                    "does not assign potential or actual from hand",
+                    "does not define internal or external before translational truth",
+                    "truth is not issued",
+                ],
+                relation_hints=["NRRF800", "NRRF805 downstream chart", data.motion.value],
                 causal_predecessor_ids=unique(parents),
                 parent_event_ids=unique(parents),
                 affected_perspectives=[data.authored_by],
@@ -94,6 +111,7 @@ class HandedActionMixin:
                     "record_id": record_id,
                     "system_id": data.system_id,
                     "evaluation": evaluation,
+                    "finite_chart_only": True,
                     "truth_issued": False,
                 },
             )
@@ -111,7 +129,7 @@ class HandedActionMixin:
                 "payload": data.model_dump(mode="json"),
                 "evaluation": evaluation,
                 "source_ids": source_ids,
-                "metadata": data.metadata,
+                "metadata": {**data.metadata, "finite_chart_only": True},
                 "created_at": utcnow(),
             }
         )
@@ -193,6 +211,12 @@ class HandedActionMixin:
             "four_acts_relation_changed_by_four": four_separation - separation == 4,
             "every_human_relation_same_hair_in_chart": True,
             "gate_orientation_explicit_data": data.gate_hand.value,
+            "orientation_from_standing_is_chart_only": True,
+            "semantic_hand_defined": False,
+            "internal_external_defined": False,
+            "potential_actual_defined": False,
+            "translational_truth_prior": False,
+            "finite_chart_only": True,
             "human_law_claimed": False,
             "truth_issued": False,
         }
@@ -201,7 +225,8 @@ class HandedActionMixin:
             ResourceEnvelope(
                 exact_text=stable(
                     {
-                        "NRRF800": "human relation handed-life reading",
+                        "NRRF800": "human relation finite handed chart",
+                        "NRRF805_scope": "standing chart does not define internal/external or semantic hand",
                         "name": data.name,
                         "participants": [data.source_participant, data.target_participant],
                         "standings": [data.source_standing, data.target_standing],
@@ -209,23 +234,25 @@ class HandedActionMixin:
                     }
                 ),
                 authored_by=data.authored_by,
-                form_label="handed human relation reading",
-                language_label="NRRF800 submitted relation chart",
+                form_label="handed human relation chart",
+                language_label="NRRF800 finite relation chart under NRRF805 priority",
                 source_id="handed-life-supernet",
                 perspective_id=data.perspective_id,
                 problem_id=data.problem_id,
                 capabilities=[
-                    "read relative hand, ball phase and hair",
-                    "classify submitted before/after relation return",
+                    "read finite chart orientation, ball phase and hair",
+                    "classify submitted before/after chart return",
                     "check common-shift invariance",
                 ],
                 constraints=[
                     "submitted integer standings only",
+                    "orientation from standing is a chart, not semantic hand",
+                    "internal/external require a Turing Being translational return",
                     "equal-standing orientation is explicit chart data",
                     "no human law inferred",
                     "truth is not issued",
                 ],
-                relation_hints=["NRRF800", "human relation", transition_class],
+                relation_hints=["NRRF800", "NRRF805 downstream human chart", transition_class],
                 causal_predecessor_ids=parents,
                 parent_event_ids=parents,
                 affected_perspectives=[data.source_participant, data.target_participant],
@@ -236,6 +263,7 @@ class HandedActionMixin:
                     **data.metadata,
                     "record_id": record_id,
                     "evaluation": evaluation,
+                    "finite_chart_only": True,
                     "human_law_claimed": False,
                     "truth_issued": False,
                 },
@@ -254,7 +282,7 @@ class HandedActionMixin:
                 "payload": data.model_dump(mode="json"),
                 "evaluation": evaluation,
                 "source_ids": source_ids,
-                "metadata": data.metadata,
+                "metadata": {**data.metadata, "finite_chart_only": True},
                 "created_at": utcnow(),
             }
         )
@@ -267,43 +295,57 @@ class HandedActionMixin:
         self.runtime.supernet_integrator.determine(
             event_id,
             actor_id=actor_id,
-            rigidity_scope=["submitted NRRF800 finite chart"],
+            rigidity_scope=["submitted finite handed chart"],
             rigidity_receipt={
                 "record_id": record_id,
-                "relation_reading_deterministic_on_submitted_data": True,
+                "chart_reading_deterministic_on_submitted_data": True,
+                "internal_external_defined": evaluation.get(
+                    "internal_external_defined", False
+                ),
+                "semantic_hand_defined": evaluation.get("semantic_hand_defined", False),
+                "potential_actual_defined": evaluation.get(
+                    "potential_actual_defined", False
+                ),
                 "physical_or_biological_interpretation_selected": False,
                 "truth_issued": False,
             },
             determined_form={
                 "record_id": record_id,
-                "transition_class": evaluation.get("transition_class"),
-                "hair_class": "hair:unit",
+                "chart_transition_class": evaluation.get("transition_class"),
+                "hair_chart_class": "hair:unit",
+                "temporal_role": None,
+                "internal": None,
+                "external": None,
+                "foundation_status": "FINITE_CHART_ONLY",
                 "canonical_human_interpretation": None,
             },
             unitary_path_partition={
-                "ball": "four phases",
-                "hair": "one completion class",
-                "return": evaluation.get("transition_class"),
+                "ball_chart": "four phases",
+                "hair_chart": "one completion class",
+                "chart_return": evaluation.get("transition_class"),
+                "foundational_life_loop": "requires Turing Being translational truth",
             },
-            reason="The submitted finite relation uniquely determines its handed-life reading",
+            reason="The submitted finite chart is determined without defining prior life semantics",
         )
         self.runtime.supernet_integrator.transition(
             event_id,
             IntegrationStateCreate(
                 stage=IntegrationStage.RETURNED,
                 verdict=Verdict.OPEN,
-                reason="The handed-life reading returns while interpretation remains reopenable",
+                reason="The finite handed chart returns while life interpretation remains reopenable",
                 actor_id=actor_id,
                 returned_resource_ids=[record_id],
                 successor_potential=[
                     {
-                        "kind": "handed-life reopening",
+                        "kind": "finite handed chart reopening",
                         "record_id": record_id,
-                        "hair_class": "hair:unit",
+                        "next": "bind to Turing Being action-reaction translational truth",
+                        "hair_chart_class": "hair:unit",
                     }
                 ],
                 metadata={
                     "truth_issued": False,
+                    "finite_chart_only": True,
                     "biological_life_claimed": False,
                     "human_law_claimed": False,
                 },
