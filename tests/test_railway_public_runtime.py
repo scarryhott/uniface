@@ -9,12 +9,11 @@ RAILWAY = ROOT / "railway.toml"
 ASGI_ENTRY = ROOT / "asgi.py"
 
 
-def test_railway_runs_the_complete_turing_being_application(monkeypatch) -> None:
+def test_railway_runs_the_complete_continuation_application(monkeypatch) -> None:
     contract = RAILWAY.read_text(encoding="utf-8")
-    assert 'builder = "NIXPACKS"' in contract
-    assert "closure-supernet serve" in contract
-    assert "CLOSURE_DB_PATH=/data/closure_supernet.db" in contract
-    assert 'healthcheckPath = "/network/turing-being/capabilities"' in contract
+    assert 'builder = "DOCKERFILE"' in contract
+    assert "closure-supernet --db /data/closure_supernet.db serve" in contract
+    assert 'healthcheckPath = "/network/continuations/capabilities"' in contract
     assert "--no-autonomy" in contract
 
     monkeypatch.setenv("CLOSURE_AUTONOMY_ENABLED", "false")
@@ -26,6 +25,11 @@ def test_railway_runs_the_complete_turing_being_application(monkeypatch) -> None
     assert "/turing-being" in routes
     assert "/network/turing-being/capabilities" in routes
     assert "/network/turing-being/life-events" in routes
-    assert "/network/turing-being/life-events/{event_id}/return" in routes
+    assert "/network/turing-being/life-events/{life_event_id}/return" in routes
     assert "/network/turing-being/charts" in routes
-    assert module.app.version == "3.1.0"
+    assert "/continuation" in routes
+    assert "/network/continuations/capabilities" in routes
+    assert "/network/continuations/systems" in routes
+    assert "/network/continuations/maps" in routes
+    assert "/network/continuations/field" in routes
+    assert module.app.version == "3.2.0"
