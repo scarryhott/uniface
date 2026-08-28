@@ -50,5 +50,8 @@ def test_railway_runs_the_natural_interface_application(monkeypatch) -> None:
     assert "/supernet/interface/capabilities" in routes
     assert "/supernet/interface" in routes
     assert "/supernet/interface/admissions" in routes
+    assert "/supernet/sense" in routes
+    assert "/supernet/events/{event_id}/sense-interact" in routes
+    assert "/supernet/events/{event_id}/sense" in routes
     assert "/supernet/classic" in routes
-    assert module.app.version == "3.4.0"
+    assert module.app.version == "3.5.0"
