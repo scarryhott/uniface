@@ -9,12 +9,12 @@ RAILWAY = ROOT / "railway.toml"
 ASGI_ENTRY = ROOT / "asgi.py"
 
 
-def test_railway_runs_the_complete_continuation_application(monkeypatch) -> None:
+def test_railway_runs_the_complete_proof_application(monkeypatch) -> None:
     contract = RAILWAY.read_text(encoding="utf-8")
     assert 'builder = "DOCKERFILE"' in contract
     assert "closure-supernet --db /data/closure_supernet.db serve" in contract
     assert "--port $PORT" not in contract
-    assert 'healthcheckPath = "/network/continuations/capabilities"' in contract
+    assert 'healthcheckPath = "/network/proofs/capabilities"' in contract
     assert "--no-autonomy" in contract
 
     monkeypatch.setenv("CLOSURE_AUTONOMY_ENABLED", "false")
@@ -33,4 +33,9 @@ def test_railway_runs_the_complete_continuation_application(monkeypatch) -> None
     assert "/network/continuations/systems" in routes
     assert "/network/continuations/maps" in routes
     assert "/network/continuations/field" in routes
-    assert module.app.version == "3.2.0"
+    assert "/proof-completion" in routes
+    assert "/network/proofs/capabilities" in routes
+    assert "/network/proofs/systems" in routes
+    assert "/network/proofs/receipts" in routes
+    assert "/network/proofs/field" in routes
+    assert module.app.version == "3.3.0"
