@@ -1,4 +1,4 @@
-"""Closure Supernet complete continuous living interface.
+"""Closure Supernet complete continuous living interface and agent surface.
 
 Every offered or returned relative form enters one append-only integrator. The
 primary public surface is the natural Black Mirror chart selected from the
@@ -12,9 +12,11 @@ exact occurrence → UnderstandingAgent → InterpretationAgent → AdmissionPol
 TranslationField → NRRF790 natural selection/open branching → Black Mirror
 appearance. Perspective, eight-sheaf placement, direct relation, authored
 selection/rigidification, Turing return, reopening and collective continuation
-all operate from the same primary surface. Background autonomy may remain
-disabled; no Sense receipt, chart selection, or natural-form determination
-issues truth merely by being displayed.
+all operate from the same primary surface. A tool-only MCP bridge exposes these
+same operations to external agents without adding a second semantic runtime or
+truth authority. Background autonomy may remain disabled; no Sense receipt,
+chart selection, agent call, or natural-form determination issues truth merely
+by being displayed or invoked.
 """
 
 from . import living_store_runtime as _living_store_runtime
@@ -42,4 +44,4 @@ from . import proof_completion_runtime as _proof_completion_runtime
 from . import natural_interface_runtime as _natural_interface_runtime
 
 __all__ = ["RuntimeConfig", "ClosureSupernetRuntime"]
-__version__ = "3.6.0"
+__version__ = "3.7.0"
