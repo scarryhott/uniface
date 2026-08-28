@@ -40,6 +40,7 @@ class IntegrationLens(StrEnum):
     COMPLETION = "completion"
     HANDED = "handed"
     TURING_BEING = "turing_being"
+    CONTINUATION = "continuation"
 
 
 class ResourceEnvelope(BaseModel):
