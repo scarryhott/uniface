@@ -118,4 +118,6 @@ def test_live_sense_capabilities_are_exposed_on_the_primary_ui(tmp_path: Path) -
         assert payload["live_sense"]["uses_existing_understanding_agent"] is True
         assert payload["live_sense"]["uses_existing_nrrf790_selector"] is True
         assert payload["live_sense"]["background_autonomy_required"] is False
-        assert app.version == "3.5.0"
+        assert payload["single_complete_operational_surface"] is True
+        assert payload["core_action_requires_subsystem_page"] is False
+        assert app.version == "3.6.0"
