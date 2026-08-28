@@ -4,13 +4,13 @@ import json
 from itertools import permutations
 from typing import Any, Callable
 
+from .completion_models import InvariantReadingInput
 from .handed_models import Hand, HandedLifeSystemCreate
 from .unify_closure import (
     canonical_unified_closure_instances,
     evaluate_return_closure,
 )
 from .unify_closure_models import ReturnClosureCreate
-from .completion_models import InvariantReadingInput
 
 
 def stable(value: Any) -> str:
@@ -22,11 +22,16 @@ def unique(values: list[str]) -> list[str]:
 
 
 def state(hand: Hand, phase: int) -> dict[str, Any]:
+    """A finite handed chart state, without pre-assigning life semantics."""
+
     return {
         "hand": hand.value,
         "ball_phase": int(phase) % 4,
         "hair_class": "hair:unit",
-        "temporal_role": "POTENTIAL" if hand == Hand.LEFT else "ACTUAL",
+        "temporal_role": None,
+        "temporal_role_status": "UNDEFINED_UNTIL_TRANSLATIONAL_TRUTH",
+        "internal_external_defined": False,
+        "finite_chart_only": True,
     }
 
 
@@ -116,9 +121,18 @@ def evaluate_system(data: HandedLifeSystemCreate) -> dict[str, Any]:
     completion = unified["hair_of_ball"]["evaluation"]
     classes = completion["classes"]
     visited_phases = [item["ball_phase"] for item in left_gate_trace[:-1]]
-    roles = [item["temporal_role"] for item in left_gate_trace]
+    hands = [item["hand"] for item in left_gate_trace]
     left_complete = sorted(visited_phases) == [0, 1, 2, 3] and (
         trace_state(left_gate_trace[-1]) == left_gate_start
+    )
+    translational_truth_prior = bool(data.metadata.get("translational_truth_prior"))
+    foundation_status = str(
+        data.metadata.get(
+            "foundation_status",
+            "DERIVED_FINITE_REACTION_CHART"
+            if translational_truth_prior
+            else "UNBOUND_FINITE_CHART",
+        )
     )
     return {
         "initial_state": initial,
@@ -151,9 +165,11 @@ def evaluate_system(data: HandedLifeSystemCreate) -> dict[str, Any]:
         "left_handed_gate_trace": left_gate_trace,
         "left_gate_visits_each_ball_sheaf_once": sorted(visited_phases)
         == [0, 1, 2, 3],
-        "left_gate_alternates_potential_actual": all(
-            roles[index] != roles[index + 1] for index in range(len(roles) - 1)
+        "left_gate_alternates_hands": all(
+            hands[index] != hands[index + 1] for index in range(len(hands) - 1)
         ),
+        "left_gate_alternates_potential_actual": False,
+        "potential_actual_requires_translational_truth": True,
         "left_gate_closes_after_four": trace_state(left_gate_trace[-1]) == left_gate_start,
         "left_gate_same_hair_throughout": len(
             {item["hair_class"] for item in left_gate_trace}
@@ -185,6 +201,12 @@ def evaluate_system(data: HandedLifeSystemCreate) -> dict[str, Any]:
         "unify_closure": unified["closure2_life"]["unify_closure"],
         "unify_closure_symm": unified["closure2_life"]["unify_closure_symm"],
         "unified_closure_instances": unified,
+        "foundation_status": foundation_status,
+        "translational_truth_prior": translational_truth_prior,
+        "internal_external_defined": translational_truth_prior,
+        "finite_ball_hair_foundational": False,
+        "global_hair_zero_not_hair_cardinality_one": True,
+        "local_ball_infinity_not_ball_cardinality_four": True,
         "canonical_biological_interpretation": None,
         "biological_chirality_claimed": False,
         "biological_life_claimed": False,
