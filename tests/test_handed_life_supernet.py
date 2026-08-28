@@ -33,7 +33,7 @@ def test_four_ball_one_hair_completion_and_left_gate(tmp_path: Path) -> None:
         async def scenario() -> None:
             system = await runtime.handed_life.create_system(
                 HandedLifeSystemCreate(
-                    name="left-handed potential gate",
+                    name="left-handed chart gate",
                     initial_hand=Hand.LEFT,
                     initial_ball_phase=0,
                 )
@@ -57,9 +57,17 @@ def test_four_ball_one_hair_completion_and_left_gate(tmp_path: Path) -> None:
             assert evaluation["self_limit_involutive"] is True
             assert evaluation["self_limit_order_exact"] == 2
             assert evaluation["left_gate_visits_each_ball_sheaf_once"] is True
-            assert evaluation["left_gate_alternates_potential_actual"] is True
+            assert evaluation["left_gate_alternates_hands"] is True
+            assert evaluation["left_gate_alternates_potential_actual"] is False
+            assert evaluation["potential_actual_requires_translational_truth"] is True
             assert evaluation["left_gate_closes_after_four"] is True
             assert evaluation["left_gate_same_hair_throughout"] is True
+            assert evaluation["initial_state"]["temporal_role"] is None
+            assert evaluation["initial_state"]["internal_external_defined"] is False
+            assert evaluation["foundation_status"] == "UNBOUND_FINITE_CHART"
+            assert evaluation["finite_ball_hair_foundational"] is False
+            assert evaluation["global_hair_zero_not_hair_cardinality_one"] is True
+            assert evaluation["local_ball_infinity_not_ball_cardinality_four"] is True
             event = runtime.supernet_store.get_event(system["integration_event_id"])
             assert event["current_stage"] == "RETURNED"
             assert event["current_verdict"] == "OPEN"
@@ -92,6 +100,7 @@ def test_ball_hair_and_self_limit_motion_traces(tmp_path: Path) -> None:
             assert ball["evaluation"]["ball_return_hand_preserved"] is True
             assert ball["evaluation"]["end"]["ball_phase"] == 3
             assert ball["evaluation"]["end"]["hand"] == "LEFT"
+            assert ball["evaluation"]["end"]["temporal_role"] is None
 
             hair = await runtime.handed_life.create_motion(
                 HandedMotionCreate(
@@ -146,6 +155,7 @@ def test_human_relation_ball_return_hair_gate_and_shift_invariance(tmp_path: Pat
             assert e["one_act_away_from_gate_is_ball_return"] is True
             assert e["four_acts_ball_blind"] is True
             assert e["four_acts_relation_changed_by_four"] is True
+            assert e["forward_state"]["temporal_role"] is None
 
             gate = await runtime.handed_life.create_human_relation(
                 HumanRelationCreate(
@@ -194,6 +204,7 @@ def test_handed_life_api_interface_and_supernet_lens(tmp_path: Path) -> None:
         assert system.status_code == 200, system.text
         system_payload = system.json()
         assert system_payload["evaluation"]["four_ball_one_hair"] is True
+        assert system_payload["evaluation"]["finite_ball_hair_foundational"] is False
 
         trace = client.post(
             "/network/handed-life/traces",
