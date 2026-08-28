@@ -1,21 +1,19 @@
 """Closure Supernet complete continuous living interface.
 
 Every offered or returned relative form enters one append-only integrator. The
-primary public surface is a zoomable topology over that field: point/line/loop,
-truth diagonal, metavector, ball/hair, reciprocal poles, light cone, ellipse,
-shared architecture, selector, anatomy-tree, classical value-flow,
-scheme-free relative-renormalization, constructive explicit-witness, natural
-translational truth, embodied eight-sheaf, completeness/isolation,
-representation-free inversion/self-limit, generative translational completion,
-handed-life temporal closure, NRRF802 return closure, the NRRF805 Turing Being
-action-reaction primitive, NRRF807 rule/geometry natural continuation, and the
-NRRF811 proof/completion/meta-abstraction depth are lenses of the same runtime.
+primary public surface is now the natural Black Mirror chart selected from the
+receipts already present in that field: exact source point, open selector,
+Turing Being 0↔∞, rule/geometry continuation, proof/completion/balance, return
+ball–hair, or shared architecture. The older full topology remains an explicit
+recharting rather than the default ontology.
+
 Global hair 0 executes into local ball infinity; only returned translational
-truth permits relative projections. Rule retains directed lineage, completion
-retains proof existence, relative balance retains both proof directions, and
-Black Mirror closure classes reopen to their concrete proof fibres. Geometry
-never fabricates a missing proof witness. Natural-form determination requires a
-rigidity receipt and never emits TRUE merely because the relation became rigid.
+truth permits relative semantic projections. Rule retains directed lineage,
+completion retains proof existence, relative balance retains both proof
+directions, and every visible closure class reopens to its exact source and
+proof fibre. The UI introduces no second field, no canonical pixel layout, and
+no truth verdict: every interface action returns through the same canonical
+Supernet integrator.
 """
 
 from . import living_store_runtime as _living_store_runtime
@@ -40,6 +38,7 @@ from . import turing_being_runtime as _turing_being_runtime
 from . import continuation_runtime as _continuation_runtime
 from . import proof_completion_stats_patch as _proof_completion_stats_patch
 from . import proof_completion_runtime as _proof_completion_runtime
+from . import natural_interface_runtime as _natural_interface_runtime
 
 __all__ = ["RuntimeConfig", "ClosureSupernetRuntime"]
-__version__ = "3.3.0"
+__version__ = "3.4.0"

@@ -1,4 +1,4 @@
-"""Vercel ASGI entry: the same NRRF811-complete app as `closure-supernet serve`."""
+"""Vercel ASGI entry: the same natural-interface app as `closure-supernet serve`."""
 
 from __future__ import annotations
 
@@ -23,11 +23,16 @@ from closure_supernet.api_continuation import attach_continuation_routes  # noqa
 from closure_supernet.api_proof_completion import (  # noqa: E402
     attach_proof_completion_routes,
 )
+from closure_supernet.api_natural_interface import (  # noqa: E402
+    attach_natural_interface_routes,
+)
 
-app = attach_proof_completion_routes(
-    attach_continuation_routes(
-        attach_turing_being_routes(
-            attach_handed_life_routes(attach_completion_routes(app))
+app = attach_natural_interface_routes(
+    attach_proof_completion_routes(
+        attach_continuation_routes(
+            attach_turing_being_routes(
+                attach_handed_life_routes(attach_completion_routes(app))
+            )
         )
     )
 )
