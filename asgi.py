@@ -1,4 +1,4 @@
-"""Vercel ASGI entry: the same translational-truth-prior app as `closure-supernet serve`."""
+"""Vercel ASGI entry: the same NRRF807-integrated app as `closure-supernet serve`."""
 
 from __future__ import annotations
 
@@ -19,9 +19,12 @@ from closure_supernet.api_inversion import app  # noqa: E402
 from closure_supernet.api_completion import attach_completion_routes  # noqa: E402
 from closure_supernet.api_handed import attach_handed_life_routes  # noqa: E402
 from closure_supernet.api_turing_being import attach_turing_being_routes  # noqa: E402
+from closure_supernet.api_continuation import attach_continuation_routes  # noqa: E402
 
-app = attach_turing_being_routes(
-    attach_handed_life_routes(attach_completion_routes(app))
+app = attach_continuation_routes(
+    attach_turing_being_routes(
+        attach_handed_life_routes(attach_completion_routes(app))
+    )
 )
 
 __all__ = ["app"]
