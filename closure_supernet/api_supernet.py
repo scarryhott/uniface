@@ -8,6 +8,7 @@ from fastapi.responses import HTMLResponse
 
 from . import api_hardware as base_api
 from .config import RuntimeConfig
+from .natural_interface_web import NATURAL_SUPERNET_HTML
 from .supernet_models import IntegrationLens, IntegrationStateCreate, ResourceEnvelope
 from .supernet_web import SUPERNET_HTML
 from .topology_models import (
@@ -25,23 +26,30 @@ def attach_supernet_routes(app: FastAPI) -> FastAPI:
         return app
     runtime = app.state.runtime
     app.state.unified_supernet_routes_attached = True
-    app.version = "2.0.0"
+    app.version = "2.1.0"
     app.description += (
         "; the canonical runtime operation is one continuous integrate transition; "
-        "the primary interface is a zoomable topology where source, problem, "
-        "resource, translation, selector, reopening, action, agent, equality, "
-        "collective architecture and bounded hardware are direct-manipulation "
-        "lenses over the same append-only field"
+        "the primary interface is the natural Black Mirror chart selected from the "
+        "current closure receipts, while the full manual topology remains a recharting "
+        "of the same append-only field"
     )
 
     @app.get("/", response_class=HTMLResponse, include_in_schema=False)
     async def unified_supernet_root() -> str:
-        return SUPERNET_HTML
+        return NATURAL_SUPERNET_HTML
 
     app.router.routes.insert(0, app.router.routes.pop())
 
     @app.get("/supernet", response_class=HTMLResponse, include_in_schema=False)
     async def unified_supernet_interface() -> str:
+        return NATURAL_SUPERNET_HTML
+
+    @app.get(
+        "/supernet/classic",
+        response_class=HTMLResponse,
+        include_in_schema=False,
+    )
+    async def full_manual_supernet_rechart() -> str:
         return SUPERNET_HTML
 
     @app.get("/supernet/capabilities")
@@ -49,6 +57,8 @@ def attach_supernet_routes(app: FastAPI) -> FastAPI:
         return {
             **runtime.supernet_integrator.capabilities(),
             "continuous_interface": runtime.topology.capabilities(),
+            "natural_interface_primary": True,
+            "manual_rechart": "/supernet/classic",
         }
 
     @app.post("/supernet/integrate")
