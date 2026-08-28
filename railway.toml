@@ -1,9 +1,8 @@
 [build]
-builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+builder = "RAILPACK"
 
 [deploy]
-startCommand = "/usr/local/bin/closure-supernet --db /data/closure_supernet.db serve --host 0.0.0.0 --no-autonomy"
+startCommand = "/app/.venv/bin/python -m closure_supernet --db /data/closure_supernet.db serve --host 0.0.0.0 --no-autonomy"
 healthcheckPath = "/supernet/interface/capabilities"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
