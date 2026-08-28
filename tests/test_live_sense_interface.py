@@ -64,7 +64,7 @@ def test_public_interaction_runs_existing_formal_pipeline_without_autonomy(
 
         interface = client.get(
             "/supernet/interface",
-            params={"focus_event_id": payload["source_event_id"]},
+            params={"focus_event_id": payload["event_id"]},
         )
         assert interface.status_code == 200, interface.text
         ui = interface.json()
@@ -92,7 +92,7 @@ def test_interact_runs_sense_on_the_new_child_and_preserves_parent_lineage(
             },
         ).json()
         interaction = client.post(
-            f"/supernet/events/{parent['source_event_id']}/interact",
+            f"/supernet/events/{parent['event_id']}/interact",
             json={
                 "exact_text": "point line loop return",
                 "authored_by": "person-b",
@@ -103,9 +103,9 @@ def test_interact_runs_sense_on_the_new_child_and_preserves_parent_lineage(
         payload = interaction.json()
         assert payload["sense_receipt"]["candidate_relation_ids"]
         child = client.get(
-            f"/supernet/events/{payload['source_event_id']}"
+            f"/supernet/events/{payload['event_id']}"
         ).json()
-        assert parent["source_event_id"] in child["parent_event_ids"]
+        assert parent["event_id"] in child["parent_event_ids"]
 
 
 def test_live_sense_capabilities_are_exposed_on_the_primary_ui(tmp_path: Path) -> None:
