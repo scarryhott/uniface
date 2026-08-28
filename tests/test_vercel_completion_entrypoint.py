@@ -39,4 +39,10 @@ def test_vercel_asgi_serves_the_latest_completion_integrated_app(monkeypatch) ->
     assert "/network/continuations/maps" in routes
     assert "/network/continuations/field" in routes
     assert "/continuation" in routes
-    assert module.app.version == "3.2.0"
+    assert "/network/proofs/capabilities" in routes
+    assert "/network/proofs/systems" in routes
+    assert "/network/proofs/receipts" in routes
+    assert "/network/proofs/canonical-qg" in routes
+    assert "/network/proofs/field" in routes
+    assert "/proof-completion" in routes
+    assert module.app.version == "3.3.0"
