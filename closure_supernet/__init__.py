@@ -15,6 +15,10 @@ Natural-form determination requires a rigidity receipt and never emits TRUE
 merely because the relation became rigid.
 """
 
+# Install the storage contract before any runtime lens opens a SQLite connection.
+# Production uses rollback journaling with FULL synchronization so committed
+# state lives in the mounted database file across container handoffs.
+from . import sqlite_runtime as _sqlite_runtime
 from . import living_store_runtime as _living_store_runtime
 from . import reopening_store_runtime as _reopening_store_runtime
 from .config import RuntimeConfig
@@ -36,4 +40,4 @@ from . import handed_runtime as _handed_runtime
 from . import turing_being_runtime as _turing_being_runtime
 
 __all__ = ["RuntimeConfig", "ClosureSupernetRuntime"]
-__version__ = "3.1.0"
+__version__ = "3.1.1"
