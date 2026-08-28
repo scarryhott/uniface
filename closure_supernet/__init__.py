@@ -7,13 +7,14 @@ Turing Being 0↔∞, rule/geometry continuation, proof/completion/balance, retu
 ball–hair, or shared architecture. The older full topology remains an explicit
 recharting rather than the default ontology.
 
-Public interaction now executes the existing closure formalism synchronously:
+Public interaction executes the existing closure formalism synchronously:
 exact occurrence → UnderstandingAgent → InterpretationAgent → AdmissionPolicy →
-TranslationField → NRRF790 natural selection → next Black Mirror appearance.
-Background autonomy may remain disabled; Sense is caused by interaction itself.
-Global hair 0 executes into local ball infinity; only returned translational
-truth permits relative semantic projections. No Sense receipt, chart selection,
-or natural-form determination issues truth merely by being displayed.
+TranslationField → NRRF790 natural selection/open branching → Black Mirror
+appearance. Perspective, eight-sheaf placement, direct relation, authored
+selection/rigidification, Turing return, reopening and collective continuation
+all operate from the same primary surface. Background autonomy may remain
+disabled; no Sense receipt, chart selection, or natural-form determination
+issues truth merely by being displayed.
 """
 
 from . import living_store_runtime as _living_store_runtime
@@ -41,4 +42,4 @@ from . import proof_completion_runtime as _proof_completion_runtime
 from . import natural_interface_runtime as _natural_interface_runtime
 
 __all__ = ["RuntimeConfig", "ClosureSupernetRuntime"]
-__version__ = "3.5.0"
+__version__ = "3.6.0"
