@@ -6,12 +6,12 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 
 from . import api_proof_completion as base_api
+from .complete_interface_finish import FINAL_COMPLETE_SUPERNET_HTML
 from .complete_interface_models import (
     CompleteInterfaceCollective,
     CompleteInterfaceOffer,
     CompleteInterfaceSelection,
 )
-from .complete_interface_web import COMPLETE_NATURAL_SUPERNET_HTML
 from .config import RuntimeConfig
 from .natural_interface_models import NaturalInterfaceAdmissionCreate
 from .selection_models import SelectionReadingCreate
@@ -36,7 +36,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
     )
 
     async def _complete_page() -> str:
-        return COMPLETE_NATURAL_SUPERNET_HTML
+        return FINAL_COMPLETE_SUPERNET_HTML
 
     @app.get("/", response_class=HTMLResponse, include_in_schema=False)
     async def completed_root() -> str:
@@ -72,6 +72,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
             "direct_selection_or_rigidification_on_primary_surface": True,
             "direct_turing_return_on_primary_surface": True,
             "direct_collective_trace_on_primary_surface": True,
+            "return_and_reopen_resense_on_primary_surface": True,
             "core_action_requires_subsystem_page": False,
             "canonical_pixel_layout_selected": False,
             "truth_issued_by_presentation": False,
@@ -137,7 +138,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
         """Enter any ordinary live form through the one interaction-time Sense path.
 
         Eight-sheaf placement is metadata on the exact canonical occurrence rather
-        than a second source object.  Specialized managers remain derived lenses.
+        than a second source object. Specialized managers remain derived lenses.
         """
 
         try:
