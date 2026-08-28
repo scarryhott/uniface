@@ -39,6 +39,7 @@ class IntegrationLens(StrEnum):
     INVERSION = "inversion"
     COMPLETION = "completion"
     HANDED = "handed"
+    TURING_BEING = "turing_being"
 
 
 class ResourceEnvelope(BaseModel):

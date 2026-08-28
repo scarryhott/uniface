@@ -7,10 +7,12 @@ shared architecture, selector, anatomy-tree, classical value-flow,
 scheme-free relative-renormalization, constructive explicit-witness, natural
 translational truth, embodied eight-sheaf, completeness/isolation,
 representation-free inversion/self-limit, generative translational completion,
-handed-life temporal closure, and NRRF802 one-return/two-return closure are
-lenses of the same runtime rather than parallel closure engines. Natural-form
-determination requires a rigidity receipt and never emits TRUE merely because
-the relation became rigid.
+handed-life temporal closure, NRRF802 return closure, and the NRRF805 Turing
+Being action-reaction primitive are lenses of the same runtime. Global hair 0
+executes into local ball infinity; only the returned translational truth permits
+internal/external, handed, actual/potential, or finite ball-hair projections.
+Natural-form determination requires a rigidity receipt and never emits TRUE
+merely because the relation became rigid.
 """
 
 from . import living_store_runtime as _living_store_runtime
@@ -31,6 +33,7 @@ from . import selection_runtime as _selection_runtime
 from . import inversion_runtime as _inversion_runtime
 from . import completion_runtime as _completion_runtime
 from . import handed_runtime as _handed_runtime
+from . import turing_being_runtime as _turing_being_runtime
 
 __all__ = ["RuntimeConfig", "ClosureSupernetRuntime"]
-__version__ = "3.0.0"
+__version__ = "3.1.0"
