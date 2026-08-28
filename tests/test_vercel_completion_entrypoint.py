@@ -56,4 +56,6 @@ def test_vercel_asgi_serves_the_latest_completion_integrated_app(monkeypatch) ->
     assert "/supernet/events/{event_id}/sense-interact" in routes
     assert "/supernet/events/{event_id}/sense" in routes
     assert "/supernet/classic" in routes
-    assert module.app.version == "3.6.0"
+    assert "/supernet/agent/capabilities" in routes
+    assert "/mcp" in routes
+    assert module.app.version == "3.7.0"
