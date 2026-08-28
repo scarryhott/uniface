@@ -102,6 +102,18 @@ class ContinuationSystem(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
     created_at: str
 
+    @model_validator(mode="before")
+    @classmethod
+    def derive_proof_system_id(cls, value: Any) -> Any:
+        if isinstance(value, dict) and not value.get("proof_system_id"):
+            copied = dict(value)
+            copied["proof_system_id"] = (
+                dict(copied.get("metadata") or {}).get("proof_system_id")
+                or dict(copied.get("evaluation") or {}).get("proof_system_id")
+            )
+            return copied
+        return value
+
 
 class ContinuationMap(BaseModel):
     id: str
