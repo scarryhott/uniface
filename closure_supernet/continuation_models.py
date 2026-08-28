@@ -85,6 +85,7 @@ class ContinuationSystem(BaseModel):
     occurrence_id: str
     integration_event_id: str
     completion_system_id: str
+    proof_system_id: str | None = None
     name: str
     authored_by: str
     presentations: list[str]
@@ -124,9 +125,16 @@ class ContinuationFieldProjection(BaseModel):
     stats: dict[str, Any]
     canonical_examples: dict[str, Any]
     source_reverse_index: dict[str, list[str]]
-    formal_readings: list[str] = ["NRRF799", "NRRF802", "NRRF805", "NRRF807"]
+    formal_readings: list[str] = [
+        "NRRF799",
+        "NRRF802",
+        "NRRF805",
+        "NRRF807",
+        "NRRF811",
+    ]
     canonical_runtime_operation: str = "integrate"
     rule_and_geometry_are_lenses: bool = True
+    proof_completion_linked: bool = True
     rule_direction_preserved: bool = True
     geometry_does_not_fabricate_rule_witness: bool = True
     truth_issued: bool = False
