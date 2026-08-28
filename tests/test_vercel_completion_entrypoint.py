@@ -34,4 +34,9 @@ def test_vercel_asgi_serves_the_latest_completion_integrated_app(monkeypatch) ->
     assert "/network/turing-being/charts" in routes
     assert "/network/turing-being/field" in routes
     assert "/turing-being" in routes
-    assert module.app.version == "3.1.0"
+    assert "/network/continuations/capabilities" in routes
+    assert "/network/continuations/systems" in routes
+    assert "/network/continuations/maps" in routes
+    assert "/network/continuations/field" in routes
+    assert "/continuation" in routes
+    assert module.app.version == "3.2.0"
