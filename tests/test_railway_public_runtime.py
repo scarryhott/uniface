@@ -13,6 +13,7 @@ def test_railway_runs_the_complete_continuation_application(monkeypatch) -> None
     contract = RAILWAY.read_text(encoding="utf-8")
     assert 'builder = "DOCKERFILE"' in contract
     assert "closure-supernet --db /data/closure_supernet.db serve" in contract
+    assert "--port $PORT" not in contract
     assert 'healthcheckPath = "/network/continuations/capabilities"' in contract
     assert "--no-autonomy" in contract
 
