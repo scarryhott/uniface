@@ -38,6 +38,7 @@ from . import completion_runtime as _completion_runtime
 from . import handed_runtime as _handed_runtime
 from . import turing_being_runtime as _turing_being_runtime
 from . import continuation_runtime as _continuation_runtime
+from . import proof_completion_stats_patch as _proof_completion_stats_patch
 from . import proof_completion_runtime as _proof_completion_runtime
 
 __all__ = ["RuntimeConfig", "ClosureSupernetRuntime"]
