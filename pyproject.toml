@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "closure-supernet"
-version = "3.4.0"
-description = "One continuous source-preserving Supernet whose primary Black Mirror UI is the least sufficient chart selected from current closure receipts"
+version = "3.5.0"
+description = "One continuous source-preserving Supernet whose live Black Mirror interactions run the existing closure Sense and natural-selection formalism before rerendering"
 readme = "UNIFIED_SUPERNET_RUNTIME.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}

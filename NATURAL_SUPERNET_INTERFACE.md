@@ -1,6 +1,6 @@
 # Natural Supernet Interface — the Black Mirror as a Closure Reading
 
-Closure Supernet 3.4 makes the primary UI an admitted, interactive reading of
+Closure Supernet 3.5 makes the primary UI an admitted, interactive reading of
 the living field rather than a fixed dashboard that asks the participant to
 choose a topology before the relation is known.
 
@@ -19,17 +19,19 @@ lifts every interaction back into the canonical Supernet integrator.
 
 ```text
 living field
-→ receipt audit
+→ exact interaction occurrence
+→ Sense against the present field
+→ interpretation / admission
+→ natural relational selection
 → least sufficient chart
 → local Black Mirror interaction
-→ exact source-preserving Supernet event
 → successor living field
 → reselect chart
 ```
 
 The runtime does **not** claim that closure uniquely fixes CSS, SVG, colours, or
-screen coordinates. It does derive a unique minimal chart *kind* under the
-following explicit contract:
+screen coordinates. It derives a unique minimal chart *kind* under the following
+explicit contract:
 
 1. preserve every exact source;
 2. never display a semantic layer before its receipt;
@@ -37,6 +39,35 @@ following explicit contract:
 4. retain every lower proof and source fibre;
 5. add no extra chart layer without a relation witness;
 6. return every interface action through `SupernetIntegrator`.
+
+## Interaction-time Sense
+
+The natural interface does not introduce a new semantic model. On every public
+`Integrate` or `Interact`, it invokes the formal/executable machinery that was
+already in the runtime:
+
+```text
+exact occurrence
+→ UnderstandingAgent
+→ InterpretationAgent (+ configured provider, when present)
+→ AdmissionPolicy
+→ TranslationField reconciliation
+→ NRRF790 completeness / natural-selection audit
+→ natural Black Mirror chart
+```
+
+This path is synchronous with the interaction. `--no-autonomy` may remain set
+in production: disabling the background loop does not disable Sense caused by a
+human or agent action.
+
+The original exact-source event stays the UI focus. The derived selector event
+is a child receipt, so the Black Mirror can show the selected/open relation
+without replacing the participant's source with system-generated audit text.
+
+Sense does not issue truth. A coherent but unresolved relation remains `OPEN`;
+a singleton admitted relation is a natural selection under the existing NRRF790
+criterion; an authored choice among several admissible relations would remain a
+forced isolation and must retain the removed alternatives.
 
 ## Natural chart kinds
 
@@ -50,7 +81,7 @@ SOURCE_POINT
   one exact occurrence exists without a stronger relation receipt
 
 OPEN_SELECTOR
-  an admissibility relation is open or rigid at the focused scope
+  the live Sense/admissibility relation is open or naturally complete
 
 TURING_BEING
   global hair 0 → local ball ∞ → returned global hair 0+
@@ -80,6 +111,7 @@ Every natural chart returns:
 ```text
 focus event
 exact source occurrences
+Sense relation receipts, when present
 selected chart and selection reason
 required layers
 semantic layers hidden until a receipt exists
@@ -132,17 +164,25 @@ longer treated as the prior form of the UI.
 GET  /supernet/interface/capabilities
 GET  /supernet/interface?focus_event_id=<id>&perspective_id=<id>
 POST /supernet/interface/admissions
+
+POST /supernet/sense
+POST /supernet/events/{id}/sense-interact
+POST /supernet/events/{id}/sense
 ```
 
-The admission endpoint creates a normal append-only Supernet event whose
-rigidity receipt records the selected minimal chart kind. It returns `OPEN`,
-selects no canonical pixel layout, and can be reselected after the next event.
+The public natural surface's established `POST /supernet/integrate` and
+`POST /supernet/events/{id}/interact` paths are routed through this Sense pipeline
+before the next render. Lower-level subsystem code can still use the canonical
+integrator directly without recursively launching Sense.
 
-Existing live operations remain unchanged:
+The interface admission endpoint creates a normal append-only Supernet event
+whose rigidity receipt records the selected minimal chart kind. It returns
+`OPEN`, selects no canonical pixel layout, and can be reselected after the next
+event.
+
+Existing operations remain available:
 
 ```text
-POST /supernet/integrate
-POST /supernet/events/{id}/interact
 POST /supernet/relations
 POST /supernet/events/{id}/return
 POST /supernet/events/{id}/reopen
@@ -157,10 +197,12 @@ absolute language, or issue `TRUE` from presentation. Its exact status is:
 
 ```text
 UI admitted into closure                  true
+interaction-time Sense                    true
+existing formal pipeline reused           true
 minimal chart kind selected               true
 source fibre reopenable                   true
 interaction returns through integrator    true
 semantic prerequisites enforced           true
 canonical pixel layout selected           false
-truth issued                               false
+truth issued by Sense                      false
 ```
