@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "closure-supernet"
-version = "3.2.0"
-description = "One continuous source-preserving Supernet where Turing Being translational truth opens a natural continuation with non-collapsing directed rule and generated geometry lenses"
+version = "3.3.0"
+description = "One continuous source-preserving Supernet where derivation data abstracts to admission, reciprocal balance and reopenable Black Mirror closure classes"
 readme = "UNIFIED_SUPERNET_RUNTIME.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}

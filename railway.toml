@@ -4,7 +4,7 @@ dockerfilePath = "Dockerfile"
 
 [deploy]
 startCommand = "closure-supernet --db /data/closure_supernet.db serve --host 0.0.0.0 --no-autonomy"
-healthcheckPath = "/network/continuations/capabilities"
+healthcheckPath = "/network/proofs/capabilities"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10

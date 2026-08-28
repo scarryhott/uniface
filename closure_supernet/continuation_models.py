@@ -85,6 +85,7 @@ class ContinuationSystem(BaseModel):
     occurrence_id: str
     integration_event_id: str
     completion_system_id: str
+    proof_system_id: str | None = None
     name: str
     authored_by: str
     presentations: list[str]
@@ -100,6 +101,18 @@ class ContinuationSystem(BaseModel):
     evaluation: dict[str, Any]
     metadata: dict[str, Any] = Field(default_factory=dict)
     created_at: str
+
+    @model_validator(mode="before")
+    @classmethod
+    def derive_proof_system_id(cls, value: Any) -> Any:
+        if isinstance(value, dict) and not value.get("proof_system_id"):
+            copied = dict(value)
+            copied["proof_system_id"] = (
+                dict(copied.get("metadata") or {}).get("proof_system_id")
+                or dict(copied.get("evaluation") or {}).get("proof_system_id")
+            )
+            return copied
+        return value
 
 
 class ContinuationMap(BaseModel):
@@ -124,9 +137,16 @@ class ContinuationFieldProjection(BaseModel):
     stats: dict[str, Any]
     canonical_examples: dict[str, Any]
     source_reverse_index: dict[str, list[str]]
-    formal_readings: list[str] = ["NRRF799", "NRRF802", "NRRF805", "NRRF807"]
+    formal_readings: list[str] = [
+        "NRRF799",
+        "NRRF802",
+        "NRRF805",
+        "NRRF807",
+        "NRRF811",
+    ]
     canonical_runtime_operation: str = "integrate"
     rule_and_geometry_are_lenses: bool = True
+    proof_completion_linked: bool = True
     rule_direction_preserved: bool = True
     geometry_does_not_fabricate_rule_witness: bool = True
     truth_issued: bool = False
