@@ -45,4 +45,9 @@ def test_vercel_asgi_serves_the_latest_completion_integrated_app(monkeypatch) ->
     assert "/network/proofs/canonical-qg" in routes
     assert "/network/proofs/field" in routes
     assert "/proof-completion" in routes
-    assert module.app.version == "3.3.0"
+    assert "/natural-interface" in routes
+    assert "/supernet/interface/capabilities" in routes
+    assert "/supernet/interface" in routes
+    assert "/supernet/interface/admissions" in routes
+    assert "/supernet/classic" in routes
+    assert module.app.version == "3.4.0"
