@@ -30,7 +30,10 @@ class LifeState(BaseModel):
     hand: Hand
     ball_phase: int = Field(ge=0, lt=4)
     hair_class: str = "hair:unit"
-    temporal_role: str
+    temporal_role: str | None = None
+    temporal_role_status: str = "UNDEFINED_UNTIL_TRANSLATIONAL_TRUTH"
+    internal_external_defined: bool = False
+    finite_chart_only: bool = True
 
 
 class HandedLifeSystemCreate(BaseModel):
@@ -144,6 +147,10 @@ class HandedLifeFieldProjection(BaseModel):
     hair_sheaves: int = 1
     closure_defined_once: bool = True
     hair_hand_phase_are_instances: bool = True
+    finite_chart_only: bool = True
+    foundational_life_primitive: bool = False
+    temporal_role_assigned_from_hand: bool = False
+    potential_actual_requires_translational_truth: bool = True
     biological_claimed: bool = False
     human_law_claimed: bool = False
     truth_issued: bool = False
