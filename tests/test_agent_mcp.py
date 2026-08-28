@@ -106,7 +106,15 @@ def test_mcp_agent_discovers_tools_and_participates_in_live_sense(tmp_path: Path
                     {"event_id": second["event_id"], "perspective_id": "participant-b"},
                 )
             )
-            assert observed["interface"]["focus_event_id"] == second["event_id"]
+            assert any(
+                row["id"] == second["event_id"] for row in observed["recent_events"]
+            )
+            assert any(
+                source["exact_text"]
+                == "Agent and participant share one source-preserving relation."
+                for source in observed["interface"]["source_fibre"]
+            )
+            assert observed["interface"]["sense_depth"] is not None
             assert observed["subsystems_are_lenses"] is True
             assert observed["truth_issued"] is False
 
