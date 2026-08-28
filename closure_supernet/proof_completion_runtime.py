@@ -1,14 +1,23 @@
 from __future__ import annotations
 
+import json
 from typing import Any
 
+from .continuation import ContinuationManager
+from .continuation_store import ContinuationStore
+from .models import Verdict
 from .proof_completion import ProofCompletionManager
 from .proof_completion_store import ProofCompletionStore
 from .runtime import ClosureSupernetRuntime
 from .supernet_integrator import SupernetIntegrator
+from .supernet_models import IntegrationStage, IntegrationStateCreate
 
 
 _PATCHED = False
+
+
+def _json(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
 def install_proof_completion_runtime() -> None:
@@ -18,6 +27,167 @@ def install_proof_completion_runtime() -> None:
     if _PATCHED:
         return
     _PATCHED = True
+
+    # Existing continuation rows keep their schema. The proof link is persisted
+    # inside the already-versioned evaluation/metadata fields and exposed as a
+    # first-class decoded field.
+    original_decode_system = ContinuationStore._decode_system
+
+    def decode_continuation_system(row: Any) -> dict[str, Any]:
+        data = original_decode_system(row)
+        data["proof_system_id"] = (
+            dict(data.get("metadata") or {}).get("proof_system_id")
+            or dict(data.get("evaluation") or {}).get("proof_system_id")
+        )
+        return data
+
+    def link_proof_system(
+        self: ContinuationStore,
+        system_id: str,
+        proof_system_id: str,
+        evaluation: dict[str, Any],
+        metadata: dict[str, Any],
+    ) -> dict[str, Any]:
+        with self._lock:
+            self._conn.execute(
+                "UPDATE natural_continuation_systems SET evaluation=?,metadata=? WHERE id=?",
+                (_json(evaluation), _json(metadata), system_id),
+            )
+            self._conn.commit()
+        return self.get_system(system_id)
+
+    ContinuationStore._decode_system = staticmethod(decode_continuation_system)
+    ContinuationStore.link_proof_system = link_proof_system
+
+    original_continuation_create = ContinuationManager.create_system
+    original_continuation_capabilities = ContinuationManager.capabilities
+    original_continuation_projection = ContinuationManager.projection
+
+    async def create_continuation_with_proof(
+        self: ContinuationManager, data: Any
+    ) -> dict[str, Any]:
+        continuation = await original_continuation_create(self, data)
+        proof = await self.runtime.proof_completion.create_from_continuation(
+            continuation
+        )
+        evaluation = dict(continuation["evaluation"])
+        proof_evaluation = dict(proof["evaluation"])
+        evaluation.update(
+            {
+                "proof_system_id": proof["id"],
+                "rule_is_admits": True,
+                "rule_witness_is_derivation_data": True,
+                "completion_eq_proof": proof_evaluation[
+                    "completion_eq_proof"
+                ],
+                "balance_relation": proof_evaluation["balance_relation"],
+                "balance_class_of": proof_evaluation["balance_class_of"],
+                "balance_le_geometry": proof_evaluation[
+                    "balance_le_geometry"
+                ],
+                "balance_eq_geometry": proof_evaluation[
+                    "balance_eq_geometry"
+                ],
+                "balance_equals_geometry_only_when_return_closes": True,
+                "geometry_does_not_replace_proof": True,
+                "proof_fibre_reopenable": True,
+            }
+        )
+        metadata = {
+            **continuation["metadata"],
+            "proof_system_id": proof["id"],
+            "formal_readings": [
+                "NRRF799",
+                "NRRF802",
+                "NRRF805",
+                "NRRF807",
+                "NRRF811",
+            ],
+            "completion_is_proof_truncation": True,
+            "canonical_derivation_selected": False,
+            "truth_issued": False,
+        }
+        updated = self.store.link_proof_system(
+            continuation["id"], proof["id"], evaluation, metadata
+        )
+        self.runtime.supernet_integrator.transition(
+            continuation["integration_event_id"],
+            IntegrationStateCreate(
+                stage=IntegrationStage.RETURNED,
+                verdict=Verdict.OPEN,
+                reason=(
+                    "The continuation returns with its NRRF811 proof fibre, "
+                    "proposition-level admission and reciprocal balance exposed"
+                ),
+                actor_id=continuation["authored_by"],
+                returned_resource_ids=[
+                    continuation["id"],
+                    continuation["completion_system_id"],
+                    proof["id"],
+                ],
+                successor_potential=[
+                    {
+                        "kind": "proof-bearing-natural-continuation",
+                        "continuation_system_id": continuation["id"],
+                        "proof_system_id": proof["id"],
+                        "next_index": continuation["continuation_horizon"] + 1,
+                        "canonical_derivation": None,
+                    }
+                ],
+                metadata={
+                    "nrrf807": True,
+                    "nrrf811": True,
+                    "completion_is_proof_truncation": True,
+                    "geometry_does_not_replace_proof": True,
+                    "truth_issued": False,
+                },
+            ),
+        )
+        self.projection()
+        return updated
+
+    def continuation_capabilities(self: ContinuationManager) -> dict[str, Any]:
+        base = original_continuation_capabilities(self)
+        base.update(
+            {
+                "formal_readings": [
+                    "NRRF799",
+                    "NRRF802",
+                    "NRRF805",
+                    "NRRF807",
+                    "NRRF811",
+                ],
+                "every_continuation_has_proof_completion": True,
+                "rule_is_admits": True,
+                "completion_eq_proof": True,
+                "balance_is_mutual_rule": True,
+                "balance_le_geometry": True,
+                "geometry_does_not_replace_proof": True,
+                "proof_fibre_reopenable": True,
+            }
+        )
+        return base
+
+    def continuation_projection(self: ContinuationManager) -> dict[str, Any]:
+        projection = original_continuation_projection(self)
+        projection["formal_readings"] = [
+            "NRRF799",
+            "NRRF802",
+            "NRRF805",
+            "NRRF807",
+            "NRRF811",
+        ]
+        projection["proof_completion_linked"] = True
+        projection["stats"]["linked_proof_systems"] = sum(
+            int(item.get("proof_system_id") is not None)
+            for item in projection["systems"]
+        )
+        projection["geometry_does_not_replace_proof"] = True
+        return projection
+
+    ContinuationManager.create_system = create_continuation_with_proof
+    ContinuationManager.capabilities = continuation_capabilities
+    ContinuationManager.projection = continuation_projection
 
     original_infer_adapter = SupernetIntegrator._infer_adapter
     original_capabilities = SupernetIntegrator.capabilities
