@@ -12,7 +12,10 @@ ASGI_ENTRY = ROOT / "asgi.py"
 def test_railway_runs_the_complete_proof_application(monkeypatch) -> None:
     contract = RAILWAY.read_text(encoding="utf-8")
     assert 'builder = "DOCKERFILE"' in contract
-    assert "closure-supernet --db /data/closure_supernet.db serve" in contract
+    assert (
+        "/usr/local/bin/closure-supernet --db /data/closure_supernet.db serve"
+        in contract
+    )
     assert "--port $PORT" not in contract
     assert 'healthcheckPath = "/network/proofs/capabilities"' in contract
     assert "--no-autonomy" in contract
