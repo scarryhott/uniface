@@ -6,17 +6,21 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RAILWAY = ROOT / "railway.toml"
+DOCKERFILE = ROOT / "Dockerfile"
 ASGI_ENTRY = ROOT / "asgi.py"
 
 
 def test_railway_runs_the_natural_interface_application(monkeypatch) -> None:
     contract = RAILWAY.read_text(encoding="utf-8")
-    assert 'builder = "RAILPACK"' in contract
+    dockerfile = DOCKERFILE.read_text(encoding="utf-8")
+    assert 'builder = "DOCKERFILE"' in contract
+    assert 'dockerfilePath = "Dockerfile"' in contract
+    assert "RUN pip install --no-cache-dir ." in dockerfile
     assert (
-        "/app/.venv/bin/python -m closure_supernet --db /data/closure_supernet.db serve"
+        "/usr/local/bin/closure-supernet --db /data/closure_supernet.db serve"
         in contract
     )
-    assert "/usr/local/bin/closure-supernet" not in contract
+    assert "/app/.venv/bin/python" not in contract
     assert "--port $PORT" not in contract
     assert 'healthcheckPath = "/supernet/interface/capabilities"' in contract
     assert "--no-autonomy" in contract
