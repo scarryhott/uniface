@@ -1,4 +1,4 @@
-"""Vercel ASGI entry: the same natural-interface app as `closure-supernet serve`."""
+"""ASGI entry: the completed Supernet plus its tool-only MCP agent bridge."""
 
 from __future__ import annotations
 
@@ -15,26 +15,9 @@ os.environ.setdefault(
     "localhost,127.0.0.1,*.vercel.app",
 )
 
-from closure_supernet.api_inversion import app  # noqa: E402
-from closure_supernet.api_completion import attach_completion_routes  # noqa: E402
-from closure_supernet.api_handed import attach_handed_life_routes  # noqa: E402
-from closure_supernet.api_turing_being import attach_turing_being_routes  # noqa: E402
-from closure_supernet.api_continuation import attach_continuation_routes  # noqa: E402
-from closure_supernet.api_proof_completion import (  # noqa: E402
-    attach_proof_completion_routes,
-)
-from closure_supernet.api_natural_interface import (  # noqa: E402
-    attach_natural_interface_routes,
-)
-
-app = attach_natural_interface_routes(
-    attach_proof_completion_routes(
-        attach_continuation_routes(
-            attach_turing_being_routes(
-                attach_handed_life_routes(attach_completion_routes(app))
-            )
-        )
-    )
-)
+# Keep the historical base import explicit: the agent surface extends the same
+# application lineage rather than replacing the pre-existing Supernet app.
+from closure_supernet.api_inversion import app as _inversion_app  # noqa: E402,F401
+from closure_supernet.api_agent import app  # noqa: E402
 
 __all__ = ["app"]
