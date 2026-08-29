@@ -98,6 +98,55 @@ def _inject_ui(html: str) -> str:
     return f"{html}{_NRRF837_UI_PATCH}"
 
 
+def _enforce_agreement_natural_form_witness(
+    receipt: dict[str, Any],
+) -> dict[str, Any]:
+    """Keep agreement uniqueness OPEN unless the proposal is a fixed form.
+
+    A proposal event being present is not by itself a witness that it is the
+    selected member of its active freedom range. The live receipt may expose
+    `unique_under_declared_unity = True` only when every active local source of
+    that proposal is already fixed by the declared modality.
+    """
+
+    coordination = receipt.get("coordination", {})
+    continuum = coordination.get("continuum", {})
+    agreement = continuum.get("agreement_modality", {})
+    proposal_event_id = agreement.get("selected_agreement_event_id")
+    if not proposal_event_id:
+        agreement["selected_agreement_local_ids"] = []
+        agreement["selected_agreement_in_active_continuum"] = False
+        agreement["selected_agreement_is_fixed_natural_form"] = False
+        agreement["unique_under_declared_unity"] = False
+        agreement["uniqueness_status"] = "OPEN_NO_PROPOSAL_EVENT"
+        return receipt
+
+    rows = [
+        row
+        for row in continuum.get("local_presentations", [])
+        if str(row.get("event_id") or "") == str(proposal_event_id)
+    ]
+    local_ids = [str(row["local_id"]) for row in rows if row.get("local_id")]
+    in_active_continuum = bool(local_ids)
+    fixed = in_active_continuum and all(
+        row.get("is_natural_form") is True for row in rows
+    )
+    agreement["selected_agreement_local_ids"] = local_ids
+    agreement["selected_agreement_in_active_continuum"] = in_active_continuum
+    agreement["selected_agreement_is_fixed_natural_form"] = fixed
+    agreement["unique_under_declared_unity"] = fixed
+    agreement["uniqueness_status"] = (
+        "WITNESSED_FIXED_NATURAL_FORM"
+        if fixed
+        else (
+            "OPEN_NOT_SELECTED_BY_UNITY"
+            if in_active_continuum
+            else "OPEN_OUTSIDE_ACTIVE_CONTINUUM"
+        )
+    )
+    return receipt
+
+
 def install_nrrf837_runtime() -> None:
     """Attach NRRF837 to the existing Sense receipt and primary UI.
 
@@ -119,7 +168,7 @@ def install_nrrf837_runtime() -> None:
         bound.apply_defaults()
         receipt = original_build(*args, **kwargs)
         values = bound.arguments
-        return attach_continuum_to_visual_receipt(
+        enriched = attach_continuum_to_visual_receipt(
             receipt,
             event=values["event"],
             field_events=values["field_events"],
@@ -127,6 +176,7 @@ def install_nrrf837_runtime() -> None:
             relation_receipts=values["relation_receipts"],
             closure_level=values["closure_level"],
         )
+        return _enforce_agreement_natural_form_witness(enriched)
 
     visual_closure.build_visual_closure_receipt = build_visual_closure_receipt
     # live_sense imported the function directly, so update that reference too.
@@ -144,6 +194,7 @@ def install_nrrf837_runtime() -> None:
                 "unity_selector_is_extra_product_data": True,
                 "authorship_identity_requires_natural_forms": True,
                 "same_global_noncanonical_authorship_not_collapsed": True,
+                "agreement_uniqueness_requires_fixed_natural_form": True,
                 "independent_ai_token_gates_factor_as_product": True,
                 "correlated_constraints_require_relational_policy": True,
                 "economic_value_claimed": False,
@@ -167,6 +218,7 @@ def install_nrrf837_runtime() -> None:
                 "natural_form_selector_policy_visible": True,
                 "same_form_suggestion_explanation_visible": True,
                 "canonical_authorship_condition_visible": True,
+                "agreement_fixpoint_condition_visible": True,
                 "non_product_gate_limit_visible": True,
                 "unity_not_derived_from_network": True,
                 "no_economic_or_value_claim": True,
