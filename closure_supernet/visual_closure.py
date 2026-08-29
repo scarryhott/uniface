@@ -32,7 +32,12 @@ def _event_indexes(
     by_occurrence: dict[str, dict[str, Any]] = {}
     for event in events:
         for occurrence_id in event.get("exact_source_ids", []):
-            by_occurrence[str(occurrence_id)] = event
+            # Events arrive in field sequence.  Keep the first event that
+            # source-preserved an occurrence rather than replacing it with a
+            # later translation/reconciliation event that merely references
+            # the same occurrence.  Resource capabilities and constraints
+            # belong to the source event; derived relation events are lenses.
+            by_occurrence.setdefault(str(occurrence_id), event)
     return by_id, by_occurrence
 
 

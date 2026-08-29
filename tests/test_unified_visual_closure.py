@@ -165,3 +165,54 @@ def test_primary_canvas_is_the_unified_network_ui_not_a_component_selector(
         assert capabilities[
             "tokenomic_units_derived_from_equality_classes"
         ] is True
+
+
+def test_resource_unit_keeps_source_capabilities_and_constraints_when_relations_add_events(
+    tmp_path: Path,
+) -> None:
+    app = create_app(make_config(tmp_path))
+    with TestClient(app) as client:
+        first = client.post(
+            "/supernet/sense",
+            json={
+                "exact_text": "Garden telemetry: 0↔∞; moisture 18; irrigation off.",
+                "authored_by": "simulated-sensor-a",
+                "form_label": "simulated garden telemetry",
+                "capabilities": ["sense:soil-moisture"],
+                "constraints": ["water_budget_liters<=2"],
+                "metadata": {"simulation": True, "physical_claim": False},
+            },
+        )
+        assert first.status_code == 200, first.text
+
+        second = client.post(
+            "/supernet/sense",
+            json={
+                "exact_text": "Garden telemetry: 0 <-> infinity; moisture 22; irrigation on.",
+                "authored_by": "simulated-sensor-b",
+                "form_label": "simulated garden telemetry",
+                "capabilities": ["sense:soil-moisture", "actuate:irrigation"],
+                "constraints": ["remaining_water_liters<=1"],
+                "metadata": {"simulation": True, "physical_claim": False},
+            },
+        )
+        assert second.status_code == 200, second.text
+        closure = second.json()["sense_receipt"]["visual_closure"]
+
+        assert closure["ai_translation"]["relations"][0]["relation_type"] == (
+            "NOTATIONAL_VARIANT"
+        )
+        assert closure["ai_translation"]["relations"][0]["verdict"] == "OPEN"
+        unit = closure["tokenomic"]["resource_units"][0]
+        assert unit["capabilities"] == [
+            "actuate:irrigation",
+            "sense:soil-moisture",
+        ]
+        assert unit["constraints"] == [
+            "remaining_water_liters<=1",
+            "water_budget_liters<=2",
+        ]
+        assert set(unit["member_event_ids"]) == {
+            first.json()["event_id"],
+            second.json()["event_id"],
+        }
