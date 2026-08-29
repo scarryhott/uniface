@@ -26,7 +26,9 @@ def test_primary_surface_contains_no_required_core_navigation(tmp_path: Path) ->
         assert page.status_code == 200
         text = page.text
         assert "Live relational field" in text
-        assert "fieldKind" in text
+        assert "fieldKind" not in text
+        assert "drawUnifiedClosure" in text
+        assert "closureContinue" in text
         assert "perspective" in text
         assert "/supernet/interface/offer" in text
         assert "/supernet/interface/selections" in text
@@ -41,6 +43,8 @@ def test_primary_surface_contains_no_required_core_navigation(tmp_path: Path) ->
         assert caps["core_action_requires_subsystem_page"] is False
         assert caps["perspective_carried_by_primary_composer"] is True
         assert caps["eight_sheaf_entry_on_primary_surface"] is True
+        assert caps["primary_surface_component_selector"] is False
+        assert caps["slearn_black_mirror_ai_tokenomic_visual_closure"] is True
         assert caps["truth_issued_by_presentation"] is False
 
 

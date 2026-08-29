@@ -28,6 +28,7 @@ def _compact_interface_with_focus(
         "natural_chart": receipt.get("natural_chart"),
         "sense_depth": receipt.get("sense_depth"),
         "closure_level": receipt.get("closure_level"),
+        "visual_closure": receipt.get("visual_closure"),
         "proof_depth": receipt.get("proof_depth"),
         "continuation_depth": receipt.get("continuation_depth"),
         "turing_being_depth": receipt.get("turing_being_depth"),

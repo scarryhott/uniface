@@ -24,13 +24,15 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
         return app
     runtime = app.state.runtime
     app.state.natural_interface_routes_attached = True
-    app.version = "3.6.0"
+    app.version = "3.8.0"
     app.description += (
         "; the public Black Mirror is the complete operational surface of the one "
         "Supernet field: exact source → interaction-time Sense → interpretation/admission "
         "→ TranslationField → NRRF790 selection/OPEN branching → NRRF825 equality level "
         "→ source-reversible 0↔∞ projective fold "
-        "→ direct relation, refinement, return, reopening or collective continuation. "
+        "→ equality-class resource admission → visual network return → next Sense. "
+        "The same persisted receipt is the SLEARN memory update, AI translation, "
+        "tokenomic resource resolution and operational canvas topology. "
         "Perspective and eight-sheaf placement are carried on the same canonical event; "
         "no subsystem page is required for core interaction, no background autonomy is "
         "required, and presentation never manufactures truth."
@@ -75,6 +77,12 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
             "direct_collective_trace_on_primary_surface": True,
             "return_and_reopen_resense_on_primary_surface": True,
             "nrrf825_level_derived_on_primary_surface": True,
+            "slearn_black_mirror_ai_tokenomic_visual_closure": True,
+            "unified_visual_closure_receipt_persisted": True,
+            "slearn_memory_changes_future_candidate_priority": True,
+            "tokenomic_units_derived_from_equality_classes": True,
+            "visual_network_drives_derived_next_operation": True,
+            "primary_surface_component_selector": False,
             "projective_fold_derived_from_live_level": True,
             "projective_fold_is_user_selected": False,
             "two_person_E2E": "OPEN",
@@ -97,6 +105,32 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/supernet/visual-closure/receipts")
+    async def visual_closure_receipts(limit: int = 1000) -> list[dict[str, Any]]:
+        return runtime.supernet_store.list_visual_closure_receipts(
+            limit=max(1, min(limit, 20_000))
+        )
+
+    @app.get("/supernet/visual-closure/receipts/{receipt_id}")
+    async def visual_closure_receipt(receipt_id: str) -> dict[str, Any]:
+        try:
+            return runtime.supernet_store.get_visual_closure_receipt(receipt_id)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get("/supernet/events/{event_id}/visual-closure")
+    async def event_visual_closure(event_id: str) -> dict[str, Any]:
+        try:
+            runtime.supernet_store.get_event(event_id)
+            receipt = runtime.supernet_store.latest_visual_closure_receipt(event_id)
+            if receipt is None:
+                raise KeyError(
+                    f"Supernet integration event {event_id} has no visual closure receipt"
+                )
+            return receipt
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.post("/supernet/interface/admissions")
     async def admit_natural_interface(
