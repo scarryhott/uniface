@@ -428,6 +428,30 @@ class LiveSenseManager:
 class LiveNaturalInterfaceManager(NaturalInterfaceManager):
     """The Black Mirror reads the interaction's relation field, not an adapter tag."""
 
+    def _focus_event(
+        self,
+        events: list[dict[str, Any]],
+        focus_event_id: str | None,
+        perspective_id: str | None,
+    ) -> dict[str, Any] | None:
+        if focus_event_id is not None:
+            return super()._focus_event(events, focus_event_id, perspective_id)
+        sensed_ids = self.runtime.supernet_store.visual_closure_event_ids()
+        sensed = [event for event in events if event["id"] in sensed_ids]
+        if perspective_id:
+            relative = [
+                event
+                for event in sensed
+                if event.get("authored_by") == perspective_id
+                or perspective_id in event.get("affected_perspectives", [])
+                or event.get("perspective_id") == perspective_id
+            ]
+            if relative:
+                sensed = relative
+        if sensed:
+            return max(sensed, key=lambda item: int(item["seq"]))
+        return super()._focus_event(events, focus_event_id, perspective_id)
+
     def _sense_context(self, event: dict[str, Any] | None) -> dict[str, Any] | None:
         if event is None or not hasattr(self.runtime, "selection_store"):
             return None

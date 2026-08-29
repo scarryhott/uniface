@@ -453,6 +453,12 @@ class SupernetIntegrationStore:
         ).fetchall()
         return [self._decode_visual_closure_receipt(row) for row in rows]
 
+    def visual_closure_event_ids(self) -> set[str]:
+        rows = self._conn.execute(
+            "SELECT DISTINCT source_event_id FROM supernet_visual_closure_receipts"
+        ).fetchall()
+        return {str(row["source_event_id"]) for row in rows}
+
     def set_state(self, key: str, value: Any) -> None:
         with self._lock:
             self._conn.execute(
