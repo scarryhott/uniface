@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import math
+import re
+import shutil
+import subprocess
 from pathlib import Path
 
 from fastapi.testclient import TestClient
 
 from closure_supernet.api_natural_interface import create_app
 from closure_supernet.config import RuntimeConfig
+from closure_supernet.complete_interface_finish import FINAL_COMPLETE_SUPERNET_HTML
 from closure_supernet.nrrf825 import closure_level_receipt
 
 
@@ -145,3 +149,20 @@ def test_primary_supernet_renders_the_live_fold_without_a_level_widget(
         assert capabilities["nrrf825_level_derived_on_primary_surface"] is True
         assert capabilities["projective_fold_is_user_selected"] is False
         assert capabilities["two_person_E2E"] == "OPEN"
+
+
+def test_primary_supernet_browser_program_is_valid_javascript() -> None:
+    node = shutil.which("node")
+    if node is None:
+        return
+    program = "\n".join(
+        re.findall(r"<script>(.*?)</script>", FINAL_COMPLETE_SUPERNET_HTML, re.S)
+    )
+    result = subprocess.run(
+        [node, "--check"],
+        input=program,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
