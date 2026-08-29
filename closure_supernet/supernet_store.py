@@ -113,6 +113,18 @@ class SupernetIntegrationStore:
         CREATE INDEX IF NOT EXISTS idx_supernet_stages_created
           ON supernet_field_stages(stage_index,created_at);
 
+        CREATE TABLE IF NOT EXISTS supernet_visual_closure_receipts (
+            seq INTEGER PRIMARY KEY AUTOINCREMENT,
+            id TEXT NOT NULL UNIQUE,
+            source_event_id TEXT NOT NULL REFERENCES supernet_integration_events(id),
+            input_signature TEXT NOT NULL UNIQUE,
+            parent_receipt_ids TEXT NOT NULL,
+            receipt TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_supernet_visual_closure_event
+          ON supernet_visual_closure_receipts(source_event_id,seq);
+
         CREATE TABLE IF NOT EXISTS supernet_integrator_state (
             key TEXT PRIMARY KEY,
             value TEXT NOT NULL,
@@ -342,6 +354,105 @@ class SupernetIntegrationStore:
         ).fetchall()
         return [self._decode_stage(row) for row in reversed(rows)]
 
+    def append_visual_closure_receipt(
+        self,
+        *,
+        source_event_id: str,
+        input_signature: str,
+        parent_receipt_ids: list[str],
+        receipt: dict[str, Any],
+    ) -> tuple[dict[str, Any], bool]:
+        """Append one SLEARN–mirror–AI–tokenomic closure receipt.
+
+        The input signature makes repeated Sense of an unchanged event
+        idempotent while a return or reopening produces a new receipt.
+        """
+
+        self._event_row(source_event_id)
+        with self._lock:
+            existing = self._conn.execute(
+                """SELECT * FROM supernet_visual_closure_receipts
+                WHERE input_signature=?""",
+                (input_signature,),
+            ).fetchone()
+            if existing is not None:
+                return self._decode_visual_closure_receipt(existing), False
+
+            receipt_id = str(uuid.uuid4())
+            created_at = utcnow()
+            cursor = self._conn.execute(
+                """INSERT INTO supernet_visual_closure_receipts(
+                    id,source_event_id,input_signature,parent_receipt_ids,
+                    receipt,created_at
+                ) VALUES(?,?,?,?,?,?)""",
+                (
+                    receipt_id,
+                    source_event_id,
+                    input_signature,
+                    _json(parent_receipt_ids),
+                    _json(receipt),
+                    created_at,
+                ),
+            )
+            seq = int(cursor.lastrowid)
+            completed = dict(receipt)
+            completed["id"] = receipt_id
+            completed["seq"] = seq
+            completed["created_at"] = created_at
+            completed["input_signature"] = input_signature
+            completed["parent_receipt_ids"] = list(parent_receipt_ids)
+            operational = dict(completed.get("operational_closure", {}))
+            operational["receipt_persisted"] = True
+            operational["all_desired_functions_in_this_occurrence"] = all(
+                operational.get(key) is True
+                for key in (
+                    "black_mirror_sensed",
+                    "slearn_memory_committed",
+                    "ai_translation_executed",
+                    "tokenomic_resources_derived",
+                    "visual_network_derived",
+                    "network_return_open",
+                    "receipt_persisted",
+                )
+            )
+            completed["operational_closure"] = operational
+            self._conn.execute(
+                """UPDATE supernet_visual_closure_receipts
+                SET receipt=? WHERE id=?""",
+                (_json(completed), receipt_id),
+            )
+            self._conn.commit()
+        return self.get_visual_closure_receipt(receipt_id), True
+
+    def get_visual_closure_receipt(self, receipt_id: str) -> dict[str, Any]:
+        row = self._conn.execute(
+            "SELECT * FROM supernet_visual_closure_receipts WHERE id=?",
+            (receipt_id,),
+        ).fetchone()
+        if row is None:
+            raise KeyError(f"Visual closure receipt {receipt_id} not found")
+        return self._decode_visual_closure_receipt(row)
+
+    def latest_visual_closure_receipt(
+        self, source_event_id: str
+    ) -> dict[str, Any] | None:
+        row = self._conn.execute(
+            """SELECT * FROM supernet_visual_closure_receipts
+            WHERE source_event_id=? ORDER BY seq DESC LIMIT 1""",
+            (source_event_id,),
+        ).fetchone()
+        return None if row is None else self._decode_visual_closure_receipt(row)
+
+    def list_visual_closure_receipts(
+        self, limit: int = 100_000
+    ) -> list[dict[str, Any]]:
+        rows = self._conn.execute(
+            """SELECT * FROM supernet_visual_closure_receipts
+            ORDER BY seq LIMIT ?""",
+            (limit,),
+        ).fetchall()
+        return [self._decode_visual_closure_receipt(row) for row in rows]
+
     def set_state(self, key: str, value: Any) -> None:
         with self._lock:
             self._conn.execute(
@@ -374,6 +485,11 @@ class SupernetIntegrationStore:
                 "SELECT COUNT(*) AS n FROM supernet_field_stages"
             ).fetchone()["n"]
         )
+        visual_closure_receipts = int(
+            self._conn.execute(
+                "SELECT COUNT(*) AS n FROM supernet_visual_closure_receipts"
+            ).fetchone()["n"]
+        )
         current: dict[str, int] = {}
         verdicts: dict[str, int] = {}
         for event in self.list_events(limit=200_000):
@@ -383,6 +499,7 @@ class SupernetIntegrationStore:
             "events": events,
             "states": states,
             "stages": stages,
+            "visual_closure_receipts": visual_closure_receipts,
             **{f"stage_{key.lower()}": value for key, value in current.items()},
             **{f"verdict_{key.lower()}": value for key, value in verdicts.items()},
         }
@@ -435,3 +552,14 @@ class SupernetIntegrationStore:
         ):
             data[key] = _loads(data[key], default)
         return data
+
+    @staticmethod
+    def _decode_visual_closure_receipt(row: sqlite3.Row) -> dict[str, Any]:
+        receipt = _loads(row["receipt"], {})
+        receipt.setdefault("id", str(row["id"]))
+        receipt.setdefault("seq", int(row["seq"]))
+        receipt.setdefault("source_event_id", str(row["source_event_id"]))
+        receipt.setdefault("input_signature", str(row["input_signature"]))
+        receipt.setdefault("parent_receipt_ids", _loads(row["parent_receipt_ids"], []))
+        receipt.setdefault("created_at", str(row["created_at"]))
+        return receipt

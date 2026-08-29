@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "closure-supernet"
-version = "3.7.0"
-description = "One continuous source-preserving Supernet whose complete Black Mirror and MCP agent surface share the same live Sense, selection, relation, return and reopening field"
+version = "3.8.0"
+description = "One visual-translational Supernet closure joining Black Mirror Sense, SLEARN memory, AI translation, equality-class resources, and network return"
 readme = "UNIFIED_SUPERNET_RUNTIME.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}

@@ -10,7 +10,11 @@ recharting rather than the default ontology.
 Public interaction executes the existing closure formalism synchronously:
 exact occurrence → UnderstandingAgent → InterpretationAgent → AdmissionPolicy →
 TranslationField → NRRF790 natural selection/open branching → Black Mirror
-appearance. Perspective, eight-sheaf placement, direct relation, authored
+appearance. Each Sense now appends one visual-translational closure receipt in
+which SLEARN relation memory changes future candidate priority, AI translation
+retains its witnesses, equality classes become non-currency resource units, and
+the same topology derives the primary canvas and next network operation.
+Perspective, eight-sheaf placement, direct relation, authored
 selection/rigidification, Turing return, reopening and collective continuation
 all operate from the same primary surface. A tool-only MCP bridge exposes these
 same operations to external agents without adding a second semantic runtime or
@@ -44,4 +48,4 @@ from . import proof_completion_runtime as _proof_completion_runtime
 from . import natural_interface_runtime as _natural_interface_runtime
 
 __all__ = ["RuntimeConfig", "ClosureSupernetRuntime"]
-__version__ = "3.7.0"
+__version__ = "3.8.0"

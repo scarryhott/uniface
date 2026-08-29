@@ -5,10 +5,10 @@ from .natural_interface_web import NATURAL_SUPERNET_HTML
 
 _COMPLETE_PATCH = r'''
 <style>
-#perspective,#fieldKind{border:1px solid #30434c;border-radius:10px;background:#081014;padding:9px;color:inherit;min-width:118px}
+#perspective{border:1px solid #30434c;border-radius:10px;background:#081014;padding:9px;color:inherit;min-width:118px}
 .sense-row{border:1px solid #2d4049;border-radius:9px;padding:8px;margin:6px 0;background:#081014;font-size:10px;line-height:1.45}
 .sense-row strong{display:block;color:#d9e6ea;margin-bottom:3px}.sense-row .open{color:#e0b35a}.sense-row .true{color:#75e0b4}.sense-row .false{color:#ed7b86}
-@media(max-width:900px){#perspective,#fieldKind{min-width:90px}}
+@media(max-width:900px){#perspective{min-width:90px}}
 </style>
 <script>
 (() => {
@@ -24,26 +24,6 @@ _COMPLETE_PATCH = r'''
   perspective.addEventListener('change', () => localStorage.setItem('supernet-perspective', perspective.value));
   form.insertAdjacentElement('afterend', perspective);
 
-  const field = document.createElement('select');
-  field.id = 'fieldKind';
-  field.setAttribute('aria-label','Living field');
-  const options = [
-    ['','AUTO FIELD'],
-    ['HUMAN_INTERACTION','HUMAN INTERACTION'],
-    ['SLEARN_PERSPECTIVE','SLEARN PERSPECTIVE'],
-    ['BLACK_MIRROR_SENSOR','BLACK MIRROR SENSOR'],
-    ['TOKENOMIC_AI','TOKENOMIC AI'],
-    ['RESOURCE_WORLD','RESOURCE WORLD'],
-    ['AGI_SECOND_BRAIN','AGI / SECOND BRAIN'],
-    ['PSYCHOPHENOMENAL','PSYCHOPHENOMENAL'],
-    ['UNKNOWN_UAP_HYPOTHESIS','UNKNOWN / UAP HYPOTHESIS'],
-    ['agent','AGENT'],['resource','RESOURCE'],['hardware','HARDWARE'],['trading','TRADING']
-  ];
-  for (const [value,label] of options) {
-    const opt=document.createElement('option'); opt.value=value; opt.textContent=label; field.append(opt);
-  }
-  perspective.insertAdjacentElement('afterend', field);
-
   const sourceBlock = document.getElementById('sources').closest('.block');
   const senseBlock = document.createElement('section');
   senseBlock.className='block'; senseBlock.id='senseBlock';
@@ -52,7 +32,6 @@ _COMPLETE_PATCH = r'''
 
   const actor = () => document.getElementById('author').value.trim() || 'participant';
   const perspectiveId = () => perspective.value.trim() || actor();
-  const sheafKinds = new Set(['HUMAN_INTERACTION','SLEARN_PERSPECTIVE','BLACK_MIRROR_SENSOR','TOKENOMIC_AI','RESOURCE_WORLD','AGI_SECOND_BRAIN','PSYCHOPHENOMENAL','UNKNOWN_UAP_HYPOTHESIS']);
 
   function relationLabel(item){
     const node=(receipt?.topology?.nodes||[]).find(n=>n.id===item.target_occurrence || n.id===item.source_occurrence);
@@ -79,18 +58,15 @@ _COMPLETE_PATCH = r'''
   integrate = async function(parent=false){
     const text=document.getElementById('text').value.trim();
     if(!text)return toast('Enter an exact source',true);
-    const selected=field.value;
     const body={
       exact_text:text,
       authored_by:actor(),
       form_label:document.getElementById('form').value||'note',
       perspective_id:perspectiveId(),
       parent_event_id:parent&&focus?focus:null,
-      lens:sheafKinds.has(selected)?'embodied':(selected||null),
-      sheaf:sheafKinds.has(selected)?selected:null,
       affected_perspectives:[perspectiveId()],
-      relation_hints:selected?[selected]:[],
-      metadata:{black_mirror_offer:true, field_selection:selected||'AUTO'}
+      relation_hints:[],
+      metadata:{black_mirror_offer:true, unified_visual_closure:true}
     };
     try{
       const result=await api('/supernet/interface/offer',{method:'POST',body:JSON.stringify(body)});

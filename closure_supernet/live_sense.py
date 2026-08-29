@@ -12,6 +12,10 @@ from .nrrf825 import closure_level_receipt
 from .selection_models import SelectionReadingCreate
 from .supernet_models import ResourceEnvelope
 from .topology_models import TopologyMode
+from .visual_closure import (
+    build_visual_closure_receipt,
+    learned_relation_memory,
+)
 
 if TYPE_CHECKING:
     from .runtime import ClosureSupernetRuntime
@@ -48,6 +52,11 @@ class LiveSenseManager:
             "uses_existing_translation_field": True,
             "uses_existing_nrrf790_selector": True,
             "derives_nrrf825_equality_level": True,
+            "unified_visual_translational_closure": True,
+            "black_mirror_slearn_ai_tokenomic_one_receipt": True,
+            "slearn_memory_changes_candidate_priority": True,
+            "tokenomic_units_are_equality_classes": True,
+            "visual_network_drives_next_operation": True,
             "level_derived_from_admitted_returns": True,
             "projective_zero_infinity_fold": "tan((π/2)·collapse)",
             "projective_fold_is_user_selected": False,
@@ -61,6 +70,9 @@ class LiveSenseManager:
 
     def _understand_occurrence(self, occurrence_id: str) -> list[str]:
         source = self.runtime.store.get_occurrence(occurrence_id)
+        learned = learned_relation_memory(
+            self.runtime.supernet_store.list_visual_closure_receipts()
+        )
         proposals: list[tuple[float, str, dict[str, Any], str]] = []
         for target in self.runtime.store.list_occurrences(limit=100_000):
             if target["id"] == source["id"]:
@@ -71,7 +83,16 @@ class LiveSenseManager:
             if relation_type is None:
                 continue
             proposals.append((score, str(relation_type), target, rationale))
-        proposals.sort(key=lambda item: (-item[0], item[2]["id"]))
+        # SLEARN is operational here: previously admitted relation witnesses
+        # determine candidate priority before raw semantic score.  No verdict or
+        # truth is upgraded by memory, and exact sources remain unchanged.
+        proposals.sort(
+            key=lambda item: (
+                -learned.get(item[1], 0),
+                -item[0],
+                item[2]["id"],
+            )
+        )
         candidate_ids: list[str] = []
         for score, relation_type, target, rationale in proposals[
             : self.runtime.config.max_candidates_per_occurrence
@@ -318,6 +339,58 @@ class LiveSenseManager:
                     )
                 )
 
+        prior_visual_receipts = (
+            self.runtime.supernet_store.list_visual_closure_receipts()
+        )
+        current_event = self.runtime.supernet_store.get_event(event_id)
+        source_occurrences = [
+            self.runtime.store.get_occurrence(occurrence_id)
+            for occurrence_id in source_ids
+        ]
+        visual_payload = build_visual_closure_receipt(
+            event=current_event,
+            source_occurrences=source_occurrences,
+            relation_receipts=relation_receipts,
+            closure_level=closure_level,
+            selection_reading=selection_reading,
+            prior_receipts=prior_visual_receipts,
+            field_events=self.runtime.supernet_store.list_events(limit=200_000),
+        )
+        visual_signature = hashlib.sha256(
+            _stable(
+                {
+                    "source_event_id": event_id,
+                    "current_stage": current_event["current_stage"],
+                    "current_verdict": current_event["current_verdict"],
+                    "relations": relation_receipts,
+                    "closure_level_id": closure_level["level_id"],
+                    "selection": (selection_reading or {}).get("evaluation"),
+                    "slearn_memory": learned_relation_memory(
+                        prior_visual_receipts
+                    ),
+                }
+            ).encode("utf-8")
+        ).hexdigest()
+        previous_for_event = (
+            self.runtime.supernet_store.latest_visual_closure_receipt(event_id)
+        )
+        parent_receipt_ids = _unique(
+            [
+                previous_for_event.get("id") if previous_for_event else "",
+                prior_visual_receipts[-1].get("id")
+                if prior_visual_receipts
+                else "",
+            ]
+        )
+        visual_closure, visual_closure_created = (
+            self.runtime.supernet_store.append_visual_closure_receipt(
+                source_event_id=event_id,
+                input_signature=visual_signature,
+                parent_receipt_ids=parent_receipt_ids,
+                receipt=visual_payload,
+            )
+        )
+
         return {
             "source_event_id": event_id,
             "source_occurrence_ids": list(source_ids),
@@ -327,6 +400,8 @@ class LiveSenseManager:
             "admissible_relation_ids": admissible_symbols,
             "selection_reading": selection_reading,
             "closure_level": closure_level,
+            "visual_closure": visual_closure,
+            "visual_closure_created": visual_closure_created,
             "translation_ids": [row["id"] for row in translations],
             "translation_reconciliation": translation_reconciliation,
             "supernet_reconciliation": supernet_reconciliation,
@@ -369,6 +444,9 @@ class LiveNaturalInterfaceManager(NaturalInterfaceManager):
             "reading": reading,
             "relations": reading.get("metadata", {}).get("relation_receipts", []),
             "closure_level": reading.get("metadata", {}).get("closure_level"),
+            "visual_closure": self.runtime.supernet_store.latest_visual_closure_receipt(
+                event["id"]
+            ),
         }
 
     def _select_chart(
@@ -449,6 +527,17 @@ class LiveNaturalInterfaceManager(NaturalInterfaceManager):
                 relation_receipts=(sense or {}).get("relations", []),
             )
         result["closure_level"] = closure_level
+        result["visual_closure"] = (
+            sense.get("visual_closure")
+            if sense is not None
+            else (
+                self.runtime.supernet_store.latest_visual_closure_receipt(
+                    event["id"]
+                )
+                if event is not None
+                else None
+            )
+        )
         result["two_person_E2E"] = "OPEN"
         if sense is not None:
             result["sense_depth"] = {
@@ -463,6 +552,14 @@ class LiveNaturalInterfaceManager(NaturalInterfaceManager):
                 "closure_level_endpoint": closure_level["endpoint"],
                 "formal_pipeline_reused": True,
                 "nrrf825_derived": True,
+                "unified_visual_closure_receipt_id": (
+                    sense.get("visual_closure") or {}
+                ).get("id"),
+                "all_desired_functions_in_occurrence": (
+                    (sense.get("visual_closure") or {})
+                    .get("operational_closure", {})
+                    .get("all_desired_functions_in_this_occurrence", False)
+                ),
                 "projective_fold_is_user_selected": False,
                 "two_person_E2E": "OPEN",
                 "truth_issued": False,

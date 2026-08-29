@@ -268,4 +268,4 @@ def test_natural_interface_is_primary_and_classic_topology_is_a_rechart(
         assert caps["canonical_pixel_layout_selected"] is False
         assert caps["determination_issues_truth"] is False
         assert caps["live_sense"]["interaction_time_sense"] is True
-        assert app.version == "3.6.0"
+        assert app.version == "3.8.0"
