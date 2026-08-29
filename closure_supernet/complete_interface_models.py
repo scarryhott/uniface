@@ -1,10 +1,37 @@
 from __future__ import annotations
 
+from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .embodied_models import SheafKind
+
+
+class CoordinationKind(StrEnum):
+    """Product-facing forms carried by the same canonical event field."""
+
+    INTENT = "intent"
+    PERSON = "person"
+    PROJECT = "project"
+    RESOURCE = "resource"
+    ACTION = "action"
+    LIVING_RETURN = "living_return"
+
+
+class AuthorshipRole(StrEnum):
+    """A contribution role, not an authentication or legal-identity claim."""
+
+    HUMAN = "HUMAN"
+    AI = "AI"
+    TOKEN = "TOKEN"
+    LIVING_SYSTEM = "LIVING_SYSTEM"
+
+
+class CommitmentDecisionKind(StrEnum):
+    ACCEPT = "ACCEPT"
+    REJECT = "REJECT"
+    WITHDRAW = "WITHDRAW"
 
 
 class CompleteInterfaceOffer(BaseModel):
@@ -19,7 +46,18 @@ class CompleteInterfaceOffer(BaseModel):
     sheaf: SheafKind | None = None
     affected_perspectives: list[str] = Field(default_factory=list)
     relation_hints: list[str] = Field(default_factory=list)
+    coordination_kind: CoordinationKind | None = None
+    authorship_role: AuthorshipRole = AuthorshipRole.HUMAN
+    location_label: str | None = Field(default=None, max_length=500)
+    intent_tags: list[str] = Field(default_factory=list)
+    capabilities: list[str] = Field(default_factory=list)
+    constraints: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("coordination_kind", mode="before")
+    @classmethod
+    def normalize_coordination_kind(cls, value: Any) -> Any:
+        return value.lower() if isinstance(value, str) else value
 
     @model_validator(mode="after")
     def normalize(self) -> "CompleteInterfaceOffer":
@@ -33,8 +71,83 @@ class CompleteInterfaceOffer(BaseModel):
             )
         )
         self.relation_hints = list(dict.fromkeys(self.relation_hints))
+        self.intent_tags = list(dict.fromkeys(self.intent_tags))
+        self.capabilities = list(dict.fromkeys(self.capabilities))
+        self.constraints = list(dict.fromkeys(self.constraints))
+        if self.location_label is not None:
+            self.location_label = self.location_label.strip() or None
         if self.lens is not None:
             self.lens = self.lens.strip().lower() or None
+        return self
+
+
+class CompleteInterfaceCommitmentProposal(BaseModel):
+    """Exact non-transferable coordination terms over one selected path."""
+
+    intent_event_id: str = Field(min_length=1)
+    target_event_ids: list[str] = Field(min_length=1)
+    exact_terms: str = Field(min_length=1)
+    title: str = Field(default="Coordination proposal", min_length=1, max_length=300)
+    proposed_by: str = Field(default="participant", min_length=1, max_length=500)
+    perspective_id: str | None = None
+    required_participant_ids: list[str] = Field(default_factory=list)
+    resource_conditions: list[str] = Field(default_factory=list)
+    open_assumptions: list[str] = Field(default_factory=list)
+    external_key: str | None = Field(default=None, max_length=500)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def normalize(self) -> "CompleteInterfaceCommitmentProposal":
+        self.target_event_ids = list(dict.fromkeys(self.target_event_ids))
+        self.required_participant_ids = list(
+            dict.fromkeys(self.required_participant_ids)
+        )
+        self.resource_conditions = list(dict.fromkeys(self.resource_conditions))
+        self.open_assumptions = list(dict.fromkeys(self.open_assumptions))
+        if self.intent_event_id in self.target_event_ids:
+            raise ValueError("A selected path must target an event other than its intent")
+        return self
+
+
+class CompleteInterfaceCommitmentDecision(BaseModel):
+    """One participant's append-only decision about exact proposal terms."""
+
+    participant_id: str = Field(min_length=1, max_length=500)
+    authored_by: str = Field(min_length=1, max_length=500)
+    decision: CommitmentDecisionKind
+    exact_text: str = Field(min_length=1)
+    authorship_role: AuthorshipRole = AuthorshipRole.HUMAN
+    perspective_id: str | None = None
+    resource_offers: list[str] = Field(default_factory=list)
+    constraints: list[str] = Field(default_factory=list)
+    external_key: str | None = Field(default=None, max_length=500)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def human_decision_is_self_authored(
+        self,
+    ) -> "CompleteInterfaceCommitmentDecision":
+        self.resource_offers = list(dict.fromkeys(self.resource_offers))
+        self.constraints = list(dict.fromkeys(self.constraints))
+        return self
+
+
+class CompleteInterfaceCommitmentReturn(BaseModel):
+    exact_text: str = Field(min_length=1)
+    authored_by: str = Field(min_length=1, max_length=500)
+    authorship_role: AuthorshipRole = AuthorshipRole.HUMAN
+    perspective_id: str | None = None
+    location_label: str | None = Field(default=None, max_length=500)
+    affected_perspectives: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def normalize(self) -> "CompleteInterfaceCommitmentReturn":
+        self.affected_perspectives = list(
+            dict.fromkeys(self.affected_perspectives)
+        )
+        if self.location_label is not None:
+            self.location_label = self.location_label.strip() or None
         return self
 
 

@@ -125,6 +125,45 @@ class SupernetIntegrationStore:
         CREATE INDEX IF NOT EXISTS idx_supernet_visual_closure_event
           ON supernet_visual_closure_receipts(source_event_id,seq);
 
+        CREATE TABLE IF NOT EXISTS supernet_commitment_proposals (
+            id TEXT PRIMARY KEY,
+            proposal_event_id TEXT NOT NULL UNIQUE
+              REFERENCES supernet_integration_events(id),
+            intent_event_id TEXT NOT NULL
+              REFERENCES supernet_integration_events(id),
+            action_id TEXT,
+            target_event_ids TEXT NOT NULL,
+            required_participant_ids TEXT NOT NULL,
+            resource_conditions TEXT NOT NULL,
+            external_key TEXT UNIQUE,
+            metadata TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_supernet_commitment_proposals_intent
+          ON supernet_commitment_proposals(intent_event_id,created_at,id);
+        CREATE INDEX IF NOT EXISTS idx_supernet_commitment_proposals_action
+          ON supernet_commitment_proposals(action_id,created_at,id);
+
+        CREATE TABLE IF NOT EXISTS supernet_commitment_decisions (
+            seq INTEGER PRIMARY KEY AUTOINCREMENT,
+            id TEXT NOT NULL UNIQUE,
+            proposal_id TEXT NOT NULL
+              REFERENCES supernet_commitment_proposals(id),
+            decision_event_id TEXT NOT NULL UNIQUE
+              REFERENCES supernet_integration_events(id),
+            participant_id TEXT NOT NULL,
+            decision TEXT NOT NULL
+              CHECK(decision IN ('ACCEPT','REJECT','WITHDRAW')),
+            resource_offers TEXT NOT NULL,
+            constraints TEXT NOT NULL,
+            metadata TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_supernet_commitment_decisions_proposal
+          ON supernet_commitment_decisions(proposal_id,seq);
+        CREATE INDEX IF NOT EXISTS idx_supernet_commitment_decisions_participant
+          ON supernet_commitment_decisions(proposal_id,participant_id,seq);
+
         CREATE TABLE IF NOT EXISTS supernet_integrator_state (
             key TEXT PRIMARY KEY,
             value TEXT NOT NULL,
@@ -297,6 +336,245 @@ class SupernetIntegrationStore:
             (seq, limit),
         ).fetchall()
         return [self.get_event(str(row["id"])) for row in rows]
+
+    def create_commitment_proposal(
+        self, data: dict[str, Any]
+    ) -> tuple[dict[str, Any], bool]:
+        """Index one source-preserved event as a non-transferable proposal."""
+
+        proposal_event_id = str(data["proposal_event_id"])
+        intent_event_id = str(data["intent_event_id"])
+        self._event_row(proposal_event_id)
+        self._event_row(intent_event_id)
+
+        target_event_ids = [str(item) for item in data.get("target_event_ids", [])]
+        for event_id in target_event_ids:
+            self._event_row(event_id)
+        required_participant_ids = [
+            str(item).strip() for item in data.get("required_participant_ids", [])
+        ]
+        if any(not participant_id for participant_id in required_participant_ids):
+            raise ValueError("required_participant_ids cannot contain an empty id")
+        if len(set(required_participant_ids)) != len(required_participant_ids):
+            raise ValueError("required_participant_ids must be unique")
+
+        external_key_value = data.get("external_key")
+        external_key = (
+            None if not external_key_value else str(external_key_value)
+        )
+        proposal_id = str(data.get("id") or uuid.uuid4())
+        created_at = utcnow()
+        with self._lock:
+            if external_key is not None:
+                existing = self._conn.execute(
+                    """SELECT * FROM supernet_commitment_proposals
+                    WHERE external_key=?""",
+                    (external_key,),
+                ).fetchone()
+                if existing is not None:
+                    return self.get_commitment_proposal(str(existing["id"])), False
+            existing = self._conn.execute(
+                """SELECT * FROM supernet_commitment_proposals
+                WHERE proposal_event_id=?""",
+                (proposal_event_id,),
+            ).fetchone()
+            if existing is not None:
+                return self.get_commitment_proposal(str(existing["id"])), False
+            self._conn.execute(
+                """INSERT INTO supernet_commitment_proposals(
+                    id,proposal_event_id,intent_event_id,action_id,target_event_ids,
+                    required_participant_ids,resource_conditions,external_key,
+                    metadata,created_at
+                ) VALUES(?,?,?,?,?,?,?,?,?,?)""",
+                (
+                    proposal_id,
+                    proposal_event_id,
+                    intent_event_id,
+                    None if data.get("action_id") is None else str(data["action_id"]),
+                    _json(target_event_ids),
+                    _json(required_participant_ids),
+                    _json(data.get("resource_conditions", [])),
+                    external_key,
+                    _json(data.get("metadata", {})),
+                    created_at,
+                ),
+            )
+            self._conn.commit()
+        return self.get_commitment_proposal(proposal_id), True
+
+    def get_commitment_proposal(self, proposal_id: str) -> dict[str, Any]:
+        proposal = self._decode_commitment_proposal(
+            self._commitment_proposal_row(proposal_id)
+        )
+        return self._decorate_commitment_proposal(
+            proposal, self.list_commitment_decisions(proposal_id)
+        )
+
+    def get_commitment_proposal_by_external_key(
+        self, external_key: str
+    ) -> dict[str, Any] | None:
+        row = self._conn.execute(
+            """SELECT * FROM supernet_commitment_proposals
+            WHERE external_key=?""",
+            (external_key,),
+        ).fetchone()
+        return (
+            None
+            if row is None
+            else self.get_commitment_proposal(str(row["id"]))
+        )
+
+    def get_commitment_proposal_by_event(
+        self, proposal_event_id: str
+    ) -> dict[str, Any] | None:
+        row = self._conn.execute(
+            """SELECT * FROM supernet_commitment_proposals
+            WHERE proposal_event_id=?""",
+            (proposal_event_id,),
+        ).fetchone()
+        return (
+            None
+            if row is None
+            else self.get_commitment_proposal(str(row["id"]))
+        )
+
+    def list_commitment_proposals(
+        self,
+        *,
+        limit: int = 100_000,
+        offset: int = 0,
+        intent_event_id: str | None = None,
+        action_id: str | None = None,
+    ) -> list[dict[str, Any]]:
+        clauses: list[str] = []
+        parameters: list[Any] = []
+        if intent_event_id is not None:
+            clauses.append("intent_event_id=?")
+            parameters.append(intent_event_id)
+        if action_id is not None:
+            clauses.append("action_id=?")
+            parameters.append(action_id)
+        where = "" if not clauses else " WHERE " + " AND ".join(clauses)
+        rows = self._conn.execute(
+            """SELECT id FROM supernet_commitment_proposals"""
+            + where
+            + " ORDER BY created_at,id LIMIT ? OFFSET ?",
+            (*parameters, limit, offset),
+        ).fetchall()
+        return [self.get_commitment_proposal(str(row["id"])) for row in rows]
+
+    def append_commitment_decision(
+        self, proposal_id: str, data: dict[str, Any]
+    ) -> tuple[dict[str, Any], bool]:
+        """Append one required participant's source-preserved proposal decision."""
+
+        proposal = self.get_commitment_proposal(proposal_id)
+        participant_id = str(data.get("participant_id", "")).strip()
+        if not participant_id:
+            raise ValueError("participant_id is required")
+        if participant_id not in proposal["required_participant_ids"]:
+            raise ValueError(
+                f"Participant {participant_id} is not required by proposal {proposal_id}"
+            )
+        decision = str(data.get("decision", "")).strip().upper()
+        allowed = {"ACCEPT", "REJECT", "WITHDRAW"}
+        if decision not in allowed:
+            raise ValueError(
+                "decision must be one of ACCEPT, REJECT, or WITHDRAW"
+            )
+        decision_event_id = str(data["decision_event_id"])
+        self._event_row(decision_event_id)
+
+        decision_id = str(data.get("id") or uuid.uuid4())
+        created_at = utcnow()
+        with self._lock:
+            existing = self._conn.execute(
+                """SELECT * FROM supernet_commitment_decisions
+                WHERE decision_event_id=?""",
+                (decision_event_id,),
+            ).fetchone()
+            if existing is not None:
+                current = self._decode_commitment_decision(existing)
+                if (
+                    current["proposal_id"] != proposal_id
+                    or current["participant_id"] != participant_id
+                    or current["decision"] != decision
+                ):
+                    raise ValueError(
+                        "decision_event_id already indexes a different decision"
+                    )
+                return current, False
+            self._conn.execute(
+                """INSERT INTO supernet_commitment_decisions(
+                    id,proposal_id,decision_event_id,participant_id,decision,
+                    resource_offers,constraints,metadata,created_at
+                ) VALUES(?,?,?,?,?,?,?,?,?)""",
+                (
+                    decision_id,
+                    proposal_id,
+                    decision_event_id,
+                    participant_id,
+                    decision,
+                    _json(data.get("resource_offers", [])),
+                    _json(data.get("constraints", [])),
+                    _json(data.get("metadata", {})),
+                    created_at,
+                ),
+            )
+            self._conn.commit()
+        return self.get_commitment_decision(decision_id), True
+
+    def get_commitment_decision(self, decision_id: str) -> dict[str, Any]:
+        row = self._conn.execute(
+            """SELECT * FROM supernet_commitment_decisions WHERE id=?""",
+            (decision_id,),
+        ).fetchone()
+        if row is None:
+            raise KeyError(f"Supernet commitment decision {decision_id} not found")
+        return self._decode_commitment_decision(row)
+
+    def list_commitment_decisions(
+        self, proposal_id: str
+    ) -> list[dict[str, Any]]:
+        self._commitment_proposal_row(proposal_id)
+        rows = self._conn.execute(
+            """SELECT * FROM supernet_commitment_decisions
+            WHERE proposal_id=? ORDER BY seq""",
+            (proposal_id,),
+        ).fetchall()
+        return [self._decode_commitment_decision(row) for row in rows]
+
+    def commitment_proposal_receipt(self, proposal_id: str) -> dict[str, Any]:
+        proposal = self.get_commitment_proposal(proposal_id)
+        return {
+            "proposal_id": proposal_id,
+            "proposal": proposal,
+            **{
+                key: proposal[key]
+                for key in (
+                    "status",
+                    "latest_decisions",
+                    "decisions",
+                    "decision_history",
+                    "required_participant_ids",
+                    "accepted_participant_ids",
+                    "rejected_participant_ids",
+                    "withdrawn_participant_ids",
+                    "pending_participant_ids",
+                    "binding",
+                    "transferable",
+                    "currency_issued",
+                    "interactions_gated",
+                    "security_enforcement",
+                    "truth_issued",
+                )
+            },
+        }
+
+    def get_commitment_proposal_receipt(
+        self, proposal_id: str
+    ) -> dict[str, Any]:
+        return self.commitment_proposal_receipt(proposal_id)
 
     def create_field_stage(self, data: dict[str, Any]) -> dict[str, Any]:
         stage_id = str(uuid.uuid4())
@@ -496,18 +774,47 @@ class SupernetIntegrationStore:
                 "SELECT COUNT(*) AS n FROM supernet_visual_closure_receipts"
             ).fetchone()["n"]
         )
+        commitment_proposals = int(
+            self._conn.execute(
+                "SELECT COUNT(*) AS n FROM supernet_commitment_proposals"
+            ).fetchone()["n"]
+        )
+        commitment_decisions = int(
+            self._conn.execute(
+                "SELECT COUNT(*) AS n FROM supernet_commitment_decisions"
+            ).fetchone()["n"]
+        )
         current: dict[str, int] = {}
         verdicts: dict[str, int] = {}
         for event in self.list_events(limit=200_000):
             current[event["current_stage"]] = current.get(event["current_stage"], 0) + 1
             verdicts[event["current_verdict"]] = verdicts.get(event["current_verdict"], 0) + 1
+        commitment_statuses = {
+            status: 0
+            for status in (
+                "PROPOSED",
+                "PARTIAL",
+                "ACCEPTED",
+                "REJECTED",
+                "WITHDRAWN",
+            )
+        }
+        for proposal in self.list_commitment_proposals(limit=200_000):
+            status = proposal["status"]
+            commitment_statuses[status] += 1
         return {
             "events": events,
             "states": states,
             "stages": stages,
             "visual_closure_receipts": visual_closure_receipts,
+            "commitment_proposals": commitment_proposals,
+            "commitment_decisions": commitment_decisions,
             **{f"stage_{key.lower()}": value for key, value in current.items()},
             **{f"verdict_{key.lower()}": value for key, value in verdicts.items()},
+            **{
+                f"commitment_status_{key.lower()}": value
+                for key, value in commitment_statuses.items()
+            },
         }
 
     def _event_row(self, event_id: str) -> sqlite3.Row:
@@ -517,6 +824,77 @@ class SupernetIntegrationStore:
         if row is None:
             raise KeyError(f"Supernet integration event {event_id} not found")
         return row
+
+    def _commitment_proposal_row(self, proposal_id: str) -> sqlite3.Row:
+        row = self._conn.execute(
+            "SELECT * FROM supernet_commitment_proposals WHERE id=?", (proposal_id,)
+        ).fetchone()
+        if row is None:
+            raise KeyError(f"Supernet commitment proposal {proposal_id} not found")
+        return row
+
+    @staticmethod
+    def _decorate_commitment_proposal(
+        proposal: dict[str, Any], history: list[dict[str, Any]]
+    ) -> dict[str, Any]:
+        latest: dict[str, dict[str, Any]] = {}
+        for item in history:
+            latest[item["participant_id"]] = item
+
+        required = proposal["required_participant_ids"]
+        latest_required = {
+            participant_id: latest[participant_id]
+            for participant_id in required
+            if participant_id in latest
+        }
+        accepted = [
+            participant_id
+            for participant_id in required
+            if latest.get(participant_id, {}).get("decision") == "ACCEPT"
+        ]
+        rejected = [
+            participant_id
+            for participant_id in required
+            if latest.get(participant_id, {}).get("decision") == "REJECT"
+        ]
+        withdrawn = [
+            participant_id
+            for participant_id in required
+            if latest.get(participant_id, {}).get("decision") == "WITHDRAW"
+        ]
+        pending = [
+            participant_id
+            for participant_id in required
+            if participant_id not in latest
+        ]
+        if rejected:
+            status = "REJECTED"
+        elif withdrawn:
+            status = "WITHDRAWN"
+        elif required and len(accepted) == len(required):
+            status = "ACCEPTED"
+        elif latest_required:
+            status = "PARTIAL"
+        else:
+            status = "PROPOSED"
+
+        return {
+            **proposal,
+            "status": status,
+            "latest_decisions": latest_required,
+            "decisions": list(latest_required.values()),
+            "decision_history": list(history),
+            "accepted_participant_ids": accepted,
+            "rejected_participant_ids": rejected,
+            "withdrawn_participant_ids": withdrawn,
+            "pending_participant_ids": pending,
+            "binding": False,
+            "transferable": False,
+            "currency_issued": False,
+            "interactions_gated": False,
+            "security_enforcement": "OPEN",
+            "truth_issued": False,
+        }
 
     @staticmethod
     def _decode_event(row: sqlite3.Row) -> dict[str, Any]:
@@ -546,6 +924,29 @@ class SupernetIntegrationStore:
             data[key] = _loads(data[key], default)
         for key in ("rigidity_receipt", "determined_form", "unitary_path_partition"):
             data[key] = _loads(data[key], None)
+        return data
+
+    @staticmethod
+    def _decode_commitment_proposal(row: sqlite3.Row) -> dict[str, Any]:
+        data = dict(row)
+        for key, default in (
+            ("target_event_ids", []),
+            ("required_participant_ids", []),
+            ("resource_conditions", []),
+            ("metadata", {}),
+        ):
+            data[key] = _loads(data[key], default)
+        return data
+
+    @staticmethod
+    def _decode_commitment_decision(row: sqlite3.Row) -> dict[str, Any]:
+        data = dict(row)
+        for key, default in (
+            ("resource_offers", []),
+            ("constraints", []),
+            ("metadata", {}),
+        ):
+            data[key] = _loads(data[key], default)
         return data
 
     @staticmethod

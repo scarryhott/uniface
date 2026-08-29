@@ -48,4 +48,4 @@ from . import proof_completion_runtime as _proof_completion_runtime
 from . import natural_interface_runtime as _natural_interface_runtime
 
 __all__ = ["RuntimeConfig", "ClosureSupernetRuntime"]
-__version__ = "3.8.0"
+__version__ = "3.9.0"
