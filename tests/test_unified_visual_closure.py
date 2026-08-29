@@ -92,6 +92,12 @@ def test_one_sense_executes_and_persists_all_visual_closure_functions(
         assert persisted.json()["id"] == closure["id"]
         assert len(client.get("/supernet/visual-closure/receipts").json()) == 2
 
+        default_interface = client.get("/supernet/interface")
+        assert default_interface.status_code == 200, default_interface.text
+        default_body = default_interface.json()
+        assert default_body["focus_event"]["id"] == second["event_id"]
+        assert default_body["visual_closure"]["id"] == closure["id"]
+
         third = offer(client, "person-c")
         learned = third["sense_receipt"]["visual_closure"]["slearn"]
         assert learned["relation_memory_before"]["SAME_LITERAL_EQUATION"] >= 1
