@@ -342,6 +342,15 @@ class LiveSenseManager:
         prior_visual_receipts = (
             self.runtime.supernet_store.list_visual_closure_receipts()
         )
+        commitment_proposals = (
+            self.runtime.supernet_store.list_commitment_proposals(limit=100_000)
+        )
+        living_problems = self.runtime.living_store.list_problems(limit=100_000)
+        living_actions = self.runtime.living_store.list_actions(limit=100_000)
+        living_returns = self.runtime.living_store.list_action_returns(limit=100_000)
+        field_occurrences = self.runtime.store.list_occurrences(
+            limit=200_000, offset=0
+        )
         current_event = self.runtime.supernet_store.get_event(event_id)
         source_occurrences = [
             self.runtime.store.get_occurrence(occurrence_id)
@@ -355,6 +364,11 @@ class LiveSenseManager:
             selection_reading=selection_reading,
             prior_receipts=prior_visual_receipts,
             field_events=self.runtime.supernet_store.list_events(limit=200_000),
+            field_occurrences=field_occurrences,
+            commitment_proposals=commitment_proposals,
+            living_problems=living_problems,
+            living_actions=living_actions,
+            living_returns=living_returns,
         )
         visual_signature = hashlib.sha256(
             _stable(
@@ -368,6 +382,20 @@ class LiveSenseManager:
                     "slearn_memory": learned_relation_memory(
                         prior_visual_receipts
                     ),
+                    "commitment_proposals": [
+                        {
+                            "id": proposal["id"],
+                            "status": proposal["status"],
+                            "decision_event_ids": [
+                                item["decision_event_id"]
+                                for item in proposal.get("decision_history", [])
+                            ],
+                        }
+                        for proposal in commitment_proposals
+                    ],
+                    "living_return_ids": [
+                        item["id"] for item in living_returns
+                    ],
                 }
             ).encode("utf-8")
         ).hexdigest()

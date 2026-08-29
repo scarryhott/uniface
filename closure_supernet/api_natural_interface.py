@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
@@ -8,11 +9,25 @@ from fastapi.responses import HTMLResponse
 from . import api_proof_completion as base_api
 from .complete_interface_finish import FINAL_COMPLETE_SUPERNET_HTML
 from .complete_interface_models import (
+    AuthorshipRole,
     CompleteInterfaceCollective,
+    CompleteInterfaceCommitmentDecision,
+    CompleteInterfaceCommitmentProposal,
+    CompleteInterfaceCommitmentReturn,
     CompleteInterfaceOffer,
     CompleteInterfaceSelection,
 )
 from .config import RuntimeConfig
+from .living_models import (
+    ActionReturnCreate,
+    ActionState,
+    ActionStateChange,
+    CollectiveActionCreate,
+    ParticipantCreate,
+    PerspectiveCreate,
+    ProblemCreate,
+    Visibility,
+)
 from .natural_interface_models import NaturalInterfaceAdmissionCreate
 from .selection_models import SelectionReadingCreate
 from .supernet_models import IntegrationLens, ResourceEnvelope
@@ -24,7 +39,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
         return app
     runtime = app.state.runtime
     app.state.natural_interface_routes_attached = True
-    app.version = "3.8.0"
+    app.version = "3.9.0"
     app.description += (
         "; the public Black Mirror is the complete operational surface of the one "
         "Supernet field: exact source → interaction-time Sense → interpretation/admission "
@@ -37,6 +52,160 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
         "no subsystem page is required for core interaction, no background autonomy is "
         "required, and presentation never manufactures truth."
     )
+
+    def _event_for_occurrence(occurrence_id: str) -> dict[str, Any]:
+        event = runtime.supernet_store.get_by_external_key(
+            f"occurrence:{occurrence_id}"
+        )
+        if event is None:
+            runtime.supernet_integrator.reconcile_occurrences()
+            event = runtime.supernet_store.get_by_external_key(
+                f"occurrence:{occurrence_id}"
+            )
+        if event is None:
+            raise KeyError(f"No Supernet event preserves occurrence {occurrence_id}")
+        return event
+
+    def _participant_for_handle(handle: str) -> dict[str, Any]:
+        normalized = handle.strip()
+        for participant in runtime.living_store.list_participants(limit=20_000):
+            metadata = participant.get("metadata", {})
+            if metadata.get("supernet_handle") == normalized:
+                return participant
+            if participant.get("display_name") == normalized:
+                return participant
+        return runtime.living.create_participant(
+            ParticipantCreate(
+                display_name=normalized,
+                metadata={
+                    "supernet_handle": normalized,
+                    "identity_assurance": "DEVELOPMENT_ATTESTATION",
+                },
+            )
+        )
+
+    def _problem_for_intent(event: dict[str, Any]) -> dict[str, Any]:
+        occurrence_ids = set(event.get("exact_source_ids", []))
+        for problem in runtime.living_store.list_problems(limit=20_000):
+            if problem.get("occurrence_id") in occurrence_ids:
+                return problem
+        raise ValueError(
+            "The intent has no living problem receipt; create it through /supernet/interface/intents"
+        )
+
+    def _perspective_for_handle(
+        participant: dict[str, Any], label: str | None
+    ) -> dict[str, Any] | None:
+        if not label:
+            return None
+        for perspective in runtime.living_store.list_perspectives(limit=20_000):
+            if (
+                perspective.get("participant_id") == participant["id"]
+                and perspective.get("label") == label
+            ):
+                return perspective
+        return runtime.living.create_perspective(
+            PerspectiveCreate(
+                participant_id=participant["id"],
+                label=label,
+                description="Local Supernet coordination perspective",
+                visibility=Visibility.PUBLIC,
+                metadata={
+                    "supernet_perspective_handle": label,
+                    "identity_assurance": "DEVELOPMENT_ATTESTATION",
+                },
+            )
+        )
+
+    def _proposal_view(proposal_id: str) -> dict[str, Any]:
+        proposal = runtime.supernet_store.get_commitment_proposal(proposal_id)
+        def expose_decision(item: dict[str, Any]) -> dict[str, Any]:
+            return {
+                **item,
+                "authorship_role": item.get("metadata", {}).get(
+                    "authorship_role", "HUMAN"
+                ),
+                "authored_by": item.get("metadata", {}).get(
+                    "authored_by", item.get("participant_id")
+                ),
+            }
+
+        proposal = {
+            **proposal,
+            "decisions": [
+                expose_decision(item) for item in proposal.get("decisions", [])
+            ],
+            "decision_history": [
+                expose_decision(item)
+                for item in proposal.get("decision_history", [])
+            ],
+            "settled": False,
+            "non_transferable": True,
+            "identity_assurance": "DEVELOPMENT_ATTESTATION",
+        }
+        action_id = proposal.get("action_id")
+        returned = (
+            runtime.living_store.list_action_returns(
+                action_id=action_id, limit=20_000
+            )
+            if action_id
+            else []
+        )
+        if returned:
+            proposal = {
+                **proposal,
+                "status_before_return": proposal["status"],
+                "status": "RETURNED",
+                "return_ids": [item["id"] for item in returned],
+            }
+        return proposal
+
+    def _coordination_for_event(event_id: str) -> dict[str, Any] | None:
+        interface = runtime.natural_interface.select(focus_event_id=event_id)
+        return (interface.get("visual_closure") or {}).get("coordination")
+
+    async def _sense_commitment_lineage(
+        proposal_id: str,
+        *,
+        primary_event_id: str,
+    ) -> dict[str, Any]:
+        """Refresh every participant-facing receipt in one commitment lineage."""
+
+        proposal = _proposal_view(proposal_id)
+        lineage_event_ids = [
+            proposal.get("intent_event_id"),
+            proposal.get("proposal_event_id"),
+            *[
+                item.get("decision_event_id")
+                for item in proposal.get("decision_history", [])
+            ],
+        ]
+        action_id = proposal.get("action_id")
+        if action_id:
+            for item in runtime.living_store.list_action_returns(
+                action_id=action_id, limit=20_000
+            ):
+                lineage_event_ids.append(
+                    _event_for_occurrence(item["occurrence_id"])["id"]
+                )
+        ordered = list(
+            dict.fromkeys(
+                str(event_id)
+                for event_id in [*lineage_event_ids, primary_event_id]
+                if event_id
+            )
+        )
+        ordered = [
+            event_id for event_id in ordered if event_id != primary_event_id
+        ] + [primary_event_id]
+        primary_sense: dict[str, Any] | None = None
+        for event_id in ordered:
+            sense = await runtime.live_sense.sense_event(event_id)
+            if event_id == primary_event_id:
+                primary_sense = sense
+        if primary_sense is None:
+            raise ValueError("The commitment lineage has no primary Sense event")
+        return primary_sense
 
     async def _complete_page() -> str:
         return FINAL_COMPLETE_SUPERNET_HTML
@@ -82,6 +251,14 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
             "slearn_memory_changes_future_candidate_priority": True,
             "tokenomic_units_derived_from_equality_classes": True,
             "visual_network_drives_derived_next_operation": True,
+            "intent_to_explainable_paths_on_primary_surface": True,
+            "mutual_authorship_receipt_on_primary_surface": True,
+            "independent_human_commitment_decisions": True,
+            "ai_can_suggest_but_cannot_bind": True,
+            "commitment_tokens_gate_interactions": False,
+            "commitment_tokens_transferable": False,
+            "commitment_currency_issued": False,
+            "commitment_security_enforcement": "OPEN",
             "primary_surface_component_selector": False,
             "projective_fold_derived_from_live_level": True,
             "projective_fold_is_user_selected": False,
@@ -184,6 +361,9 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
             adapter_label: str | None = None
             metadata = dict(data.metadata)
             relation_hints = list(data.relation_hints)
+            relation_hints.extend(data.intent_tags)
+            if data.location_label:
+                relation_hints.append(data.location_label)
             if data.sheaf is not None:
                 adapter_label = "embodied"
                 metadata.update(
@@ -212,8 +392,11 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                 exact_text=data.exact_text,
                 authored_by=data.authored_by,
                 form_label=data.form_label,
+                source_location=data.location_label,
                 perspective_id=data.perspective_id,
                 affected_perspectives=data.affected_perspectives,
+                capabilities=data.capabilities,
+                constraints=data.constraints,
                 relation_hints=list(dict.fromkeys(relation_hints)),
                 adapter_label=adapter_label,
                 parent_event_ids=(
@@ -224,6 +407,14 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                 ),
                 metadata={
                     **metadata,
+                    "coordination_kind": (
+                        data.coordination_kind.value
+                        if data.coordination_kind is not None
+                        else None
+                    ),
+                    "authorship_role": data.authorship_role.value,
+                    "location_label": data.location_label,
+                    "intent_tags": data.intent_tags,
                     "primary_black_mirror": True,
                     "exact_source_precedes_lens": True,
                     "truth_issued": False,
@@ -241,12 +432,448 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                 "perspective_id": data.perspective_id,
                 "sheaf": data.sheaf.value if data.sheaf else None,
                 "lens": adapter_label or "source",
+                "coordination": (
+                    result.get("sense_receipt", {})
+                    .get("visual_closure", {})
+                    .get("coordination")
+                ),
                 "truth_issued": False,
             }
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/supernet/interface/intents")
+    async def complete_interface_intent(
+        data: CompleteInterfaceOffer,
+    ) -> dict[str, Any]:
+        """Preserve one thought as both a living problem and canonical intent event."""
+
+        try:
+            participant = _participant_for_handle(data.authored_by)
+            perspective = _perspective_for_handle(
+                participant, data.perspective_id
+            )
+            metadata = {
+                **data.metadata,
+                "authored_by": data.authored_by,
+                "form_label": "intent",
+                "coordination_kind": "intent",
+                "authorship_role": AuthorshipRole.HUMAN.value,
+                "location_label": data.location_label,
+                "intent_tags": data.intent_tags,
+                "capabilities": data.capabilities,
+                "constraints": data.constraints,
+                "relation_hints": list(
+                    dict.fromkeys(
+                        [
+                            *data.relation_hints,
+                            *data.intent_tags,
+                            *([data.location_label] if data.location_label else []),
+                        ]
+                    )
+                ),
+                "primary_black_mirror": True,
+                "exact_source_precedes_lens": True,
+                "truth_issued": False,
+            }
+            title = " ".join(data.exact_text.strip().split())[:300]
+            problem = await runtime.living.create_problem(
+                ProblemCreate(
+                    title=title,
+                    exact_text=data.exact_text,
+                    situations=[data.exact_text, *data.constraints],
+                    created_by=participant["id"],
+                    perspective_id=(perspective or {}).get("id"),
+                    visibility=Visibility.PUBLIC,
+                    affected_perspectives=data.affected_perspectives,
+                    metadata=metadata,
+                )
+            )
+            event = _event_for_occurrence(problem["occurrence_id"])
+            sense = await runtime.live_sense.sense_event(event["id"])
+            coordination = sense["visual_closure"].get("coordination")
+            if coordination is not None:
+                coordination["intent"]["problem_id"] = problem["id"]
+            return {
+                "event_id": event["id"],
+                "focus_event_id": event["id"],
+                "problem_id": problem["id"],
+                "participant": participant,
+                "problem": problem,
+                "sense_receipt": sense,
+                "coordination": coordination,
+                "truth_issued": False,
+            }
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/supernet/interface/commitments")
+    async def complete_interface_commitment_proposal(
+        data: CompleteInterfaceCommitmentProposal,
+    ) -> dict[str, Any]:
+        """Create exact proposal terms and an OPEN collective action.
+
+        The token is only a non-transferable receipt over selected paths.  It
+        cannot consent, settle currency, block interaction, or issue truth.
+        """
+
+        try:
+            intent = runtime.supernet_store.get_event(data.intent_event_id)
+            problem = _problem_for_intent(intent)
+            targets = [
+                runtime.supernet_store.get_event(event_id)
+                for event_id in data.target_event_ids
+            ]
+            required = list(data.required_participant_ids)
+            if not required:
+                required = [
+                    data.proposed_by,
+                    *[
+                        str(target.get("authored_by") or "") for target in targets
+                    ],
+                ]
+            required = list(dict.fromkeys(item for item in required if item))
+            if data.proposed_by not in required:
+                required.insert(0, data.proposed_by)
+            participant_rows = [_participant_for_handle(item) for item in required]
+            signature = hashlib.sha256(
+                "\x1f".join(
+                    [
+                        data.intent_event_id,
+                        *sorted(data.target_event_ids),
+                        data.proposed_by,
+                        data.exact_terms,
+                    ]
+                ).encode("utf-8")
+            ).hexdigest()
+            external_key = data.external_key or f"coordination-proposal:{signature}"
+            existing = runtime.supernet_store.get_commitment_proposal_by_external_key(
+                external_key
+            )
+            if existing is not None:
+                proposal = _proposal_view(existing["id"])
+                event_id = proposal["proposal_event_id"]
+                return {
+                    "proposal": proposal,
+                    "coordination": _coordination_for_event(event_id),
+                    "truth_issued": False,
+                }
+
+            action = await runtime.living.create_action(
+                CollectiveActionCreate(
+                    problem_id=problem["id"],
+                    title=data.title,
+                    exact_intent=data.exact_terms,
+                    created_by=_participant_for_handle(data.proposed_by)["id"],
+                    participant_ids=[item["id"] for item in participant_rows],
+                    affected_perspectives=list(
+                        dict.fromkeys(
+                            [
+                                *required,
+                                *(
+                                    [data.perspective_id]
+                                    if data.perspective_id
+                                    else []
+                                ),
+                            ]
+                        )
+                    ),
+                    open_assumptions=list(
+                        dict.fromkeys(
+                            [*data.open_assumptions, *data.resource_conditions]
+                        )
+                    ),
+                    visibility=Visibility.PUBLIC,
+                    metadata={
+                        **data.metadata,
+                        "authored_by": data.proposed_by,
+                        "form_label": "coordination agreement proposal",
+                        "coordination_kind": "agreement",
+                        "authorship_role": AuthorshipRole.HUMAN.value,
+                        "source_intent_event_id": data.intent_event_id,
+                        "target_event_ids": data.target_event_ids,
+                        "required_participant_ids": required,
+                        "resource_conditions": data.resource_conditions,
+                        "constraints": data.resource_conditions,
+                        "relation_hints": [
+                            "mutual authorship",
+                            "agreement proposal",
+                            "human consent required",
+                        ],
+                        "parent_event_ids": [
+                            data.intent_event_id,
+                            *data.target_event_ids,
+                        ],
+                        "causal_predecessor_ids": [
+                            data.intent_event_id,
+                            *data.target_event_ids,
+                        ],
+                        "supernet_external_key": (
+                            f"coordination-proposal-event:{signature}"
+                        ),
+                        "token_transferable": False,
+                        "currency_issued": False,
+                        "interactions_gated": False,
+                        "binding": False,
+                        "truth_issued": False,
+                    },
+                )
+            )
+            proposal_event = _event_for_occurrence(action["occurrence_id"])
+            stored, _created = runtime.supernet_store.create_commitment_proposal(
+                {
+                    "proposal_event_id": proposal_event["id"],
+                    "intent_event_id": data.intent_event_id,
+                    "action_id": action["id"],
+                    "target_event_ids": data.target_event_ids,
+                    "required_participant_ids": required,
+                    "resource_conditions": data.resource_conditions,
+                    "external_key": external_key,
+                    "metadata": {
+                        **data.metadata,
+                        "title": data.title,
+                        "proposed_by": data.proposed_by,
+                        "perspective_id": data.perspective_id,
+                        "identity_assurance": "DEVELOPMENT_ATTESTATION",
+                    },
+                }
+            )
+            sense = await _sense_commitment_lineage(
+                stored["id"], primary_event_id=proposal_event["id"]
+            )
+            return {
+                "proposal": _proposal_view(stored["id"]),
+                "action": action,
+                "sense_receipt": sense,
+                "coordination": sense["visual_closure"].get("coordination"),
+                "truth_issued": False,
+            }
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/supernet/interface/commitments/{proposal_id}/decisions")
+    async def complete_interface_commitment_decision(
+        proposal_id: str,
+        data: CompleteInterfaceCommitmentDecision,
+    ) -> dict[str, Any]:
+        """Append one self-authored human decision; AI/token roles cannot decide."""
+
+        try:
+            if data.authorship_role != AuthorshipRole.HUMAN:
+                raise ValueError(
+                    f"{data.authorship_role.value} cannot accept or reject human consent"
+                )
+            if data.participant_id != data.authored_by:
+                raise ValueError("A participant may record only their own decision")
+            proposal = runtime.supernet_store.get_commitment_proposal(proposal_id)
+            if data.participant_id not in proposal["required_participant_ids"]:
+                raise ValueError(
+                    f"Participant {data.participant_id} is not required by this proposal"
+                )
+            signature = hashlib.sha256(
+                "\x1f".join(
+                    [
+                        proposal_id,
+                        data.participant_id,
+                        data.decision.value,
+                        data.exact_text,
+                    ]
+                ).encode("utf-8")
+            ).hexdigest()
+            event_result = await runtime.interact_with_event(
+                proposal["proposal_event_id"],
+                ResourceEnvelope(
+                    exact_text=data.exact_text,
+                    authored_by=data.authored_by,
+                    form_label=f"commitment decision {data.decision.value.lower()}",
+                    source_id="supernet-coordination",
+                    perspective_id=data.perspective_id or data.participant_id,
+                    problem_id=runtime.supernet_store.get_event(
+                        proposal["intent_event_id"]
+                    ).get("problem_id"),
+                    action_id=proposal.get("action_id"),
+                    capabilities=data.resource_offers,
+                    constraints=data.constraints,
+                    relation_hints=[
+                        "human commitment decision",
+                        data.decision.value,
+                        "mutual authorship",
+                    ],
+                    parent_event_ids=[proposal["proposal_event_id"]],
+                    causal_predecessor_ids=[proposal["proposal_event_id"]],
+                    affected_perspectives=proposal["required_participant_ids"],
+                    external_key=data.external_key
+                    or f"coordination-decision:{signature}",
+                    metadata={
+                        **data.metadata,
+                        "coordination_kind": "commitment",
+                        "authorship_role": AuthorshipRole.HUMAN.value,
+                        "commitment_proposal_id": proposal_id,
+                        "source_intent_event_id": proposal["intent_event_id"],
+                        "participant_id": data.participant_id,
+                        "decision": data.decision.value,
+                        "resource_offers": data.resource_offers,
+                        "token_transferable": False,
+                        "currency_issued": False,
+                        "interactions_gated": False,
+                        "binding": False,
+                        "truth_issued": False,
+                    },
+                ),
+            )
+            runtime.supernet_store.append_commitment_decision(
+                proposal_id,
+                {
+                    "decision_event_id": event_result["event_id"],
+                    "participant_id": data.participant_id,
+                    "decision": data.decision.value,
+                    "resource_offers": data.resource_offers,
+                    "constraints": data.constraints,
+                    "metadata": {
+                        **data.metadata,
+                        "authorship_role": AuthorshipRole.HUMAN.value,
+                        "authored_by": data.authored_by,
+                    },
+                },
+            )
+            current = _proposal_view(proposal_id)
+            action_id = current.get("action_id")
+            if action_id:
+                action = runtime.living_store.get_action(action_id)
+                actor = _participant_for_handle(data.participant_id)
+                if current["status"] == "ACCEPTED" and action[
+                    "current_state"
+                ] != ActionState.COMMITTED:
+                    runtime.living.transition_action(
+                        action_id,
+                        ActionStateChange(
+                            state=ActionState.COMMITTED,
+                            reason=(
+                                "Every required participant has a separate latest ACCEPT receipt"
+                            ),
+                            actor_id=actor["id"],
+                        ),
+                    )
+                elif current["status"] in {"REJECTED", "WITHDRAWN"} and action[
+                    "current_state"
+                ] == ActionState.COMMITTED:
+                    runtime.living.transition_action(
+                        action_id,
+                        ActionStateChange(
+                            state=ActionState.REOPENED,
+                            reason="A required participant rejected or withdrew",
+                            actor_id=actor["id"],
+                        ),
+                    )
+            sense = await _sense_commitment_lineage(
+                proposal_id, primary_event_id=event_result["event_id"]
+            )
+            return {
+                "proposal": _proposal_view(proposal_id),
+                "decision_event_id": event_result["event_id"],
+                "sense_receipt": sense,
+                "coordination": sense["visual_closure"].get("coordination"),
+                "truth_issued": False,
+            }
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/supernet/interface/commitments/{proposal_id}/returns")
+    async def complete_interface_commitment_return(
+        proposal_id: str,
+        data: CompleteInterfaceCommitmentReturn,
+    ) -> dict[str, Any]:
+        """Return a real or explicitly simulated consequence to the same field."""
+
+        try:
+            proposal = _proposal_view(proposal_id)
+            if proposal["status"] != "ACCEPTED":
+                raise ValueError(
+                    "ACT and RETURN remain token-gated until every required human accepts"
+                )
+            action_id = proposal.get("action_id")
+            if not action_id:
+                raise ValueError("The proposal has no collective action")
+            participant = _participant_for_handle(data.authored_by)
+            returned = await runtime.living.add_action_return(
+                action_id,
+                ActionReturnCreate(
+                    exact_text=data.exact_text,
+                    authored_by=participant["id"],
+                    affected_perspectives=data.affected_perspectives
+                    or proposal["required_participant_ids"],
+                    source_location=data.location_label,
+                    metadata={
+                        **data.metadata,
+                        "authored_by": data.authored_by,
+                        "form_label": "living action return",
+                        "coordination_kind": "living_return",
+                        "authorship_role": data.authorship_role.value,
+                        "commitment_proposal_id": proposal_id,
+                        "source_intent_event_id": proposal["intent_event_id"],
+                        "action_id": action_id,
+                        "location_label": data.location_label,
+                        "parent_event_ids": [proposal["proposal_event_id"]],
+                        "causal_predecessor_ids": [proposal["proposal_event_id"]],
+                        "return_is_not_terminal": True,
+                        "truth_issued": False,
+                    },
+                ),
+            )
+            runtime.living.reintegrate()
+            return_event = _event_for_occurrence(returned["occurrence_id"])
+            sense = await _sense_commitment_lineage(
+                proposal_id, primary_event_id=return_event["id"]
+            )
+            return {
+                "proposal": _proposal_view(proposal_id),
+                "return": returned,
+                "return_event_id": return_event["id"],
+                "sense_receipt": sense,
+                "coordination": sense["visual_closure"].get("coordination"),
+                "truth_issued": False,
+            }
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/supernet/interface/commitments/{proposal_id}")
+    async def complete_interface_commitment(
+        proposal_id: str,
+    ) -> dict[str, Any]:
+        try:
+            proposal = _proposal_view(proposal_id)
+            focus_event_id = proposal["proposal_event_id"]
+            decisions = proposal.get("decision_history", [])
+            if decisions:
+                focus_event_id = decisions[-1]["decision_event_id"]
+            returns = (
+                runtime.living_store.list_action_returns(
+                    action_id=proposal.get("action_id"), limit=20_000
+                )
+                if proposal.get("action_id")
+                else []
+            )
+            if returns:
+                focus_event_id = _event_for_occurrence(
+                    returns[-1]["occurrence_id"]
+                )["id"]
+            return {
+                "proposal": proposal,
+                "coordination": _coordination_for_event(focus_event_id),
+                "truth_issued": False,
+            }
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.post("/supernet/interface/selections")
     async def complete_interface_selection(

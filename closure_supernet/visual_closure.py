@@ -3,6 +3,8 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any
 
+from .coordination import build_coordination_receipt
+
 
 def _unique(values: list[str]) -> list[str]:
     return list(dict.fromkeys(str(value) for value in values if str(value)))
@@ -133,6 +135,11 @@ def build_visual_closure_receipt(
     selection_reading: dict[str, Any] | None,
     prior_receipts: list[dict[str, Any]],
     field_events: list[dict[str, Any]],
+    field_occurrences: list[dict[str, Any]],
+    commitment_proposals: list[dict[str, Any]],
+    living_problems: list[dict[str, Any]],
+    living_actions: list[dict[str, Any]],
+    living_returns: list[dict[str, Any]],
 ) -> dict[str, Any]:
     """Derive one operational UI receipt from one interaction-time Sense.
 
@@ -143,7 +150,10 @@ def build_visual_closure_receipt(
     equality classes that can carry capabilities and constraints together.
     """
 
-    _events_by_id, event_by_occurrence = _event_indexes(field_events)
+    events_by_id, event_by_occurrence = _event_indexes(field_events)
+    occurrences_by_id = {
+        str(occurrence["id"]): occurrence for occurrence in field_occurrences
+    }
     source_ids = [str(item["id"]) for item in source_occurrences]
     current_relation_types = _unique(
         [str(item.get("relation_type") or "OPEN_RELATION") for item in relation_receipts]
@@ -210,6 +220,26 @@ def build_visual_closure_receipt(
                     owner.get("form_label") if owner else "exact occurrence"
                 ),
                 "authored_by": owner.get("authored_by") if owner else "source",
+                "authorship_role": (
+                    owner.get("metadata", {}).get("authorship_role", "HUMAN")
+                    if owner
+                    else "OPEN"
+                ),
+                "coordination_kind": (
+                    owner.get("metadata", {}).get("coordination_kind")
+                    if owner
+                    else None
+                ),
+                "exact_text": (
+                    occurrences_by_id.get(occurrence_id, {}).get("exact_text")
+                ),
+                "location_label": (
+                    owner.get("metadata", {}).get("location_label")
+                    if owner
+                    else None
+                ),
+                "capabilities": owner.get("capabilities", []) if owner else [],
+                "constraints": owner.get("constraints", []) if owner else [],
                 "natural_form": natural_form_for_occurrence.get(occurrence_id),
                 "focus": occurrence_id in source_ids,
                 "current_stage": owner.get("current_stage") if owner else "OPEN",
@@ -244,6 +274,18 @@ def build_visual_closure_receipt(
                 "slearn_memory_before": memory_before.get(
                     str(relation.get("relation_type") or "OPEN_RELATION"), 0
                 ),
+                "why": {
+                    "rationale": relation.get("rationale"),
+                    "admission_reason": relation.get("admission_reason"),
+                    "score": relation.get("score"),
+                    "verdict": str(relation.get("verdict") or "OPEN"),
+                    "candidate_relation_id": relation.get(
+                        "candidate_relation_id"
+                    ),
+                    "source_occurrence": source_occurrence,
+                    "target_occurrence": target_occurrence,
+                    "truth_issued": False,
+                },
             }
         )
 
@@ -258,6 +300,59 @@ def build_visual_closure_receipt(
         if metadata.get("agent_authored") or adapter == "agent"
         else "human-interface"
     )
+    coordination = build_coordination_receipt(
+        event=event,
+        field_events=field_events,
+        field_occurrences=field_occurrences,
+        relation_receipts=relation_receipts,
+        commitment_proposals=commitment_proposals,
+        living_problems=living_problems,
+        living_actions=living_actions,
+        living_returns=living_returns,
+        closure_level_id=str(closure_level["level_id"]),
+    )
+    visible_event_ids = {
+        str(coordination.get("intent", {}).get("event_id") or ""),
+        *[
+            str(path.get("target_event_id") or "")
+            for path in coordination.get("paths", [])
+        ],
+    }
+    existing_node_ids = {str(node["id"]) for node in nodes}
+    for visible_event_id in visible_event_ids:
+        if not visible_event_id or visible_event_id in existing_node_ids:
+            continue
+        visible_event = events_by_id.get(visible_event_id)
+        if visible_event is None:
+            continue
+        occurrence_id = str((visible_event.get("exact_source_ids") or [""])[0])
+        nodes.append(
+            {
+                "id": visible_event_id,
+                "occurrence_id": occurrence_id,
+                "form_label": visible_event.get("form_label"),
+                "authored_by": visible_event.get("authored_by"),
+                "authorship_role": visible_event.get("metadata", {}).get(
+                    "authorship_role", "HUMAN"
+                ),
+                "coordination_kind": visible_event.get("metadata", {}).get(
+                    "coordination_kind"
+                ),
+                "exact_text": occurrences_by_id.get(occurrence_id, {}).get(
+                    "exact_text"
+                ),
+                "location_label": visible_event.get("metadata", {}).get(
+                    "location_label"
+                ),
+                "capabilities": visible_event.get("capabilities", []),
+                "constraints": visible_event.get("constraints", []),
+                "natural_form": natural_form_for_occurrence.get(occurrence_id),
+                "focus": visible_event_id == str(event["id"]),
+                "current_stage": visible_event.get("current_stage"),
+                "current_verdict": visible_event.get("current_verdict"),
+            }
+        )
+        existing_node_ids.add(visible_event_id)
 
     return {
         "protocol": "closure.supernet/visual-translational-closure-v1",
@@ -338,6 +433,7 @@ def build_visual_closure_receipt(
             "canonical_pixel_layout_selected": False,
             "network_ui_is_operational_surface": True,
         },
+        "coordination": coordination,
         "network_return": {
             "open": True,
             "current_stage": event.get("current_stage"),

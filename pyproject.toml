@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "closure-supernet"
-version = "3.8.0"
-description = "One visual-translational Supernet closure joining Black Mirror Sense, SLEARN memory, AI translation, equality-class resources, and network return"
+version = "3.9.0"
+description = "Intent-to-agreement Supernet joining explainable AI paths, mutual authorship, scoped commitment receipts, action returns, and visual translational closure"
 readme = "UNIFIED_SUPERNET_RUNTIME.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}

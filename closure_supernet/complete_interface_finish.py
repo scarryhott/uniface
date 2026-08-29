@@ -5,13 +5,268 @@ from .complete_interface_web import COMPLETE_NATURAL_SUPERNET_HTML
 
 _FINISH_PATCH = r'''
 <style>
-@media(min-width:901px){.composer{grid-template-columns:110px 100px 150px minmax(300px,1fr);align-items:stretch}.composer textarea{grid-column:auto}}
+@media(min-width:901px){.composer{grid-template-columns:110px 150px 130px 170px minmax(300px,1fr);align-items:stretch}.composer textarea{grid-column:auto}}
+.composer select,.composer input{border:1px solid #30434c;border-radius:10px;background:#081014;padding:9px;color:inherit;min-width:0}
+.coordination-block{background:linear-gradient(180deg,#0b141a,#081014)}.coordination-intent{border:1px solid #354b56;border-radius:11px;padding:10px;background:#060b0f;margin-bottom:9px}.coordination-intent strong{display:block;font-size:12px;color:#e7f0f3}.coordination-intent p{margin:5px 0 0;color:#a7bac2;font-size:10px;line-height:1.45;white-space:pre-wrap}.coordination-meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.coordination-chip{border:1px solid #39505b;border-radius:999px;padding:3px 6px;color:#a9bec7;font:8px ui-monospace,SFMono-Regular,monospace}.coordination-paths{display:flex;flex-direction:column;gap:8px}.coordination-path{border:1px solid #2d424d;border-radius:11px;padding:9px;background:#091218}.coordination-path.selected{border-color:#75e0b4;box-shadow:0 0 0 1px #75e0b433 inset}.coordination-path-head{display:flex;align-items:flex-start;gap:7px}.coordination-path-head strong{font-size:11px;line-height:1.35}.coordination-path-head button{margin-left:auto;white-space:nowrap;font-size:9px;padding:6px 8px}.coordination-kind{border:1px solid currentColor;border-radius:999px;padding:3px 5px;font:8px ui-monospace,SFMono-Regular,monospace}.coordination-kind.intent{color:#b59cff}.coordination-kind.person{color:#72d8e8}.coordination-kind.project{color:#75e0b4}.coordination-kind.resource{color:#e0b35a}.coordination-kind.agreement{color:#f1a8de}.coordination-kind.return{color:#9bb6ff}.coordination-why{margin-top:7px;padding:7px;border-left:2px solid #54717e;background:#071015;color:#99adb6;font-size:9px;line-height:1.45}.coordination-why strong{display:block;color:#dce8eb;margin-bottom:3px}.coordination-list{margin:5px 0 0;padding-left:16px}.coordination-list li{margin:2px 0}.coordination-form{margin-top:10px;border-top:1px solid #263a43;padding-top:10px}.coordination-form label{display:block;color:#91a6af;font-size:9px;margin:7px 0 4px}.coordination-form input,.coordination-form textarea{display:block;width:100%;border:1px solid #30434c;border-radius:8px;background:#060b0f;padding:8px;color:inherit;font-size:10px;font-family:inherit}.coordination-form textarea{resize:vertical;min-height:66px}.coordination-form button{margin-top:8px}.coordination-form button[disabled]{opacity:.38;cursor:not-allowed}.coordination-status{border:1px solid #2d424d;border-radius:9px;padding:8px;margin-top:9px;background:#071015;font-size:9px;line-height:1.5}.coordination-status strong{color:#e5f0f2}.coordination-note{color:#8297a0;font-size:9px;line-height:1.45;margin-top:8px}.coordination-empty{border:1px dashed #334954;border-radius:9px;padding:9px;color:#879ba4;font-size:9px;line-height:1.45}.coordination-path-line{fill:none;stroke:#72d8e8;stroke-width:4;stroke-opacity:.72;stroke-dasharray:8 7;marker-end:url(#arrow);pointer-events:stroke;cursor:pointer}.coordination-path-line.selected{stroke:#75e0b4;stroke-width:6;stroke-opacity:1}.coordination-role-label{fill:#e9f2f3;font:8px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4;pointer-events:none}.coordination-path-label{fill:#b9cbd1;font:8px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4;pointer-events:none}
+@media(max-width:900px) and (min-width:621px){.shell{grid-template-rows:58px minmax(0,1fr) 142px}.drawer{bottom:142px}.composer{grid-template-columns:repeat(4,minmax(80px,1fr))}.composer textarea{grid-column:1/-1;height:54px}}
+@media(max-width:620px){.shell{grid-template-rows:54px minmax(0,1fr) 218px}.drawer{bottom:218px}.composer{grid-template-columns:1fr 1fr}.composer textarea{grid-column:1/-1;height:54px}}
 .level-summary{border:1px solid #2d4049;border-radius:10px;background:#081014;padding:9px;font-size:10px;line-height:1.5}.level-summary strong{color:#e5f0f2}.level-summary .seam{color:#b59cff}.level-summary .open{color:#e0b35a}.level-classes{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.level-class{border:1px solid #334a55;border-radius:999px;padding:3px 6px;color:#a9bdc5}.level-fold{pointer-events:none}.level-axis{stroke:#6b8791;stroke-width:2}.level-seam{stroke:#b59cff;stroke-width:2;stroke-dasharray:5 6}.level-return{stroke:#75e0b4;stroke-width:1.6;stroke-dasharray:5 7;fill:none}.level-point{fill:#eaf4f4;stroke:#72d8e8;stroke-width:5}.level-text{fill:#c8d7dc;font:10px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4}.level-small{fill:#8fa2aa;font:9px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4}.closure-class-ring{fill:none;stroke-width:3;stroke-opacity:.72;pointer-events:none}.closure-translation{fill:none;stroke-width:3;stroke-opacity:.9;marker-end:url(#arrow);pointer-events:none}.closure-memory{stroke-dasharray:4 5}.closure-unit{fill:#071015;stroke:#75e0b4;stroke-width:2;pointer-events:none}.closure-unit-text,.closure-next-text{fill:#d9e7eb;font:9px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4;pointer-events:none}.closure-next{fill:none;stroke:#75e0b4;stroke-width:2;stroke-dasharray:6 6;pointer-events:none}.closure-operational{color:#75e0b4}.closure-open{color:#e0b35a}
 </style>
 <script>
 (() => {
   const priorRunAction = runAction;
   const priorRender = render;
+
+  const coordinationKind=document.createElement('select');
+  coordinationKind.id='coordinationKind';
+  coordinationKind.setAttribute('aria-label','Coordination kind');
+  coordinationKind.innerHTML='<option value="intent">Intent</option><option value="person">Person</option><option value="project">Project</option><option value="resource">Resource</option>';
+  const coordinationLocation=document.createElement('input');
+  coordinationLocation.id='coordinationLocation';
+  coordinationLocation.setAttribute('aria-label','Optional coarse locality');
+  coordinationLocation.placeholder='locality (optional)';
+  coordinationLocation.value=localStorage.getItem('supernet-coarse-locality')||'';
+  const formInput=document.getElementById('form');
+  const thoughtInput=document.getElementById('text');
+  formInput.type='hidden';
+  thoughtInput.insertAdjacentElement('beforebegin',coordinationKind);
+  thoughtInput.insertAdjacentElement('beforebegin',coordinationLocation);
+
+  const coordinationPlaceholders={
+    intent:'What do you want to understand, create, or do?',
+    person:'Describe the perspective, capability, or collaboration being offered…',
+    project:'Describe the project and the interaction it invites…',
+    resource:'Describe the resource, capability, commitment, or constraint…'
+  };
+  function updateCoordinationComposer(){
+    const kind=coordinationKind.value||'intent';
+    formInput.value=kind;
+    thoughtInput.placeholder=coordinationPlaceholders[kind];
+    document.getElementById('integrate').textContent=kind==='intent'?'Translate thought':`Offer ${kind}`;
+    document.getElementById('interact').textContent='Continue interaction';
+  }
+  coordinationKind.addEventListener('change',updateCoordinationComposer);
+  coordinationLocation.addEventListener('change',()=>localStorage.setItem('supernet-coarse-locality',coordinationLocation.value.trim()));
+  coordinationKind.value=['intent','person','project','resource'].includes(formInput.value)?formInput.value:'intent';
+  updateCoordinationComposer();
+
+  let selectedCoordinationPathId=null;
+  const coordinationEdits={pathId:null,title:'',terms:'',resources:'',decision:'',returned:''};
+  const coordinationBlock=document.createElement('section');
+  coordinationBlock.className='block coordination-block';
+  coordinationBlock.id='coordinationBlock';
+  coordinationBlock.innerHTML='<h2>Thought → paths → agreement → return</h2><div id="coordinationSurface"><div class="coordination-empty">Offer a thought, person, project, or resource to derive explainable interaction paths.</div></div>';
+  document.getElementById('drawer').prepend(coordinationBlock);
+
+  function asList(value){
+    if(Array.isArray(value))return value.filter(item=>item!==null&&item!==undefined&&String(item).trim());
+    if(value===null||value===undefined||String(value).trim()==='')return [];
+    return [value];
+  }
+  function uniqueStrings(values){return [...new Set(asList(values).flatMap(asList).map(value=>String(value).trim()).filter(Boolean))]}
+  function roleClass(value){return String(value||'OPEN').toLowerCase().replace(/[^a-z0-9_-]/g,'-')}
+  function coordinationActor(){return document.getElementById('author').value.trim()||'participant'}
+  function coordinationPerspective(){return document.getElementById('perspective')?.value?.trim()||coordinationActor()}
+  function currentCoordination(){return receipt?.visual_closure?.coordination||null}
+  function pathTarget(path){return String(path?.target_event_id||path?.event_id||path?.id||'')}
+  function selectedPath(coordination){return (coordination?.paths||[]).find(path=>pathTarget(path)===selectedCoordinationPathId)||null}
+  function readable(value){
+    if(value===null||value===undefined)return '';
+    if(typeof value==='string'||typeof value==='number'||typeof value==='boolean')return String(value);
+    if(Array.isArray(value))return value.map(readable).filter(Boolean).join(' · ');
+    return String(value.label||value.reason||value.summary||value.status||value.state||value.name||'');
+  }
+  function chips(values){return uniqueStrings(values).map(value=>`<span class="coordination-chip">${esc(value)}</span>`).join('')}
+  function whyPath(path){
+    const why=path?.why;
+    if(typeof why==='string')return `<div class="coordination-why"><strong>Why this path</strong>${esc(why)}</div>`;
+    const rows=[];
+    if(why?.relation_type)rows.push(['relation',why.relation_type]);
+    if(why?.rationale||why?.reason||why?.summary)rows.push(['reason',why.rationale||why.reason||why.summary]);
+    if(why?.admission_reason)rows.push(['admission',why.admission_reason]);
+    if(why?.verdict)rows.push(['verdict',why.verdict]);
+    if(why?.score!==null&&why?.score!==undefined)rows.push(['score',why.score]);
+    const matched=uniqueStrings([why?.matched_features,why?.matched_terms]);
+    if(matched.length)rows.push(['matched evidence',matched.join(' · ')]);
+    const limits=uniqueStrings(why?.limitations);
+    if(limits.length)rows.push(['limits',limits.join(' · ')]);
+    if(!rows.length)rows.push(['status','The current receipt admits this source-reversible interaction path; no stronger explanation is recorded.']);
+    return `<div class="coordination-why"><strong>Why this path</strong><ul class="coordination-list">${rows.map(([name,value])=>`<li><span style="color:#d3e0e4">${esc(name)}</span> · ${esc(value)}</li>`).join('')}</ul></div>`;
+  }
+  function captureCoordinationEdits(){
+    const fields={coordinationAgreementTitle:'title',coordinationAgreementTerms:'terms',coordinationResourceConditions:'resources',coordinationDecisionText:'decision',coordinationReturnText:'returned'};
+    for(const [id,key] of Object.entries(fields)){
+      const field=document.getElementById(id);if(field)coordinationEdits[key]=field.value;
+    }
+  }
+  function rememberCoordinationField(id,key){
+    const field=document.getElementById(id);if(!field)return;
+    field.addEventListener('input',()=>coordinationEdits[key]=field.value);
+  }
+  function coordinationFocusFrom(result){
+    return result?.focus_event_id||result?.event_id||result?.intent_event_id||result?.integration_event_id||result?.decision_event_id||result?.return_event_id||result?.event?.id||result?.intent?.event_id||result?.decision?.decision_event_id||result?.proposal?.proposal_event_id||result?.coordination?.local_global?.local_event_id||null;
+  }
+  function commitmentFormAvailable(gate){
+    if(!gate)return true;
+    if(gate.commitment_form_available!==undefined)return Boolean(gate.commitment_form_available);
+    if(gate.interface_form_available!==undefined)return Boolean(gate.interface_form_available);
+    if(gate.allowed!==undefined)return Boolean(gate.allowed);
+    return String(gate.status||'OPEN').toUpperCase()!=='BLOCKED';
+  }
+
+  function chooseCoordinationPath(coordination,path){
+    selectedCoordinationPathId=pathTarget(path);
+    coordinationEdits.pathId=selectedCoordinationPathId;
+    const intent=coordination?.intent||{};
+    const draft=coordination?.draft_agreement||{};
+    coordinationEdits.title=String(draft.title||`${readable(intent.label)||'Shared intent'} ↔ ${readable(path.label)||readable(path.kind)||'interaction'}`);
+    coordinationEdits.terms=String(draft.exact_terms||draft.terms||'');
+    coordinationEdits.resources=uniqueStrings([draft.resource_conditions,path.constraints]).join('\n');
+    document.getElementById('drawer').classList.add('open');
+    render();
+  }
+
+  async function proposeCoordinationAgreement(coordination,path){
+    const title=document.getElementById('coordinationAgreementTitle')?.value.trim()||'';
+    const exactTerms=document.getElementById('coordinationAgreementTerms')?.value.trim()||'';
+    if(!path)return toast('Choose one explainable path first',true);
+    if(!title||!exactTerms)return toast('Name the proposal and preserve its exact terms',true);
+    const draft=coordination?.draft_agreement||{};
+    const mutual=coordination?.mutual_authorship||{};
+    const draftAppliesToPath=asList(draft.target_event_ids).map(String).includes(pathTarget(path));
+    const required=uniqueStrings([
+      draftAppliesToPath?draft.required_participant_ids:[],
+      path.required_participant_ids,
+      path.authored_by,
+      mutual.required_participant_ids,
+      coordinationPerspective()
+    ]);
+    const resourceConditions=(document.getElementById('coordinationResourceConditions')?.value||'').split('\n').map(value=>value.trim()).filter(Boolean);
+    try{
+      const result=await api('/supernet/interface/commitments',{method:'POST',body:JSON.stringify({
+        intent_event_id:String(coordination?.intent?.event_id||receipt?.focus_event?.id||focus||''),
+        target_event_ids:[pathTarget(path)],
+        exact_terms:exactTerms,
+        title,
+        proposed_by:coordinationActor(),
+        perspective_id:coordinationPerspective(),
+        required_participant_ids:required,
+        resource_conditions:resourceConditions
+      })});
+      const nextFocus=coordinationFocusFrom(result);if(nextFocus)focus=nextFocus;
+      toast('Agreement proposal entered the shared field');
+      await refresh();
+    }catch(error){toast(error.message,true)}
+  }
+
+  async function decideCoordinationProposal(proposal){
+    const proposalId=String(proposal?.id||proposal?.proposal_id||'');
+    const exact=document.getElementById('coordinationDecisionText')?.value.trim()||'';
+    const participantId=coordinationActor();
+    if(!proposalId)return toast('No active proposal is available',true);
+    if(!exact)return toast('Preserve your exact acceptance text',true);
+    try{
+      const result=await api(`/supernet/interface/commitments/${encodeURIComponent(proposalId)}/decisions`,{method:'POST',body:JSON.stringify({
+        participant_id:participantId,
+        authored_by:participantId,
+        decision:'ACCEPT',
+        exact_text:exact,
+        authorship_role:'HUMAN',
+        perspective_id:coordinationPerspective()
+      })});
+      const nextFocus=coordinationFocusFrom(result);if(nextFocus)focus=nextFocus;
+      coordinationEdits.decision='';
+      toast('Your acceptance returned as explicit authorship');
+      await refresh();
+    }catch(error){toast(error.message,true)}
+  }
+
+  async function returnCoordinationConsequence(proposal){
+    const proposalId=String(proposal?.id||proposal?.proposal_id||'');
+    const exact=document.getElementById('coordinationReturnText')?.value.trim()||'';
+    if(!proposalId)return toast('No accepted proposal is available',true);
+    if(!exact)return toast('Describe what actually returned',true);
+    try{
+      const result=await api(`/supernet/interface/commitments/${encodeURIComponent(proposalId)}/returns`,{method:'POST',body:JSON.stringify({
+        exact_text:exact,
+        participant_id:coordinationPerspective(),
+        authored_by:coordinationActor(),
+        authorship_role:'HUMAN',
+        perspective_id:coordinationPerspective(),
+        affected_perspectives:[coordinationPerspective()],
+        location_label:coordinationLocation.value.trim()||null
+      })});
+      const nextFocus=coordinationFocusFrom(result);if(nextFocus)focus=nextFocus;
+      coordinationEdits.returned='';
+      toast('Living return re-entered the visual field');
+      await refresh();
+    }catch(error){toast(error.message,true)}
+  }
+
+  function renderCoordination(coordination){
+    captureCoordinationEdits();
+    const surface=document.getElementById('coordinationSurface');
+    if(!coordination){
+      surface.innerHTML='<div class="coordination-empty">Offer a thought, person, project, or resource to derive explainable interaction paths. Ordinary interaction remains available.</div>';
+      return;
+    }
+    const intent=coordination.intent||{};
+    const paths=coordination.paths||[];
+    if(selectedCoordinationPathId&&!paths.some(path=>pathTarget(path)===selectedCoordinationPathId))selectedCoordinationPathId=null;
+    const draft=coordination.draft_agreement||{};
+    const draftTargets=uniqueStrings(draft.target_event_ids);
+    if(!selectedCoordinationPathId&&draftTargets.some(id=>paths.some(path=>pathTarget(path)===id)))selectedCoordinationPathId=draftTargets.find(id=>paths.some(path=>pathTarget(path)===id))||null;
+    const path=selectedPath(coordination);
+    if(path&&coordinationEdits.pathId!==pathTarget(path)){
+      coordinationEdits.pathId=pathTarget(path);
+      coordinationEdits.title=String(draft.title||`${readable(intent.label)||'Shared intent'} ↔ ${readable(path.label)||readable(path.kind)||'interaction'}`);
+      coordinationEdits.terms=String(draft.exact_terms||draft.terms||'');
+      coordinationEdits.resources=uniqueStrings([draft.resource_conditions,path.constraints]).join('\n');
+    }
+    const intentText=readable(intent.exact_text||intent.text||intent.label)||'Current source-preserved thought';
+    const intentLocation=readable(intent.location_label||intent.location);
+    const intentKind=readable(intent.kind||intent.coordination_kind||'INTENT');
+    const pathCards=paths.length?paths.map(item=>{
+      const id=pathTarget(item),selected=id===selectedCoordinationPathId;
+      const kind=readable(item.kind||'OPEN');
+      const location=readable(item.location_label||item.location);
+      const distance=item.distance_km!==null&&item.distance_km!==undefined?`${item.distance_km} km`:'';
+      const resources=chips([item.capabilities,item.constraints]);
+      return `<article class="coordination-path ${selected?'selected':''}" data-target-event="${esc(id)}"><div class="coordination-path-head"><span class="coordination-kind ${roleClass(kind)}">${esc(kind)}</span><strong>${esc(readable(item.label)||id.slice(0,8))}</strong><button type="button" data-coordination-path="${esc(id)}" aria-pressed="${selected?'true':'false'}">${selected?'Path chosen':'Choose path'}</button></div>${location||distance?`<div class="coordination-meta">${location?`<span class="coordination-chip">locality · ${esc(location)}</span>`:''}${distance?`<span class="coordination-chip">authored distance · ${esc(distance)}</span>`:''}</div>`:''}${whyPath(item)}${resources?`<div class="coordination-meta">${resources}</div>`:''}</article>`;
+    }).join(''):'<div class="coordination-empty">No explainable path is admitted yet. Continue interacting or add a person, project, or resource; no suggestion is manufactured.</div>';
+    const operator=coordination.natural_form_operator||{};
+    const operatorLabel=readable(operator.natural_form||operator.label||operator.name||operator.form||operator);
+    const operatorReason=readable(operator.reason||operator.derived_from||operator.global_transition);
+    const gate=coordination.token_gate||{};
+    const gateStatus=readable(gate.status)||'OPEN';
+    const gateReason=readable(gate.reason||gate.explanation);
+    const formAvailable=commitmentFormAvailable(gate);
+    const active=coordination.active_proposal||null;
+    const mutual=coordination.mutual_authorship||{};
+    const mutualRoles=uniqueStrings([mutual.roles,(mutual.contributors||[]).map(item=>item.role_label||item.role)]);
+    const livingReturn=coordination.living_return||{};
+    const activeId=String(active?.id||active?.proposal_id||'');
+    const activeState=readable(active?.state||active?.status||active?.current_state)||'OPEN';
+    const decisions=asList(active?.decisions||mutual.decisions);
+    const currentParticipant=coordinationActor();
+    const alreadyAccepted=decisions.some(decision=>String(decision?.participant_id||decision?.authored_by||'')===currentParticipant&&String(decision?.decision||decision?.status||'').toUpperCase()==='ACCEPT');
+    const accepted=Boolean(active?.accepted===true||mutual.all_required_accepted===true||mutual.accepted===true||livingReturn.available===true||['ACCEPTED','RETURNED'].includes(String(activeState).toUpperCase()));
+    const requiredIds=uniqueStrings(active?.required_participant_ids||mutual.required_participant_ids);
+    const returnedText=readable(livingReturn.exact_text||livingReturn.text||livingReturn.summary||livingReturn.status);
+    const agreementForm=path?`<div class="coordination-form"><h3 style="font-size:11px;margin:0">Draft an agreement on this path</h3><p class="coordination-note">The exact terms remain a proposal until required participants author decisions.</p><label for="coordinationAgreementTitle">Proposal title</label><input id="coordinationAgreementTitle"><label for="coordinationAgreementTerms">Exact agreement terms</label><textarea id="coordinationAgreementTerms" placeholder="Roles, action, timing, consent, and what remains OPEN…"></textarea><label for="coordinationResourceConditions">Resource conditions · one per line</label><textarea id="coordinationResourceConditions" placeholder="time, money, access, tools, constraints…"></textarea><button type="button" id="coordinationPropose" ${formAvailable?'':'disabled'}>Propose agreement</button>${formAvailable?'':`<p class="coordination-note">This commitment form is not admitted by the current gate. Interaction stays open.</p>`}</div>`:'<div class="coordination-form"><div class="coordination-empty">Choose a path to open its editable agreement form.</div></div>';
+    const activeProposal=active?`<div class="coordination-form"><h3 style="font-size:11px;margin:0">Active proposal</h3><div class="coordination-status"><strong>${esc(readable(active.title)||activeId.slice(0,8))}</strong><br>state · ${esc(activeState)}${active.exact_terms?`<br><br>${esc(active.exact_terms)}`:''}${asList(active.resource_conditions).length?`<div class="coordination-meta">${chips(active.resource_conditions)}</div>`:''}${requiredIds.length?`<br>required authors · ${esc(requiredIds.join(' · '))}`:''}${decisions.length?`<br>authored decisions · ${esc(decisions.length)}`:''}</div>${!accepted&&!alreadyAccepted?`<label for="coordinationDecisionText">Your exact participant decision</label><textarea id="coordinationDecisionText" placeholder="State what you accept as your participation…"></textarea><button type="button" id="coordinationAccept">Record my acceptance</button>`:`<p class="coordination-note">${accepted?'Required acceptance is present in the current receipt.':'Your acceptance is already present.'}</p>`}${accepted?`<label for="coordinationReturnText">What actually happened?</label><textarea id="coordinationReturnText" placeholder="Return the observed consequence, including differences from the proposal…"></textarea><button type="button" id="coordinationReturn">Return what happened</button>`:''}${returnedText?`<div class="coordination-status"><strong>Living return</strong><br>${esc(returnedText)}</div>`:''}</div>`:'';
+    surface.innerHTML=`<div class="coordination-intent"><span class="coordination-kind ${roleClass(intentKind)}">${esc(intentKind)}</span><strong>${esc(intentText)}</strong>${intentLocation?`<p>locality · ${esc(intentLocation)}</p>`:''}<div class="coordination-meta">${chips(intent.capabilities||[])}${chips(intent.constraints||[])}</div></div>${operatorLabel?`<div class="coordination-status"><strong>Natural-form operator · ${esc(operatorLabel)}</strong>${operatorReason?`<br>${esc(operatorReason)}`:''}</div>`:''}<h3 style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8ea0aa;margin:11px 0 7px">Explainable paths</h3><div class="coordination-paths">${pathCards}</div><div class="coordination-status"><strong>Commitment interface gate · ${esc(gateStatus)}</strong>${gateReason?`<br>${esc(gateReason)}`:''}<br>AI may expose paths; participants author decisions. Ordinary interaction remains available.</div>${mutualRoles.length?`<div class="coordination-status"><strong>Mutual authorship · ${esc(mutualRoles.join(' · '))}</strong><br>No canonical author replaces the preserved contributions.</div>`:''}${agreementForm}${activeProposal}`;
+    surface.querySelectorAll('[data-coordination-path]').forEach(button=>button.addEventListener('click',()=>{
+      const chosen=paths.find(item=>pathTarget(item)===button.dataset.coordinationPath);if(chosen)chooseCoordinationPath(coordination,chosen);
+    }));
+    const fields={coordinationAgreementTitle:['title',coordinationEdits.title],coordinationAgreementTerms:['terms',coordinationEdits.terms],coordinationResourceConditions:['resources',coordinationEdits.resources],coordinationDecisionText:['decision',coordinationEdits.decision],coordinationReturnText:['returned',coordinationEdits.returned]};
+    for(const [id,[key,value]] of Object.entries(fields)){
+      const field=document.getElementById(id);if(field){field.value=value||'';rememberCoordinationField(id,key)}
+    }
+    document.getElementById('coordinationPropose')?.addEventListener('click',()=>proposeCoordinationAgreement(coordination,path));
+    document.getElementById('coordinationAccept')?.addEventListener('click',()=>decideCoordinationProposal(active));
+    document.getElementById('coordinationReturn')?.addEventListener('click',()=>returnCoordinationConsequence(active));
+  }
 
   const levelBlock=document.createElement('section');
   levelBlock.className='block';
@@ -52,6 +307,7 @@ _FINISH_PATCH = r'''
   function drawUnifiedClosure(closure){
     if(!closure?.visual_network)return;
     const visual=closure.visual_network;
+    const coordination=closure.coordination||{};
     const world=document.getElementById('world');
     const topology=receipt?.topology||{};
     const positions=positionMap(topology);
@@ -65,6 +321,11 @@ _FINISH_PATCH = r'''
     const classes=visual.natural_form_classes||[];
     const classByEvent={};
     classes.forEach((unit,index)=>(unit.member_event_ids||[]).forEach(id=>classByEvent[id]=index));
+    const roleByEvent={};
+    const intentEventId=String(coordination.intent?.event_id||closure.source_event_id||'');
+    if(intentEventId)roleByEvent[intentEventId]=String(coordination.intent?.kind||coordination.intent?.coordination_kind||'INTENT');
+    for(const path of coordination.paths||[]){const target=pathTarget(path);if(target)roleByEvent[target]=String(path.kind||'OPEN')}
+    const roleColors={intent:'#b59cff',person:'#72d8e8',project:'#75e0b4',resource:'#e0b35a',agreement:'#f1a8de',return:'#9bb6ff'};
     for(const edge of visual.edges||[]){
       const a=positions[edge.source],b=positions[edge.target];if(!a||!b)continue;
       const remembered=Number(edge.slearn_memory_before||0)>0;
@@ -72,10 +333,27 @@ _FINISH_PATCH = r'''
       const tx=(a.x+b.x)/2,ty=(a.y+b.y)/2-9;
       const edgeLabel=svg('text',{x:tx,y:ty,class:'closure-next-text'});edgeLabel.textContent=`AI · ${edge.relation_type}${remembered?' · SLEARN':''}`;world.append(edgeLabel);
     }
+    const intentPosition=positions[intentEventId];
+    if(intentPosition){
+      for(const path of coordination.paths||[]){
+        const targetId=pathTarget(path),targetPosition=positions[targetId];if(!targetPosition||targetId===intentEventId)continue;
+        const chosen=targetId===selectedCoordinationPathId;
+        const line=svg('path',{d:`M ${intentPosition.x} ${intentPosition.y} L ${targetPosition.x} ${targetPosition.y}`,class:`coordination-path-line ${chosen?'selected':''}`,'data-coordination-target':targetId});
+        line.addEventListener('click',()=>chooseCoordinationPath(coordination,path));
+        line.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();chooseCoordinationPath(coordination,path)}});
+        line.setAttribute('tabindex','0');
+        line.setAttribute('aria-label',`Choose ${String(path.kind||'interaction')} path to ${String(path.label||targetId)}`);
+        world.append(line);
+        const pathLabel=svg('text',{x:(intentPosition.x+targetPosition.x)/2,y:(intentPosition.y+targetPosition.y)/2+13,class:'coordination-path-label'});pathLabel.textContent=`${String(path.kind||'PATH').toUpperCase()} · ${String(path.label||targetId).slice(0,30)}`;world.append(pathLabel);
+      }
+    }
     for(const node of nodes){
       const p=positions[node.id];if(!p)continue;
       const classIndex=classByEvent[node.id]??0;
-      world.append(svg('circle',{cx:p.x,cy:p.y,r:node.focus?42:33,class:'closure-class-ring',stroke:`hsl(${(classIndex*97+175)%360} 68% 67%)`}));
+      const role=roleByEvent[node.id];
+      const stroke=roleColors[roleClass(role)]||`hsl(${(classIndex*97+175)%360} 68% 67%)`;
+      world.append(svg('circle',{cx:p.x,cy:p.y,r:node.focus?42:33,class:`closure-class-ring ${role?'coordination-role-'+roleClass(role):''}`,stroke}));
+      if(role){const roleLabel=svg('text',{x:p.x,y:p.y-(node.focus?50:41),class:'coordination-role-label'});roleLabel.textContent=role.toUpperCase();world.append(roleLabel)}
       const form=svg('text',{x:p.x,y:p.y+(node.focus?53:44),class:'closure-unit-text'});form.textContent=node.natural_form||'OPEN';world.append(form);
     }
     classes.forEach((unit,index)=>{
@@ -97,6 +375,8 @@ _FINISH_PATCH = r'''
     priorRender();
     const level=receipt?.closure_level;
     const closure=receipt?.visual_closure;
+    renderCoordination(closure?.coordination||null);
+    document.getElementById('interact').disabled=false;
     const target=document.getElementById('closureLevel');
     if(!level){
       target.innerHTML='<div class="level-summary">No focused occurrence: the admission level remains OPEN.</div>';
@@ -125,6 +405,46 @@ _FINISH_PATCH = r'''
   };
 
   continueButton.onclick=()=>runAction(continueButton.dataset.action||'interact');
+
+  integrate = async function(parent=false){
+    const exactText=thoughtInput.value.trim();
+    if(!exactText)return toast('Enter a thought or exact offered form',true);
+    const kind=coordinationKind.value||'intent';
+    const locationLabel=coordinationLocation.value.trim()||null;
+    const perspectiveId=coordinationPerspective();
+    const parentId=parent&&focus?focus:null;
+    const body={
+      exact_text:exactText,
+      authored_by:coordinationActor(),
+      form_label:kind,
+      coordination_kind:kind,
+      location_label:locationLabel,
+      perspective_id:perspectiveId,
+      parent_event_id:parentId,
+      affected_perspectives:[perspectiveId],
+      relation_hints:uniqueStrings([kind,locationLabel]),
+      metadata:{
+        coordination_kind:kind,
+        location_label:locationLabel,
+        intent_to_agreement_surface:true,
+        primary_black_mirror:true,
+        truth_issued:false
+      }
+    };
+    const path=!parent&&kind==='intent'?'/supernet/interface/intents':'/supernet/interface/offer';
+    try{
+      const result=await api(path,{method:'POST',body:JSON.stringify(body)});
+      const nextFocus=coordinationFocusFrom(result);if(nextFocus)focus=nextFocus;
+      thoughtInput.value='';
+      selectedCoordinationPathId=null;
+      Object.assign(coordinationEdits,{pathId:null,title:'',terms:'',resources:'',decision:'',returned:''});
+      toast(parent?'Interaction returned to the shared field':kind==='intent'?'Thought translated into explainable paths':`${kind[0].toUpperCase()+kind.slice(1)} offered to the shared field`);
+      await refresh();
+    }catch(error){toast(error.message,true)}
+  };
+  document.getElementById('integrate').onclick=()=>integrate(false);
+  document.getElementById('interact').onclick=()=>integrate(true);
+  document.getElementById('interact').disabled=false;
 
   refresh = async function(){
     try{
