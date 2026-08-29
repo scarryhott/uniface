@@ -28,7 +28,8 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
     app.description += (
         "; the public Black Mirror is the complete operational surface of the one "
         "Supernet field: exact source → interaction-time Sense → interpretation/admission "
-        "→ TranslationField → NRRF790 selection/OPEN branching → source-reversible chart "
+        "→ TranslationField → NRRF790 selection/OPEN branching → NRRF825 equality level "
+        "→ source-reversible 0↔∞ projective fold "
         "→ direct relation, refinement, return, reopening or collective continuation. "
         "Perspective and eight-sheaf placement are carried on the same canonical event; "
         "no subsystem page is required for core interaction, no background autonomy is "
@@ -73,6 +74,10 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
             "direct_turing_return_on_primary_surface": True,
             "direct_collective_trace_on_primary_surface": True,
             "return_and_reopen_resense_on_primary_surface": True,
+            "nrrf825_level_derived_on_primary_surface": True,
+            "projective_fold_derived_from_live_level": True,
+            "projective_fold_is_user_selected": False,
+            "two_person_E2E": "OPEN",
             "core_action_requires_subsystem_page": False,
             "canonical_pixel_layout_selected": False,
             "truth_issued_by_presentation": False,

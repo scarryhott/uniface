@@ -8,6 +8,7 @@ from .axiometry import operator_keys
 from .models import Verdict
 from .natural_interface import NaturalInterfaceManager
 from .natural_interface_models import NaturalChartKind
+from .nrrf825 import closure_level_receipt
 from .selection_models import SelectionReadingCreate
 from .supernet_models import ResourceEnvelope
 from .topology_models import TopologyMode
@@ -29,9 +30,10 @@ class LiveSenseManager:
 
     No new semantic classifier lives here.  The manager runs the project's
     existing UnderstandingAgent classifier, InterpretationProvider,
-    AdmissionPolicy, TranslationField reconciliation and NRRF790 selection
-    audit immediately after a public interaction.  Background autonomy may
-    remain disabled: Sense is caused by the interaction itself.
+    AdmissionPolicy, TranslationField reconciliation, NRRF790 selection, and
+    NRRF825 equality-level closure immediately after a public interaction.
+    Background autonomy may remain disabled: Sense is caused by the
+    interaction itself.
     """
 
     def __init__(self, runtime: "ClosureSupernetRuntime"):
@@ -45,6 +47,10 @@ class LiveSenseManager:
             "uses_existing_admission_policy": True,
             "uses_existing_translation_field": True,
             "uses_existing_nrrf790_selector": True,
+            "derives_nrrf825_equality_level": True,
+            "level_derived_from_admitted_returns": True,
+            "projective_zero_infinity_fold": "tan((π/2)·collapse)",
+            "projective_fold_is_user_selected": False,
             "background_autonomy_required": False,
             "exact_source_preserved_before_sense": True,
             "open_relations_remain_open": True,
@@ -254,6 +260,11 @@ class LiveSenseManager:
                 }
             )
 
+        closure_level = closure_level_receipt(
+            source_occurrence_ids=source_ids,
+            relation_receipts=relation_receipts,
+        )
+
         selection_reading = None
         if candidates:
             signature = hashlib.sha256(
@@ -299,7 +310,9 @@ class LiveSenseManager:
                                 "AdmissionPolicy",
                                 "TranslationField",
                                 "NRRF790",
+                                "NRRF825",
                             ],
+                            "closure_level": closure_level,
                             "truth_issued": False,
                         },
                     )
@@ -313,6 +326,7 @@ class LiveSenseManager:
             "relation_receipts": relation_receipts,
             "admissible_relation_ids": admissible_symbols,
             "selection_reading": selection_reading,
+            "closure_level": closure_level,
             "translation_ids": [row["id"] for row in translations],
             "translation_reconciliation": translation_reconciliation,
             "supernet_reconciliation": supernet_reconciliation,
@@ -321,6 +335,7 @@ class LiveSenseManager:
             "formal_pipeline_reused": True,
             "background_autonomy_required": False,
             "canonical_presentation": None,
+            "two_person_E2E": "OPEN",
             "truth_issued": False,
         }
 
@@ -353,6 +368,7 @@ class LiveNaturalInterfaceManager(NaturalInterfaceManager):
         return {
             "reading": reading,
             "relations": reading.get("metadata", {}).get("relation_receipts", []),
+            "closure_level": reading.get("metadata", {}).get("closure_level"),
         }
 
     def _select_chart(
@@ -378,6 +394,10 @@ class LiveNaturalInterfaceManager(NaturalInterfaceManager):
             f"{item['relation_type']} · {item['verdict']}"
             for item in sense["relations"][:6]
         ]
+        closure_level = sense.get("closure_level") or closure_level_receipt(
+            source_occurrence_ids=event.get("exact_source_ids", []),
+            relation_receipts=sense["relations"],
+        )
         chart.update(
             {
                 "kind": NaturalChartKind.OPEN_SELECTOR.value,
@@ -396,6 +416,8 @@ class LiveNaturalInterfaceManager(NaturalInterfaceManager):
                     "Sense",
                     "interpretation",
                     "truth admission",
+                    f"NRRF825 level {closure_level['endpoint']}",
+                    "0↔∞ projective return seam",
                     state,
                     *relation_layers,
                 ],
@@ -418,6 +440,16 @@ class LiveNaturalInterfaceManager(NaturalInterfaceManager):
             focus_event_id=focus_event_id, perspective_id=perspective_id
         )
         sense = self._sense_context(result.get("focus_event"))
+        event = result.get("focus_event")
+        closure_level = None
+        if event is not None:
+            stored_level = sense.get("closure_level") if sense is not None else None
+            closure_level = stored_level or closure_level_receipt(
+                source_occurrence_ids=(event or {}).get("exact_source_ids", []),
+                relation_receipts=(sense or {}).get("relations", []),
+            )
+        result["closure_level"] = closure_level
+        result["two_person_E2E"] = "OPEN"
         if sense is not None:
             result["sense_depth"] = {
                 "selection_reading_id": sense["reading"]["id"],
@@ -427,7 +459,12 @@ class LiveNaturalInterfaceManager(NaturalInterfaceManager):
                 ],
                 "admissible_relations": sense["reading"]["admissible_symbols"],
                 "relations": sense["relations"],
+                "closure_level_id": closure_level["level_id"],
+                "closure_level_endpoint": closure_level["endpoint"],
                 "formal_pipeline_reused": True,
+                "nrrf825_derived": True,
+                "projective_fold_is_user_selected": False,
+                "two_person_E2E": "OPEN",
                 "truth_issued": False,
             }
         return result

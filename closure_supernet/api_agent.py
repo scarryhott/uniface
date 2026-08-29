@@ -27,10 +27,12 @@ def _compact_interface_with_focus(
         "perspective_id": perspective_id,
         "natural_chart": receipt.get("natural_chart"),
         "sense_depth": receipt.get("sense_depth"),
+        "closure_level": receipt.get("closure_level"),
         "proof_depth": receipt.get("proof_depth"),
         "continuation_depth": receipt.get("continuation_depth"),
         "turing_being_depth": receipt.get("turing_being_depth"),
         "source_fibre": receipt.get("source_fibre", []),
+        "two_person_E2E": "OPEN",
         "truth_issued": False,
     }
 
