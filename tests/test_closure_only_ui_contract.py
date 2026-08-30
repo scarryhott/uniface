@@ -1,669 +1,436 @@
 from __future__ import annotations
 
+from collections import Counter
 from copy import deepcopy
 from pathlib import Path
+from typing import Any
 
 from fastapi.testclient import TestClient
 
-from closure_supernet.api_natural_interface import create_app
+from closure_supernet.api_agent import create_app as create_projection_app
 from closure_supernet.closure_ui_contract import (
-    BLOCKED_STATUS,
     OPEN_STATUS,
+    PROTOCOL,
+    RETURN_ENDPOINT_TEMPLATE,
     SCHEMA,
     WITNESSED_STATUS,
-    derive_closure_ui_contract,
     validate_ui_contract,
 )
 from closure_supernet.config import RuntimeConfig
 
 
-def make_config(tmp_path: Path) -> RuntimeConfig:
+def make_config(
+    tmp_path: Path,
+    *,
+    environment: str = "test",
+    projection_only_mode: bool = False,
+) -> RuntimeConfig:
     return RuntimeConfig(
         database_path=tmp_path / "closure-only-ui.db",
         inbox_dir=tmp_path / "inbox",
         backup_dir=tmp_path / "backups",
         autonomy_enabled=False,
-        environment="test",
+        environment=environment,
+        projection_only_mode=projection_only_mode,
         trusted_hosts=("testserver", "localhost", "127.0.0.1"),
     )
 
 
-def walk(node: dict) -> list[dict]:
-    return [
-        node,
-        *[
-            descendant
-            for child in node.get("children", [])
-            for descendant in walk(child)
-        ],
-    ]
-
-
-def open_values(
-    *,
-    thought: str,
-    author: str = "harry",
-    kind: str = "intent",
-) -> dict[str, str]:
+def return_payload(contract: dict[str, Any], exact_source: str) -> dict[str, Any]:
+    relation = contract["return_relation"]
     return {
-        "author": author,
-        "perspective": author,
-        "coordination_kind": kind,
-        "location": "Berkeley, California",
-        "thought": thought,
-    }
-
-
-def execution_payload(
-    contract: dict,
-    *,
-    action_id: str,
-    values: dict[str, str],
-) -> dict:
-    """Carry only the closure contract's authored execution context."""
-
-    return {
-        "action_id": action_id,
+        "return_relation_id": relation["id"],
         "perspective_id": contract["perspective_id"],
         "focus_event_id": contract["focus_event_id"],
-        "values": values,
+        "exact_source_return": exact_source,
     }
 
 
-def test_empty_surface_is_the_complete_open_perspective_contract(
+def execute_return(
+    client: TestClient,
+    contract: dict[str, Any],
+    exact_source: str,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    response = client.post(
+        RETURN_ENDPOINT_TEMPLATE.format(contract_id=contract["id"]),
+        json=return_payload(contract, exact_source),
+    )
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    return payload, payload["closure_ui_contract"]
+
+
+def assert_equality_fibres_partition_projection(contract: dict[str, Any]) -> None:
+    projection = contract["projection"]
+    states = {state["id"]: state for state in projection["states"]}
+    member_counts = Counter(
+        member
+        for fibre in projection["equality_fibres"]
+        for member in fibre["member_state_ids"]
+    )
+
+    assert member_counts == Counter({state_id: 1 for state_id in states})
+    assert set(projection["reading"]) == set(states)
+    for state_id, state in states.items():
+        assert projection["reading"][state_id] == state["display_fibre_id"]
+    for fibre in projection["equality_fibres"]:
+        displays = {
+            projection["reading"][state_id]
+            for state_id in fibre["member_state_ids"]
+        }
+        assert displays == set(fibre["display_fibre_ids"])
+        assert fibre["closure_fixed"] is True
+
+
+def test_open_projection_has_no_authored_page_or_substitute_content(
     tmp_path: Path,
 ) -> None:
-    app = create_app(make_config(tmp_path))
+    app = create_projection_app(make_config(tmp_path))
     with TestClient(app) as client:
         page = client.get("/")
-        interface = client.get(
-            "/supernet/interface", params={"perspective_id": "harry"}
+        receipt = client.get(
+            "/supernet/interface",
+            params={"perspective_id": "perspective:harry"},
         ).json()
 
-    body_before_program = page.text.split("<body>", 1)[1].split(
-        "<script>", 1
-    )[0].strip()
-    assert body_before_program == (
-        '<main id="closure-contract-root" '
-        "data-closure-only-contract></main>"
-    )
-    for tag in ("<button", "<input", "<textarea", "<select", "<svg", "<h1"):
-        assert tag not in body_before_program
-    for route in (
-        "/supernet/interface/offer",
-        "/supernet/interface/intents",
-        "/supernet/interface/commitments",
-        "/supernet/interface/selections",
-        "/supernet/interface/collective",
+    static_body = page.text.split("<body>", 1)[1].split("<script>", 1)[0].strip()
+    assert static_body == '<main id="translational-mirror"></main>'
+    for visible_element in (
+        "<button",
+        "<input",
+        "<textarea",
+        "<select",
+        "<h1",
+        "<nav",
+        "<form",
     ):
-        assert route not in page.text
-    assert "innerHTML" not in page.text
+        assert visible_element not in static_body
     assert "localStorage" not in page.text
     assert "prompt(" not in page.text
-    assert "validateContract" in page.text
 
-    contract = interface["closure_ui_contract"]
+    assert set(receipt) == {"closure_ui_contract"}
+    contract = receipt["closure_ui_contract"]
+    assert contract["protocol"] == PROTOCOL
     assert contract["schema"] == SCHEMA
     assert contract["status"] == OPEN_STATUS
-    assert contract["perspective_id"] == "harry"
+    assert contract["perspective_id"] == "perspective:harry"
+    assert contract["projection"]["states"] == []
+    assert contract["projection"]["equality_fibres"] == []
+    assert contract["projection"]["translations"] == []
+    assert contract["projection"]["potentials"] == []
+    assert contract["projection"]["reading"] == {}
+    assert contract["natural_form_ids"] == []
+    assert contract["source_return_ids"] == []
     assert contract["claims"]["natural_form_admitted"] is False
-    assert contract["execution"]["source_boundary_actions_only"] is True
-    assert [item["id"] for item in contract["action_bindings"]] == [
-        "offer-source"
-    ]
-    nodes = walk(contract["root"])
-    assert {item["id"] for item in nodes if item["kind"] in {
-        "input", "textarea", "select"
-    }} == {
-        "author",
-        "perspective",
-        "coordination_kind",
-        "location",
-        "thought",
-    }
-    assert all(
-        item["derivation"]["basis"]
-        == "OPEN_AUTHORED_PERSPECTIVE_SOURCE_BOUNDARY"
-        for item in nodes
-    )
+
+    relation = contract["return_relation"]
+    assert relation["kind"] == "SOURCE_PRESERVING_TRANSLATIONAL_RETURN"
+    assert relation["full_surface_aperture"] is True
+    assert relation["visible_control"] is False
+    assert relation["requires_exact_source_return"] is True
+    assert relation["creates_truth_directly"] is False
+    assert contract["execution"]["return_relation_id"] == relation["id"]
+    assert contract["execution"]["only_relation_extension"] is True
+    assert contract["renderer_relation"]["fixed_visible_controls"] == []
+    assert contract["renderer_relation"]["authored_visible_vocabulary"] == []
+    assert contract["renderer_relation"]["fallback_visuals"] == []
+    for removed_app_layer in (
+        "root",
+        "scene",
+        "action_bindings",
+        "fields",
+        "theme",
+        "layout",
+        "controls",
+    ):
+        assert removed_app_layer not in contract
     assert validate_ui_contract(contract)["valid"] is True
 
 
-def test_contract_executor_derives_the_successor_and_rejects_client_semantics(
+def test_universal_return_derives_the_only_visible_source_and_successor_closure(
     tmp_path: Path,
 ) -> None:
-    app = create_app(make_config(tmp_path))
+    app = create_projection_app(make_config(tmp_path))
+    exact_source = "I want to start a community garden with my neighbors."
+
     with TestClient(app) as client:
-        first_page = client.get("/").text
-        contract = client.get(
-            "/supernet/interface", params={"perspective_id": "harry"}
-        ).json()["closure_ui_contract"]
-        values = open_values(thought="I want to start a community garden.")
-        executed = client.post(
-            f"/supernet/interface/contracts/{contract['id']}/execute",
-            json=execution_payload(
-                contract,
-                action_id="offer-source",
-                values=values,
-            ),
-        )
-        assert executed.status_code == 200, executed.text
-        payload = executed.json()
-        successor = payload["closure_ui_contract"]
-        visual = payload["interface"]["visual_closure"]
-
-        assert payload["status"] == "EXECUTED"
-        assert payload["executed"] is True
-        assert successor["status"] == WITNESSED_STATUS
-        assert successor == visual["closure_ui_contract"]
-        assert successor == visual["interface_natural_form"]["render_state"][
-            "closure_ui_contract"
-        ]
-        assert successor["closure_derivation_id"] == visual[
-            "translational_truth_axiometry"
-        ]["id"]
-        assert successor["visual_closure_id"] == visual[
-            "translational_truth_axiometry"
-        ]["visual_truth_closure"]["id"]
-        assert successor["nrrf843_ui_id"] == visual["nrrf843_ui"]["id"]
-        assert successor["interaction_closure_id"] == visual[
-            "interaction_closure"
-        ]["id"]
-        assert visual["unified_truth_runtime"][
-            "closure_ui_contract_id"
-        ] == successor["id"]
-        assert validate_ui_contract(successor)["valid"] is True
-        assert all(
-            item["derivation"]["closure_derivation_id"]
-            == successor["closure_derivation_id"]
-            for item in walk(successor["root"])
-        )
-        assert client.get("/").text == first_page
-
-        event_count = len(
-            app.state.runtime.supernet_store.list_events(limit=100_000)
-        )
-        repeated = client.post(
-            f"/supernet/interface/contracts/{contract['id']}/execute",
-            json=execution_payload(
-                contract,
-                action_id="offer-source",
-                values=values,
-            ),
-        )
-        assert repeated.status_code == 200, repeated.text
-        assert repeated.json()["replayed"] is True
-        assert repeated.json()["result"]["event_id"] == payload["result"][
-            "event_id"
-        ]
-        assert len(
-            app.state.runtime.supernet_store.list_events(limit=100_000)
-        ) == event_count
-
-        changed_open = client.post(
-            f"/supernet/interface/contracts/{contract['id']}/execute",
-            json=execution_payload(
-                contract,
-                action_id="offer-source",
-                values=open_values(
-                    thought="An old source boundary cannot author twice."
-                ),
-            ),
-        )
-        assert changed_open.status_code == 409, changed_open.text
-        assert changed_open.json()["status"] == "STALE_CONTRACT"
-        assert len(
-            app.state.runtime.supernet_store.list_events(limit=100_000)
-        ) == event_count
-
-        altered_schema = client.post(
-            f"/supernet/interface/contracts/{successor['id']}/execute",
-            json=execution_payload(
-                successor,
-                action_id="continue-local-interaction",
-                values={
-                    key: value
-                    for key, value in open_values(
-                        thought="Invite neighbors to plan the first meeting."
-                    ).items()
-                    if key != "location"
-                },
-            ),
-        )
-        assert altered_schema.status_code == 400
-        unknown_action = client.post(
-            f"/supernet/interface/contracts/{successor['id']}/execute",
-            json=execution_payload(
-                successor,
-                action_id="invent-external-action",
-                values=open_values(thought="This must not execute."),
-            ),
-        )
-        assert unknown_action.status_code == 400
-        client_route = client.post(
-            f"/supernet/interface/contracts/{successor['id']}/execute",
-            json={
-                **execution_payload(
-                    successor,
-                    action_id="continue-local-interaction",
-                    values=open_values(thought="This must not execute."),
-                ),
-                "endpoint": "https://example.invalid",
-            },
-        )
-        assert client_route.status_code == 422
-
-        mismatched_values = client.post(
-            f"/supernet/interface/contracts/{successor['id']}/execute",
-            json=execution_payload(
-                successor,
-                action_id="continue-local-interaction",
-                values=open_values(
-                    thought="This cannot escape the active perspective.",
-                    author="mallory",
-                ),
-            ),
-        )
-        assert mismatched_values.status_code == 400
-
-        missing_context = client.post(
-            f"/supernet/interface/contracts/{successor['id']}/execute",
-            json={
-                "action_id": "continue-local-interaction",
-                "values": open_values(thought="No authored context."),
-            },
-        )
-        assert missing_context.status_code == 422
-
-        tampered = deepcopy(successor)
-        tampered["action_bindings"][0]["operation"] = "DELETE_EXTERNAL_STATE"
-        tampered["action_bindings"][0]["endpoint"] = "https://example.invalid"
-        validation = validate_ui_contract(tampered)
-        assert validation["valid"] is False
-        assert validation["closure_only_execution"] is False
-
-
-def test_non_mirror_truth_constraint_produces_no_semantic_fallback(
-    tmp_path: Path,
-) -> None:
-    app = create_app(make_config(tmp_path))
-    with TestClient(app) as client:
-        created = client.post(
-            "/supernet/interface/offer",
-            json={
-                "exact_text": "A source-preserved perspective.",
-                "authored_by": "person-a",
-                "perspective_id": "person-a",
-                "form_label": "intent",
-                "coordination_kind": "intent",
-            },
-        ).json()
-        interface = client.get(
+        open_contract = client.get(
             "/supernet/interface",
-            params={"focus_event_id": created["event_id"]},
-        ).json()
+            params={"perspective_id": "perspective:harry"},
+        ).json()["closure_ui_contract"]
+        payload, successor = execute_return(client, open_contract, exact_source)
 
-    visual = interface["visual_closure"]
-    non_mirror = deepcopy(visual["nrrf843_ui"])
-    non_mirror["status"] = "OPEN_NON_MIRROR_UI"
-    non_mirror["translational_mirror"]["witnessed"] = False
-    non_mirror["truth_constraint_location"]["located"] = False
-    blocked = derive_closure_ui_contract(
-        truth_derivation=visual["translational_truth_axiometry"],
-        nrrf843_ui=non_mirror,
-        nrrf842_journey=visual["nrrf842_journey"],
-        interaction_closure=visual["interaction_closure"],
-        coordination=visual["coordination"],
-        visual_network=visual["visual_network"],
-        source_occurrences=visual["interface_natural_form"]["render_state"][
-            "source_fibre"
-        ],
-        focus_event=interface["focus_event"],
-        field_event_seq=visual["closure_ui_contract"]["field_event_seq"],
+    assert payload["status"] == "RETURNED"
+    assert payload["returned"] is True
+    assert payload["replayed"] is False
+    assert payload["truth_issued"] is False
+    assert "result" not in payload
+    assert "interface" not in payload
+    assert "action" not in payload
+
+    assert successor["status"] == WITNESSED_STATUS
+    assert successor["focus_event_id"] == payload["focus_event_id"]
+    assert successor["claims"]["natural_form_admitted"] is True
+    assert successor["claims"]["truth_issued"] is False
+    assert {state["source_trace"] for state in successor["projection"]["states"]} == {
+        exact_source
+    }
+    assert all(
+        state["source_return_ids"]
+        and state["natural_form_id"] in successor["natural_form_ids"]
+        for state in successor["projection"]["states"]
     )
-    assert blocked["status"] == BLOCKED_STATUS
-    assert blocked["root"]["visible"] is False
-    assert blocked["action_bindings"] == []
-    assert blocked["execution"]["allowed_action_ids"] == []
-    assert blocked["renderer_contract"]["semantic_fallback"] is False
-    assert validate_ui_contract(blocked)["valid"] is True
+    assert successor["renderer_relation"]["visible_words_source"] == (
+        "SOURCE_RETURNS_ONLY"
+    )
+    assert successor["renderer_relation"]["authored_visible_vocabulary"] == []
+    assert successor["return_relation"]["kind"] == (
+        "SOURCE_PRESERVING_TRANSLATIONAL_RETURN"
+    )
+    assert_equality_fibres_partition_projection(successor)
+    visualization = successor["projection"]["visualization"]
+    assert visualization["operator"] == "PERSPECTIVE_RELATION_PROJECTIVE_FOLD"
+    assert visualization["axiometry"]["finite_pole"] == 0
+    assert visualization["axiometry"]["projective_seam"] == (
+        "tan(pi/2)=infinity"
+    )
+    assert len(visualization["fibre_primitives"]) == len(
+        successor["projection"]["equality_fibres"]
+    )
+
+    validation = validate_ui_contract(successor)
+    assert validation["valid"] is True
+    assert validation["every_visible_word_is_a_source_return"] is True
+    assert validation["equality_fibres_partition_visible_states"] is True
+    assert validation["active_reading_determines_projection"] is True
 
 
-def test_closure_only_contract_carries_proposal_and_independent_consent(
+def test_each_return_recloses_one_carrier_and_preserves_exact_source_traces(
     tmp_path: Path,
 ) -> None:
-    app = create_app(make_config(tmp_path))
+    app = create_projection_app(make_config(tmp_path))
+    first_source = "First exact source return."
+    second_source = "Second exact source return; no action category selected."
+
     with TestClient(app) as client:
-        collaborator = client.post(
-            "/supernet/interface/offer",
-            json={
-                "exact_text": (
-                    "Maya can help organize a Berkeley community garden "
-                    "on weekends."
-                ),
-                "authored_by": "maya",
-                "perspective_id": "maya",
-                "form_label": "garden collaborator",
-                "coordination_kind": "person",
-                "location_label": "Berkeley, California",
-                "relation_hints": ["community garden", "Berkeley"],
-            },
-        )
-        assert collaborator.status_code == 200, collaborator.text
         open_contract = client.get(
-            "/supernet/interface", params={"perspective_id": "harry"}
+            "/supernet/interface", params={"perspective_id": "perspective:one"}
         ).json()["closure_ui_contract"]
-        intent = client.post(
-            f"/supernet/interface/contracts/{open_contract['id']}/execute",
-            json=execution_payload(
-                open_contract,
-                action_id="offer-source",
-                values=open_values(
-                    thought="I want to start a Berkeley community garden."
-                ),
-            ),
-        )
-        assert intent.status_code == 200, intent.text
-        intent_contract = intent.json()["closure_ui_contract"]
-        proposal_action = next(
-            item
-            for item in intent_contract["action_bindings"]
-            if item["operation"] == "PROPOSE_AGREEMENT"
-        )
-        target_id = proposal_action["immutable"][
-            "allowed_target_event_ids"
-        ][0]
-        proposed = client.post(
-            f"/supernet/interface/contracts/{intent_contract['id']}/execute",
-            json=execution_payload(
-                intent_contract,
-                action_id=proposal_action["id"],
-                values={
-                    "author": "harry",
-                    "perspective": "harry",
-                    "proposal_target": target_id,
-                    "proposal_title": "Community garden agreement",
-                    "proposal_terms": (
-                        "Harry and Maya may plan together only after each "
-                        "separately accepts these exact terms."
-                    ),
-                    "proposal_resources": "weekends only",
-                },
-            ),
-        )
-        assert proposed.status_code == 200, proposed.text
-        consent_contract = proposed.json()["closure_ui_contract"]
-        operations = {
-            item["operation"] for item in consent_contract["action_bindings"]
-        }
-        assert "DECIDE_AGREEMENT" in operations
-        assert "RETURN_AGREEMENT" not in operations
-        assert {
-            item["immutable"].get("decision")
-            for item in consent_contract["action_bindings"]
-            if item["operation"] == "DECIDE_AGREEMENT"
-        } == {"ACCEPT", "REJECT", "WITHDRAW"}
-        assert validate_ui_contract(consent_contract)["valid"] is True
+        _, first = execute_return(client, open_contract, first_source)
+        _, second = execute_return(client, first, second_source)
 
-        maya_interface = client.get(
-            "/supernet/interface",
-            params={
-                "focus_event_id": consent_contract["focus_event_id"],
-                "perspective_id": "maya",
-            },
-        ).json()
-        maya_contract = maya_interface["closure_ui_contract"]
-        assert maya_contract["status"] == WITNESSED_STATUS
-        assert maya_contract["perspective_id"] == "maya"
-        assert maya_contract["id"] != consent_contract["id"]
-        assert validate_ui_contract(maya_contract)["valid"] is True
-        maya_render = maya_interface["visual_closure"][
-            "interface_natural_form"
-        ]["render_state"]
-        assert maya_render["closure_ui_contract"] == maya_contract
-        maya_form = maya_interface["visual_closure"][
-            "interface_natural_form"
-        ]
-        assert maya_form["render_state_factorized"] is True
-        assert all(
-            payload["render_state"]["closure_ui_contract"] == maya_contract
-            for payload in maya_form["closure_projection"].values()
-        )
-        assert all(
-            payload["render_state"]["closure_ui_contract"] == maya_contract
-            for payload in maya_form["quotient_render_state"].values()
-        )
-        maya_fields = {
-            item["id"]: item
-            for item in walk(maya_contract["root"])
-            if item["kind"] in {"input", "textarea", "select"}
-        }
-        assert maya_fields["decision_participant"]["value"] == "maya"
-        field_by_id = {
-            item["id"]: item
-            for item in walk(consent_contract["root"])
-            if item["kind"] in {"input", "textarea", "select"}
-        }
-        decision_values = {
-            "decision_participant": field_by_id[
-                "decision_participant"
-            ]["value"],
-            "perspective": "harry",
-            "decision_text": "I separately accept these exact terms.",
-            "decision_resources": "",
-            "decision_constraints": "",
-        }
-        accepted = client.post(
-            f"/supernet/interface/contracts/{consent_contract['id']}/execute",
-            json=execution_payload(
-                consent_contract,
-                action_id="decide-accept",
-                values=decision_values,
-            ),
-        )
-        assert accepted.status_code == 200, accepted.text
-        assert accepted.json()["closure_ui_contract"]["id"] != (
-            consent_contract["id"]
-        )
-        completed_retry = client.post(
-            f"/supernet/interface/contracts/{consent_contract['id']}/execute",
-            json=execution_payload(
-                consent_contract,
-                action_id="decide-accept",
-                values=decision_values,
-            ),
-        )
-        assert completed_retry.status_code == 200, completed_retry.text
-        assert completed_retry.json()["replayed"] is True
-        changed_retry = client.post(
-            f"/supernet/interface/contracts/{consent_contract['id']}/execute",
-            json=execution_payload(
-                consent_contract,
-                action_id="decide-accept",
-                values={
-                    **decision_values,
-                    "decision_text": "A changed stale decision must not execute.",
-                },
-            ),
-        )
-        assert changed_retry.status_code == 409
-        assert changed_retry.json()["status"] == "STALE_CONTRACT"
-        assert changed_retry.json()["executed"] is False
+    assert second["id"] != first["id"]
+    assert second["field_event_seq"] > first["field_event_seq"]
+    assert {state["source_trace"] for state in second["projection"]["states"]} == {
+        first_source,
+        second_source,
+    }
+    assert_equality_fibres_partition_projection(second)
+    # The second source was returned through the focused first fibre.  The UI
+    # interaction itself therefore supplies the equal visual reading; no text
+    # classifier or separate action is allowed to merge it afterward.
+    assert len(second["projection"]["equality_fibres"]) == 1
+    assert len(set(second["projection"]["reading"].values())) == 1
+    for relation in second["projection"]["translations"]:
+        if relation["executes_as_equality"]:
+            reading = second["projection"]["reading"]
+            assert relation["relation_status"] == WITNESSED_STATUS
+            assert reading[relation["source_state_id"]] == reading[
+                relation["target_state_id"]
+            ]
+    assert validate_ui_contract(second)["valid"] is True
 
 
-def test_wrong_focus_is_refused_before_sense_side_effects(
+def test_server_rejects_action_vocab_and_noncurrent_return_relation(
     tmp_path: Path,
 ) -> None:
-    app = create_app(make_config(tmp_path))
+    app = create_projection_app(make_config(tmp_path))
     with TestClient(app) as client:
-        first = client.post(
-            "/supernet/interface/offer",
-            json={
-                "exact_text": "First witnessed source.",
-                "authored_by": "harry",
-                "perspective_id": "harry",
-                "form_label": "intent",
-                "coordination_kind": "intent",
-            },
-        ).json()
-        second = client.post(
-            "/supernet/interface/offer",
-            json={
-                "exact_text": "Second witnessed source.",
-                "authored_by": "maya",
-                "perspective_id": "maya",
-                "form_label": "project",
-                "coordination_kind": "project",
-            },
-        ).json()
         contract = client.get(
-            "/supernet/interface",
-            params={
-                "focus_event_id": first["event_id"],
-                "perspective_id": "harry",
-            },
+            "/supernet/interface", params={"perspective_id": "perspective:one"}
         ).json()["closure_ui_contract"]
-        unknown = client.get(
-            "/supernet/interface",
-            params={
-                "focus_event_id": first["event_id"],
-                "perspective_id": "unwitnessed-perspective",
-            },
-        ).json()
-        assert unknown["closure_ui_contract"]["status"] == OPEN_STATUS
-        assert unknown["visual_closure"] is None
-        stage_count = len(
-            app.state.runtime.supernet_store.list_stages(limit=100_000)
-        )
-        refused = client.post(
-            f"/supernet/interface/contracts/{contract['id']}/execute",
+        event_count = len(app.state.runtime.ledger.list_returns())
+
+        invented_action = client.post(
+            RETURN_ENDPOINT_TEMPLATE.format(contract_id=contract["id"]),
             json={
-                **execution_payload(
-                    contract,
-                    action_id="continue-local-interaction",
-                    values=open_values(thought="Must not run against another focus."),
-                ),
-                "focus_event_id": second["event_id"],
+                **return_payload(contract, "The source return itself."),
+                "action_id": "BUY_NOW",
+                "values": {"price": "100"},
             },
         )
-        assert refused.status_code == 409, refused.text
-        assert refused.json()["executed"] is False
-        assert len(
-            app.state.runtime.supernet_store.list_stages(limit=100_000)
-        ) == stage_count
+        assert invented_action.status_code == 422
 
-        third = client.post(
-            "/supernet/interface/offer",
+        wrong_relation = client.post(
+            RETURN_ENDPOINT_TEMPLATE.format(contract_id=contract["id"]),
             json={
-                "exact_text": "A later field event invalidates old contracts.",
-                "authored_by": "river",
-                "perspective_id": "river",
-                "form_label": "resource",
-                "coordination_kind": "resource",
+                **return_payload(contract, "The source return itself."),
+                "return_relation_id": "return-relation:invented",
             },
         )
-        assert third.status_code == 200, third.text
-        stage_count = len(
-            app.state.runtime.supernet_store.list_stages(limit=100_000)
-        )
-        stale_field = client.post(
-            f"/supernet/interface/contracts/{contract['id']}/execute",
-            json=execution_payload(
-                contract,
-                action_id="continue-local-interaction",
-                values=open_values(thought="This contract predates the field."),
-            ),
-        )
-        assert stale_field.status_code == 409, stale_field.text
-        assert stale_field.json()["refresh_required"] is True
-        assert len(
-            app.state.runtime.supernet_store.list_stages(limit=100_000)
-        ) == stage_count
-        refreshed = client.get(
-            "/supernet/interface",
-            params={
-                "focus_event_id": first["event_id"],
-                "perspective_id": "harry",
-            },
-        ).json()["closure_ui_contract"]
-        assert refreshed["status"] == WITNESSED_STATUS
-        assert refreshed["id"] != contract["id"]
+        assert wrong_relation.status_code == 400
+        assert len(app.state.runtime.ledger.list_returns()) == event_count
 
 
-def test_completed_witnessed_execution_replays_after_restart(
+def test_replay_is_idempotent_and_changed_return_against_old_projection_is_stale(
     tmp_path: Path,
 ) -> None:
-    config = make_config(tmp_path)
-    app = create_app(config)
+    app = create_projection_app(make_config(tmp_path))
+    exact_source = "One source, one return, one successor."
     with TestClient(app) as client:
-        open_contract = client.get(
-            "/supernet/interface", params={"perspective_id": "harry"}
+        contract = client.get(
+            "/supernet/interface", params={"perspective_id": "perspective:one"}
         ).json()["closure_ui_contract"]
-        offered = client.post(
-            f"/supernet/interface/contracts/{open_contract['id']}/execute",
-            json=execution_payload(
-                open_contract,
-                action_id="offer-source",
-                values=open_values(thought="A restart-safe source."),
-            ),
-        )
-        assert offered.status_code == 200, offered.text
-        witnessed = offered.json()["closure_ui_contract"]
-        request_payload = execution_payload(
-            witnessed,
-            action_id="continue-local-interaction",
-            values=open_values(thought="A restart-safe continuation."),
-        )
-        first = client.post(
-            f"/supernet/interface/contracts/{witnessed['id']}/execute",
-            json=request_payload,
-        )
+        endpoint = RETURN_ENDPOINT_TEMPLATE.format(contract_id=contract["id"])
+        request = return_payload(contract, exact_source)
+        first = client.post(endpoint, json=request)
         assert first.status_code == 200, first.text
-        first_payload = first.json()
-    restarted = create_app(config)
-    with TestClient(restarted) as client:
-        event_count = len(
-            restarted.state.runtime.supernet_store.list_events(
-                limit=100_000
-            )
-        )
-        replay = client.post(
-            f"/supernet/interface/contracts/{witnessed['id']}/execute",
-            json=request_payload,
-        )
+        event_count = len(app.state.runtime.ledger.list_returns())
+
+        replay = client.post(endpoint, json=request)
         assert replay.status_code == 200, replay.text
         assert replay.json()["replayed"] is True
-        assert replay.json()["result"]["event_id"] == first_payload[
-            "result"
-        ]["event_id"]
-        assert len(
-            restarted.state.runtime.supernet_store.list_events(
-                limit=100_000
-            )
-        ) == event_count
+        assert replay.json()["focus_event_id"] == first.json()["focus_event_id"]
+        assert replay.json()["closure_ui_contract"] == first.json()[
+            "closure_ui_contract"
+        ]
+        assert len(app.state.runtime.ledger.list_returns()) == event_count
+
+        changed = client.post(
+            endpoint,
+            json=return_payload(contract, "A different source needs the successor."),
+        )
+        assert changed.status_code == 409, changed.text
+        assert changed.json()["status"] == "STALE_CONTRACT"
+        assert changed.json()["returned"] is False
+        assert len(app.state.runtime.ledger.list_returns()) == event_count
 
 
-def test_field_revision_uses_authoritative_sequence_and_all_pages(
+def test_contract_content_and_provenance_tampering_are_rejected(
     tmp_path: Path,
-    monkeypatch,
 ) -> None:
-    app = create_app(make_config(tmp_path))
-    store = app.state.runtime.supernet_store
-    pages = {
-        0: [{"id": "first", "seq": 200_000}],
-        1: [{"id": "later", "seq": 200_001}],
-        2: [],
+    app = create_projection_app(make_config(tmp_path))
+    with TestClient(app) as client:
+        open_contract = client.get(
+            "/supernet/interface", params={"perspective_id": "perspective:one"}
+        ).json()["closure_ui_contract"]
+        _, contract = execute_return(client, open_contract, "Exact source witness.")
+
+    forged_source = deepcopy(contract)
+    forged_source["projection"]["states"][0]["source_trace"] = (
+        "Interface-authored substitute."
+    )
+    forged_source_validation = validate_ui_contract(forged_source)
+    assert forged_source_validation["valid"] is False
+    assert forged_source_validation["contract_id_matches_content"] is False
+    assert forged_source_validation["stored_audit_matches_recomputation"] is False
+
+    forged_provenance = deepcopy(contract)
+    forged_provenance["projection"]["states"][0]["derivation"][
+        "source_return_ids"
+    ] = ["source-return:not-in-the-carrier"]
+    provenance_validation = validate_ui_contract(forged_provenance)
+    assert provenance_validation["valid"] is False
+    assert provenance_validation["all_visual_existence_has_exact_derivation"] is False
+    assert any(
+        error.endswith(":source-returns")
+        for error in provenance_validation["errors"]
+    )
+
+    forged_reading = deepcopy(contract)
+    state = forged_reading["projection"]["states"][0]
+    forged_reading["projection"]["reading"][state["id"]] = "display:external"
+    reading_validation = validate_ui_contract(forged_reading)
+    assert reading_validation["valid"] is False
+    assert reading_validation["active_reading_determines_projection"] is False
+
+    forged_geometry = deepcopy(contract)
+    forged_geometry["projection"]["visualization"]["fibre_primitives"][0][
+        "centre"
+    ] = [12, 34]
+    geometry_validation = validate_ui_contract(forged_geometry)
+    assert geometry_validation["valid"] is False
+    assert "visualization:not-exact-projection" in geometry_validation["errors"]
+
+
+def test_production_exposes_only_projection_return_and_runtime_health(
+    tmp_path: Path,
+) -> None:
+    app = create_projection_app(
+        make_config(
+            tmp_path,
+            environment="production",
+            projection_only_mode=True,
+        )
+    )
+    expected_paths = {
+        "/",
+        "/supernet",
+        "/natural-interface",
+        "/supernet/interface",
+        "/supernet/interface/capabilities",
+        "/supernet/interface/projections/{contract_id}/return",
+        "/livez",
+        "/readyz",
     }
-    monkeypatch.setattr(
-        store,
-        "list_events",
-        lambda *, limit, offset=0: pages.get(offset, []),
-    )
-    monkeypatch.setattr(store, "latest_event_sequence", lambda: 200_001)
+    assert {str(route.path) for route in app.router.routes} == expected_paths
 
-    events, revision = app.state.runtime.live_sense._field_events_snapshot(
-        batch_size=1
-    )
+    with TestClient(app) as client:
+        root = client.get("/")
+        assert root.status_code == 200
+        assert client.get("/supernet").text == root.text
+        assert client.get("/natural-interface").text == root.text
+        assert client.get(
+            "/supernet/interface",
+            params={"perspective_id": "perspective:production"},
+        ).status_code == 200
+        for removed_surface in (
+            "/docs",
+            "/openapi.json",
+            "/mcp",
+            "/trading",
+            "/supernet/integrate",
+            "/supernet/interface/offer",
+            "/supernet/interface/intents",
+            "/supernet/interface/commitments",
+            "/supernet/interface/selections",
+            "/supernet/interface/collective",
+        ):
+            assert client.get(removed_surface).status_code == 404
 
-    assert [item["id"] for item in events] == ["first", "later"]
-    assert revision == 200_001
+
+def test_published_runtime_closes_returns_through_the_selected_visual_fibre(
+    tmp_path: Path,
+) -> None:
+    app = create_projection_app(
+        make_config(
+            tmp_path,
+            environment="production",
+            projection_only_mode=True,
+        )
+    )
+    with TestClient(app) as client:
+        initial = client.get(
+            "/supernet/interface", params={"perspective_id": "perspective:live"}
+        ).json()["closure_ui_contract"]
+        first_payload, first = execute_return(
+            client, initial, "A living community garden."
+        )
+        replay = client.post(
+            RETURN_ENDPOINT_TEMPLATE.format(contract_id=initial["id"]),
+            json=return_payload(initial, "A living community garden."),
+        )
+        assert replay.status_code == 200
+        assert replay.json()["replayed"] is True
+        assert replay.json()["focus_event_id"] == first_payload["focus_event_id"]
+        _, second = execute_return(
+            client,
+            first,
+            "Neighbors, tools, land, and a shared agreement.",
+        )
+
+    assert first["status"] == second["status"] == WITNESSED_STATUS
+    assert len(second["projection"]["states"]) == 2
+    assert len(second["projection"]["equality_fibres"]) == 1
+    assert len(set(second["projection"]["reading"].values())) == 1
+    assert validate_ui_contract(second)["valid"] is True

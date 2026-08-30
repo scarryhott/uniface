@@ -1,11 +1,12 @@
 """Closure-derived translational-truth axiometry.
 
-This module deliberately starts with *visual existence*, not with a quotient,
-selector, metric, topology, or externally chosen interface.  Relative truth is
-first evaluated between things that visually exist.  Only witnessed truth is
-promoted to an axiom.  The admitted axiometry derives a joint truth reading;
-NRRF840 closure is then the preimage of the image of a seed under that reading,
-and natural forms are precisely its saturated truth fibres.
+This module deliberately starts with *perspectival visual existence*, not with
+a quotient, selector, metric, topology, or externally chosen interface.  The
+actual readings supplied by perspectives are prior to truth: their common
+kernel is the joint translational-truth reading.  Relative truth proposals can
+be witnessed only inside that kernel.  NRRF840 closure is then the preimage of
+the image of a seed under that reading, and natural forms are precisely its
+saturated truth fibres.
 
 The external renderer has one role: transporting an already-derived interface
 natural form to pixels or another presentation medium.  It cannot witness
@@ -24,7 +25,7 @@ from typing import Any
 
 
 PROTOCOL = "TRANSLATIONAL_TRUTH_AXIOMETRY"
-SCHEMA = "closure.supernet/translational-truth-axiometry-v3"
+SCHEMA = "closure.supernet/translational-truth-axiometry-v4"
 NRRF840_MODULE = (
     "NRRF840ClosureDerivedFromTranslationalTruthAxiometryNotAnExternalLimit"
 )
@@ -394,6 +395,38 @@ class VisualMirrorConstraint:
     endpoints_visually_exist: bool
     source_return_provenance: tuple[str, ...]
     presentation_status: str
+    equal_in_visualization_kernel: bool = False
+
+
+@dataclass(frozen=True)
+class PerspectiveTranslationWitness:
+    """Input evidence that one perspective faithfully translates another.
+
+    The mapping is never inferred from a completed truth partition.  It must
+    be supplied with the perspectival readings and is checked against every
+    visually existing form.  A faithful witnessed edge can be traversed in
+    either direction when establishing a perspectival continuum.
+    """
+
+    id: str
+    source_perspective_id: str
+    target_perspective_id: str
+    display_translation: Mapping[str, str]
+    source_return_provenance: tuple[str, ...]
+    witnessed: bool
+    well_defined: bool
+    faithful: bool
+    same_kernel: bool
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "display_translation",
+            _freeze(self.display_translation),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return _to_dict(self)
 
 
 @dataclass(frozen=True)
@@ -410,8 +443,13 @@ class PerspectiveVisualMirror:
     form_ids: tuple[str, ...]
     perspective_ids: tuple[str, ...]
     projected_forms: Mapping[str, Mapping[str, Any]]
+    perspective_readings: Mapping[str, Mapping[str, str]]
+    joint_reading_by_form: Mapping[str, str]
+    translation_witnesses: tuple[PerspectiveTranslationWitness, ...]
     constraints: tuple[VisualMirrorConstraint, ...]
     source_return_provenance: tuple[str, ...]
+    status: str
+    truth_ready: bool
     semantic_observers: tuple[str, ...] = (
         "PERSPECTIVE_FORM",
         "RELATIVE_VISUAL_EQUATION",
@@ -427,12 +465,33 @@ class PerspectiveVisualMirror:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "projected_forms", _freeze(self.projected_forms))
+        object.__setattr__(
+            self,
+            "perspective_readings",
+            _freeze(self.perspective_readings),
+        )
+        object.__setattr__(
+            self,
+            "joint_reading_by_form",
+            _freeze(self.joint_reading_by_form),
+        )
 
     def constraint_for(self, truth_id: str) -> VisualMirrorConstraint | None:
         for item in self.constraints:
             if item.truth_id == truth_id:
                 return item
         return None
+
+    def reads_equal(self, source: str, target: str) -> bool:
+        """Whether every actual perspective gives the two forms one reading."""
+
+        return bool(
+            self.truth_ready
+            and source in self.joint_reading_by_form
+            and target in self.joint_reading_by_form
+            and self.joint_reading_by_form[source]
+            == self.joint_reading_by_form[target]
+        )
 
     def to_dict(self) -> dict[str, Any]:
         return _to_dict(self)
@@ -611,6 +670,8 @@ class DerivedVisualClosure:
     classes: tuple[tuple[str, ...], ...]
     singleton_closure: Mapping[str, tuple[str, ...]]
     memberships: tuple[VisClosureMembership, ...]
+    status: str
+    truth_issued: bool
     properties: VisClosureProperties = VisClosureProperties()
     construction: str = "PREIMAGE_OF_IMAGE_OF_JOINT_TRANSLATIONAL_TRUTH_READING"
     formal_module: str = NRRF840_MODULE
@@ -667,6 +728,8 @@ class DerivedVisualClosure:
     def is_naturally_admitted(self, form_ids: Iterable[str]) -> bool:
         """A form is admitted exactly when it is already truth-saturated."""
 
+        if not self.truth_issued:
+            return False
         members = tuple(sorted(dict.fromkeys(str(item) for item in form_ids)))
         return self.close(members) == members
 
@@ -785,6 +848,8 @@ class ClosureDerivation:
     visual_truth_closure: DerivedVisualClosure
     equivalence_closure: EquivalenceClosure
     natural_forms: tuple[NaturalForm, ...]
+    status: str
+    supernet_open: bool
     protocol: str = PROTOCOL
     schema: str = SCHEMA
 
@@ -965,24 +1030,253 @@ def _coerce_relative_truth(
     )
 
 
+def _reading_token(value: Any) -> str:
+    """Canonicalize one actually supplied visual value without interpreting it."""
+
+    return value if isinstance(value, str) else _canonical_json(value)
+
+
+def _coerce_perspective_readings(
+    existence: VisualExistence,
+    readings: Mapping[str, Mapping[str, Any]] | None,
+) -> dict[str, dict[str, str]]:
+    if readings is None:
+        return {}
+    form_ids = set(existence.form_ids)
+    result: dict[str, dict[str, str]] = {}
+    for raw_perspective, raw_reading in readings.items():
+        perspective = str(raw_perspective)
+        if not perspective:
+            raise ValueError("perspective reading requires a non-empty id")
+        if not isinstance(raw_reading, Mapping):
+            raise TypeError(
+                f"perspective reading {perspective!r} must be a mapping"
+            )
+        unknown = sorted(str(item) for item in set(raw_reading) - form_ids)
+        if unknown:
+            raise ValueError(
+                f"perspective {perspective!r} reads forms outside visual "
+                f"existence: {', '.join(unknown)}"
+            )
+        result[perspective] = {
+            str(form_id): _reading_token(value)
+            for form_id, value in raw_reading.items()
+        }
+    return result
+
+
+def _reading_kernel(
+    form_ids: tuple[str, ...],
+    reading: Mapping[str, str],
+) -> tuple[tuple[str, ...], ...]:
+    fibres: dict[str, list[str]] = {}
+    for form_id in form_ids:
+        if form_id in reading:
+            fibres.setdefault(reading[form_id], []).append(form_id)
+    return tuple(
+        sorted(
+            (tuple(sorted(members)) for members in fibres.values()),
+            key=lambda members: members[0] if members else "",
+        )
+    )
+
+
+def _coerce_perspective_translations(
+    existence: VisualExistence,
+    readings: Mapping[str, Mapping[str, str]],
+    translations: Iterable[PerspectiveTranslationWitness | Mapping[str, Any]],
+) -> tuple[PerspectiveTranslationWitness, ...]:
+    result: list[PerspectiveTranslationWitness] = []
+    form_ids = existence.form_ids
+    perspective_ids = set(readings)
+    for raw in translations:
+        if isinstance(raw, PerspectiveTranslationWitness):
+            candidate = raw.to_dict()
+        elif isinstance(raw, Mapping):
+            candidate = dict(raw)
+        else:
+            raise TypeError("perspective translation must be a mapping")
+        source = str(
+            candidate.get("source_perspective_id")
+            or candidate.get("source")
+            or ""
+        )
+        target = str(
+            candidate.get("target_perspective_id")
+            or candidate.get("target")
+            or ""
+        )
+        if not source or not target or source == target:
+            raise ValueError(
+                "perspective translation requires two distinct perspective ids"
+            )
+        unknown = sorted({source, target} - perspective_ids)
+        if unknown:
+            raise ValueError(
+                "perspective translation references unread perspectives: "
+                + ", ".join(unknown)
+            )
+        raw_mapping = candidate.get("display_translation")
+        if raw_mapping is None:
+            raw_mapping = candidate.get("mapping")
+        if not isinstance(raw_mapping, Mapping):
+            raise ValueError(
+                "perspective translation requires an explicit display_translation"
+            )
+        mapping = {
+            _reading_token(key): _reading_token(value)
+            for key, value in raw_mapping.items()
+        }
+        claimed = _strict_bool(
+            candidate.get("witnessed", False),
+            field_name="perspective translation witnessed",
+        )
+        expected: dict[str, str] = {}
+        well_defined = True
+        mapping_matches = True
+        for form_id in form_ids:
+            if form_id not in readings[source] or form_id not in readings[target]:
+                well_defined = False
+                mapping_matches = False
+                continue
+            source_value = readings[source][form_id]
+            target_value = readings[target][form_id]
+            prior = expected.get(source_value)
+            if prior is not None and prior != target_value:
+                well_defined = False
+            expected[source_value] = target_value
+            if mapping.get(source_value) != target_value:
+                mapping_matches = False
+        faithful = bool(
+            well_defined
+            and mapping_matches
+            and len(set(expected)) == len(set(expected.values()))
+        )
+        same_kernel = bool(
+            _reading_kernel(form_ids, readings[source])
+            == _reading_kernel(form_ids, readings[target])
+        )
+        witnessed = bool(
+            claimed and well_defined and mapping_matches and faithful and same_kernel
+        )
+        witness_id = str(candidate.get("id") or "") or _stable_id(
+            "perspective-translation-witness",
+            {
+                "source": source,
+                "target": target,
+                "mapping": mapping,
+                "source_returns": _strings(
+                    candidate.get("source_return_provenance")
+                    or candidate.get("source_return_ids")
+                    or candidate.get("source_returns")
+                ),
+            },
+        )
+        result.append(
+            PerspectiveTranslationWitness(
+                id=witness_id,
+                source_perspective_id=source,
+                target_perspective_id=target,
+                display_translation=mapping,
+                source_return_provenance=_strings(
+                    candidate.get("source_return_provenance")
+                    or candidate.get("source_return_ids")
+                    or candidate.get("source_returns")
+                ),
+                witnessed=witnessed,
+                well_defined=well_defined and mapping_matches,
+                faithful=faithful,
+                same_kernel=same_kernel,
+            )
+        )
+    ids = [item.id for item in result]
+    if len(ids) != len(set(ids)):
+        raise ValueError("perspective translations contain duplicate ids")
+    return tuple(sorted(result, key=lambda item: item.id))
+
+
+def _perspective_continuum_witnessed(
+    perspective_ids: tuple[str, ...],
+    translations: tuple[PerspectiveTranslationWitness, ...],
+) -> bool:
+    if not perspective_ids:
+        return False
+    if len(perspective_ids) == 1:
+        return True
+    adjacency = {perspective: set() for perspective in perspective_ids}
+    for item in translations:
+        if not item.witnessed:
+            continue
+        adjacency[item.source_perspective_id].add(item.target_perspective_id)
+        adjacency[item.target_perspective_id].add(item.source_perspective_id)
+    reached = {perspective_ids[0]}
+    queue = deque((perspective_ids[0],))
+    while queue:
+        current = queue.popleft()
+        for neighbour in adjacency[current]:
+            if neighbour not in reached:
+                reached.add(neighbour)
+                queue.append(neighbour)
+    return reached == set(perspective_ids)
+
+
 def _derive_perspective_visual_mirror(
     existence: VisualExistence,
     truths: tuple[RelativeTruth, ...],
+    perspective_readings: Mapping[str, Mapping[str, Any]] | None,
+    perspective_translations: Iterable[
+        PerspectiveTranslationWitness | Mapping[str, Any]
+    ],
 ) -> PerspectiveVisualMirror:
     form_ids = set(existence.form_ids)
-    perspective_ids = tuple(
-        sorted(
-            {
-                str(form.state.get("perspective_id"))
-                for form in existence.forms
-                if form.state.get("perspective_id") not in {None, ""}
-            }
-        )
+    readings = _coerce_perspective_readings(existence, perspective_readings)
+    perspective_ids = tuple(sorted(readings))
+    translations = _coerce_perspective_translations(
+        existence,
+        readings,
+        perspective_translations,
+    )
+    readings_complete = bool(
+        perspective_ids
+        and all(set(reading) == form_ids for reading in readings.values())
+    )
+    continuum_witnessed = bool(
+        readings_complete
+        and _perspective_continuum_witnessed(perspective_ids, translations)
+    )
+    truth_ready = bool(readings_complete and continuum_witnessed)
+    if not perspective_ids:
+        status = "OPEN_NO_PERSPECTIVE_READING"
+    elif not readings_complete:
+        status = "OPEN_INCOMPLETE_PERSPECTIVE_READING"
+    elif not continuum_witnessed:
+        status = "OPEN_UNTRANSLATED_PERSPECTIVES"
+    else:
+        status = "WITNESSED"
+    joint_reading_by_form = (
+        {
+            form_id: _stable_id(
+                "joint-perspective-visual-reading",
+                {
+                    perspective: readings[perspective][form_id]
+                    for perspective in perspective_ids
+                },
+            )
+            for form_id in sorted(form_ids)
+        }
+        if truth_ready
+        else {}
     )
     constraints: list[VisualMirrorConstraint] = []
     for truth in truths:
         equation = truth.visual_equation
         endpoints_exist = truth.source in form_ids and truth.target in form_ids
+        equal_in_kernel = bool(
+            truth_ready
+            and endpoints_exist
+            and joint_reading_by_form[truth.source]
+            == joint_reading_by_form[truth.target]
+        )
         constraint_id = _stable_id(
             "visual-mirror-constraint",
             {
@@ -1015,11 +1309,16 @@ def _derive_perspective_visual_mirror(
                 ),
                 presentation_status=(
                     "PRESENTED_TRUE_CONSTRAINT"
+                    if truth.verdict is TruthVerdict.TRUE and equal_in_kernel
+                    else "OPEN_NO_PERSPECTIVE_READING"
+                    if truth.verdict is TruthVerdict.TRUE and not truth_ready
+                    else "REJECTED_BY_VISUALIZATION_KERNEL"
                     if truth.verdict is TruthVerdict.TRUE
                     else "PRESENTED_OPEN_POTENTIAL"
                     if truth.verdict is TruthVerdict.OPEN
                     else "PRESENTED_FALSE_CONSTRAINT"
                 ),
+                equal_in_visualization_kernel=equal_in_kernel,
             )
         )
     mirror_id = _stable_id(
@@ -1030,6 +1329,9 @@ def _derive_perspective_visual_mirror(
             "projected_forms": {
                 form.id: form.state for form in existence.forms
             },
+            "perspective_readings": readings,
+            "translation_witnesses": [item.id for item in translations],
+            "status": status,
             "constraints": [item.id for item in constraints],
         },
     )
@@ -1038,14 +1340,26 @@ def _derive_perspective_visual_mirror(
         form_ids=tuple(sorted(existence.form_ids)),
         perspective_ids=perspective_ids,
         projected_forms={form.id: form.state for form in existence.forms},
+        perspective_readings=readings,
+        joint_reading_by_form=joint_reading_by_form,
+        translation_witnesses=translations,
         constraints=tuple(sorted(constraints, key=lambda item: item.id)),
         source_return_provenance=tuple(
             dict.fromkeys(
-                source_return
-                for form in existence.forms
-                for source_return in form.source_returns
+                tuple(
+                    source_return
+                    for form in existence.forms
+                    for source_return in form.source_returns
+                )
+                + tuple(
+                    source_return
+                    for item in translations
+                    for source_return in item.source_return_provenance
+                )
             )
         ),
+        status=status,
+        truth_ready=truth_ready,
     )
 
 
@@ -1139,6 +1453,77 @@ def _cross_witness(
     )
 
 
+def _visual_kernel_witness(
+    source: VisualForm,
+    target: VisualForm,
+    visual_mirror: PerspectiveVisualMirror,
+) -> TruthWitness:
+    """Witness equality directly from the prior perspectival visualization."""
+
+    if source.id == target.id or not visual_mirror.reads_equal(source.id, target.id):
+        raise ValueError(
+            "visual-kernel witness requires two distinct equally read forms"
+        )
+    pair = tuple(sorted((source.id, target.id)))
+    truth_id = _stable_id(
+        "perspective-visualization-truth",
+        {"mirror": visual_mirror.id, "forms": pair},
+    )
+    witness_id = _stable_id(
+        "truth-witness",
+        {
+            "kind": WitnessKind.RELATIVE_TRANSLATION.value,
+            "truth": truth_id,
+            "source": pair[0],
+            "target": pair[1],
+        },
+    )
+    translation_ids = tuple(
+        item.id for item in visual_mirror.translation_witnesses if item.witnessed
+    )
+    return TruthWitness(
+        id=witness_id,
+        kind=WitnessKind.RELATIVE_TRANSLATION,
+        source=pair[0],
+        target=pair[1],
+        truth_id=truth_id,
+        truth_provenance=(truth_id, visual_mirror.id),
+        existence_provenance=tuple(
+            dict.fromkeys(
+                (*source.existence_provenance, *target.existence_provenance)
+            )
+        ),
+        source_return_provenance=tuple(
+            dict.fromkeys(
+                (
+                    *source.source_returns,
+                    *target.source_returns,
+                    *visual_mirror.source_return_provenance,
+                )
+            )
+        ),
+        visual_equation_provenance=(
+            _stable_id(
+                "perspective-visualization-equation",
+                {
+                    "mirror": visual_mirror.id,
+                    "forms": pair,
+                    "reading": visual_mirror.joint_reading_by_form[pair[0]],
+                },
+            ),
+        ),
+        compatibility_provenance=(
+            "compatibility:equal-in-every-actual-perspective",
+            *translation_ids,
+        ),
+        closure_explicit_provenance=(
+            "closure-explicit:perspective-visualization-kernel",
+            visual_mirror.joint_reading_by_form[pair[0]],
+        ),
+        visual_mirror_provenance=(visual_mirror.id, *translation_ids),
+    )
+
+
 def _promote_axiom(witness: TruthWitness) -> TranslationAxiom:
     axiom_id = _stable_id(
         "translation-axiom",
@@ -1187,6 +1572,34 @@ def _derive_closure_meetings(
                         *witness.existence_provenance,
                         *witness.closure_explicit_provenance,
                         *witness.visual_mirror_provenance,
+                    )
+                )
+            )
+        elif witness.truth_id not in truth_by_id:
+            mirror_constraint_id = _stable_id(
+                "visual-mirror-kernel-constraint",
+                {
+                    "mirror": visual_mirror.id,
+                    "source": witness.source,
+                    "target": witness.target,
+                },
+            )
+            compatible = visual_mirror.reads_equal(
+                witness.source,
+                witness.target,
+            )
+            closure_explicit = compatible
+            admitted = compatible
+            basis = "PERSPECTIVE_VISUALIZATION_KERNEL"
+            provenance = tuple(
+                dict.fromkeys(
+                    (
+                        *witness.truth_provenance,
+                        *witness.visual_equation_provenance,
+                        *witness.compatibility_provenance,
+                        *witness.closure_explicit_provenance,
+                        *witness.visual_mirror_provenance,
+                        mirror_constraint_id,
                     )
                 )
             )
@@ -1350,20 +1763,26 @@ def _derive_visual_truth_closure(
     equivalence: EquivalenceClosure,
     visual_mirror: PerspectiveVisualMirror,
 ) -> DerivedVisualClosure:
-    """Factor axiometry into a joint reading, then apply NRRF840 exactly."""
+    """Apply NRRF840 to the actual joint perspectival reading.
 
-    class_by_form = {
-        member: members
-        for members in equivalence.classes
-        for member in members
-    }
-    joint_reading_by_form = {
-        member: _stable_id(
-            "joint-translational-truth-reading",
-            {"members": class_by_form[member]},
-        )
-        for member in sorted(existence.form_ids)
-    }
+    The equality graph is retained only as provenance and must match the
+    visualization kernel.  It never supplies the reading.  When no complete
+    translated visualization exists, unique provisional boundary tokens keep
+    the carrier representable while ``truth_issued`` remains false and no
+    natural form is admitted.
+    """
+
+    joint_reading_by_form = (
+        dict(visual_mirror.joint_reading_by_form)
+        if visual_mirror.truth_ready
+        else {
+            member: _stable_id(
+                "open-perspective-boundary",
+                {"mirror": visual_mirror.id, "member": member},
+            )
+            for member in sorted(existence.form_ids)
+        }
+    )
     singleton_closure = {
         source: tuple(
             member
@@ -1394,21 +1813,28 @@ def _derive_visual_truth_closure(
                     )
                 )
             )
-            observer_equality = ObserverEquality(
-                observer_id=JOINT_TRUTH_OBSERVER,
-                member_id=member,
-                source_form_id=source,
-                member_reading=joint_reading_by_form[member],
-                source_reading=source_reading,
-                equal=True,
-                provenance=equality_provenance,
-            )
+            observer_equalities = tuple(
+                ObserverEquality(
+                    observer_id=perspective,
+                    member_id=member,
+                    source_form_id=source,
+                    member_reading=(
+                        visual_mirror.perspective_readings[perspective][member]
+                    ),
+                    source_reading=(
+                        visual_mirror.perspective_readings[perspective][source]
+                    ),
+                    equal=True,
+                    provenance=equality_provenance,
+                )
+                for perspective in visual_mirror.perspective_ids
+            ) if visual_mirror.truth_ready else ()
             membership_id = _stable_id(
                 "vis-closure-membership",
                 {
                     "member": member,
                     "source": source,
-                    "observer_equalities": (observer_equality,),
+                    "observer_equalities": observer_equalities,
                 },
             )
             memberships.append(
@@ -1424,7 +1850,9 @@ def _derive_visual_truth_closure(
                             )
                         )
                     ),
-                    observer_equalities=(observer_equality,),
+                    observer_equalities=observer_equalities,
+                    all_observers_equal=bool(visual_mirror.truth_ready),
+                    admitted=bool(visual_mirror.truth_ready),
                 )
             )
 
@@ -1440,11 +1868,27 @@ def _derive_visual_truth_closure(
     result = DerivedVisualClosure(
         id=closure_id,
         visual_mirror_id=visual_mirror.id,
-        observer_ids=(JOINT_TRUTH_OBSERVER,),
+        observer_ids=visual_mirror.perspective_ids,
         joint_reading_by_form=joint_reading_by_form,
         classes=equivalence.classes,
         singleton_closure=singleton_closure,
         memberships=tuple(memberships),
+        status=visual_mirror.status,
+        truth_issued=visual_mirror.truth_ready,
+        properties=VisClosureProperties(
+            extensive=visual_mirror.truth_ready,
+            monotone=visual_mirror.truth_ready,
+            additive=visual_mirror.truth_ready,
+            idempotent=visual_mirror.truth_ready,
+            least_naturally_admitted_superset=visual_mirror.truth_ready,
+            naturally_admitted_closed_under_complement=visual_mirror.truth_ready,
+            naturally_admitted_closed_under_arbitrary_unions=(
+                visual_mirror.truth_ready
+            ),
+            naturally_admitted_closed_under_arbitrary_intersections=(
+                visual_mirror.truth_ready
+            ),
+        ),
     )
     # This assertion is the executable bridge: the retained axiom graph and
     # the NRRF840 preimage/image construction must select exactly the same
@@ -1541,22 +1985,34 @@ def _natural_forms(
 def derive_translational_truth_axiometry(
     visual_existence: Iterable[VisualForm | Mapping[str, Any] | str],
     relative_truths: Iterable[RelativeTruth | Mapping[str, Any]] = (),
+    *,
+    perspective_readings: Mapping[str, Mapping[str, Any]] | None = None,
+    perspective_translations: Iterable[
+        PerspectiveTranslationWitness | Mapping[str, Any]
+    ] = (),
 ) -> ClosureDerivation:
     """Derive natural forms through the complete closure relation.
 
     The stages are explicit in the result:
 
-    ``visual existence -> witnessed relative truths -> visual axiometry ->
-    closure-explicit meeting -> joint translational-truth reading -> NRRF840
+    ``actual perspective readings -> their translated common kernel ->
+    witnessed relative truths -> visual axiometry -> closure-explicit meeting ->
+    joint translational-truth reading -> NRRF840
     ``preimage(image(A))`` closure -> naturally admitted forms``.
 
-    Every existing form receives an identity witness.  A non-identity proposal
+    No reading is inferred from form metadata or from already-derived truth.
+    Omitted, incomplete, or mutually untranslated readings leave the result
+    ``OPEN``.  Every existing form receives a structural identity witness.  A
+    non-identity proposal
     receives a truth witness exactly when both endpoints exist, its verdict is
     ``TRUE``, compatibility is witnessed, and a deterministic endpoint-matching
     visual equation exists.  Those witnesses first become visual axioms.  Only
     a later closure-explicit meeting admits an axiom as an equality generator.
     ``OPEN`` and ``FALSE`` proposals, merely similar presentations, and axioms
-    whose meeting remains open cannot generate equality.
+    whose meeting remains open cannot generate equality.  Conversely, forms
+    that every translated perspective actually reads equally receive a kernel
+    witness directly from that visualization, so changing the visualization
+    kernel changes closure rather than merely changing a post-hoc display.
     """
 
     forms = tuple(_coerce_visual_form(value) for value in visual_existence)
@@ -1569,7 +2025,12 @@ def derive_translational_truth_axiometry(
     truth_ids = tuple(truth.id for truth in truths)
     if len(truth_ids) != len(set(truth_ids)):
         raise ValueError("relative truths contain duplicate truth ids")
-    visual_mirror = _derive_perspective_visual_mirror(existence, truths)
+    visual_mirror = _derive_perspective_visual_mirror(
+        existence,
+        truths,
+        perspective_readings,
+        perspective_translations,
+    )
 
     witnesses: list[TruthWitness] = [
         _identity_witness(form, visual_mirror)
@@ -1589,7 +2050,9 @@ def derive_translational_truth_axiometry(
                 if witness.kind is WitnessKind.IDENTITY
                 and witness.source == truth.source
             )
-            claim_is_true = truth.verdict is TruthVerdict.TRUE
+            claim_is_true = bool(
+                truth.verdict is TruthVerdict.TRUE and visual_mirror.truth_ready
+            )
             evaluations.append(
                 RelativeTruthEvaluation(
                     truth_id=truth.id,
@@ -1605,6 +2068,8 @@ def derive_translational_truth_axiometry(
                     reason=(
                         "identity_is_witnessed_by_visual_existence"
                         if claim_is_true
+                        else "identity_waits_for_perspective_visualization"
+                        if truth.verdict is TruthVerdict.TRUE
                         else "identity_relation_intrinsic_but_claim_verdict_not_true"
                     ),
                     witness_id=identity.id if claim_is_true else None,
@@ -1648,6 +2113,23 @@ def derive_translational_truth_axiometry(
                     closure_admitted=False,
                 )
             )
+        elif not visual_mirror.truth_ready:
+            evaluations.append(
+                RelativeTruthEvaluation(
+                    truth_id=truth.id,
+                    source=truth.source,
+                    target=truth.target,
+                    verdict=truth.verdict,
+                    endpoints_exist=True,
+                    status=WitnessStatus.NOT_WITNESSED,
+                    reason="cross_translation_requires_perspective_visualization",
+                    witness_id=None,
+                    compatible=truth.compatibility.witnessed,
+                    closure_explicit=truth.closure_explicit.witnessed,
+                    meets_visual_existence=False,
+                    closure_admitted=False,
+                )
+            )
         elif not truth.compatibility.witnessed:
             evaluations.append(
                 RelativeTruthEvaluation(
@@ -1685,6 +2167,23 @@ def derive_translational_truth_axiometry(
                     closure_admitted=False,
                 )
             )
+        elif not visual_mirror.reads_equal(truth.source, truth.target):
+            evaluations.append(
+                RelativeTruthEvaluation(
+                    truth_id=truth.id,
+                    source=truth.source,
+                    target=truth.target,
+                    verdict=truth.verdict,
+                    endpoints_exist=True,
+                    status=WitnessStatus.NOT_WITNESSED,
+                    reason="cross_translation_rejected_by_visualization_kernel",
+                    witness_id=None,
+                    compatible=True,
+                    closure_explicit=truth.closure_explicit.witnessed,
+                    meets_visual_existence=False,
+                    closure_admitted=False,
+                )
+            )
         else:
             witness = _cross_witness(
                 truth,
@@ -1713,6 +2212,15 @@ def derive_translational_truth_axiometry(
                     closure_admitted=truth.closure_explicit.witnessed,
                 )
             )
+
+    if visual_mirror.truth_ready:
+        ordered_forms = sorted(forms, key=lambda item: item.id)
+        for index, source in enumerate(ordered_forms):
+            for target in ordered_forms[index + 1 :]:
+                if visual_mirror.reads_equal(source.id, target.id):
+                    witnesses.append(
+                        _visual_kernel_witness(source, target, visual_mirror)
+                    )
 
     witness_tuple = tuple(sorted(witnesses, key=lambda item: item.id))
     axioms = tuple(
@@ -1743,10 +2251,14 @@ def derive_translational_truth_axiometry(
         equivalence,
         visual_mirror,
     )
-    natural_forms = _natural_forms(
-        visual_truth_closure,
-        equivalence,
-        admitted_axioms,
+    natural_forms = (
+        _natural_forms(
+            visual_truth_closure,
+            equivalence,
+            admitted_axioms,
+        )
+        if visual_mirror.truth_ready
+        else ()
     )
     derivation_id = _stable_id(
         "closure-derivation",
@@ -1804,18 +2316,27 @@ def derive_translational_truth_axiometry(
         visual_truth_closure=visual_truth_closure,
         equivalence_closure=equivalence,
         natural_forms=natural_forms,
+        status=visual_mirror.status,
+        supernet_open=not visual_mirror.truth_ready,
     )
 
 
 def derive_closure(
     visual_existence: Iterable[VisualForm | Mapping[str, Any] | str],
     relative_truths: Iterable[RelativeTruth | Mapping[str, Any]] = (),
+    *,
+    perspective_readings: Mapping[str, Mapping[str, Any]] | None = None,
+    perspective_translations: Iterable[
+        PerspectiveTranslationWitness | Mapping[str, Any]
+    ] = (),
 ) -> ClosureDerivation:
     """Concise alias for :func:`derive_translational_truth_axiometry`."""
 
     return derive_translational_truth_axiometry(
         visual_existence,
         relative_truths,
+        perspective_readings=perspective_readings,
+        perspective_translations=perspective_translations,
     )
 
 
@@ -1865,6 +2386,12 @@ def derive_interface_natural_form(
     unequal classes without inventing an equality between them.  HTML, canvas,
     native, spatial, and other external renderers only transport this result.
     """
+
+    if derivation.supernet_open:
+        raise ValueError(
+            "interface natural form requires a witnessed perspective "
+            "visualization; Supernet truth is OPEN"
+        )
 
     states = _normalize_render_states(render_states)
     member_ids = tuple(item["member_id"] for item in states)
@@ -2003,6 +2530,7 @@ __all__ = [
     "NRRF840_CRITERION",
     "NRRF840_MODULE",
     "ObserverEquality",
+    "PerspectiveTranslationWitness",
     "PerspectiveVisualMirror",
     "PROTOCOL",
     "RelativeTruth",

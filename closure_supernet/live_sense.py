@@ -755,13 +755,15 @@ class LiveNaturalInterfaceManager(NaturalInterfaceManager):
             ai_translation=visual["ai_translation"],
             tokenomic=visual["tokenomic"],
         )
-        render_state = deepcopy(
-            visual.get("interface_natural_form", {}).get("render_state", {})
-        )
-        render_state["nrrf842_journey"] = journey
-        render_state["interaction_closure"] = interaction
-        render_state["closure_ui_contract"] = contract
-        render_state["unified_truth_runtime"] = unified
+        render_state = {
+            "closure_derivation_id": contract.get("closure_derivation_id"),
+            "visual_closure_id": contract.get("visual_closure_id"),
+            "nrrf843_ui_id": contract.get("nrrf843_ui_id"),
+            "interaction_closure_id": contract.get("interaction_closure_id"),
+            "closure_ui_contract": contract,
+            "projection": contract.get("projection", {}),
+            "return_relation": contract.get("return_relation"),
+        }
         interface_form = self._refactor_interface_natural_form(
             visual=visual,
             render_state=render_state,
@@ -792,13 +794,58 @@ class LiveNaturalInterfaceManager(NaturalInterfaceManager):
             str(item["id"])
             for item in truth.get("visual_existence", {}).get("forms", [])
         )
-        payload_by_form = {
-            str(form["id"]): {
-                "natural_form_id": str(form["id"]),
-                "render_state": render_state,
-            }
-            for form in truth.get("natural_forms", [])
+        contract = render_state["closure_ui_contract"]
+        projected = contract.get("projection", {})
+        state_by_id = {
+            str(item["id"]): item for item in projected.get("states", [])
         }
+        payload_by_form: dict[str, dict[str, Any]] = {}
+        for fibre in projected.get("equality_fibres", []):
+            form_id = str(fibre["id"])
+            fibre_members = set(
+                str(item) for item in fibre.get("member_state_ids", [])
+            )
+            payload_by_form[form_id] = {
+                "natural_form_id": form_id,
+                "perspective_visual_value": {
+                    "natural_form_id": form_id,
+                    "member_state_ids": sorted(fibre_members),
+                    "source_returns": [
+                        {
+                            "state_id": state_id,
+                            "source_return_ids": state_by_id[state_id][
+                                "source_return_ids"
+                            ],
+                            "source_trace": state_by_id[state_id][
+                                "source_trace"
+                            ],
+                        }
+                        for state_id in sorted(fibre_members)
+                    ],
+                    "translations": [
+                        item
+                        for item in projected.get("translations", [])
+                        if item.get("source_state_id") in fibre_members
+                        or item.get("target_state_id") in fibre_members
+                    ],
+                    "potentials": [
+                        item
+                        for item in projected.get("potentials", [])
+                        if item.get("shared_natural_form_id") == form_id
+                        or item.get("target_state_id") in fibre_members
+                        or (
+                            item.get("target_state_id") is None
+                            and contract.get("return_relation", {}).get(
+                                "parent_natural_form_id"
+                            )
+                            == form_id
+                        )
+                    ],
+                    "relation_digest": projected.get(
+                        "visualization", {}
+                    ).get("relation_digest"),
+                },
+            }
         quotient = {
             form_id: payload_by_form[form_id]
             for form_id in sorted(payload_by_form)
@@ -839,10 +886,10 @@ class LiveNaturalInterfaceManager(NaturalInterfaceManager):
                 "factorization_provenance": [factorization_id],
                 "render_state": render_state,
                 "render_state_factorized": True,
-                "semantic_elements": render_state.get(
-                    "semantic_elements", []
-                ),
-                "actions": render_state.get("actions", []),
+                "factorization_is_per_equality_fibre": True,
+                "constant_whole_scene_factorization": False,
+                "semantic_elements": [],
+                "actions": [],
             }
         )
         return interface_form

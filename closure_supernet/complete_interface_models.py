@@ -192,33 +192,23 @@ class CompleteInterfaceCollective(BaseModel):
 
 
 class ClosureUIExecutionRequest(BaseModel):
-    """Raw values submitted to one server-revalidated closure UI action.
+    """One exact return through a server-revalidated perspective projection.
 
-    The browser is deliberately unable to submit an endpoint, HTTP method, or
-    resolved domain payload.  Those are selected only after the current
-    perspective-interaction contract has been re-derived on the server.
+    There is no browser-selected domain action or field schema.  The submitted
+    value is the next source return in the same carrier; the runtime recomputes
+    translational equality, closure, natural forms, and the successor UI.
     """
 
     model_config = ConfigDict(extra="forbid")
 
-    action_id: str = Field(min_length=1, max_length=240)
+    return_relation_id: str = Field(min_length=1, max_length=500)
     perspective_id: str = Field(min_length=1, max_length=500)
     focus_event_id: str | None = Field(default=None, max_length=500)
-    values: dict[str, Any] = Field(default_factory=dict)
+    exact_source_return: str = Field(min_length=1, max_length=20_000)
 
-    @field_validator("values")
+    @field_validator("exact_source_return")
     @classmethod
-    def values_are_named_fields(cls, value: dict[str, Any]) -> dict[str, Any]:
-        if len(value) > 64:
-            raise ValueError("A closure UI action may submit at most 64 fields")
-        normalized: dict[str, Any] = {}
-        for key, item in value.items():
-            name = str(key).strip()
-            if not name:
-                raise ValueError("Closure UI field names may not be empty")
-            if isinstance(item, (dict, list, tuple, set)):
-                raise ValueError(
-                    f"Closure UI field {name!r} must be a scalar transport value"
-                )
-            normalized[name] = item
-        return normalized
+    def source_return_is_not_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("A translational return may not be blank")
+        return value

@@ -1,68 +1,12 @@
-from __future__ import annotations
+"""Published Supernet entrypoint.
 
-from typing import Any
+The former entrypoint assembled every historical dashboard, manager, mutation
+API and MCP tool before hiding most routes.  Publication now imports only the
+minimal closure projection runtime, so there is no parallel application behind
+the translational visualization.
+"""
 
-from fastapi import FastAPI
+from .minimal_projection_runtime import app, create_app
 
-from . import api_natural_interface as base_api
-from . import agent_mcp as agent_mcp_module
-from .agent_mcp import attach_supernet_agent_mcp
-from .config import RuntimeConfig
-from .nrrf837_continuum import SCHEMA as NRRF837_SCHEMA
-
-
-async def _compact_interface_with_focus(
-    runtime: Any,
-    event_id: str | None,
-    perspective_id: str | None,
-) -> dict[str, Any]:
-    """Keep the explicit agent focus even when the UI receipt stores it as an object."""
-
-    receipt = runtime.natural_interface.select(
-        focus_event_id=event_id,
-        perspective_id=perspective_id,
-    )
-    focused = receipt.get("focus_event") or {}
-    focused_event_id = str(focused.get("id") or event_id or "")
-    visual = receipt.get("visual_closure") or {}
-    coordination = visual.get("coordination") or {}
-    continuum = coordination.get("nrrf837_continuum") or coordination.get(
-        "continuum"
-    ) or {}
-    if visual and continuum.get("schema") != NRRF837_SCHEMA and focused_event_id:
-        await runtime.live_sense.sense_event(focused_event_id)
-        receipt = runtime.natural_interface.select(
-            focus_event_id=focused_event_id,
-            perspective_id=perspective_id,
-        )
-        focused = receipt.get("focus_event") or focused
-    return {
-        "focus_event_id": (
-            receipt.get("focus_event_id") or focused.get("id") or event_id
-        ),
-        "perspective_id": perspective_id,
-        "natural_chart": receipt.get("natural_chart"),
-        "sense_depth": receipt.get("sense_depth"),
-        "closure_level": receipt.get("closure_level"),
-        "visual_closure": receipt.get("visual_closure"),
-        "proof_depth": receipt.get("proof_depth"),
-        "continuation_depth": receipt.get("continuation_depth"),
-        "turing_being_depth": receipt.get("turing_being_depth"),
-        "source_fibre": receipt.get("source_fibre", []),
-        "two_person_E2E": "OPEN",
-        "truth_issued": False,
-    }
-
-
-# Tool functions registered by agent_mcp resolve this module global at call time.
-# Correct the compact projection without introducing another runtime or tool layer.
-agent_mcp_module._compact_interface = _compact_interface_with_focus
-
-
-def create_app(config: RuntimeConfig | None = None) -> FastAPI:
-    return attach_supernet_agent_mcp(base_api.create_app(config))
-
-
-app = attach_supernet_agent_mcp(base_api.app)
 
 __all__ = ["app", "create_app"]

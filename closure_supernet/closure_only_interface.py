@@ -1,212 +1,162 @@
 from __future__ import annotations
 
 
+# There is intentionally no authored page inside the body.  The program below
+# is a relation evaluator and a physical input aperture.  It owns no headings,
+# buttons, fields, menus, explanations, product categories, or action names.
 CLOSURE_ONLY_SUPERNET_HTML = r"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <title></title>
 <style>
-:root {
-  color-scheme: dark;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
+:root { color-scheme: dark; }
 * { box-sizing: border-box; }
-html, body { margin: 0; min-height: 100%; }
-body {
-  min-height: 100vh;
-  background: var(--closure-background);
-  color: var(--closure-text);
-}
-[data-closure-only-contract] {
-  min-height: 100vh;
-  opacity: 0;
-  transition: opacity 180ms ease;
-}
-[data-closure-only-contract][data-ready="true"] { opacity: 1; }
-[data-kind="surface"] {
-  width: min(calc(100% - 28px), var(--closure-max-width));
-  margin: 0 auto;
-  padding: clamp(22px, 4vw, 54px) 0;
-  display: grid;
-  gap: var(--closure-gap);
-}
-[data-kind="region"],
-[data-kind="topology"] {
-  min-width: 0;
-  padding: clamp(18px, 3vw, 30px);
-  border: 1px solid var(--closure-line);
-  border-radius: var(--closure-radius);
-  background: color-mix(in srgb, var(--closure-surface) 92%, transparent);
-  box-shadow: 0 24px 80px color-mix(in srgb, var(--closure-background) 74%, transparent);
-}
-[data-presentation="reading"] {
-  background:
-    radial-gradient(circle at 82% 10%, color-mix(in srgb, var(--closure-accent) 22%, transparent), transparent 38%),
-    var(--closure-surface);
-}
-[data-presentation="composer"],
-[data-presentation="agreement"] {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--closure-gap);
-}
-[data-presentation="composer"] > [data-kind="text"],
-[data-presentation="agreement"] > [data-kind="text"],
-[data-presentation="composer"] > [data-kind="textarea"],
-[data-presentation="agreement"] > [data-kind="textarea"] {
-  grid-column: 1 / -1;
-}
-[data-presentation="potentials"] > [data-kind="region"] {
-  margin-top: 12px;
-  border-left: 3px solid var(--closure-open);
-  padding: 13px 15px;
-  background: var(--closure-surface-alt);
-}
-[data-presentation="witnessed"] { border-left-color: var(--closure-witnessed) !important; }
-h1, h2, h3, p { margin: 0; }
-h1 {
-  max-width: 20ch;
-  font-size: clamp(2.2rem, 7vw, 6.4rem);
-  line-height: .92;
-  letter-spacing: -.065em;
-  text-wrap: balance;
-}
-h2 { font-size: clamp(1.2rem, 2.5vw, 2rem); letter-spacing: -.035em; }
-p { color: var(--closure-muted); line-height: 1.6; }
-[data-kind="metric"] {
-  display: inline-grid;
-  gap: 4px;
-  margin: 22px 20px 0 0;
-  vertical-align: top;
-}
-[data-kind="metric"] > :first-child {
-  color: var(--closure-muted);
-  font-size: .72rem;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-}
-[data-kind="metric"] > :last-child { color: var(--closure-witnessed); font-weight: 700; }
-[data-kind="input"],
-[data-kind="textarea"],
-[data-kind="select"] {
-  display: grid;
-  align-content: start;
-  gap: 8px;
-}
-label {
-  color: var(--closure-muted);
-  font-size: .76rem;
-  letter-spacing: .11em;
-  text-transform: uppercase;
-}
-input, textarea, select, button {
+html, body {
   width: 100%;
-  border: 1px solid var(--closure-line);
-  border-radius: calc(var(--closure-radius) * .58);
-  font: inherit;
-  color: var(--closure-text);
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #020305;
 }
-input, textarea, select {
-  padding: 13px 14px;
-  background: var(--closure-surface-alt);
+#translational-mirror {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  touch-action: manipulation;
   outline: none;
 }
-textarea { min-height: 116px; resize: vertical; }
-input:focus, textarea:focus, select:focus {
-  border-color: var(--closure-accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--closure-accent) 18%, transparent);
+svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
-[aria-invalid="true"] { border-color: var(--closure-open) !important; }
-button {
-  min-height: 48px;
-  align-self: end;
-  padding: 12px 16px;
-  cursor: pointer;
-  border-color: color-mix(in srgb, var(--closure-accent) 66%, var(--closure-line));
-  background: color-mix(in srgb, var(--closure-accent) 17%, var(--closure-surface-alt));
-  font-weight: 760;
+[data-return-sensor] {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  opacity: .001;
+  resize: none;
+  color: transparent;
+  background: transparent;
+  caret-color: transparent;
+  pointer-events: none;
 }
-button:hover { background: color-mix(in srgb, var(--closure-accent) 27%, var(--closure-surface-alt)); }
-button:disabled { cursor: wait; opacity: .52; }
-svg { display: block; width: 100%; height: var(--closure-topology-height); overflow: visible; }
-.closure-edge {
-  stroke: var(--closure-line);
+.fibre-shell {
+  fill: rgba(255,255,255,.018);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.fibre-shell[data-focus="true"] {
+  fill: rgba(255,255,255,.052);
+  stroke-width: 2.8;
+}
+.translation {
+  fill: none;
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
 }
-.closure-edge[data-truth="WITNESSED"] { stroke: var(--closure-witnessed); }
-.closure-edge[data-truth="OPEN"] { stroke: var(--closure-open); stroke-dasharray: 8 10; }
-.closure-node circle {
-  fill: color-mix(in srgb, var(--closure-surface-alt) 88%, transparent);
-  stroke: var(--closure-accent);
-  stroke-width: 2;
+.translation[data-equality="true"] { stroke-width: 3; }
+.translation[data-equality="false"] {
+  stroke-width: 1.2;
+  stroke-dasharray: 5 9;
+  opacity: .44;
+}
+.potential {
+  fill: none;
+  stroke-width: 1;
+  stroke-dasharray: 2 11;
+  stroke-linecap: round;
   vector-effect: non-scaling-stroke;
+  opacity: .46;
 }
-.closure-node[data-truth="WITNESSED"] circle { stroke: var(--closure-witnessed); }
-.closure-node text {
-  fill: var(--closure-text);
-  font-size: 13px;
-  text-anchor: middle;
-  paint-order: stroke;
-  stroke: var(--closure-background);
-  stroke-width: 5px;
-  stroke-linejoin: round;
+.source-trace {
+  color: rgba(249,251,255,.92);
+  font: 430 clamp(13px, 1.45vw, 18px)/1.38 ui-sans-serif, system-ui, sans-serif;
+  text-align: center;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+  pointer-events: none;
 }
-.closure-node text + text { fill: var(--closure-muted); font-size: 10px; }
-@media (max-width: 760px) {
-  [data-presentation="composer"],
-  [data-presentation="agreement"] { grid-template-columns: 1fr; }
-  [data-kind="surface"] { width: min(calc(100% - 18px), var(--closure-max-width)); }
+.draft-trace {
+  color: rgba(249,251,255,.9);
+  font: 470 clamp(18px, 3vw, 38px)/1.24 ui-sans-serif, system-ui, sans-serif;
+  text-align: center;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .potential { animation: relation-breathe 5.8s ease-in-out infinite; }
+}
+@keyframes relation-breathe {
+  50% { opacity: .78; }
 }
 </style>
 </head>
 <body>
-<main id="closure-contract-root" data-closure-only-contract></main>
+<main id="translational-mirror"></main>
 <script>
 (() => {
   "use strict";
 
-  const mount = document.getElementById("closure-contract-root");
   const namespace = "http://www.w3.org/2000/svg";
-  const schema = "closure.supernet/perspective-interaction-ui-contract-v1";
-  const protocol = "SUPERNET-CLOSURE-ONLY-UI";
-  const statuses = new Set(["OPEN_SOURCE_BOUNDARY", "OPEN_TRUTH_CONSTRAINT", "WITNESSED"]);
-  const kinds = new Set(["surface", "region", "text", "metric", "input", "textarea", "select", "button", "topology"]);
-  const tags = new Set(["h1", "h2", "h3", "p", "strong", "span"]);
-  const inputKinds = new Set(["input", "textarea", "select"]);
-  const operations = new Set(["OFFER_SOURCE", "CONTINUE_INTERACTION", "PROPOSE_AGREEMENT", "DECIDE_AGREEMENT", "RETURN_AGREEMENT"]);
-  const fields = new Map();
-  let activeContract = null;
+  const schema = "closure.supernet/translational-visualization-v2";
+  const protocol = "SUPERNET-TRANSLATIONAL-VISUALIZATION";
+  const statuses = new Set([
+    "OPEN_SOURCE_BOUNDARY",
+    "OPEN_TRUTH_CONSTRAINT",
+    "WITNESSED",
+  ]);
+  const mount = document.getElementById("translational-mirror");
+  const sensor = document.createElement("textarea");
+  sensor.dataset.returnSensor = "";
+  sensor.autocomplete = "off";
+  sensor.autocapitalize = "sentences";
+  sensor.spellcheck = true;
+  sensor.setAttribute("aria-label", "");
+  document.body.append(sensor);
+
+  let active = null;
+  let draft = "";
+  let executing = false;
+
+  function svgElement(name, attributes = {}) {
+    const node = document.createElementNS(namespace, name);
+    for (const [key, value] of Object.entries(attributes)) {
+      node.setAttribute(key, String(value));
+    }
+    return node;
+  }
 
   function asText(value) {
     return value === null || value === undefined ? "" : String(value);
   }
 
-  function walk(node, output = []) {
-    if (!node || typeof node !== "object") return output;
-    output.push(node);
-    if (Array.isArray(node.children)) {
-      for (const child of node.children) walk(child, output);
-    }
-    return output;
+  function unique(values) {
+    return [...new Set((values || []).map(asText).filter(Boolean))];
   }
 
   function sameMembers(left, right) {
-    if (!Array.isArray(left) || !Array.isArray(right)) return false;
-    const a = [...new Set(left.map(asText))].sort();
-    const b = [...new Set(right.map(asText))].sort();
+    const a = unique(left).sort();
+    const b = unique(right).sort();
     return a.length === b.length && a.every((item, index) => item === b[index]);
   }
 
-  function derivationMatches(contract, derivation) {
+  function derivationMatches(contract, derivation, allowOpen = false) {
     if (!derivation || typeof derivation !== "object") return false;
     if (derivation.status !== contract.status) return false;
     if (derivation.perspective_id !== contract.perspective_id) return false;
     if (derivation.truth_issued !== false) return false;
     if (contract.status === "OPEN_SOURCE_BOUNDARY") {
-      return derivation.basis === "OPEN_AUTHORED_PERSPECTIVE_SOURCE_BOUNDARY"
+      return allowOpen
+        && derivation.basis === "AUTHORED_PERSPECTIVE_SOURCE_BOUNDARY"
         && derivation.source_boundary_only === true
         && derivation.closure_derivation_id === null
         && derivation.visual_closure_id === null
@@ -217,10 +167,6 @@ svg { display: block; width: 100%; height: var(--closure-topology-height); overf
     if (contract.status === "OPEN_TRUTH_CONSTRAINT") {
       return derivation.basis === "OPEN_UNWITNESSED_TRANSLATIONAL_TRUTH_CONSTRAINT";
     }
-    const derivedForms = new Set((derivation.natural_form_ids || []).map(asText));
-    const derivedSources = new Set((derivation.source_return_ids || []).map(asText));
-    const formUniverse = new Set((contract.natural_form_ids || []).map(asText));
-    const sourceUniverse = new Set((contract.source_return_ids || []).map(asText));
     return derivation.basis === "TRANSLATIONAL_TRUTH_CLOSURE"
       && derivation.source_boundary_only === false
       && derivation.closure_derivation_id === contract.closure_derivation_id
@@ -228,351 +174,297 @@ svg { display: block; width: 100%; height: var(--closure-topology-height); overf
       && derivation.nrrf843_ui_id === contract.nrrf843_ui_id
       && derivation.interaction_closure_id === contract.interaction_closure_id
       && derivation.field_event_seq === contract.field_event_seq
-      && derivedForms.size > 0
-      && derivedSources.size > 0
-      && [...derivedForms].every((item) => formUniverse.has(item))
-      && [...derivedSources].every((item) => sourceUniverse.has(item));
+      && unique(derivation.natural_form_ids).length > 0
+      && unique(derivation.source_return_ids).length > 0
+      && unique(derivation.natural_form_ids).every((item) => contract.natural_form_ids.includes(item))
+      && unique(derivation.source_return_ids).every((item) => contract.source_return_ids.includes(item));
   }
 
-  function validateContract(contract) {
+  function validate(contract) {
     if (!contract || typeof contract !== "object") return false;
     if (contract.schema !== schema || contract.protocol !== protocol) return false;
     if (!statuses.has(contract.status)) return false;
-    if (contract.status === "WITNESSED" && (!Number.isInteger(contract.field_event_seq) || contract.field_event_seq < 1)) return false;
-    if (!contract.audit || contract.audit.closure_only_execution !== true) return false;
-    const renderer = contract.renderer_contract || {};
-    if (renderer.role !== "GENERIC_CONTRACT_INTERPRETER") return false;
-    if (renderer.visible_instance_source !== "CONTRACT_ONLY") return false;
-    if (renderer.hardcoded_visible_instances !== false || renderer.semantic_fallback !== false) return false;
-    if (!sameMembers(renderer.allowed_node_kinds, [...kinds])) return false;
-    if (!sameMembers(renderer.allowed_text_tags, [...tags])) return false;
-    if (!derivationMatches(contract, (contract.visual_form || {}).derivation)) return false;
-    const nodes = walk(contract.root);
-    if (!nodes.length) return false;
-    const nodeIds = nodes.map((node) => asText(node.id));
-    if (nodeIds.some((id) => !id) || new Set(nodeIds).size !== nodeIds.length) return false;
-    const fieldIds = [];
-    const controlIds = [];
-    for (const node of nodes) {
-      if (!kinds.has(node.kind) || !derivationMatches(contract, node.derivation)) return false;
-      if (node.kind === "text" && !tags.has(node.tag)) return false;
-      if (inputKinds.has(node.kind)) fieldIds.push(asText(node.id));
-      if (node.kind === "button") controlIds.push(asText(node.action_id));
-      if (node.kind === "topology") {
-        const topology = node.topology || {};
-        if (!topology.projection || topology.projection.static_external_map !== false) return false;
-        if (!derivationMatches(contract, topology.projection.derivation)) return false;
-        const topologyIds = (topology.nodes || []).map((item) => asText(item.id));
-        if (new Set(topologyIds).size !== topologyIds.length) return false;
-        if (!sameMembers(Object.keys(topology.positions || {}), topologyIds)) return false;
-        for (const item of topology.nodes || []) {
-          if (!derivationMatches(contract, item.derivation)) return false;
-        }
-        for (const item of topology.edges || []) {
-          if (!topologyIds.includes(asText(item.source)) || !topologyIds.includes(asText(item.target))) return false;
-          if (item.truth_status !== "WITNESSED" && item.executes_as_equality === true) return false;
-          if (!derivationMatches(contract, item.derivation)) return false;
-        }
-      }
+    const renderer = contract.renderer_relation || {};
+    if (renderer.role !== "TRANSLATIONAL_RELATION_EVALUATOR") return false;
+    if (renderer.input !== "ACTIVE_PERSPECTIVE_RELATION_ONLY") return false;
+    if (renderer.visible_words_source !== "SOURCE_RETURNS_ONLY") return false;
+    if (!Array.isArray(renderer.fixed_visible_controls) || renderer.fixed_visible_controls.length) return false;
+    if (!Array.isArray(renderer.authored_visible_vocabulary) || renderer.authored_visible_vocabulary.length) return false;
+    if (!Array.isArray(renderer.fallback_visuals) || renderer.fallback_visuals.length) return false;
+    if (renderer.can_define_semantics !== false || renderer.can_admit_forms !== false || renderer.can_issue_truth !== false) return false;
+    const projection = contract.projection || {};
+    if (projection.active_perspective_id !== contract.perspective_id) return false;
+    if (!Array.isArray(projection.states) || !Array.isArray(projection.equality_fibres)) return false;
+    if (!Array.isArray(projection.translations) || !Array.isArray(projection.potentials)) return false;
+    if (!projection.reading || typeof projection.reading !== "object") return false;
+    if (!derivationMatches(contract, (projection.visualization || {}).derivation, contract.status === "OPEN_SOURCE_BOUNDARY")) return false;
+    const states = new Map();
+    for (const state of projection.states) {
+      if (!state.id || states.has(state.id)) return false;
+      if (!asText(state.source_trace)) return false;
+      if (projection.reading[state.id] !== state.display_fibre_id) return false;
+      if (!derivationMatches(contract, state.derivation)) return false;
+      states.set(state.id, state);
     }
-    if (new Set(fieldIds).size !== fieldIds.length) return false;
-    if (new Set(controlIds).size !== controlIds.length) return false;
-    const actions = Array.isArray(contract.action_bindings) ? contract.action_bindings : [];
-    const actionIds = actions.map((action) => asText(action.id));
-    if (!sameMembers(controlIds, actionIds)) return false;
-    if (!sameMembers(actionIds, (contract.execution || {}).allowed_action_ids || [])) return false;
-    if ((contract.execution || {}).endpoint_template !== "/supernet/interface/contracts/{contract_id}/execute") return false;
-    if ((contract.execution || {}).contract_revalidation_required !== true) return false;
-    if ((contract.execution || {}).closure_only !== true) return false;
-    for (const action of actions) {
-      if (!operations.has(action.operation)) return false;
-      if (action.enabled !== true || action.external_semantic_action !== false) return false;
-      if (!derivationMatches(contract, action.derivation)) return false;
-      if (["endpoint", "endpoint_selector", "method", "payload", "url"].some((key) => key in action)) return false;
-      if (!(action.input_field_ids || []).every((id) => fieldIds.includes(asText(id)))) return false;
-      if (!(action.required_field_ids || []).every((id) => (action.input_field_ids || []).includes(id))) return false;
+    const members = [];
+    for (const fibre of projection.equality_fibres) {
+      if (!contract.natural_form_ids.includes(fibre.id)) return false;
+      if (fibre.closure_fixed !== true || !derivationMatches(contract, fibre.derivation)) return false;
+      if (!(fibre.member_state_ids || []).every((id) => states.has(id))) return false;
+      members.push(...fibre.member_state_ids);
     }
-    if (contract.status === "OPEN_TRUTH_CONSTRAINT") {
-      return actions.length === 0 && contract.root.visible === false;
+    if (!sameMembers(members, [...states.keys()])) return false;
+    for (const relation of projection.translations) {
+      if (!states.has(relation.source_state_id) || !states.has(relation.target_state_id)) return false;
+      if (relation.executes_as_equality === true
+          && projection.reading[relation.source_state_id] !== projection.reading[relation.target_state_id]) return false;
+      if (relation.relation_status !== "WITNESSED" && relation.executes_as_equality === true) return false;
+      if (!derivationMatches(contract, relation.derivation)) return false;
     }
-    return true;
+    for (const relation of projection.potentials) {
+      if (relation.target_state_id !== null && !states.has(relation.target_state_id)) return false;
+      if (relation.relation_status !== "WITNESSED" && relation.executes_as_equality === true) return false;
+      if (!derivationMatches(contract, relation.derivation)) return false;
+    }
+    const visualization = projection.visualization || {};
+    if (visualization.operator !== "PERSPECTIVE_RELATION_PROJECTIVE_FOLD") return false;
+    if (JSON.stringify(visualization.view_box) !== JSON.stringify([0, 0, 1000, 1000])) return false;
+    const fibrePrimitives = visualization.fibre_primitives || [];
+    const translationPrimitives = visualization.translation_primitives || [];
+    const potentialPrimitives = visualization.potential_primitives || [];
+    if (fibrePrimitives.length !== projection.equality_fibres.length) return false;
+    if (!fibrePrimitives.every((primitive) =>
+      projection.equality_fibres.some((fibre) =>
+        primitive.natural_form_id === fibre.id
+        && sameMembers(primitive.source_state_ids, fibre.member_state_ids)
+        && sameMembers(primitive.source_return_ids, fibre.source_return_ids)
+      )
+      && Array.isArray(primitive.centre)
+      && primitive.centre.length === 2
+      && Number.isFinite(primitive.centre[0])
+      && Number.isFinite(primitive.centre[1])
+      && Number.isFinite(primitive.radius)
+      && Number.isInteger(primitive.hue)
+      && derivationMatches(contract, primitive.derivation)
+    )) return false;
+    if (!translationPrimitives.every((primitive) =>
+      projection.translations.some((relation) => relation.id === primitive.relation_id)
+      && Array.isArray(primitive.quadratic_path)
+      && primitive.quadratic_path.length === 3
+      && derivationMatches(contract, primitive.derivation)
+    )) return false;
+    if (!potentialPrimitives.every((primitive) =>
+      projection.potentials.some((relation) => relation.id === primitive.relation_id)
+      && Array.isArray(primitive.quadratic_path)
+      && primitive.quadratic_path.length === 3
+      && derivationMatches(contract, primitive.derivation)
+    )) return false;
+    const relation = contract.return_relation;
+    if (contract.status === "OPEN_TRUTH_CONSTRAINT") return relation === null;
+    if (!relation || relation.kind !== "SOURCE_PRESERVING_TRANSLATIONAL_RETURN") return false;
+    if (relation.full_surface_aperture !== true || relation.visible_control !== false) return false;
+    if (relation.creates_truth_directly !== false || relation.reclose_after_return !== true) return false;
+    if (!derivationMatches(contract, relation.derivation, contract.status === "OPEN_SOURCE_BOUNDARY")) return false;
+    const execution = contract.execution || {};
+    return execution.return_relation_id === relation.id
+      && execution.only_relation_extension === true
+      && execution.contract_revalidation_required === true
+      && execution.closure_only === true;
   }
 
-  function applyVisualForm(contract) {
-    const palette = (contract.visual_form || {}).palette || {};
-    const geometry = (contract.visual_form || {}).geometry || {};
-    const colorPattern = /^hsl\(\d{1,3}\s+\d{1,3}%\s+\d{1,3}%\)$/;
-    const colors = {
-      background: "--closure-background",
-      surface: "--closure-surface",
-      surface_alt: "--closure-surface-alt",
-      text: "--closure-text",
-      muted: "--closure-muted",
-      accent: "--closure-accent",
-      witnessed: "--closure-witnessed",
-      open: "--closure-open",
-      line: "--closure-line",
-    };
-    for (const [key, variable] of Object.entries(colors)) {
-      const value = asText(palette[key]);
-      if (!colorPattern.test(value)) throw new Error("invalid contract color");
-      document.documentElement.style.setProperty(variable, value);
-    }
-    const dimensions = {
-      max_width_px: "--closure-max-width",
-      gap_px: "--closure-gap",
-      radius_px: "--closure-radius",
-      topology_height_px: "--closure-topology-height",
-    };
-    for (const [key, variable] of Object.entries(dimensions)) {
-      const value = Number(geometry[key]);
-      if (!Number.isFinite(value) || value < 0 || value > 4000) throw new Error("invalid contract geometry");
-      document.documentElement.style.setProperty(variable, value + "px");
-    }
+  function sourceBlock(svg, x, y, width, height, text, className) {
+    const foreign = svgElement("foreignObject", {x, y, width, height});
+    const block = document.createElement("div");
+    block.className = className;
+    block.textContent = text;
+    foreign.append(block);
+    svg.append(foreign);
   }
 
-  function svgElement(name, attributes = {}) {
-    const element = document.createElementNS(namespace, name);
-    for (const [key, value] of Object.entries(attributes)) {
-      element.setAttribute(key, asText(value));
-    }
-    return element;
+  function projectedPath(points) {
+    if (!Array.isArray(points) || points.length !== 3) return "";
+    return `M ${points[0][0]} ${points[0][1]} Q ${points[1][0]} ${points[1][1]} ${points[2][0]} ${points[2][1]}`;
   }
 
-  function renderTopology(node) {
-    const topology = node.topology;
-    const titleId = node.id + "-title";
-    const svg = svgElement("svg", {
-      role: "img",
-      viewBox: topology.view_box.join(" "),
-      "aria-labelledby": titleId,
-    });
-    const title = svgElement("title", { id: titleId });
-    title.textContent = asText(topology.projection.active_perspective_id);
-    svg.append(title);
-    const positions = topology.positions;
-    for (const edge of topology.edges) {
-      const source = positions[edge.source];
-      const target = positions[edge.target];
-      const line = svgElement("line", {
-        x1: source.x,
-        y1: source.y,
-        x2: target.x,
-        y2: target.y,
-      });
-      line.setAttribute("class", "closure-edge");
-      line.dataset.truth = asText(edge.truth_status);
-      line.style.strokeWidth = asText(edge.width);
-      const edgeTitle = svgElement("title");
-      edgeTitle.textContent = asText(edge.label);
-      line.append(edgeTitle);
-      svg.append(line);
-    }
-    for (const item of topology.nodes) {
-      const position = positions[item.id];
-      const group = svgElement("g", {
-        transform: "translate(" + position.x + " " + position.y + ")",
-      });
-      group.setAttribute("class", "closure-node");
-      group.dataset.truth = asText(item.truth_status);
-      const circle = svgElement("circle", { r: item.radius });
-      const nodeTitle = svgElement("title");
-      nodeTitle.textContent = asText(item.label);
-      circle.append(nodeTitle);
-      const label = svgElement("text", { y: Number(item.radius) + 18 });
-      label.textContent = asText(item.label);
-      const sublabel = svgElement("text", { y: Number(item.radius) + 34 });
-      sublabel.textContent = asText(item.sublabel);
-      group.append(circle, label, sublabel);
-      svg.append(group);
-    }
-    return svg;
-  }
-
-  function renderNode(node) {
-    if (node.visible === false) return null;
-    let element;
-    if (node.kind === "surface") {
-      element = document.createElement("div");
-    } else if (node.kind === "region") {
-      element = document.createElement("section");
-    } else if (node.kind === "text") {
-      element = document.createElement(node.tag);
-      element.textContent = asText(node.text);
-    } else if (node.kind === "metric") {
-      element = document.createElement("div");
-      const label = document.createElement("span");
-      const value = document.createElement("span");
-      label.textContent = asText(node.label);
-      value.textContent = asText(node.value);
-      element.append(label, value);
-    } else if (inputKinds.has(node.kind)) {
-      element = document.createElement("div");
-      const label = document.createElement("label");
-      const controlId = "closure-field-" + node.id;
-      label.htmlFor = controlId;
-      label.textContent = asText(node.label);
-      const control = document.createElement(node.kind === "select" ? "select" : node.kind);
-      control.id = controlId;
-      control.name = asText(node.id);
-      control.required = node.required === true;
-      if (Number.isInteger(node.max_length)) control.maxLength = node.max_length;
-      if (node.kind === "select") {
-        for (const optionRecord of node.options) {
-          const option = document.createElement("option");
-          option.value = asText(optionRecord.value);
-          option.textContent = asText(optionRecord.label);
-          option.selected = option.value === asText(node.value);
-          control.append(option);
-        }
-      } else {
-        control.value = asText(node.value);
-        control.placeholder = asText(node.placeholder);
-      }
-      fields.set(asText(node.id), control);
-      element.append(label, control);
-    } else if (node.kind === "button") {
-      element = document.createElement("button");
-      element.type = "button";
-      element.textContent = asText(node.label);
-      element.dataset.actionId = asText(node.action_id);
-      element.addEventListener("click", () => executeAction(asText(node.action_id)));
-    } else if (node.kind === "topology") {
-      element = document.createElement("section");
-      element.append(renderTopology(node));
-    } else {
-      return null;
-    }
-    element.dataset.kind = asText(node.kind);
-    element.dataset.nodeId = asText(node.id);
-    if (node.presentation) element.dataset.presentation = asText(node.presentation);
-    if (Array.isArray(node.children)) {
-      for (const child of node.children) {
-        const rendered = renderNode(child);
-        if (rendered) element.append(rendered);
-      }
-    }
-    return element;
-  }
-
-  function firstTitle(node) {
-    return walk(node).find((item) => item.kind === "text" && item.tag === "h1");
-  }
-
-  function renderContract(contract) {
+  function render(contract) {
+    active = validate(contract) ? contract : null;
     mount.replaceChildren();
-    fields.clear();
-    mount.dataset.ready = "false";
-    mount.dataset.state = "OPEN";
-    activeContract = null;
-    if (!validateContract(contract)) return;
-    if (contract.status === "OPEN_TRUTH_CONSTRAINT" || contract.root.visible === false) return;
-    applyVisualForm(contract);
-    const rendered = renderNode(contract.root);
-    if (!rendered) return;
-    mount.append(rendered);
-    const title = firstTitle(contract.root);
-    document.title = title ? asText(title.text) : "";
-    activeContract = contract;
-    mount.dataset.contractId = asText(contract.id);
-    mount.dataset.state = asText(contract.status);
-    mount.dataset.ready = "true";
-  }
-
-  function fieldValue(fieldId) {
-    const control = fields.get(fieldId);
-    return control ? control.value : "";
-  }
-
-  async function loadContract(focusEventId, perspectiveId) {
-    const query = new URLSearchParams();
-    if (focusEventId) query.set("focus_event_id", asText(focusEventId));
-    if (perspectiveId) query.set("perspective_id", asText(perspectiveId));
-    const suffix = query.toString() ? "?" + query.toString() : "";
-    const response = await fetch("/supernet/interface" + suffix, {
-      headers: { accept: "application/json" },
-    });
-    if (!response.ok) return false;
-    const payload = await response.json();
-    const contract = payload.closure_ui_contract
-      || (payload.visual_closure || {}).closure_ui_contract;
-    if (!contract) return false;
-    renderContract(contract);
-    return true;
-  }
-
-  async function executeAction(actionId) {
-    const contract = activeContract;
-    if (!contract || !validateContract(contract)) return;
-    const binding = contract.action_bindings.find((item) => item.id === actionId);
-    if (!binding || binding.enabled !== true) return;
-    const values = {};
-    let invalid = false;
-    for (const fieldId of binding.input_field_ids) {
-      const control = fields.get(fieldId);
-      if (!control) return;
-      const value = fieldValue(fieldId);
-      values[fieldId] = value;
-      const required = binding.required_field_ids.includes(fieldId);
-      const empty = !asText(value).trim();
-      control.setAttribute("aria-invalid", required && empty ? "true" : "false");
-      if (required && empty) invalid = true;
+    mount.dataset.state = active ? active.status : "OPEN_TRUTH_CONSTRAINT";
+    if (!active) return;
+    const projection = active.projection;
+    const visualization = projection.visualization;
+    const svg = svgElement("svg", {viewBox: visualization.view_box.join(" ")});
+    mount.append(svg);
+    const fibreById = new Map(projection.equality_fibres.map((fibre) => [fibre.id, fibre]));
+    const primitiveByForm = new Map(visualization.fibre_primitives.map((primitive) => [primitive.natural_form_id, primitive]));
+    for (const relation of visualization.translation_primitives) {
+      const path = svgElement("path", {
+        d: projectedPath(relation.quadratic_path),
+        class: "translation",
+        stroke: `hsl(${relation.hue} 72% 66%)`,
+        "data-equality": relation.executes_as_equality === true,
+      });
+      svg.append(path);
     }
-    if (invalid) return;
-    mount.querySelectorAll("[data-action-id]").forEach((button) => {
-      button.disabled = true;
+    const focusForm = active.return_relation?.parent_natural_form_id || null;
+    const focusPrimitive = primitiveByForm.get(focusForm) || {centre: [500, 500], radius: 54};
+    visualization.potential_primitives.forEach((relation) => {
+      svg.append(svgElement("path", {
+        d: projectedPath(relation.quadratic_path),
+        class: "potential",
+        stroke: `hsl(${relation.hue} 68% 65%)`,
+      }));
     });
-    mount.dataset.state = "EXECUTING";
-    const endpoint = contract.execution.endpoint_template.replace(
-      "{contract_id}",
-      encodeURIComponent(contract.id),
+    for (const primitive of visualization.fibre_primitives) {
+      const fibre = fibreById.get(primitive.natural_form_id);
+      if (!fibre) continue;
+      const [x, y] = primitive.centre;
+      const group = svgElement("g", {"data-natural-form-id": fibre.id});
+      const color = `hsl(${primitive.hue} 76% 66%)`;
+      const shell = svgElement("circle", {
+        cx: x,
+        cy: y,
+        r: primitive.radius,
+        class: "fibre-shell",
+        stroke: color,
+        "data-focus": fibre.id === focusForm,
+      });
+      group.append(shell);
+      const memberStates = fibre.member_state_ids
+        .map((id) => projection.states.find((state) => state.id === id))
+        .filter(Boolean);
+      const trace = memberStates.map((state) => state.source_trace).join("\n\n");
+      const firstEvent = memberStates[0]?.event_id;
+      if (firstEvent) {
+        group.style.cursor = "pointer";
+        group.addEventListener("pointerdown", (event) => {
+          event.stopPropagation();
+          const current = new URL(window.location.href);
+          current.searchParams.set("focus_event_id", firstEvent);
+          current.searchParams.set("perspective_id", active.perspective_id);
+          history.replaceState(null, "", current);
+          load(firstEvent, active.perspective_id).finally(() => sensor.focus());
+        });
+      }
+      svg.append(group);
+      const traceWidth = Math.max(120, primitive.radius * 2.8);
+      sourceBlock(
+        svg,
+        x - traceWidth / 2,
+        y - primitive.radius * .55,
+        traceWidth,
+        primitive.radius * 1.25,
+        trace,
+        "source-trace",
+      );
+    }
+    renderDraft(svg, focusPrimitive);
+  }
+
+  function renderDraft(svg, focusPrimitive) {
+    if (!draft) return;
+    const [x, y] = focusPrimitive?.centre || [500, 500];
+    const blockWidth = 720;
+    sourceBlock(
+      svg,
+      x - blockWidth / 2,
+      y - 180,
+      blockWidth,
+      360,
+      draft,
+      "draft-trace",
     );
+  }
+
+  function perspectiveFromLocation() {
+    const current = new URL(window.location.href);
+    let perspective = current.searchParams.get("perspective_id");
+    if (!perspective) {
+      const identity = crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+      perspective = `perspective:${identity}`;
+      current.searchParams.set("perspective_id", perspective);
+      history.replaceState(null, "", current);
+    }
+    return perspective;
+  }
+
+  async function load(focusEventId, perspectiveId) {
+    const params = new URLSearchParams({perspective_id: perspectiveId});
+    if (focusEventId) params.set("focus_event_id", focusEventId);
+    const response = await fetch(`/supernet/interface?${params}`, {credentials: "same-origin"});
+    if (!response.ok) return render(null);
+    const payload = await response.json();
+    render(payload.closure_ui_contract || null);
+  }
+
+  async function returnSource() {
+    if (executing || !active || !active.return_relation || !draft.trim()) return;
+    executing = true;
+    const relation = active.return_relation;
+    const endpoint = active.execution.endpoint_template.replace(
+      "{contract_id}",
+      encodeURIComponent(active.id),
+    );
+    const exactSourceReturn = draft;
     try {
       const response = await fetch(endpoint, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        credentials: "same-origin",
+        headers: {"content-type": "application/json"},
         body: JSON.stringify({
-          action_id: actionId,
-          perspective_id: contract.perspective_id,
-          focus_event_id: contract.focus_event_id,
-          values,
+          return_relation_id: relation.id,
+          perspective_id: active.perspective_id,
+          focus_event_id: active.focus_event_id,
+          exact_source_return: exactSourceReturn,
         }),
       });
       const payload = await response.json();
       if (response.status === 409) {
-        await loadContract(contract.focus_event_id, contract.perspective_id);
+        await load(active.focus_event_id, active.perspective_id);
         return;
       }
       const next = payload.closure_ui_contract
-        || (payload.interface || {}).closure_ui_contract
-        || (payload.detail || {}).closure_ui_contract;
-      if (next) {
-        renderContract(next);
-        return;
-      }
-      mount.dataset.state = response.ok ? "OPEN" : "REJECTED";
-    } catch (_error) {
-      mount.dataset.state = "OPEN";
+        || payload.interface?.closure_ui_contract
+        || payload.detail?.closure_ui_contract;
+      if (!response.ok || !next) return;
+      draft = "";
+      sensor.value = "";
+      const current = new URL(window.location.href);
+      if (next.focus_event_id) current.searchParams.set("focus_event_id", next.focus_event_id);
+      current.searchParams.set("perspective_id", next.perspective_id);
+      history.replaceState(null, "", current);
+      render(next);
     } finally {
-      mount.querySelectorAll("[data-action-id]").forEach((button) => {
-        button.disabled = false;
-      });
+      executing = false;
+      sensor.focus();
     }
   }
 
-  async function bootstrap() {
-    const current = new URL(window.location.href);
-    try {
-      await loadContract(
-        current.searchParams.get("focus_event_id"),
-        current.searchParams.get("perspective_id"),
-      );
-    } catch (_error) {
-      mount.dataset.state = "OPEN";
+  sensor.addEventListener("input", () => {
+    draft = sensor.value;
+    if (active) render(active);
+  });
+  sensor.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      returnSource();
+    } else if (event.key === "Escape") {
+      draft = "";
+      sensor.value = "";
+      if (active) render(active);
     }
-  }
+  });
+  mount.addEventListener("pointerdown", () => sensor.focus());
+  window.addEventListener("resize", () => {
+    if (active) render(active);
+  });
 
-  bootstrap();
+  const perspective = perspectiveFromLocation();
+  const current = new URL(window.location.href);
+  load(current.searchParams.get("focus_event_id"), perspective)
+    .finally(() => sensor.focus());
 })();
 </script>
 </body>

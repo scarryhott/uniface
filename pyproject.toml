@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "closure-supernet"
-version = "3.17.0"
-description = "Supernet whose perspective UI mirror closes evolving source topology and AI/token potential through one natural-form translational truth"
+version = "3.18.0"
+description = "Supernet whose UI is the active-perspective translational-truth relation and universal return surface"
 readme = "UNIFIED_SUPERNET_RUNTIME.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
@@ -14,13 +14,21 @@ dependencies = [
   "fastapi>=0.115,<1",
   "uvicorn[standard]>=0.30,<1",
   "pydantic>=2.8,<3",
+]
+
+[project.optional-dependencies]
+legacy = [
   "httpx>=0.27,<1",
   "PyJWT[crypto]>=2.9,<3",
   "mcp>=2,<3",
 ]
-
-[project.optional-dependencies]
-dev = ["pytest>=8,<9", "pytest-asyncio>=0.24,<1"]
+dev = [
+  "pytest>=8,<9",
+  "pytest-asyncio>=0.24,<1",
+  "httpx>=0.27,<1",
+  "PyJWT[crypto]>=2.9,<3",
+  "mcp>=2,<3",
+]
 
 [project.scripts]
 closure-supernet = "closure_supernet.cli_supernet:main"

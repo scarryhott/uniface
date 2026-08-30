@@ -115,6 +115,11 @@ class RuntimeConfig:
 
     environment: str = os.getenv("CLOSURE_ENVIRONMENT", "development").strip().lower()
     service_role: str = os.getenv("CLOSURE_SERVICE_ROLE", "all").strip().lower()
+    projection_only_mode: bool = _bool(
+        "CLOSURE_PROJECTION_ONLY_MODE",
+        os.getenv("CLOSURE_ENVIRONMENT", "development").strip().lower()
+        == "production",
+    )
     public_base_url: str | None = os.getenv("CLOSURE_PUBLIC_BASE_URL") or None
     auth_mode: str = os.getenv("CLOSURE_AUTH_MODE", "open").strip().lower()
     auth_api_keys_json: str = os.getenv("CLOSURE_AUTH_API_KEYS_JSON", "{}")

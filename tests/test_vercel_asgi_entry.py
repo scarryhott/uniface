@@ -7,93 +7,28 @@ import subprocess
 import sys
 from pathlib import Path
 
-from fastapi.testclient import TestClient
-
-from closure_supernet.api_inversion import create_app
-from closure_supernet.config import RuntimeConfig
-
 
 ROOT = Path(__file__).resolve().parents[1]
-DOCS_INDEX = ROOT / "docs" / "index.html"
 VERCEL_JSON = ROOT / "vercel.json"
 ASGI_ENTRY = ROOT / "asgi.py"
 
 
-def make_config(tmp_path: Path) -> RuntimeConfig:
-    return RuntimeConfig(
-        database_path=tmp_path / "vercel.db",
-        inbox_dir=tmp_path / "inbox",
-        backup_dir=tmp_path / "backups",
-        autonomy_enabled=False,
-        environment="test",
-        trusted_hosts=("testserver", "localhost", "127.0.0.1"),
-    )
-
-
-def test_root_vercel_json_selects_fastapi_asgi_not_docs_static() -> None:
-    assert VERCEL_JSON.is_file()
+def test_vercel_selects_the_projection_only_asgi_entry() -> None:
     payload = json.loads(VERCEL_JSON.read_text(encoding="utf-8"))
     assert payload.get("framework") == "fastapi"
-    functions = payload.get("functions") or {}
-    assert "asgi.py" in functions
-    exclude = functions["asgi.py"].get("excludeFiles", "")
-    assert "docs/**" in exclude
-    pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    assert 'entrypoint = "asgi:app"' in pyproject
-
-
-def test_asgi_entry_reexports_existing_inversion_app() -> None:
+    assert "asgi.py" in (payload.get("functions") or {})
     source = ASGI_ENTRY.read_text(encoding="utf-8")
     tree = ast.parse(source)
-    imports = [
-        node
-        for node in tree.body
-        if isinstance(node, ast.ImportFrom) and node.module == "closure_supernet.api_inversion"
-    ]
-    assert imports, "ASGI entry must import the existing FastAPI app"
-    names = {alias.name for node in imports for alias in node.names}
-    assert "app" in names
-    assert "FastAPI(" not in source
-    assert "docs/index.html" not in source
+    imported_modules = {
+        node.module for node in tree.body if isinstance(node, ast.ImportFrom)
+    }
+    assert "closure_supernet.api_agent" in imported_modules
+    assert "closure_supernet.api_inversion" not in imported_modules
+    assert 'CLOSURE_ENVIRONMENT", "production"' in source
+    assert 'CLOSURE_PROJECTION_ONLY_MODE", "true"' in source
 
 
-def test_serve_equivalent_root_is_integrator_field_not_docs_loop_face(
-    tmp_path: Path,
-) -> None:
-    leftover = DOCS_INDEX.read_text(encoding="utf-8")
-    assert "data-projection=\"face\"" in leftover
-
-    app = create_app(make_config(tmp_path))
-    with TestClient(app) as client:
-        root = client.get("/")
-        supernet = client.get("/supernet")
-        field = client.get("/supernet/field")
-        self_limit = client.get("/self-limit")
-
-    assert root.status_code == 200
-    assert "text/html" in root.headers.get("content-type", "")
-    assert "One continuous integrator" in root.text
-    assert "data-projection=\"face\"" not in root.text
-    assert "notes as undetermined Sense" not in root.text
-
-    assert supernet.status_code == 200
-    assert supernet.text == root.text
-
-    assert field.status_code == 200
-    payload = field.json()
-    assert payload["canonical_runtime_operation"] == "integrate"
-    assert payload["subsystems_are_lenses"] is True
-    assert payload["truth_issued_by_determination"] is False
-
-    assert self_limit.status_code == 200
-    assert "One inversion" in self_limit.text
-    assert self_limit.text != root.text
-
-
-def test_asgi_module_serves_integrator_in_isolated_process(tmp_path: Path) -> None:
-    db = tmp_path / "isolated.db"
-    inbox = tmp_path / "inbox"
-    backups = tmp_path / "backups"
+def test_vercel_asgi_executes_one_projection_and_one_return(tmp_path: Path) -> None:
     script = """
 import os, sys
 os.environ["CLOSURE_DB_PATH"] = {db!r}
@@ -103,19 +38,40 @@ os.environ["CLOSURE_AUTONOMY_ENABLED"] = "false"
 os.environ["CLOSURE_TRUSTED_HOSTS"] = "testserver,localhost,127.0.0.1"
 sys.path.insert(0, {root!r})
 import asgi
+for forbidden in (
+    "closure_supernet.api_natural_interface",
+    "closure_supernet.agent_mcp",
+    "closure_supernet.coordination",
+    "closure_supernet.complete_interface_models",
+    "closure_supernet.runtime",
+):
+    assert forbidden not in sys.modules, forbidden
 from fastapi.testclient import TestClient
 with TestClient(asgi.app) as client:
     root = client.get("/")
-    field = client.get("/supernet/field")
+    initial = client.get("/supernet/interface", params={{"perspective_id": "p"}}).json()["closure_ui_contract"]
+    result = client.post(
+        f"/supernet/interface/projections/{{initial['id']}}/return",
+        json={{
+            "return_relation_id": initial["return_relation"]["id"],
+            "perspective_id": "p",
+            "focus_event_id": None,
+            "exact_source_return": "One exact visual return.",
+        }},
+    )
     assert root.status_code == 200
-    assert "data-closure-only-contract" in root.text
-    assert "One continuous integrator" not in root.text
-    assert "data-projection=\\"face\\"" not in root.text
-    payload = field.json()
-    assert payload["canonical_runtime_operation"] == "integrate"
-    assert payload["truth_issued_by_determination"] is False
+    assert '<main id="translational-mirror"></main>' in root.text
+    assert result.status_code == 200, result.text
+    assert result.json()["closure_ui_contract"]["status"] == "WITNESSED"
+    assert client.get("/trading").status_code == 404
+    assert client.get("/mcp").status_code == 404
 print("ok")
-""".format(db=str(db), inbox=str(inbox), backups=str(backups), root=str(ROOT))
+""".format(
+        db=str(tmp_path / "isolated.db"),
+        inbox=str(tmp_path / "inbox"),
+        backups=str(tmp_path / "backups"),
+        root=str(ROOT),
+    )
     result = subprocess.run(
         [sys.executable, "-c", script],
         cwd=ROOT,

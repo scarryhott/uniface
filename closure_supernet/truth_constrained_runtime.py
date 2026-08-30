@@ -207,10 +207,16 @@ def derive_unified_truth_runtime(
         and closure_ui_contract.get("interaction_closure_id")
         == interaction_closure.get("id")
         and closure_ui_contract.get("execution", {}).get("closure_only") is True
-        and closure_ui_contract.get("renderer_contract", {}).get(
-            "visible_instance_source"
+        and closure_ui_contract.get("renderer_relation", {}).get("role")
+        == "TRANSLATIONAL_RELATION_EVALUATOR"
+        and closure_ui_contract.get("renderer_relation", {}).get(
+            "authored_visible_vocabulary"
         )
-        == "CONTRACT_ONLY"
+        == []
+        and closure_ui_contract.get("execution", {}).get(
+            "only_relation_extension"
+        )
+        is True
     )
 
     components = [
@@ -317,15 +323,14 @@ def derive_unified_truth_runtime(
                     for item in semantic_elements
                     if item.get("admission_status") not in {"OPEN", None}
                 ],
-                "allowed_return_operations": [
-                    item.get("operation")
-                    for item in closure_ui_contract.get("action_bindings", [])
-                ],
+                "return_relation_id": (
+                    closure_ui_contract.get("return_relation") or {}
+                ).get("id"),
                 "closure_ui_contract_id": closure_ui_contract.get("id"),
                 "closure_ui_contract_valid": closure_ui_validation["valid"],
-                "all_visible_ui_nodes_contract_derived": (
+                "all_visual_existence_closure_derived": (
                     closure_ui_validation[
-                        "all_nodes_and_topology_records_have_exact_derivation"
+                        "all_visual_existence_has_exact_derivation"
                     ]
                 ),
             },
@@ -377,19 +382,9 @@ def derive_unified_truth_runtime(
             "constraint_source": (
                 "NRRF843_UI_PREIMAGE_IMAGE_TRANSLATIONAL_TRUTH_CLOSURE"
             ),
-            "allowed_return_operations": (
-                [
-                    item.get("operation")
-                    for item in closure_ui_contract.get("action_bindings", [])
-                ]
-                if unified
-                else []
-            ),
-            "allowed_contract_action_ids": (
-                closure_ui_contract.get("execution", {}).get(
-                    "allowed_action_ids", []
-                )
-                if unified
+            "return_relation_ids": (
+                [closure_ui_contract.get("return_relation", {}).get("id")]
+                if unified and closure_ui_contract.get("return_relation")
                 else []
             ),
             "closure_ui_contract_revalidated": closure_ui_validation["valid"],
@@ -398,8 +393,8 @@ def derive_unified_truth_runtime(
             "source_preserved_round_trip_required": True,
             "ordinary_interaction_open": True,
         },
-        "transport_boundary": {
-            "browser_html_svg": "TRANSPORT_ONLY",
+        "physical_aperture": {
+            "browser_html_svg": "TRANSLATIONAL_VISUALIZATION_AND_RETURN_SURFACE",
             "network_io": "TRANSPORT_ONLY",
             "sensors": "SOURCE_CARRIER_ONLY",
             "can_define_semantics": False,

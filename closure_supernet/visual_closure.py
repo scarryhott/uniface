@@ -533,10 +533,27 @@ def build_visual_closure_receipt(
     }
 
     visual_forms = []
+    active_perspective = str(
+        event.get("perspective_id")
+        or event.get("metadata", {}).get("perspective_id")
+        or event.get("authored_by")
+        or "perspective"
+    )
+    active_perspective_reading: dict[str, str] = {}
     for state in closure_level.get("states", []):
         occurrence = occurrences_by_id.get(str(state), {})
         owner = event_by_occurrence.get(str(state), {})
         owner_metadata = owner.get("metadata", {})
+        exact_visual_form = str(occurrence.get("exact_text") or "")
+        # A return made through a focused natural form carries that form's
+        # actual displayed value.  Otherwise the exact source is its visual
+        # value.  No classifier, similarity score, or post-hoc truth fibre is
+        # allowed to supply this reading.
+        perspective_visual_value = str(
+            owner_metadata.get("perspective_visual_value")
+            or exact_visual_form
+        )
+        active_perspective_reading[str(state)] = perspective_visual_value
         visual_forms.append(
             {
                 "id": state,
@@ -548,7 +565,8 @@ def build_visual_closure_receipt(
                         or owner.get("authored_by")
                         or "OPEN"
                     ),
-                    "exact_visual_form": occurrence.get("exact_text"),
+                    "exact_visual_form": exact_visual_form,
+                    "active_perspective_visual_value": perspective_visual_value,
                     "form_label": owner.get("form_label"),
                     "operator_path": occurrence.get("operator_path", []),
                 },
@@ -579,7 +597,13 @@ def build_visual_closure_receipt(
         for relation in relation_receipts
         if relation.get("source_occurrence") and relation.get("target_occurrence")
     ]
-    truth_derivation = derive_closure(visual_forms, relative_truths)
+    truth_derivation = derive_closure(
+        visual_forms,
+        relative_truths,
+        perspective_readings={
+            active_perspective: active_perspective_reading
+        },
+    )
     truth_evaluations = {
         evaluation.truth_id: evaluation
         for evaluation in truth_derivation.truth_evaluations
@@ -653,85 +677,11 @@ def build_visual_closure_receipt(
         witnessed_relation_ids
     )
 
-    def element_derivation(member_ids: list[str]) -> dict[str, Any]:
-        form_ids = sorted(
-            {
-                truth_derivation.natural_form_for(member_id).id
-                for member_id in member_ids
-                if member_id in truth_derivation.visual_existence.form_ids
-            }
-        )
-        return {
-            "source_return_ids": member_ids,
-            "natural_form_ids": form_ids,
-            "closure_derivation_id": truth_derivation.id,
-            "visual_closure_id": truth_derivation.visual_truth_closure.id,
-            "vis_closure_membership_witness_ids": [
-                witness.id
-                for witness in truth_derivation.visual_truth_closure.memberships
-                if witness.member_id in member_ids
-            ],
-            "derived_inside_closure": bool(form_ids),
-        }
-
+    # UI semantics are not mirrored in a second node/action inventory.  The
+    # projection and its universal return relation are derived below and are
+    # the only interface carrier.
     semantic_elements: list[dict[str, Any]] = []
-    for node in receipt["visual_network"]["nodes"]:
-        occurrence_id = str(node.get("occurrence_id") or "")
-        derivation = element_derivation(
-            [occurrence_id] if occurrence_id else []
-        )
-        naturally_admitted = bool(derivation["natural_form_ids"])
-        semantic_elements.append(
-            {
-                "id": f"ui-node:{node['id']}",
-                "kind": "NODE",
-                "admission_status": (
-                    "NATURALLY_ADMITTED" if naturally_admitted else "OPEN"
-                ),
-                **derivation,
-                "derived_inside_closure": naturally_admitted,
-            }
-        )
-    for edge in receipt["visual_network"]["edges"]:
-        relation = next(
-            (
-                item
-                for item in relation_receipts
-                if str(item.get("candidate_relation_id") or "")
-                == str(edge.get("id") or "")
-            ),
-            {},
-        )
-        endpoints = [
-            str(relation.get("source_occurrence") or ""),
-            str(relation.get("target_occurrence") or ""),
-        ]
-        derivation = element_derivation([item for item in endpoints if item])
-        relation_witnessed = bool(edge["generates_equality"])
-        semantic_elements.append(
-            {
-                "id": f"ui-edge:{edge.get('id')}",
-                "kind": "TRANSLATION_EDGE",
-                "admission_status": edge["translational_truth_status"],
-                "generates_equality": relation_witnessed,
-                "potential_visible": True,
-                **derivation,
-                "derived_inside_closure": relation_witnessed,
-            }
-        )
-
-    next_action = receipt["network_return"]["next_operation"]
-    interface_actions = [
-        {
-            "id": f"interface-return:{next_action['action']}",
-            "operation": next_action["action"],
-            "kind": "RETURN_IN_SAME_CLOSURE_ENVIRONMENT",
-            "source_return_ids": source_ids,
-            "closure_derivation_id": truth_derivation.id,
-            "requires_source_preserved_round_trip": True,
-            "changes_interface_without_new_receipt": False,
-        }
-    ]
+    interface_actions: list[dict[str, Any]] = []
     truth_derivation_dict = truth_derivation.to_dict()
     # The first coordination pass identifies which source-preserved events must
     # enter visual existence.  Re-derive its continuum here from the resulting
@@ -749,42 +699,9 @@ def build_visual_closure_receipt(
         closure_derivation=truth_derivation_dict,
     )
     receipt["coordination"] = coordination
-    initial_nrrf843_ui = derive_nrrf843_ui_receipt(
+    nrrf843_ui = derive_nrrf843_ui_receipt(
         truth_derivation=truth_derivation_dict,
     )
-    base_readings = initial_nrrf843_ui.get("ui_family", {}).get(
-        "readings", {}
-    )
-    interface_perspectives = _unique(
-        [
-            *[
-                str(
-                    item.get("perspective_id")
-                    or item.get("metadata", {}).get("perspective_id")
-                    or item.get("authored_by")
-                    or ""
-                )
-                for item in field_events
-            ],
-            *[
-                str(item)
-                for item in (coordination.get("active_proposal") or {}).get(
-                    "required_participant_ids", []
-                )
-            ],
-        ]
-    )
-    if base_readings and interface_perspectives:
-        reference_reading = dict(next(iter(base_readings.values())))
-        nrrf843_ui = derive_nrrf843_ui_receipt(
-            truth_derivation=truth_derivation_dict,
-            perspective_readings={
-                perspective: reference_reading
-                for perspective in interface_perspectives
-            },
-        )
-    else:
-        nrrf843_ui = initial_nrrf843_ui
     receipt["nrrf843_ui"] = nrrf843_ui
     nrrf842_journey = derive_nrrf842_journey_receipt(
         focus_event=event,
@@ -888,21 +805,24 @@ def build_visual_closure_receipt(
             "closure_only_ui_contract_derived": (
                 closure_ui_contract["audit"]["closure_only_execution"]
             ),
-            "all_visible_ui_nodes_contract_derived": (
+            "all_visible_ui_relations_closure_derived": (
                 closure_ui_contract["audit"][
-                    "all_nodes_and_topology_records_have_exact_derivation"
+                    "all_visual_existence_has_exact_derivation"
                 ]
             ),
-            "all_ui_actions_contract_derived": (
+            "single_full_surface_return_relation": (
                 closure_ui_contract["audit"][
-                    "controls_equal_actions_equal_execution_allowlist"
+                    "full_surface_is_only_return_aperture"
                 ]
             ),
-            "no_hardcoded_visible_ui_instances": (
-                closure_ui_contract["renderer_contract"][
-                    "hardcoded_visible_instances"
+            "no_hardcoded_visible_ui_instances": not (
+                closure_ui_contract["renderer_relation"][
+                    "fixed_visible_controls"
                 ]
-                is False
+                or closure_ui_contract["renderer_relation"][
+                    "authored_visible_vocabulary"
+                ]
+                or closure_ui_contract["renderer_relation"]["fallback_visuals"]
             ),
             "open_digital_potential_remains_visible": interaction_closure[
                 "perspective_digital_potential_gate"
@@ -919,58 +839,59 @@ def build_visual_closure_receipt(
             ],
         }
     )
-    interface_render_state = {
-        "source_event_id": receipt["source_event_id"],
-        "focus_event": {
-            "id": receipt["source_event_id"],
-            "current_stage": event.get("current_stage"),
-            "current_verdict": event.get("current_verdict"),
-            "authored_by": event.get("authored_by"),
-            "form_label": event.get("form_label"),
-        },
-        "source_fibre": [
-            {
-                "id": str(item.get("id") or ""),
-                "exact_text": item.get("exact_text"),
-                "source_id": item.get("source_id"),
-                "form_label": item.get("form_label"),
-            }
-            for item in source_occurrences
-        ],
-        "derivation_order": receipt["closure_relation"],
-        "truth_form_equals_visual_equality": True,
-        "perspective_visual_mirror": (
-            truth_derivation.perspective_visual_mirror.to_dict()
-        ),
-        "interface_mechanism_role": (
-            "VISUAL_TRUTH_CONSTRAINT_AND_CLOSURE_RETURN"
-        ),
-        "without_interface_status": "OPEN",
-        "static_external_network_map": False,
-        "nrrf840_vis_closure": truth_derivation.visual_truth_closure.to_dict(),
-        "nrrf843_ui": nrrf843_ui,
-        "ui_factors_through_translational_truth": True,
-        "ui_is_external_ontology": False,
-        "renderer_role": "TRANSPORT_ONLY",
-        "nrrf842_journey": nrrf842_journey,
-        "interaction_closure": interaction_closure,
-        "closure_ui_contract": closure_ui_contract,
-        "unified_truth_runtime": unified_truth_runtime,
-        "coordination": coordination,
-        "visual_network": receipt["visual_network"],
-        "closure_level": closure_level,
-        "tokenomic": receipt["tokenomic"],
-        "slearn": receipt["slearn"],
-        "ai_translation": receipt["ai_translation"],
-        "network_return": receipt["network_return"],
-        "operational_closure": receipt["operational_closure"],
-        "semantic_elements": semantic_elements,
-        "actions": interface_actions,
+    # Factor the actual projected relation by equality fibre.  Earlier versions
+    # copied one enormous pre-authored render state onto every member; that made
+    # factorisation tautological and did not derive UI content.  Each payload
+    # below is now exactly the visual value of one natural form.
+    projection = closure_ui_contract["projection"]
+    projected_states = {
+        str(item["id"]): item for item in projection.get("states", [])
     }
+    fibre_values: dict[str, dict[str, Any]] = {}
+    for fibre in projection.get("equality_fibres", []):
+        members = set(str(item) for item in fibre["member_state_ids"])
+        fibre_values[str(fibre["id"])] = {
+            "natural_form_id": fibre["id"],
+            "member_state_ids": sorted(members),
+            "source_returns": [
+                {
+                    "state_id": state_id,
+                    "source_return_ids": projected_states[state_id][
+                        "source_return_ids"
+                    ],
+                    "source_trace": projected_states[state_id]["source_trace"],
+                }
+                for state_id in sorted(members)
+            ],
+            "translations": [
+                item
+                for item in projection.get("translations", [])
+                if item.get("source_state_id") in members
+                or item.get("target_state_id") in members
+            ],
+            "potentials": [
+                item
+                for item in projection.get("potentials", [])
+                if item.get("shared_natural_form_id") == fibre["id"]
+                or item.get("target_state_id") in members
+                or (
+                    item.get("target_state_id") is None
+                    and closure_ui_contract.get("return_relation", {}).get(
+                        "parent_natural_form_id"
+                    )
+                    == fibre["id"]
+                )
+            ],
+            "relation_digest": projection["visualization"].get(
+                "relation_digest"
+            ),
+        }
     quotient_reading = {
         state: {
             "natural_form_id": truth_derivation.natural_form_for(state).id,
-            "render_state": interface_render_state,
+            "perspective_visual_value": fibre_values[
+                truth_derivation.natural_form_for(state).id
+            ],
         }
         for state in truth_derivation.visual_existence.form_ids
     }
@@ -978,32 +899,29 @@ def build_visual_closure_receipt(
         truth_derivation,
         quotient_reading,
     ).to_dict()
-    if truth_derivation.visual_existence.form_ids:
-        first_member = truth_derivation.visual_existence.form_ids[0]
-        validated_render_state = interface_form["closure_projection"][
-            first_member
-        ]["render_state"]
-    else:
-        validated_render_state = interface_render_state
+    interface_render_state = {
+        "closure_derivation_id": truth_derivation.id,
+        "visual_closure_id": truth_derivation.visual_truth_closure.id,
+        "nrrf843_ui_id": nrrf843_ui["id"],
+        "interaction_closure_id": interaction_closure["id"],
+        "closure_ui_contract": closure_ui_contract,
+        "projection": projection,
+        "return_relation": closure_ui_contract.get("return_relation"),
+    }
     interface_form.update(
         {
             "kind": "SUPERNET_INTERFACE_NATURAL_FORM",
             "admission_status": "NATURALLY_ADMITTED",
-            "derivation_order": validated_render_state["derivation_order"],
-            "truth_form_equals_visual_equality": validated_render_state[
-                "truth_form_equals_visual_equality"
-            ],
-            "ui_factors_through_translational_truth": validated_render_state[
-                "ui_factors_through_translational_truth"
-            ],
-            "ui_is_external_ontology": validated_render_state[
-                "ui_is_external_ontology"
-            ],
-            "renderer_role": validated_render_state["renderer_role"],
-            "semantic_elements": validated_render_state["semantic_elements"],
-            "actions": validated_render_state["actions"],
-            "render_state": validated_render_state,
+            "truth_form_equals_visual_equality": True,
+            "ui_factors_through_translational_truth": True,
+            "ui_is_external_ontology": False,
+            "renderer_role": "TRANSLATIONAL_RELATION_EVALUATOR",
+            "semantic_elements": [],
+            "actions": [],
+            "render_state": interface_render_state,
             "render_state_factorized": True,
+            "factorization_is_per_equality_fibre": True,
+            "constant_whole_scene_factorization": False,
         }
     )
     receipt["translational_truth_axiometry"] = truth_derivation_dict
