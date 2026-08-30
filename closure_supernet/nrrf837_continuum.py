@@ -8,6 +8,8 @@ from datetime import date, datetime
 from enum import Enum
 from typing import Any
 
+from .translational_truth_axiometry import derive_closure
+
 
 PROTOCOL = "NRRF837"
 SCHEMA = "closure.supernet/nrrf837-continuum-v1"
@@ -98,11 +100,12 @@ def unity_form(
     *,
     selector_version: str = UNITY_SELECTOR_VERSION,
 ) -> dict[str, Any]:
-    """Choose one versioned local presentation of a global word.
+    """Construct a versioned presentation, never a naturality witness.
 
-    This helper makes the *consequence* of a product-selected unity
-    deterministic.  The decision to use this selector/version remains extra
-    product data; it is not inferred from interaction or network structure.
+    Semantic natural forms are derived separately by translational-truth
+    axiometry.  This helper may relabel one already-admitted form for a client,
+    but its hash, selector version, or fixed-point behavior cannot admit a form
+    or define closure.
     """
 
     if isinstance(global_atom_id, str):
@@ -114,11 +117,14 @@ def unity_form(
     )
     return {
         "id": form_id,
-        "kind": "NATURAL_FORM",
+        "kind": "LOCAL_PRESENTATION",
         "selector_version": selector_version,
         "global_word": global_word,
-        "product_chosen": True,
+        "product_chosen": False,
         "network_derived": False,
+        "naturally_admitted": False,
+        "semantic_naturality_claimed": False,
+        "defines_closure": False,
     }
 
 
@@ -259,27 +265,32 @@ def _explicit_form_key(event: Mapping[str, Any]) -> str | None:
     return str(value) if value is not None and str(value) else None
 
 
-def _event_global_key(event: Mapping[str, Any]) -> str:
-    """Return authored equality data or a canonical content atom key.
+def _event_global_key(
+    event: Mapping[str, Any],
+    truth_form_by_source: Mapping[str, Mapping[str, Any]],
+) -> str:
+    """Return only equality already derived by translational-truth closure.
 
-    Contextual focus and path ranking are deliberately absent.  Two event
-    generators compose equally only when their explicit key is equal or their
-    canonical source content is literally equal under this finite projection.
+    Authored natural-form IDs, global labels, exact text, focus, path ranking,
+    and presentation metadata are never equality witnesses.  An event receives
+    a shared semantic key only when all of its known source returns factor
+    through exactly one closure-derived natural form.  Otherwise it remains a
+    distinct OPEN local atom.
     """
 
-    explicit = _explicit_form_key(event)
-    if explicit is not None:
-        return "explicit:" + explicit
-    if bool(event.get("projection_reference_only")):
-        return "open-reference:" + canonical_hash(
-            {"reference_event_id": _event_id(event)}
-        )
-    return "content:" + canonical_hash(
+    truth_form_ids = {
+        str(truth_form_by_source[source_id]["id"])
+        for source_id in _source_ids(event)
+        if source_id in truth_form_by_source
+    }
+    if len(truth_form_ids) == 1:
+        return "truth-form:" + next(iter(truth_form_ids))
+    return "open-local:" + canonical_hash(
         {
-            "exact_text": _exact_text(event),
-            "form_label": event.get("form_label"),
-            "coordination_kind": _dict(event.get("metadata")).get(
-                "coordination_kind"
+            "event_id": _event_id(event),
+            "source_ids": _source_ids(event),
+            "projection_reference_only": bool(
+                event.get("projection_reference_only")
             ),
         }
     )
@@ -362,6 +373,7 @@ def build_continuum_receipt(
     closure_level_id: str,
     contributors: Iterable[Mapping[str, Any]],
     token_status: str | Mapping[str, Any],
+    closure_derivation: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build the finite runtime witness corresponding to NRRF837.
 
@@ -375,6 +387,9 @@ def build_continuum_receipt(
     root_intent = _dict(intent)
     proposal = _dict(active_proposal)
     returned = _dict(living_return)
+    field_event_rows = [
+        _dict(item) for item in _list(field_events) if _dict(item)
+    ]
     path_rows = [_dict(item) for item in _list(paths) if _dict(item)]
     contributor_rows = [
         _dict(item) for item in _list(contributors) if _dict(item)
@@ -392,6 +407,38 @@ def build_continuum_receipt(
     )
     proposal_status = str(proposal.get("status") or "OPEN").upper()
     token_data = _dict(token_status)
+    truth_closure = _dict(closure_derivation)
+    if not truth_closure:
+        fallback_source_ids = _unique_strings(
+            [
+                *_source_ids(local),
+                *_source_ids(root_intent),
+                *[
+                    source_id
+                    for field_event in field_event_rows
+                    for source_id in _source_ids(_dict(field_event))
+                ],
+            ]
+        )
+        truth_closure = derive_closure(
+            [
+                {
+                    "id": source_id,
+                    "source_return_ids": [source_id],
+                    "existence_provenance": [f"source-return:{source_id}"],
+                }
+                for source_id in fallback_source_ids
+            ]
+        ).to_dict()
+    truth_natural_forms = [
+        _dict(item)
+        for item in _list(truth_closure.get("natural_forms"))
+        if _dict(item).get("id")
+    ]
+    truth_form_by_source: dict[str, dict[str, Any]] = {}
+    for truth_form in truth_natural_forms:
+        for member in _list(truth_form.get("members")):
+            truth_form_by_source[str(member)] = truth_form
     token_state = str(
         (token_data.get("status") or "OPEN")
         if token_data
@@ -449,7 +496,7 @@ def build_continuum_receipt(
         }
     )
 
-    events = _merge_events(field_events, root_intent, local)
+    events = _merge_events(field_event_rows, root_intent, local)
     intent_id = _event_id(root_intent, prefix="intent")
     focus_id = _event_id(local, prefix="local") if local else intent_id
     path_targets = {_path_target_id(path) for path in path_rows if _path_target_id(path)}
@@ -459,7 +506,10 @@ def build_continuum_receipt(
     event_global_keys: dict[str, str] = {}
     for event in events:
         event_id = _event_id(event)
-        event_global_keys[event_id] = _event_global_key(event)
+        event_global_keys[event_id] = _event_global_key(
+            event,
+            truth_form_by_source,
+        )
 
     # Paths are allowed to refer to source-preserved field nodes that were not
     # included in the supplied projection.  Give those references a local atom
@@ -485,7 +535,10 @@ def build_continuum_receipt(
         }
         events.append(synthetic)
         known_ids.add(target_id)
-        event_global_keys[target_id] = _event_global_key(synthetic)
+        event_global_keys[target_id] = _event_global_key(
+            synthetic,
+            truth_form_by_source,
+        )
 
     local_atoms: list[dict[str, Any]] = []
     atom_map: dict[str, list[str]] = {}
@@ -510,6 +563,8 @@ def build_continuum_receipt(
                 "exact_text_hash": canonical_hash(_exact_text(event)),
                 "global_atom_id": global_id,
                 "global_content_key": form_key,
+                "authored_presentation_key": _explicit_form_key(event),
+                "semantic_equality_basis": "TRANSLATIONAL_TRUTH_CLOSURE",
                 "projection_reference_only": bool(
                     event.get("projection_reference_only", False)
                 ),
@@ -519,7 +574,10 @@ def build_continuum_receipt(
     if focus_id not in atom_map:
         # This is reachable only for an entirely empty caller payload.  Keep the
         # event OPEN and distinct from the canonical continuum-state generator.
-        open_event_key = _event_global_key({"id": focus_id})
+        open_event_key = _event_global_key(
+            {"id": focus_id},
+            truth_form_by_source,
+        )
         open_global = "global:" + canonical_hash(
             {
                 "global_content_key": open_event_key,
@@ -579,6 +637,40 @@ def build_continuum_receipt(
     )
     atom_map[selected_form["id"]] = list(input_global_word)
     atom_map[alternate_form["id"]] = list(input_global_word)
+    focus_truth_forms = {
+        str(truth_form_by_source[source_id]["id"]): truth_form_by_source[source_id]
+        for source_id in _source_ids(local)
+        if source_id in truth_form_by_source
+    }
+    semantic_selected_form = (
+        next(iter(focus_truth_forms.values()))
+        if len(focus_truth_forms) == 1
+        else None
+    )
+    semantic_selected_form_id = (
+        str(semantic_selected_form["id"])
+        if semantic_selected_form is not None
+        else None
+    )
+    selected_form.update(
+        {
+            "presentation_id": selected_form["id"],
+            "semantic_natural_form_id": semantic_selected_form_id,
+            "derived_within_closure": semantic_selected_form is not None,
+            "naturally_admitted": bool(
+                semantic_selected_form
+                and semantic_selected_form.get("admitted", False)
+            ),
+            "truth_provenance": (
+                list(semantic_selected_form.get("truth_provenance", []))
+                if semantic_selected_form
+                else []
+            ),
+            "closure_derivation_id": truth_closure.get("id"),
+            "product_chosen": False,
+            "selector_changes_semantic_form": False,
+        }
+    )
 
     event_generators = [atom["id"] for atom in local_atoms]
     declared_global_words = sorted(
@@ -781,6 +873,19 @@ def build_continuum_receipt(
         item for item in fibre_presentations if item == selected_form["id"]
     ]
 
+    local_atom_by_id = {str(atom["id"]): atom for atom in local_atoms}
+
+    def event_truth_form_id(event_id: str) -> str | None:
+        atom = local_atom_by_id.get(str(event_id))
+        if atom is None or atom.get("projection_reference_only"):
+            return None
+        form_ids = {
+            str(truth_form_by_source[source_id]["id"])
+            for source_id in atom.get("source_ids", [])
+            if source_id in truth_form_by_source
+        }
+        return next(iter(form_ids)) if len(form_ids) == 1 else None
+
     # Natural-form equality is an equivalence relation.  Ranked path edges are
     # kept separately because score, locality, and constraints are directional
     # context, not equality and not a global optimum proof.
@@ -794,11 +899,10 @@ def build_continuum_receipt(
     for member in suggestion_members:
         if member in projection_reference_ids:
             continue
-        global_word = atom_map.get(member)
-        if global_word is None:
+        form_id = event_truth_form_id(member)
+        if form_id is None:
             continue
-        form = unity_form(global_word, selector_version=selector_version)
-        suggestion_classes.setdefault(form["id"], []).append(member)
+        suggestion_classes.setdefault(form_id, []).append(member)
     equivalence_classes = [
         {"natural_form_id": form_id, "members": sorted(members)}
         for form_id, members in sorted(suggestion_classes.items())
@@ -809,7 +913,7 @@ def build_continuum_receipt(
     known_suggestion_members = [
         member
         for member in suggestion_members
-        if member in atom_map and member not in projection_reference_ids
+        if event_truth_form_id(member) is not None
     ]
     equivalence_verified = (
         sorted(partition_members) == sorted(known_suggestion_members)
@@ -834,18 +938,8 @@ def build_continuum_receipt(
         source_id = str(
             _dict(path.get("why")).get("source_event_id") or intent_id
         )
-        source_word = atom_map.get(source_id)
-        target_word = atom_map.get(target_id)
-        source_form = (
-            unity_form(source_word, selector_version=selector_version)["id"]
-            if source_word is not None and source_id not in projection_reference_ids
-            else None
-        )
-        target_form = (
-            unity_form(target_word, selector_version=selector_version)["id"]
-            if target_word is not None and target_id not in projection_reference_ids
-            else None
-        )
+        source_form = event_truth_form_id(source_id)
+        target_form = event_truth_form_id(target_id)
         shared_form = bool(source_form and source_form == target_form)
         contextual_edges.append(
             {
@@ -962,7 +1056,7 @@ def build_continuum_receipt(
         "proposal_id": proposal.get("id"),
         "global_content_id": global_content_id,
         "global_state_id": global_state_id,
-        "natural_form_id": selected_form["id"],
+        "natural_form_id": semantic_selected_form_id,
         "unity_selector_version": selector_version,
         "interaction_ids": target_event_ids,
         "party_ids": required_participants,
@@ -981,11 +1075,7 @@ def build_continuum_receipt(
     for atom in local_atoms:
         projection_reference_only = bool(atom.get("projection_reference_only"))
         event_word = list(atom_map[atom["id"]])
-        event_form_id = (
-            None
-            if projection_reference_only
-            else unity_form(event_word, selector_version=selector_version)["id"]
-        )
+        event_form_id = event_truth_form_id(str(atom["id"]))
         event_authorship_records.append(
             {
                 "record_kind": "EVENT_AUTHORSHIP",
@@ -1007,12 +1097,12 @@ def build_continuum_receipt(
                 ),
                 "selected_natural_form_id": event_form_id,
                 "equality_status": (
-                    "OPEN" if projection_reference_only else "WITNESSED"
+                    "WITNESSED" if event_form_id else "OPEN"
                 ),
                 "equality_basis": (
-                    "UNRESOLVED_PROJECTION_REFERENCE"
-                    if projection_reference_only
-                    else "EVENT_COMPOSE"
+                    "TRANSLATIONAL_TRUTH_CLOSURE"
+                    if event_form_id
+                    else "UNRESOLVED_TRANSLATIONAL_TRUTH"
                 ),
                 "source_identity_status": (
                     "WITNESSED"
@@ -1036,34 +1126,30 @@ def build_continuum_receipt(
                 *_list(contributor.get("source_event_ids")),
             ]
         )
-        explicit_key = _explicit_form_key(contributor)
+        authored_form_claim = _explicit_form_key(contributor)
         unresolved_source_event_ids = [
             source_id for source_id in source_event_ids if source_id not in atom_map
         ]
-        if explicit_key is not None:
-            contributor_global_key = "explicit:" + explicit_key
-            contributor_global_atom = "global:" + canonical_hash(
-                {"global_content_key": contributor_global_key}
-            )
-            contributor_global_word: list[str] | None = [contributor_global_atom]
-            equality_basis = "EXPLICIT_GLOBAL_OR_NATURAL_FORM"
-        elif source_event_ids and not unresolved_source_event_ids:
+        if source_event_ids and not unresolved_source_event_ids:
             contributor_global_word = compose_pointwise(source_event_ids, atom_map)
-            equality_basis = "SOURCE_EVENT_COMPOSE"
         else:
             contributor_global_word = None
-            equality_basis = "UNRESOLVED"
-
-        equality_status = (
-            "WITNESSED" if contributor_global_word is not None else "OPEN"
-        )
+        contributor_form_ids = {
+            form_id
+            for source_event_id in source_event_ids
+            if (form_id := event_truth_form_id(source_event_id)) is not None
+        }
         contributor_form_id = (
-            unity_form(
-                contributor_global_word,
-                selector_version=selector_version,
-            )["id"]
-            if contributor_global_word is not None
+            next(iter(contributor_form_ids))
+            if len(contributor_form_ids) == 1
+            and not unresolved_source_event_ids
             else None
+        )
+        equality_status = "WITNESSED" if contributor_form_id else "OPEN"
+        equality_basis = (
+            "TRANSLATIONAL_TRUTH_CLOSURE"
+            if contributor_form_id
+            else "UNRESOLVED_TRANSLATIONAL_TRUTH"
         )
         contributor_actor_id = _actor(contributor)
         contributor_internal_actor_id = _internal_actor(contributor)
@@ -1102,7 +1188,8 @@ def build_continuum_receipt(
                     and contributor_internal_actor_id not in {"", "OPEN"}
                     else "OPEN"
                 ),
-                "explicit_equality_key": explicit_key,
+                "authored_form_claim": authored_form_claim,
+                "authored_form_claim_is_truth_witness": False,
                 "unresolved_source_event_ids": unresolved_source_event_ids,
                 "mutual_authorship_redundancy_applicable": False,
             }
@@ -1201,6 +1288,22 @@ def build_continuum_receipt(
         and len(unity_global_words) == len(declared_global_words)
         and len(set(unity_global_words.values())) == len(declared_global_words)
     )
+    semantic_form_payload = (
+        {
+            **semantic_selected_form,
+            "derived_within_closure": True,
+            "naturally_admitted": bool(
+                semantic_selected_form.get("admitted", False)
+            ),
+        }
+        if semantic_selected_form is not None
+        else {
+            "id": None,
+            "status": "OPEN_NO_TRANSLATIONAL_TRUTH_FORM",
+            "derived_within_closure": False,
+            "naturally_admitted": False,
+        }
+    )
 
     body: dict[str, Any] = {
         "protocol": PROTOCOL,
@@ -1210,7 +1313,13 @@ def build_continuum_receipt(
         "local_closure_level_id": level_id,
         "global_content_id": global_content_id,
         "global_state_id": global_state_id,
-        "selected_natural_form_id": selected_form["id"],
+        "selected_natural_form_id": semantic_selected_form_id,
+        "closure_derivation_id": truth_closure.get("id"),
+        "natural_form_admission_status": (
+            "NATURALLY_ADMITTED"
+            if semantic_selected_form_id
+            else "OPEN"
+        ),
         "local_monoid": {
             "carrier": "finite words of source-preserved local interaction generators",
             "operation": "append",
@@ -1269,16 +1378,22 @@ def build_continuum_receipt(
         },
         "unity_selector": {
             "version": selector_version,
-            "policy_id": "supernet-product-unity",
+            "policy_id": "supernet-presentation-after-closure",
             "source": selector_source,
-            "chosen_by": "product",
+            "chosen_by": "closure derivation then perspective presentation",
             "network_derived": False,
             "extra_data": True,
-            "closure_level_is_natural_form": False,
+            "selector_policy_is_extra_data": True,
+            "selector_can_only_select_closure_admitted_forms": True,
+            "semantic_form_network_derived": bool(semantic_selected_form_id),
+            "closure_level_is_natural_form": True,
             "local_closure_level_id": level_id,
-            "selected_form": selected_form,
+            "selected_form": semantic_form_payload,
+            "selected_presentation": selected_form,
             "declared_global_states": [list(word) for word in declared_global_words],
             "declared_unity": declared_unity_forms,
+            "declared_presentations": declared_unity_forms,
+            "declared_unity_is_presentation_only": True,
             "declared_domain_scope": (
                 "identity, current continuum state, and observed one-generator "
                 "global words"
@@ -1288,9 +1403,11 @@ def build_continuum_receipt(
             "alternative_selector_witness": {
                 "same_local_and_global_monoids": True,
                 "same_compose": True,
-                "selected_form_id": selected_form["id"],
+                "semantic_form_id": semantic_selected_form_id,
+                "selected_presentation_id": selected_form["id"],
                 "alternative_form_id": alternate_form["id"],
                 "distinct": selected_form["id"] != alternate_form["id"],
+                "semantic_form_unchanged": True,
                 "same_global_word": (
                     compose_pointwise([selected_form["id"]], atom_map)
                     == compose_pointwise([alternate_form["id"]], atom_map)
@@ -1299,10 +1416,11 @@ def build_continuum_receipt(
             },
         },
         "modality": {
-            "definition": "form ∘ compose",
+            "definition": "presentation ∘ compose after translational truth closure",
             "input": input_word,
             "composed_global_word": input_global_word,
-            "form": selected_form,
+            "form": semantic_form_payload,
+            "presentation": selected_form,
             "first_application": first_modality,
             "second_application": second_modality,
             "idempotent": modality_idempotent,
@@ -1315,16 +1433,22 @@ def build_continuum_receipt(
             "fixed_points_equal_unity_scope": (
                 "declared finite generator/unity domain only"
             ),
-            "equality_is_global_equality": True,
+            "idempotence_is_consequence_not_closure_definition": True,
+            "defines_closure": False,
+            "truth_form_precedes_modality": True,
+            "equality_is_global_equality": False,
             "multiplicative_up_to_modality": multiplicative_up_to_modality,
             "is_monoid_homomorphism_claimed": False,
             "operator": natural_operator,
             "local_closure_level_id": level_id,
-            "selected_natural_form_id": selected_form["id"],
+            "selected_natural_form_id": semantic_selected_form_id,
+            "selected_presentation_id": selected_form["id"],
             "verified_scope": "declared finite generator/unity domain",
         },
         "global_equality_kernel": {
-            "relation": "x ~ y iff compose(x) = compose(y)",
+            "relation": (
+                "x ~ y iff truth-derived compose(x) = truth-derived compose(y)"
+            ),
             "classes": kernel_classes,
             "reflexive": reflexive,
             "symmetric": symmetric,
@@ -1333,6 +1457,11 @@ def build_continuum_receipt(
             "monoid_congruence": congruence_verified,
             "congruence_witness": congruence_witness,
             "equal_content_does_not_equal_actor_identity": True,
+            "derived_reading_only": True,
+            "truth_form_le_kernel_compose": True,
+            "kernel_compose_le_truth_form_claimed": False,
+            "authored_ids_define_equality": False,
+            "presentation_metadata_defines_equality": False,
         },
         "freedom_fibre": {
             "global_word": input_global_word,
@@ -1345,7 +1474,8 @@ def build_continuum_receipt(
             "nonempty": bool(fibre_presentations),
             "unity_witnesses": unity_witnesses,
             "exactly_one_unity_witness": len(unity_witnesses) == 1,
-            "canonical_unity_witness_id": selected_form["id"],
+            "canonical_unity_witness_id": semantic_selected_form_id,
+            "presentation_witness_id": selected_form["id"],
             "unity_selects_without_exhausting_local_freedom": True,
         },
         "authorship": {
@@ -1481,7 +1611,8 @@ def build_continuum_receipt(
                 "phase": natural_operator,
                 "global_content_id": global_content_id,
                 "global_state_id": global_state_id,
-                "selected_natural_form_id": selected_form["id"],
+                "selected_natural_form_id": semantic_selected_form_id,
+                "selected_presentation_id": selected_form["id"],
                 "joint_content_global_word": input_global_word,
                 "required_participant_ids": required_participants,
                 "human_acceptances": accepted_humans,

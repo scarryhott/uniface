@@ -5,6 +5,8 @@ import json
 import math
 from typing import Any, Iterable
 
+from .translational_truth_axiometry import derive_closure
+
 
 def _stable(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
@@ -56,15 +58,11 @@ def closure_level_receipt(
 ) -> dict[str, Any]:
     """Derive the finite live equality level selected by interaction-time Sense.
 
-    The states and return edges come from the existing source-preserving Sense and
-    admission pipeline.  This module does not classify a source, issue TRUE, or
-    select a chart.  It takes the admitted return environment already produced by
-    Supernet and exposes its generated equality level, quotient natural forms, and
-    compactified 0↔∞ projective coordinate.
-
-    FALSE return edges do not generate equality.  TRUE and OPEN edges remain in
-    the admitted environment because both are admitted possibilities; OPEN is not
-    silently promoted to TRUE.
+    Visual existence comes first.  A cross-return enters the equality-generating
+    axiometry only when it has an explicit relative TRUE verdict, compatibility
+    witness, and closure-explicit visual equation.  The finite quotient and any
+    0↔∞/tan reading are consequences of that derivation, never definitions of
+    closure.  OPEN remains visible potential and cannot generate equality.
     """
 
     relations = [dict(item) for item in relation_receipts]
@@ -76,10 +74,47 @@ def closure_level_receipt(
         ]
     )
     states.sort()
-    admitted_returns = [
-        item for item in relations if str(item.get("verdict") or "OPEN") != "FALSE"
+    relative_truths = [
+        {
+            "id": item.get("candidate_relation_id") or item.get("id"),
+            "source": item.get("source_occurrence"),
+            "target": item.get("target_occurrence"),
+            "verdict": item.get("verdict", "OPEN"),
+            "statement": item.get("relation_type"),
+            "provenance": [
+                item.get("interpretation_id"),
+                item.get("admission_id"),
+            ],
+            "source_return_ids": item.get("source_return_ids")
+            or [item.get("source_occurrence"), item.get("target_occurrence")],
+            "visual_equation": item.get("visual_equation"),
+            "compatible": item.get("compatible", False),
+            "closure_explicit": item.get("closure_explicit"),
+        }
+        for item in relations
+        if item.get("source_occurrence") and item.get("target_occurrence")
     ]
-    level_classes = _classes(states, admitted_returns)
+    derivation = derive_closure(
+        [
+            {
+                "id": state,
+                "state": {"source_occurrence_id": state},
+                "existence_provenance": [f"source-return:{state}"],
+            }
+            for state in states
+        ],
+        relative_truths,
+    )
+    derivation_receipt = derivation.to_dict()
+    level_classes = [
+        list(members) for members in derivation.equivalence_closure.classes
+    ]
+    admitted_returns = [
+        evaluation
+        for evaluation in derivation.truth_evaluations
+        if evaluation.closure_admitted
+        and evaluation.source != evaluation.target
+    ]
     state_count = len(states)
     class_count = len(level_classes)
 
@@ -97,24 +132,67 @@ def closure_level_receipt(
         tangent = "0≡∞"
         endpoint = "⊥=⊤"
     else:
-        collapse = (state_count - class_count) / (state_count - 1)
-        angle = collapse * math.pi / 2
-        tangent = "∞" if is_top else round(math.tan(angle), 12)
         endpoint = "⊤" if is_top else "⊥" if is_bottom else "relative"
 
     level_id = hashlib.sha256(_stable(level_classes).encode("utf-8")).hexdigest()
     quotient = [
         {
-            "natural_form": f"L/{index}",
-            "members": members,
+            "natural_form": form.id,
+            "members": list(form.members),
             "representative_is_not_privileged": True,
+            "derived_within_closure": form.derived_within_closure,
+            "naturally_admitted": form.admitted,
+            "admission_basis": form.admission_basis,
+            "existence_provenance": list(form.existence_provenance),
+            "source_return_provenance": list(
+                form.source_return_provenance
+            ),
+            "visual_equation_provenance": list(
+                form.visual_equation_provenance
+            ),
+            "compatibility_provenance": list(
+                form.compatibility_provenance
+            ),
+            "closure_explicit_provenance": list(
+                form.closure_explicit_provenance
+            ),
+            "truth_provenance": list(form.truth_provenance),
+            "factorization_provenance": list(
+                form.factorization_provenance
+            ),
         }
-        for index, members in enumerate(level_classes)
+        for form in derivation.natural_forms
     ]
+
+    tan_seam_truths = [
+        truth
+        for truth in derivation.relative_truths
+        if truth.verdict.value == "TRUE"
+        and truth.meets_visual_existence
+        and truth.visual_equation is not None
+        and "tan" in truth.visual_equation.equation.lower()
+        and (
+            "pi/2" in truth.visual_equation.equation.lower()
+            or "π/2" in truth.visual_equation.equation.lower()
+        )
+    ]
+    fold_axiometry_witnessed = bool(tan_seam_truths)
+    if fold_axiometry_witnessed and state_count > 1:
+        collapse = (state_count - class_count) / (state_count - 1)
+        angle = collapse * math.pi / 2
+        tangent = "∞" if is_top else round(math.tan(angle), 12)
+    elif not fold_axiometry_witnessed:
+        collapse = None
+        angle = None
+        tangent = None
 
     return {
         "formal_reading": "NRRF825",
-        "derived_from": "interaction-time Sense → AdmissionPolicy return environment",
+        "derived_from": (
+            "visual existence → translational truth → visual axiometry → "
+            "closure-explicit meeting → natural admission"
+        ),
+        "translational_truth_axiometry": derivation_receipt,
         "level_id": level_id,
         "states": states,
         "state_count": state_count,
@@ -123,12 +201,14 @@ def closure_level_receipt(
         "endpoint": endpoint,
         "existence_to_admission": {
             "environment": [
-                str(item.get("candidate_relation_id") or "")
+                str(item.truth_id)
                 for item in admitted_returns
             ],
+            "open_returns_excluded_from_equality": True,
             "false_returns_excluded": True,
             "level_env_characterization": (
-                "a return is admitted at L exactly when both endpoints stay in one L-class"
+                "a return is naturally admitted only after compatibility and "
+                "closure-explicit visual truth are both witnessed"
             ),
             "current_environment_contained_in_level_env": True,
             "level_env_is_greatest_environment_admitted_at_level": True,
@@ -150,17 +230,30 @@ def closure_level_receipt(
             "equivariant_under_state_relabelling": True,
         },
         "projective_fold": {
-            "coordinate": "tan((π/2)·collapse)",
+            "coordinate": (
+                "tan((π/2)·collapse)" if fold_axiometry_witnessed else "OPEN"
+            ),
             "collapse": collapse,
             "angle_radians": None if angle is None else round(angle, 12),
             "tan_value": tangent,
             "zero": "⊥ · bare equality · faithful readings remain possible",
             "infinity": "⊤ · existence · every closed reading is constant",
-            "pi_over_two_is_projective_seam": True,
-            "seam_returns_to_next_sense": True,
+            "axiometry_witnessed": fold_axiometry_witnessed,
+            "witness_truth_ids": [truth.id for truth in tan_seam_truths],
+            "pi_over_two_is_projective_seam": fold_axiometry_witnessed,
+            "seam_returns_to_next_sense": fold_axiometry_witnessed,
             "not_a_user_selected_phase": True,
+            "defines_closure": False,
+            "status": (
+                "DERIVED_READING" if fold_axiometry_witnessed else "OPEN_NO_VISUAL_AXIOM"
+            ),
         },
-        "physical_hypothesis": "OPEN: nature determines which equality level is admitted",
+        "physical_hypothesis": (
+            "OPEN: physical returns must supply their own compatible, "
+            "closure-explicit visual truth witnesses"
+        ),
+        "translational_truth_witnessed": bool(admitted_returns),
+        "closure_is_external_limit": False,
         "two_person_E2E": "OPEN",
         "truth_issued": False,
     }

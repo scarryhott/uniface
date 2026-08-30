@@ -260,6 +260,7 @@ def build_coordination_receipt(
     living_actions: list[dict[str, Any]],
     living_returns: list[dict[str, Any]],
     closure_level_id: str,
+    closure_derivation: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Derive the intent-to-return product interface without issuing truth.
 
@@ -949,6 +950,7 @@ def build_coordination_receipt(
         closure_level_id=closure_level_id,
         contributors=contributors,
         token_status=receipt["token_gate"],
+        closure_derivation=closure_derivation,
     )
     receipt["continuum"] = continuum
     receipt["nrrf837_continuum"] = continuum
