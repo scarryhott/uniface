@@ -37,6 +37,7 @@ from .nrrf837_continuum import canonical_hash
 from .selection_models import SelectionReadingCreate
 from .supernet_models import IntegrationLens, ResourceEnvelope
 from .topology_models import CollectiveTraceCreate
+from .translational_truth_axiometry import SCHEMA as AXIOMETRY_SCHEMA
 
 
 def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
@@ -45,14 +46,15 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
     runtime = app.state.runtime
     app.state.natural_interface_routes_attached = True
     proposal_creation_lock = asyncio.Lock()
-    app.version = "3.10.0"
+    app.version = "3.11.0"
     app.description += (
         "; the public Black Mirror is the complete operational surface of the one "
-        "Supernet field: exact source → interaction-time Sense → interpretation/admission "
-        "→ TranslationField → NRRF790 selection/OPEN branching → NRRF825 equality level "
-        "→ NRRF837 local/global composition, versioned unity selection, modality and freedom fibre "
-        "→ source-reversible 0↔∞ projective fold "
-        "→ equality-class resource admission → visual network return → next Sense. "
+        "Supernet field: visual existence → witnessed translational truth → visual "
+        "axiometry → closure-explicit meeting → naturally admitted forms → a "
+        "factorized interface natural form → source-preserving return → next Sense. "
+        "NRRF837 local/global composition, presentation selection, modality and freedom "
+        "fibre are readings after truth; an explicitly witnessed 0↔∞ projective fold is "
+        "also only a derived reading and never defines closure. "
         "The same persisted receipt is the SLEARN memory update, AI translation, "
         "tokenomic resource resolution and operational canvas topology. "
         "Perspective and eight-sheaf placement are carried on the same canonical event; "
@@ -220,7 +222,17 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
         continuum = coordination.get("nrrf837_continuum") or coordination.get(
             "continuum"
         ) or {}
-        return continuum.get("schema") == NRRF837_SCHEMA
+        axiometry = (receipt or {}).get("translational_truth_axiometry") or {}
+        interface = (receipt or {}).get("interface_natural_form") or {}
+        renderer = interface.get("renderer_contract") or {}
+        return bool(
+            continuum.get("schema") == NRRF837_SCHEMA
+            and axiometry.get("schema") == AXIOMETRY_SCHEMA
+            and interface.get("closure_internal") is True
+            and interface.get("admitted") is True
+            and interface.get("render_state_factorized") is True
+            and renderer.get("role") == "TRANSPORT_ONLY"
+        )
 
     async def _upgrade_visual_if_stale(
         event_id: str,
@@ -332,11 +344,26 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
             "intent_to_explainable_paths_on_primary_surface": True,
             "mutual_authorship_receipt_on_primary_surface": True,
             "nrrf837_continuum_on_primary_surface": True,
+            "closure_derived_from_translational_truth_axiometry_of_visual_existence": True,
+            "closure_defined_by_external_limit_or_fold": False,
+            "open_relation_generates_equality": False,
+            "natural_forms_admitted_only_after_explicit_closure_derivation": True,
+            "selected_form_closure_derived": True,
+            "ui_is_closure_internal_natural_form": True,
+            "actual_ui_render_state_factorized_through_closure": True,
+            "external_renderer_is_transport_only": True,
+            "external_renderer_has_no_semantic_fallback": True,
+            "legacy_chart_is_transport_only": True,
+            "legacy_chart_admission_defines_truth_or_closure": False,
+            "ui_actions_are_returns_in_the_same_closure_environment": True,
             "local_global_compose_homomorphism_checked": True,
             "versioned_unity_selector_is_extra_data": True,
+            "unity_selector_can_only_select_closure_admitted_forms": True,
             "unity_selector_network_derived": False,
             "modality_idempotence_checked": True,
             "global_equality_kernel_exposed": True,
+            "global_equality_kernel_uses_only_truth_derived_compose": True,
+            "authored_form_ids_define_equality": False,
             "freedom_fibre_exposed": True,
             "content_equality_preserves_actor_identity": True,
             "suggestion_equivalence_separate_from_contextual_ranking": True,
@@ -351,7 +378,9 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
             "commitment_security_enforcement": "OPEN",
             "primary_surface_component_selector": False,
             "projective_fold_derived_from_live_level": True,
+            "projective_fold_requires_explicit_visual_axiometry_witness": True,
             "projective_fold_is_user_selected": False,
+            "open_candidates_change_slearn_truth_memory": False,
             "two_person_E2E": "OPEN",
             "core_action_requires_subsystem_page": False,
             "canonical_pixel_layout_selected": False,

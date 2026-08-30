@@ -20,29 +20,39 @@ exact source or returned form
 → reopening
 ```
 
-Closure is not the protocol, database, AI model, proof object, user-interface
-chart, resource metric, token, hardware device, counterterm, or selected
-presentation. Those carry or render the same active field.
+Closure is not an imposed protocol, quotient, idempotent limit, class-count
+endpoint, projective fold, AI verdict, token gate, or selected presentation. It
+is derived when source-preserved visual existence supplies compatible
+translational-truth equations, those equations become visual axioms, and a
+separate closure-explicit meeting admits them. The quotient, monoid modality,
+0↔∞/tan reading and token relations may then be consequences of that closure.
 
-## Version 3.10 — NRRF837 socioeconomic super-brain interface
+The semantic user interface is not outside this relation. Each receipt carries
+an `interface_natural_form`: a closed reading that factors through the derived
+truth classes. HTML, Canvas and CSS are transport only; they do not introduce
+semantic nodes, phases, actions, gates, or equality.
 
-The primary surface now renders the product-level continuum directly:
+## Version 3.11 — translational-truth-derived Supernet interface
+
+The primary surface now derives the product-level continuum in this order:
 
 ```text
-local interaction
-→ compose
-→ collective global state
-→ versioned unity selector
-→ selected natural-form interface
-→ source-preserved local freedom fibre
+visual existence
+→ relative translational truth
+→ visual axiometry
+→ compatible + closure-explicit meeting
+→ naturally admitted truth forms
+→ closure-internal interface form
+→ source-preserved interface return
 ```
 
 The runtime keeps AI interaction admission, token form admission and correlated
 human commitment as three separate relations. Partial consent derives
 `COMMIT`; unanimous current consent admits `ACT`; a consequence following that
 acceptance derives `RETURN`. Ordinary interaction remains open throughout.
-Equal translated content never collapses actor identity, and unity is recorded
-as chosen product data rather than inferred from the network.
+Equal translated content never collapses actor identity. A versioned selector
+may choose how an already-admitted form is presented, but cannot manufacture
+its naturality or alter its semantic truth form.
 
 See
 [SUPERNET_SOCIOECONOMIC_SUPER_BRAIN_INTERFACE_NRRF837_RUNTIME.md](SUPERNET_SOCIOECONOMIC_SUPER_BRAIN_INTERFACE_NRRF837_RUNTIME.md)

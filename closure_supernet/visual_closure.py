@@ -4,6 +4,10 @@ from collections import Counter
 from typing import Any
 
 from .coordination import build_coordination_receipt
+from .translational_truth_axiometry import (
+    derive_closure,
+    derive_interface_natural_form,
+)
 
 
 def _unique(values: list[str]) -> list[str]:
@@ -17,10 +21,12 @@ def learned_relation_memory(
 
     witnessed: dict[str, str] = {}
     for receipt in receipts:
-        for relation in receipt.get("ai_translation", {}).get("relations", []):
-            if str(relation.get("verdict", "OPEN")) == "FALSE":
+        for relation in receipt.get("visual_network", {}).get("edges", []):
+            if relation.get("generates_equality") is not True:
                 continue
-            relation_id = str(relation.get("candidate_relation_id") or "")
+            relation_id = str(
+                relation.get("id") or relation.get("candidate_relation_id") or ""
+            )
             relation_type = str(relation.get("relation_type") or "OPEN_RELATION")
             if relation_id:
                 witnessed[relation_id] = relation_type
@@ -327,6 +333,7 @@ def build_visual_closure_receipt(
         living_actions=living_actions,
         living_returns=living_returns,
         closure_level_id=str(closure_level["level_id"]),
+        closure_derivation=closure_level.get("translational_truth_axiometry"),
     )
     visible_event_ids = {
         str(coordination.get("intent", {}).get("event_id") or ""),
@@ -371,16 +378,22 @@ def build_visual_closure_receipt(
         )
         existing_node_ids.add(visible_event_id)
 
-    return {
+    receipt = {
         "protocol": "closure.supernet/visual-translational-closure-v1",
         "source_event_id": str(event["id"]),
         "closure_relation": [
+            "VISUAL_EXISTENCE",
+            "TRANSLATIONAL_TRUTH",
+            "VISUAL_AXIOMETRY",
+            "CLOSURE_EXPLICIT_MEETING",
+            "NATURAL_FORM_ADMISSION",
+            "INTERFACE_NATURAL_FORM",
+        ],
+        "operational_return_cycle": [
             "BLACK_MIRROR_SENSE",
             "SLEARN_MEMORY",
             "AI_TRANSLATION",
-            "TOKENOMIC_ADMISSION",
-            "VISUAL_CLOSURE",
-            "NETWORK_RETURN",
+            "INTERFACE_RETURN",
             "BLACK_MIRROR_SENSE",
         ],
         "black_mirror": {
@@ -472,3 +485,267 @@ def build_visual_closure_receipt(
         "two_person_E2E": "OPEN",
         "truth_issued": False,
     }
+
+    visual_forms = [
+        {
+            "id": state,
+            "state": {"source_occurrence_id": state},
+            "existence_provenance": [f"source-return:{state}"],
+        }
+        for state in closure_level.get("states", [])
+    ]
+    relative_truths = [
+        {
+            "id": relation.get("candidate_relation_id") or relation.get("id"),
+            "source": relation.get("source_occurrence"),
+            "target": relation.get("target_occurrence"),
+            "verdict": relation.get("verdict", "OPEN"),
+            "statement": relation.get("relation_type"),
+            "provenance": [
+                relation.get("interpretation_id"),
+                relation.get("admission_id"),
+            ],
+            "source_return_ids": relation.get("source_return_ids")
+            or [
+                relation.get("source_occurrence"),
+                relation.get("target_occurrence"),
+            ],
+            "visual_equation": relation.get("visual_equation"),
+            "compatible": relation.get("compatible", False),
+            "closure_explicit": relation.get("closure_explicit"),
+        }
+        for relation in relation_receipts
+        if relation.get("source_occurrence") and relation.get("target_occurrence")
+    ]
+    truth_derivation = derive_closure(visual_forms, relative_truths)
+    truth_evaluations = {
+        evaluation.truth_id: evaluation
+        for evaluation in truth_derivation.truth_evaluations
+    }
+    for edge in receipt["visual_network"]["edges"]:
+        evaluation = truth_evaluations.get(str(edge.get("id") or ""))
+        witnessed = bool(
+            evaluation is not None
+            and evaluation.closure_admitted
+        )
+        edge["admitted"] = witnessed
+        edge["translational_truth_status"] = (
+            "WITNESSED" if witnessed else "OPEN"
+        )
+        edge["generates_equality"] = witnessed
+        edge["why"]["translational_truth_status"] = edge[
+            "translational_truth_status"
+        ]
+    witnessed_relation_ids = [
+        str(edge["id"])
+        for edge in receipt["visual_network"]["edges"]
+        if edge["generates_equality"] and edge.get("id")
+    ]
+    witnessed_relation_id_set = set(witnessed_relation_ids)
+    witnessed_relations = [
+        relation
+        for relation in relation_receipts
+        if str(relation.get("candidate_relation_id") or relation.get("id") or "")
+        in witnessed_relation_id_set
+    ]
+    next_operation = _next_operation(
+        event,
+        closure_level,
+        witnessed_relations,
+    )
+    current_witnessed = {
+        str(relation.get("candidate_relation_id") or relation.get("id") or ""):
+        str(relation.get("relation_type") or "OPEN_RELATION")
+        for relation in witnessed_relations
+    }
+    prior_witnessed_ids = {
+        str(edge.get("id") or edge.get("candidate_relation_id") or "")
+        for prior in prior_receipts
+        for edge in prior.get("visual_network", {}).get("edges", [])
+        if edge.get("generates_equality") is True
+    }
+    witnessed_memory_after = Counter(memory_before)
+    for relation_id, relation_type in current_witnessed.items():
+        if relation_id and relation_id not in prior_witnessed_ids:
+            witnessed_memory_after[relation_type] += 1
+    receipt["slearn"]["relation_memory_after"] = dict(
+        sorted(witnessed_memory_after.items())
+    )
+    receipt["slearn"]["memory_basis"] = (
+        "closure-admitted translational-truth witnesses only"
+    )
+    receipt["slearn"]["open_candidates_change_truth_memory"] = False
+    receipt["ai_translation"]["retained_candidate_relation_ids"] = [
+        str(item["candidate_relation_id"])
+        for item in admitted
+        if item.get("candidate_relation_id")
+    ]
+    receipt["ai_translation"]["admitted_relation_ids"] = witnessed_relation_ids
+    receipt["ai_translation"]["admission_means_translational_truth_witness"] = True
+    receipt["tokenomic"]["admitted_relation_capacity"] = len(
+        witnessed_relation_ids
+    )
+    receipt["tokenomic"]["next_operation"] = next_operation
+    receipt["network_return"]["next_operation"] = next_operation
+    receipt["network_return"]["witnessed_relation_count"] = len(
+        witnessed_relation_ids
+    )
+
+    def element_derivation(member_ids: list[str]) -> dict[str, Any]:
+        form_ids = sorted(
+            {
+                truth_derivation.natural_form_for(member_id).id
+                for member_id in member_ids
+                if member_id in truth_derivation.visual_existence.form_ids
+            }
+        )
+        return {
+            "source_return_ids": member_ids,
+            "natural_form_ids": form_ids,
+            "closure_derivation_id": truth_derivation.id,
+            "derived_inside_closure": bool(form_ids),
+        }
+
+    semantic_elements: list[dict[str, Any]] = []
+    for node in receipt["visual_network"]["nodes"]:
+        occurrence_id = str(node.get("occurrence_id") or "")
+        derivation = element_derivation(
+            [occurrence_id] if occurrence_id else []
+        )
+        naturally_admitted = bool(derivation["natural_form_ids"])
+        semantic_elements.append(
+            {
+                "id": f"ui-node:{node['id']}",
+                "kind": "NODE",
+                "admission_status": (
+                    "NATURALLY_ADMITTED" if naturally_admitted else "OPEN"
+                ),
+                **derivation,
+                "derived_inside_closure": naturally_admitted,
+            }
+        )
+    for edge in receipt["visual_network"]["edges"]:
+        relation = next(
+            (
+                item
+                for item in relation_receipts
+                if str(item.get("candidate_relation_id") or "")
+                == str(edge.get("id") or "")
+            ),
+            {},
+        )
+        endpoints = [
+            str(relation.get("source_occurrence") or ""),
+            str(relation.get("target_occurrence") or ""),
+        ]
+        derivation = element_derivation([item for item in endpoints if item])
+        relation_witnessed = bool(edge["generates_equality"])
+        semantic_elements.append(
+            {
+                "id": f"ui-edge:{edge.get('id')}",
+                "kind": "TRANSLATION_EDGE",
+                "admission_status": edge["translational_truth_status"],
+                "generates_equality": relation_witnessed,
+                "potential_visible": True,
+                **derivation,
+                "derived_inside_closure": relation_witnessed,
+            }
+        )
+
+    next_action = receipt["network_return"]["next_operation"]
+    interface_actions = [
+        {
+            "id": f"interface-return:{next_action['action']}",
+            "operation": next_action["action"],
+            "kind": "RETURN_IN_SAME_CLOSURE_ENVIRONMENT",
+            "source_return_ids": source_ids,
+            "closure_derivation_id": truth_derivation.id,
+            "requires_source_preserved_round_trip": True,
+            "changes_interface_without_new_receipt": False,
+        }
+    ]
+    receipt["operational_closure"].update(
+        {
+            "translational_truth_axiometry_derived": True,
+            "open_edges_excluded_from_equality": True,
+            "natural_forms_derived_before_admission": True,
+            "interface_natural_form_derived_inside_closure": True,
+            "external_renderer_transport_only": True,
+        }
+    )
+    interface_render_state = {
+        "source_event_id": receipt["source_event_id"],
+        "focus_event": {
+            "id": receipt["source_event_id"],
+            "current_stage": event.get("current_stage"),
+            "current_verdict": event.get("current_verdict"),
+            "authored_by": event.get("authored_by"),
+            "form_label": event.get("form_label"),
+        },
+        "source_fibre": [
+            {
+                "id": str(item.get("id") or ""),
+                "exact_text": item.get("exact_text"),
+                "source_id": item.get("source_id"),
+                "form_label": item.get("form_label"),
+            }
+            for item in source_occurrences
+        ],
+        "derivation_order": receipt["closure_relation"],
+        "truth_form_equals_visual_equality": True,
+        "ui_factors_through_translational_truth": True,
+        "ui_is_external_ontology": False,
+        "renderer_role": "TRANSPORT_ONLY",
+        "coordination": coordination,
+        "visual_network": receipt["visual_network"],
+        "closure_level": closure_level,
+        "tokenomic": receipt["tokenomic"],
+        "slearn": receipt["slearn"],
+        "ai_translation": receipt["ai_translation"],
+        "network_return": receipt["network_return"],
+        "operational_closure": receipt["operational_closure"],
+        "semantic_elements": semantic_elements,
+        "actions": interface_actions,
+    }
+    quotient_reading = {
+        state: {
+            "natural_form_id": truth_derivation.natural_form_for(state).id,
+            "render_state": interface_render_state,
+        }
+        for state in truth_derivation.visual_existence.form_ids
+    }
+    interface_form = derive_interface_natural_form(
+        truth_derivation,
+        quotient_reading,
+    ).to_dict()
+    if truth_derivation.visual_existence.form_ids:
+        first_member = truth_derivation.visual_existence.form_ids[0]
+        validated_render_state = interface_form["closure_projection"][
+            first_member
+        ]["render_state"]
+    else:
+        validated_render_state = interface_render_state
+    interface_form.update(
+        {
+            "kind": "SUPERNET_INTERFACE_NATURAL_FORM",
+            "admission_status": "NATURALLY_ADMITTED",
+            "derivation_order": validated_render_state["derivation_order"],
+            "truth_form_equals_visual_equality": validated_render_state[
+                "truth_form_equals_visual_equality"
+            ],
+            "ui_factors_through_translational_truth": validated_render_state[
+                "ui_factors_through_translational_truth"
+            ],
+            "ui_is_external_ontology": validated_render_state[
+                "ui_is_external_ontology"
+            ],
+            "renderer_role": validated_render_state["renderer_role"],
+            "semantic_elements": validated_render_state["semantic_elements"],
+            "actions": validated_render_state["actions"],
+            "render_state": validated_render_state,
+            "render_state_factorized": True,
+        }
+    )
+    receipt["translational_truth_axiometry"] = truth_derivation.to_dict()
+    receipt["interface_natural_form"] = interface_form
+    return receipt

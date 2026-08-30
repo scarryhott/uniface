@@ -47,7 +47,9 @@ class NaturalInterfaceManager:
                 "NRRF807",
                 "NRRF811",
             ],
-            "ui_is_admitted_closure_reading": True,
+            "legacy_chart_is_admitted_closure_reading": False,
+            "legacy_chart_is_transport_only": True,
+            "semantic_interface_receipt": "visual_closure.interface_natural_form",
             "chart_kind_selected_from_existing_receipts": True,
             "natural_form_unique_under_declared_contract": True,
             "canonical_pixel_layout_selected": False,
@@ -300,7 +302,7 @@ class NaturalInterfaceManager:
             hidden.extend(["internal", "external", "semantic hand", "actual/potential"])
         if proof is None:
             hidden.append("proof fibre")
-        actions = ["integrate", "interact", "relate", "admit-interface"]
+        actions = ["integrate", "interact", "relate"]
         if kind == NaturalChartKind.OPEN_SELECTOR:
             actions.append("rigidify")
         if kind == NaturalChartKind.TURING_BEING and not semantic_complete:
@@ -414,7 +416,11 @@ class NaturalInterfaceManager:
             "turing_being_depth": life_summary,
             "determination_depth": determination,
             "admission_receipt": {
-                "ui_admitted": True,
+                "ui_admitted": False,
+                "legacy_chart_transport_only": True,
+                "semantic_interface_receipt": (
+                    "visual_closure.interface_natural_form"
+                ),
                 "source_preserved": True,
                 "source_fibre_reopenable": True,
                 "interaction_lifts_to_supernet_event": True,
@@ -457,7 +463,7 @@ class NaturalInterfaceManager:
                     }
                 ),
                 authored_by=data.authored_by,
-                form_label="natural Supernet interface admission",
+                form_label="legacy interface presentation return",
                 language_label="Black Mirror closure reading",
                 source_id="natural-supernet-interface",
                 perspective_id=data.perspective_id,
@@ -490,7 +496,8 @@ class NaturalInterfaceManager:
                     "natural_topology_mode": chart["topology_mode"],
                     "natural_lens": chart["lens"],
                     "focus_event_id": focus["id"] if focus else None,
-                    "ui_admitted": True,
+                    "ui_admitted": False,
+                    "legacy_chart_transport_only": True,
                     "canonical_pixel_layout_selected": False,
                     "truth_issued": False,
                 },

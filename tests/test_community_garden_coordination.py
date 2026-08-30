@@ -628,9 +628,10 @@ def test_community_garden_intent_closes_through_mutual_authorship(
         assert persisted["coordination"]["mutual_authorship"] == mutual
         assert persisted["truth_issued"] is False
 
-        # Every surface bound to the proposal is refreshed to the same current
-        # global content and phase-sensitive natural form.  Its own local
-        # closure level may differ and is not used as the natural-form ID.
+            # Every surface bound to the proposal is refreshed to the same
+            # collective content/state.  Its semantic natural form remains the
+            # truth class of that surface's own source return; a shared phase or
+            # proposal is not allowed to manufacture equality between them.
         bound_surface_ids = [
             intent_event_id,
             proposal["proposal_event_id"],
@@ -654,9 +655,11 @@ def test_community_garden_intent_closes_through_mutual_authorship(
             assert surface_continuum["global_state_id"] == returned_continuum[
                 "global_state_id"
             ]
-            assert surface_continuum["selected_natural_form_id"] == (
-                returned_continuum["selected_natural_form_id"]
+            assert surface_continuum["selected_natural_form_id"]
+            assert surface_continuum["natural_form_admission_status"] == (
+                "NATURALLY_ADMITTED"
             )
+            assert surface_continuum["closure_derivation_id"]
 
 
 def test_ai_authorship_cannot_accept_a_commitment_proposal(tmp_path: Path) -> None:
@@ -1016,6 +1019,7 @@ def _demote_latest_visual_to_pre_nrrf837(
     event_id: str,
     *,
     suffix: str,
+    keep_nrrf837: bool = False,
 ) -> str:
     store = app.state.runtime.supernet_store
     row = store._conn.execute(  # noqa: SLF001 - migration-path fixture
@@ -1026,9 +1030,12 @@ def _demote_latest_visual_to_pre_nrrf837(
     assert row is not None
     payload = json.loads(str(row["receipt"]))
     coordination = payload.get("coordination") or {}
-    coordination.pop("nrrf837_continuum", None)
-    coordination.pop("continuum", None)
+    if not keep_nrrf837:
+        coordination.pop("nrrf837_continuum", None)
+        coordination.pop("continuum", None)
     payload["coordination"] = coordination
+    payload.pop("translational_truth_axiometry", None)
+    payload.pop("interface_natural_form", None)
     with store._lock:  # noqa: SLF001 - migration-path fixture
         store._conn.execute(  # noqa: SLF001 - migration-path fixture
             """UPDATE supernet_visual_closure_receipts
@@ -1085,6 +1092,27 @@ def test_pre_nrrf837_latest_visual_is_lazily_upgraded_without_rewriting_history(
         assert primary_payload["visual_closure"]["coordination"][
             "nrrf837_continuum"
         ]["schema"] == "closure.supernet/nrrf837-continuum-v1"
+
+        third = create_intent(client)
+        third_event_id = third["event_id"]
+        same_schema_historical_id = _demote_latest_visual_to_pre_nrrf837(
+            app,
+            third_event_id,
+            suffix="same-nrrf837-without-axiometry",
+            keep_nrrf837=True,
+        )
+        same_schema_upgrade = client.get(
+            f"/supernet/events/{third_event_id}/visual-closure"
+        )
+        assert same_schema_upgrade.status_code == 200, same_schema_upgrade.text
+        same_schema_payload = same_schema_upgrade.json()
+        assert same_schema_payload["id"] != same_schema_historical_id
+        assert same_schema_payload["translational_truth_axiometry"]["schema"] == (
+            "closure.supernet/translational-truth-axiometry-v2"
+        )
+        assert same_schema_payload["interface_natural_form"][
+            "render_state_factorized"
+        ] is True
 
 
 def test_pre_nrrf837_proposal_replay_reuses_only_the_same_full_proposal(

@@ -58,4 +58,4 @@ def test_vercel_asgi_serves_the_latest_completion_integrated_app(monkeypatch) ->
     assert "/supernet/classic" in routes
     assert "/supernet/agent/capabilities" in routes
     assert "/mcp" in routes
-    assert module.app.version == "3.10.0"
+    assert module.app.version == "3.11.0"

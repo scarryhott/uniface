@@ -12,12 +12,11 @@ _FINISH_PATCH = r'''
 @media(max-width:390px){.continuum-strip{grid-template-columns:1fr}.continuum-arrow{padding:1px}.continuum-arrow::after{content:' ↓'}.continuum-cell span{white-space:normal}}
 @media(max-width:900px) and (min-width:621px){.shell{grid-template-rows:58px minmax(0,1fr) 142px}.drawer{bottom:142px}.composer{grid-template-columns:repeat(4,minmax(80px,1fr))}.composer textarea{grid-column:1/-1;height:54px}}
 @media(max-width:620px){.shell{grid-template-rows:54px minmax(0,1fr) 218px}.drawer{bottom:218px}.composer{grid-template-columns:1fr 1fr}.composer textarea{grid-column:1/-1;height:54px}}
-.level-summary{border:1px solid #2d4049;border-radius:10px;background:#081014;padding:9px;font-size:10px;line-height:1.5}.level-summary strong{color:#e5f0f2}.level-summary .seam{color:#b59cff}.level-summary .open{color:#e0b35a}.level-classes{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.level-class{border:1px solid #334a55;border-radius:999px;padding:3px 6px;color:#a9bdc5}.level-fold{pointer-events:none}.level-axis{stroke:#6b8791;stroke-width:2}.level-seam{stroke:#b59cff;stroke-width:2;stroke-dasharray:5 6}.level-return{stroke:#75e0b4;stroke-width:1.6;stroke-dasharray:5 7;fill:none}.level-point{fill:#eaf4f4;stroke:#72d8e8;stroke-width:5}.level-text{fill:#c8d7dc;font:10px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4}.level-small{fill:#8fa2aa;font:9px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4}.closure-class-ring{fill:none;stroke-width:3;stroke-opacity:.72;pointer-events:none}.closure-translation{fill:none;stroke-width:3;stroke-opacity:.9;marker-end:url(#arrow);pointer-events:none}.closure-memory{stroke-dasharray:4 5}.closure-unit{fill:#071015;stroke:#75e0b4;stroke-width:2;pointer-events:none}.closure-unit-text,.closure-next-text{fill:#d9e7eb;font:9px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4;pointer-events:none}.closure-next{fill:none;stroke:#75e0b4;stroke-width:2;stroke-dasharray:6 6;pointer-events:none}.closure-operational{color:#75e0b4}.closure-open{color:#e0b35a}
+.level-summary{border:1px solid #2d4049;border-radius:10px;background:#081014;padding:9px;font-size:10px;line-height:1.5}.level-summary strong{color:#e5f0f2}.level-summary .seam{color:#b59cff}.level-summary .open{color:#e0b35a}.level-classes{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.level-class{border:1px solid #334a55;border-radius:999px;padding:3px 6px;color:#a9bdc5}.level-fold{pointer-events:none}.level-axis{stroke:#6b8791;stroke-width:2}.level-seam{stroke:#b59cff;stroke-width:2;stroke-dasharray:5 6}.level-return{stroke:#75e0b4;stroke-width:1.6;stroke-dasharray:5 7;fill:none}.level-point{fill:#eaf4f4;stroke:#72d8e8;stroke-width:5}.level-text{fill:#c8d7dc;font:10px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4}.level-small{fill:#8fa2aa;font:9px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4}.closure-class-ring{fill:none;stroke-width:3;stroke-opacity:.72;pointer-events:none}.closure-translation{fill:none;stroke-width:3;stroke-opacity:.9;marker-end:url(#arrow);pointer-events:none}.closure-memory{stroke-dasharray:4 5}.closure-unit{fill:#071015;stroke:#75e0b4;stroke-width:2;pointer-events:none}.closure-unit-text,.closure-next-text{fill:#d9e7eb;font:9px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4;pointer-events:none}.closure-next{fill:none;stroke:#75e0b4;stroke-width:2;stroke-dasharray:6 6;pointer-events:none}.closure-operational{color:#75e0b4}.closure-open{color:#e0b35a}.derivation-chain{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:8px 0}.derivation-step{border:1px solid #344a55;border-radius:8px;padding:6px;background:#071015;color:#aec2ca;font:8px ui-monospace,SFMono-Regular,monospace;text-align:center}.derivation-step.admitted{border-color:#75e0b4;color:#dcebe7}.derivation-step.open{border-color:#e0b35a;color:#e0b35a}@media(max-width:700px){.derivation-chain{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 <script>
 (() => {
   const priorRunAction = runAction;
-  const priorRender = render;
 
   const coordinationKind=document.createElement('select');
   coordinationKind.id='coordinationKind';
@@ -70,7 +69,14 @@ _FINISH_PATCH = r'''
   function roleClass(value){return String(value||'OPEN').toLowerCase().replace(/[^a-z0-9_-]/g,'-')}
   function coordinationActor(){return document.getElementById('author').value.trim()||'participant'}
   function coordinationPerspective(){return document.getElementById('perspective')?.value?.trim()||coordinationActor()}
-  function currentCoordination(){return receipt?.visual_closure?.coordination||null}
+  function interfaceNaturalForm(closure){return closure?.interface_natural_form||null}
+  function closureRenderState(closure){
+    const form=interfaceNaturalForm(closure);
+    if(!form||form.closure_internal!==true||form.admitted!==true||form.render_state_factorized!==true)return null;
+    if(form.renderer_contract?.role!=='TRANSPORT_ONLY')return null;
+    return form.render_state&&typeof form.render_state==='object'?form.render_state:null;
+  }
+  function currentCoordination(){const closure=receipt?.visual_closure;return closureRenderState(closure)?.coordination||null}
   function pathTarget(path){return String(path?.target_event_id||path?.event_id||path?.id||'')}
   function selectedPath(coordination){return (coordination?.paths||[]).find(path=>pathTarget(path)===selectedCoordinationPathId)||null}
   function readable(value){
@@ -96,13 +102,22 @@ _FINISH_PATCH = r'''
     const globalId=continuum.global_state_id||continuum.global_content_id||'OPEN';
     const formId=continuum.selected_natural_form_id||unity.selected_form?.id||coordination?.mutual_authorship?.one_natural_form_id||'OPEN';
     const basePhase=String(operatorLabel||continuum.modality?.operator||'DISCOVER').toUpperCase();
-    const phase=path&&basePhase==='DISCOVER'?'CONNECT':basePhase;
+    const phase=basePhase;
     const version=readable(unity.version||coordination?.natural_form_operator?.selector_version)||'OPEN';
-    const source=readable(unity.source||coordination?.natural_form_operator?.selector_source)||'product policy';
-    const chosenBy=readable(unity.chosen_by)||'product';
+    const source=readable(unity.source||coordination?.natural_form_operator?.selector_source)||'closure-derived admission';
+    const chosenBy=readable(unity.chosen_by)||'closure derivation';
     const actions=uniqueStrings(freedom.available_local_actions||freedom.local_actions||coordination?.natural_form_operator?.local_open);
     const presentations=asList(freedom.local_presentations);
-    return `<div class="continuum-strip" role="group" aria-label="NRRF837 local to global natural-form continuum"><div class="continuum-cell"><strong>LOCAL</strong><span title="${esc(localId)}">${esc(shortContinuumId(localId))}</span></div><div class="continuum-arrow" aria-hidden="true">compose →</div><div class="continuum-cell"><strong>GLOBAL</strong><span title="${esc(globalId)}">${esc(shortContinuumId(globalId))}</span></div><div class="continuum-arrow" aria-hidden="true">form →</div><div class="continuum-cell continuum-form"><strong>${esc(phase)}</strong><span title="${esc(formId)}">${esc(shortContinuumId(formId))}</span></div></div><div class="coordination-status"><strong>Chosen unity · ${esc(version)}</strong><br>source · ${esc(source)} · chosen by ${esc(chosenBy)}<br><span class="open">Extra product data: this unity is versioned and chosen, not derived from the network or the NRRF825 equality level.</span></div><div class="coordination-status"><strong>Freedom fibre · ${presentations.length||actions.length} local presentation${(presentations.length||actions.length)===1?'':'s'}</strong><br>The selected form does not exhaust local freedom.${actions.length?`<div class="coordination-meta">${chips(actions)}</div>`:''}</div>`;
+    return `<div class="continuum-strip" role="group" aria-label="NRRF837 local to global natural-form continuum"><div class="continuum-cell"><strong>LOCAL</strong><span title="${esc(localId)}">${esc(shortContinuumId(localId))}</span></div><div class="continuum-arrow" aria-hidden="true">translate →</div><div class="continuum-cell"><strong>GLOBAL</strong><span title="${esc(globalId)}">${esc(shortContinuumId(globalId))}</span></div><div class="continuum-arrow" aria-hidden="true">close →</div><div class="continuum-cell continuum-form"><strong>${esc(phase)}</strong><span title="${esc(formId)}">${esc(shortContinuumId(formId))}</span></div></div><div class="coordination-status"><strong>Closure-admitted form · ${esc(version)}</strong><br>source · ${esc(source)} · presentation selected by ${esc(chosenBy)}<br><span class="closure-operational">The selector may choose a presentation only after visual existence, translational truth and axiometry derive its natural form inside closure.</span></div><div class="coordination-status"><strong>Freedom fibre · ${presentations.length||actions.length} local presentation${(presentations.length||actions.length)===1?'':'s'}</strong><br>The selected form does not exhaust local freedom.${actions.length?`<div class="coordination-meta">${chips(actions)}</div>`:''}</div>`;
+  }
+
+  function renderInterfaceDerivation(closure){
+    const form=interfaceNaturalForm(closure);
+    const renderState=closureRenderState(closure);
+    if(!form||!renderState)return '<div class="coordination-status"><strong>Interface form · OPEN</strong><br>No factorized closure-derived interface natural form is present.</div>';
+    const order=asList(renderState.derivation_order);
+    const admitted=form.admitted===true&&form.closure_internal===true&&form.render_state_factorized===true;
+    return `<div class="coordination-status"><strong>Interface natural form · ${esc(form.admission_status||'OPEN')}</strong><div class="derivation-chain">${order.map((step,index)=>`<span class="derivation-step ${index<5||admitted?'admitted':'open'}">${esc(step)}</span>`).join('')}</div>${admitted?'This interface is a closed reading that factors through the derived translational truth. Its renderer carries the form; it does not define closure.':'The interface remains OPEN because its closed-reading derivation is incomplete.'}</div>`;
   }
   function renderGates(coordination){
     const continuum=continuumOf(coordination);
@@ -324,7 +339,7 @@ _FINISH_PATCH = r'''
     }).join(''):'<div class="coordination-empty">No explainable path is admitted yet. Continue interacting or add a person, project, or resource; no suggestion is manufactured.</div>';
     const operator=coordination.natural_form_operator||{};
     const operatorLabel=readable(operator.natural_form||operator.label||operator.name||operator.form||operator);
-    const displayedOperator=path&&String(operatorLabel).toUpperCase()==='DISCOVER'?'CONNECT':operatorLabel;
+    const displayedOperator=operatorLabel;
     const operatorReason=readable(operator.reason||operator.derived_from||operator.global_transition);
     const gate=coordination.token_gate||{};
     const formAvailable=commitmentFormAvailable(gate);
@@ -347,7 +362,7 @@ _FINISH_PATCH = r'''
     const returnedText=readable(livingReturn.exact_text||livingReturn.text||livingReturn.summary||livingReturn.status);
     const agreementForm=path?`<div class="coordination-form"><h3 style="font-size:11px;margin:0">Draft an agreement on this path</h3><p class="coordination-note">The exact terms remain a proposal until required participants author decisions.</p><label for="coordinationAgreementTitle">Proposal title</label><input id="coordinationAgreementTitle"><label for="coordinationAgreementTerms">Exact agreement terms</label><textarea id="coordinationAgreementTerms" placeholder="Roles, action, timing, consent, and what remains OPEN…"></textarea><label for="coordinationResourceConditions">Resource conditions · one per line</label><textarea id="coordinationResourceConditions" placeholder="time, money, access, tools, constraints…"></textarea><button type="button" id="coordinationPropose" ${formAvailable?'':'disabled'}>Propose agreement</button>${formAvailable?'':`<p class="coordination-note">This commitment form is not admitted by the current gate. Interaction stays open.</p>`}</div>`:'<div class="coordination-form"><div class="coordination-empty">Choose a path to open its editable agreement form.</div></div>';
     const activeProposal=active?`<div class="coordination-form"><h3 style="font-size:11px;margin:0">Active proposal</h3><div class="coordination-status"><strong>${esc(readable(active.title)||activeId.slice(0,8))} · ${esc(consentPhase)}</strong><br>proposal state · ${esc(activeState)}${active.exact_terms?`<br><br>${esc(active.exact_terms)}`:''}${asList(active.resource_conditions).length?`<div class="coordination-meta">${chips(active.resource_conditions)}</div>`:''}${requiredIds.length?`<br>independent consent · ${acceptedIds.length}/${requiredIds.length}<div class="coordination-progress" role="progressbar" aria-label="Independent human consent" aria-valuemin="0" aria-valuemax="${requiredIds.length}" aria-valuenow="${acceptedIds.length}"><span style="width:${consentPercent}%"></span></div><span>accepted · ${esc(acceptedIds.join(' · ')||'none')}</span>${pendingIds.length?`<br><span class="open">pending · ${esc(pendingIds.join(' · '))}</span>`:''}`:''}${decisions.length?`<br>authored decisions · ${esc(decisions.length)}`:''}</div>${!accepted&&!alreadyAccepted?`<label for="coordinationDecisionText">Your exact participant decision</label><textarea id="coordinationDecisionText" placeholder="State what you accept as your participation…"></textarea><button type="button" id="coordinationAccept">Record my acceptance</button>`:`<p class="coordination-note">${accepted?'Every required acceptance is present in the current receipt.':'Your acceptance is present; ACT remains unavailable while other required receipts are pending.'}</p>`}${accepted?`<label for="coordinationReturnText">What actually happened?</label><textarea id="coordinationReturnText" placeholder="Return the observed consequence, including differences from the proposal…"></textarea><button type="button" id="coordinationReturn">Return what happened</button>`:''}${returnedText?`<div class="coordination-status"><strong>Living return</strong><br>${esc(returnedText)}</div>`:''}</div>`:'';
-    surface.innerHTML=`<div class="coordination-intent"><span class="coordination-kind ${roleClass(intentKind)}">${esc(intentKind)}</span><strong>${esc(intentText)}</strong>${intentLocation?`<p>locality · ${esc(intentLocation)}</p>`:''}<div class="coordination-meta">${chips(intent.capabilities||[])}${chips(intent.constraints||[])}</div></div>${renderContinuum(coordination,path,displayedOperator)}${displayedOperator?`<div class="coordination-status"><strong>Natural-form operator · ${esc(displayedOperator)}</strong>${path&&displayedOperator==='CONNECT'?'<br>Local path selection opens detail and agreement composition; the persisted collective receipt remains source-preserved.':''}${operatorReason?`<br>${esc(operatorReason)}`:''}</div>`:''}<h3 style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8ea0aa;margin:11px 0 7px">Explainable paths</h3><div class="coordination-paths">${pathCards}</div>${renderGates(coordination)}${renderContributors(coordination)}${agreementForm}${activeProposal}`;
+    surface.innerHTML=`<div class="coordination-intent"><span class="coordination-kind ${roleClass(intentKind)}">${esc(intentKind)}</span><strong>${esc(intentText)}</strong>${intentLocation?`<p>locality · ${esc(intentLocation)}</p>`:''}<div class="coordination-meta">${chips(intent.capabilities||[])}${chips(intent.constraints||[])}</div></div>${renderContinuum(coordination,path,displayedOperator)}${displayedOperator?`<div class="coordination-status"><strong>Natural-form operator · ${esc(displayedOperator)}</strong>${path?'<br>Local path selection expands this already-derived form; it does not change the semantic operator or closure.':''}${operatorReason?`<br>${esc(operatorReason)}`:''}</div>`:''}<h3 style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8ea0aa;margin:11px 0 7px">Explainable paths</h3><div class="coordination-paths">${pathCards}</div>${renderGates(coordination)}${renderContributors(coordination)}${agreementForm}${activeProposal}`;
     surface.querySelectorAll('[data-coordination-path]').forEach(button=>button.addEventListener('click',()=>{
       const chosen=paths.find(item=>pathTarget(item)===button.dataset.coordinationPath);if(chosen)chooseCoordinationPath(coordination,chosen);
     }));
@@ -380,7 +395,7 @@ _FINISH_PATCH = r'''
   }
 
   function drawClosureLevel(level){
-    if(!level)return;
+    if(!level||level.projective_fold?.axiometry_witnessed!==true)return;
     const world=document.getElementById('world');
     const group=svg('g',{class:'level-fold','data-derived-by':'NRRF825'});
     const y=342,left=-430,right=430;
@@ -404,14 +419,14 @@ _FINISH_PATCH = r'''
   document.querySelector('.bottom-actions').prepend(continueButton);
 
   function drawUnifiedClosure(closure){
-    if(!closure?.visual_network)return;
-    const visual=closure.visual_network;
-    const coordination=closure.coordination||{};
+    const renderState=closureRenderState(closure);
+    if(!renderState?.visual_network)return;
+    const visual=renderState.visual_network;
+    const coordination=renderState.coordination||{};
     const continuum=continuumOf(coordination);
     const world=document.getElementById('world');
-    const topology=receipt?.topology||{};
-    const positions=positionMap(topology);
     const nodes=visual.nodes||[];
+    const positions=positionMap({nodes});
     nodes.forEach((node,index)=>{
       if(!positions[node.id]){
         const angle=2*Math.PI*index/Math.max(1,nodes.length);
@@ -422,7 +437,7 @@ _FINISH_PATCH = r'''
     const classByEvent={};
     classes.forEach((unit,index)=>(unit.member_event_ids||[]).forEach(id=>classByEvent[id]=index));
     const roleByEvent={};
-    const intentEventId=String(coordination.intent?.event_id||closure.source_event_id||'');
+    const intentEventId=String(coordination.intent?.event_id||renderState.source_event_id||'');
     if(intentEventId)roleByEvent[intentEventId]=String(coordination.intent?.kind||coordination.intent?.coordination_kind||'INTENT');
     for(const path of coordination.paths||[]){const target=pathTarget(path);if(target)roleByEvent[target]=String(path.kind||'OPEN')}
     const roleColors={intent:'#b59cff',person:'#72d8e8',project:'#75e0b4',resource:'#e0b35a',agreement:'#f1a8de',return:'#9bb6ff'};
@@ -469,48 +484,80 @@ _FINISH_PATCH = r'''
       const token=svg('text',{x,y:y+3,class:'closure-unit-text'});token.textContent=`R${index}`;world.append(token);
     });
     if(continuum.selected_natural_form_id){
-      const phase=selectedCoordinationPathId&&String(continuum.modality?.operator||'DISCOVER').toUpperCase()==='DISCOVER'?'CONNECT':String(continuum.modality?.operator||'DISCOVER').toUpperCase();
-      const continuumLabel=svg('text',{x:0,y:-392,class:'level-small'});continuumLabel.textContent=`NRRF837 · LOCAL → COMPOSE → GLOBAL → FORM · ${phase} · ${shortContinuumId(continuum.selected_natural_form_id)}`;world.append(continuumLabel);
+      const phase=String(continuum.modality?.operator||'DISCOVER').toUpperCase();
+      const continuumLabel=svg('text',{x:0,y:-392,class:'level-small'});continuumLabel.textContent=`EXISTENCE → TRANSLATIONAL TRUTH → AXIOMETRY → CLOSURE → FORM → UI · ${phase} · ${shortContinuumId(continuum.selected_natural_form_id)}`;world.append(continuumLabel);
     }
     const focusNode=nodes.find(node=>node.focus);const p=focusNode&&positions[focusNode.id];
     if(p){
-      const next=closure.network_return?.next_operation;
+      const next=renderState.network_return?.next_operation;
       world.append(svg('path',{d:`M ${p.x-28} ${p.y+28} C ${p.x-115} ${p.y+120} ${p.x+115} ${p.y+120} ${p.x+28} ${p.y+28}`,class:'closure-next'}));
       const nextLabel=svg('text',{x:p.x,y:p.y+108,class:'closure-next-text'});nextLabel.textContent=`RETURN → ${next?.label||'next Sense'}`;world.append(nextLabel);
     }
   }
 
   render = function(){
-    priorRender();
-    const level=receipt?.closure_level;
     const closure=receipt?.visual_closure;
-    renderCoordination(closure?.coordination||null);
+    const form=interfaceNaturalForm(closure);
+    const renderState=closureRenderState(closure);
+    const world=document.getElementById('world');
+    world.replaceChildren();
+    const legacyAdmit=document.getElementById('admit');if(legacyAdmit)legacyAdmit.hidden=true;
+    const level=renderState?.closure_level;
+    renderCoordination(renderState?.coordination||null);
     document.getElementById('interact').disabled=false;
     const target=document.getElementById('closureLevel');
-    if(!level){
-      target.innerHTML='<div class="level-summary">No focused occurrence: the admission level remains OPEN.</div>';
+    if(!renderState||!level){
+      document.getElementById('chartKind').textContent='OPEN INTERFACE';
+      document.getElementById('chartTitle').textContent='Interface natural form · OPEN';
+      document.getElementById('axiometric').textContent='No factorized closure-derived render state is present.';
+      document.getElementById('why').textContent='The renderer will not fall back to an external chart or raw closure semantics.';
+      document.getElementById('stage').textContent='OPEN · renderer transport only';
+      document.getElementById('tags').innerHTML='<span class="tag">OPEN</span><span class="tag">NO SEMANTIC FALLBACK</span>';
+      document.getElementById('sources').innerHTML='<div class="source">No closure-admitted source fibre is available to render.</div>';
+      document.getElementById('layers').innerHTML='<div class="layer hidden-layer">visual existence → translational truth → axiometry → explicit closure meeting → natural form → interface · OPEN</div>';
+      document.getElementById('receipt').innerHTML='<dt>interface</dt><dd>OPEN</dd><dt>renderer</dt><dd>TRANSPORT_ONLY</dd>';
+      document.getElementById('actions').replaceChildren();
+      const senseTarget=document.getElementById('senseRelations');if(senseTarget)senseTarget.innerHTML='<div class="sense-row">No admitted interface reading is available.</div>';
+      target.innerHTML='<div class="level-summary">No factorized interface form: the semantic UI remains OPEN.</div>';
+      continueButton.disabled=true;
       return;
     }
+    document.getElementById('chartKind').textContent='INTERFACE NATURAL FORM';
+    document.getElementById('chartTitle').textContent='Visual translational closure';
+    document.getElementById('axiometric').textContent='visual existence → translational truth → visual axiometry → explicit closure meeting → natural admission → interface form';
+    document.getElementById('why').textContent=`Factorized through ${form.factorization_provenance?.[0]||'the current closure witness'}; renderer transport cannot add truth.`;
+    const focusState=renderState.focus_event||{};
+    document.getElementById('stage').textContent=`${focusState.current_stage||'OPEN'} · ${focusState.current_verdict||'OPEN'} · closure-internal interface`;
+    document.getElementById('tags').innerHTML=['TRANSLATIONAL TRUTH','CLOSURE EXPLICIT','NATURAL FORM','RENDERER TRANSPORT'].map(value=>`<span class="tag">${esc(value)}</span>`).join('');
+    const sourceFibre=asList(renderState.source_fibre);
+    document.getElementById('sources').innerHTML=sourceFibre.length?sourceFibre.map(source=>`<div class="source">${esc(source.exact_text||source.id)}</div>`).join(''):'<div class="source">Visual existence is empty.</div>';
+    document.getElementById('layers').innerHTML=asList(renderState.derivation_order).map(value=>`<div class="layer">${esc(value)}</div>`).join('');
+    document.getElementById('receipt').innerHTML=`<dt>interface</dt><dd>${esc(form.id)}</dd><dt>closure</dt><dd>${esc(form.closure_id)}</dd><dt>admission</dt><dd>${esc(form.admission_basis)}</dd><dt>factorized</dt><dd>${esc(form.render_state_factorized)}</dd><dt>renderer</dt><dd>${esc(form.renderer_contract?.role||'OPEN')}</dd>`;
+    const interfaceActions=asList(renderState.actions);
+    document.getElementById('actions').innerHTML=interfaceActions.map(action=>`<button data-action="${esc(action.operation)}">${esc(action.operation)}</button>`).join('');
+    document.getElementById('actions').querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>runAction(button.dataset.action)));
+    const sensedEdges=asList(renderState.visual_network?.edges);
+    const senseTarget=document.getElementById('senseRelations');
+    if(senseTarget)senseTarget.innerHTML=sensedEdges.length?sensedEdges.map(edge=>`<div class="sense-row"><strong>${esc(edge.relation_type||edge.id)}</strong><span class="${edge.generates_equality?'true':'open'}">${edge.generates_equality?'WITNESSED':'OPEN'}</span> · ${edge.generates_equality?'closure-generating translational truth':'visible potential; no equality generated'}</div>`).join(''):'<div class="sense-row">No cross-form translational truth is present; identities remain intrinsic.</div>';
     const fold=level.projective_fold||{};
     const forms=(level.truth_closes_level_alone?.natural_forms||[]).map(form=>`<span class="level-class">${esc(form.natural_form)} · ${form.members.map(shortState).join(' = ')}</span>`).join('');
-    const status=closure?.operational_closure||{};
-    target.innerHTML=`<div class="level-summary"><strong>${esc(level.endpoint)} · ${level.class_count} equality class${level.class_count===1?'':'es'} across ${level.state_count} sensed state${level.state_count===1?'':'s'}</strong><br>Derived from admitted returns; no level control exists.<br><span class="seam">${esc(fold.coordinate)} = ${esc(fold.tan_value??'OPEN')}</span><br><span class="closure-operational">Mirror ${status.black_mirror_sensed?'✓':'OPEN'} · SLEARN ${status.slearn_memory_committed?'✓':'OPEN'} · AI ${status.ai_translation_executed?'✓':'OPEN'} · resources ${closure?.tokenomic?.resource_unit_count??0} · visual ${status.visual_network_derived?'✓':'OPEN'} · return ${status.network_return_open?'OPEN':'missing'}</span><div class="level-classes">${forms}</div><br><span class="open">${esc(level.physical_hypothesis)} · two-person E2E ${esc(level.two_person_E2E)}</span></div>`;
+    const status=renderState?.operational_closure||{};
+    target.innerHTML=`${renderInterfaceDerivation(closure)}<div class="level-summary"><strong>${esc(level.endpoint)} · ${level.class_count} translational-truth class${level.class_count===1?'':'es'} across ${level.state_count} visually existing state${level.state_count===1?'':'s'}</strong><br>Visual existence derives the translation equations; compatible and closure-explicit witnesses derive admission. OPEN edges remain visible without generating equality.<br><span class="seam">${esc(fold.coordinate)} = ${esc(fold.tan_value??'OPEN')} · derived reading only, never the definition of closure</span><br><span class="closure-operational">Mirror ${status.black_mirror_sensed?'✓':'OPEN'} · SLEARN ${status.slearn_memory_committed?'✓':'OPEN'} · AI ${status.ai_translation_executed?'✓':'OPEN'} · resources ${renderState?.tokenomic?.resource_unit_count??0} · interface form ${interfaceNaturalForm(closure)?.admission_status||'OPEN'} · return ${status.network_return_open?'OPEN':'missing'}</span><div class="level-classes">${forms}</div><br><span class="open">${esc(level.physical_hypothesis)} · two-person E2E ${esc(level.two_person_E2E)}</span></div>`;
     drawUnifiedClosure(closure);
     drawClosureLevel(level);
     const tags=document.getElementById('tags');
     if(tags)tags.insertAdjacentHTML('beforeend',`<span class="tag">NRRF825 L ${esc(level.endpoint)}</span>`);
     if(tags&&closure){
-      const memory=closure.slearn?.memory_receipts_after??0;
-      const units=closure.tokenomic?.resource_unit_count??0;
-      tags.insertAdjacentHTML('beforeend',`<span class="tag">BLACK MIRROR</span><span class="tag">SLEARN ${memory}</span><span class="tag">AI ${esc(closure.ai_translation?.selection_state||'OPEN')}</span><span class="tag">RESOURCE ${units}</span>`);
+      const memory=renderState?.slearn?.memory_receipts_after??0;
+      const units=renderState?.tokenomic?.resource_unit_count??0;
+      tags.insertAdjacentHTML('beforeend',`<span class="tag">BLACK MIRROR</span><span class="tag">SLEARN ${memory}</span><span class="tag">AI ${esc(renderState?.ai_translation?.selection_state||'OPEN')}</span><span class="tag">RESOURCE ${units}</span>`);
     }
     const stage=document.getElementById('stage');
-    if(stage)stage.textContent+=` · visual closure ${closure?.id?.slice(0,8)||'OPEN'} · level ${level.class_count}/${level.state_count} · two-person E2E OPEN`;
-    const next=closure?.network_return?.next_operation;
+    if(stage)stage.textContent+=` · closure ${form.closure_id?.slice(0,18)||'OPEN'} · level ${level.class_count}/${level.state_count}`;
+    const next=renderState?.network_return?.next_operation;
     continueButton.textContent=next?.label||'Continue closure';
     continueButton.dataset.action=next?.action||'interact';
-    continueButton.disabled=!closure;
-    if(closure)document.getElementById('chartTitle').textContent=`Visual translational closure · ${document.getElementById('chartTitle').textContent}`;
+    continueButton.disabled=!form;
   };
 
   continueButton.onclick=()=>runAction(continueButton.dataset.action||'interact');

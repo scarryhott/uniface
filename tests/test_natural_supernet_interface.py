@@ -34,7 +34,8 @@ def test_empty_and_source_point_are_the_minimal_admitted_charts(tmp_path: Path) 
     try:
         empty = runtime.natural_interface.select()
         assert empty["natural_chart"]["kind"] == NaturalChartKind.EMPTY_FIELD
-        assert empty["admission_receipt"]["ui_admitted"] is True
+        assert empty["admission_receipt"]["ui_admitted"] is False
+        assert empty["admission_receipt"]["legacy_chart_transport_only"] is True
         assert empty["admission_receipt"]["canonical_pixel_layout_selected"] is False
 
         async def scenario() -> None:
@@ -260,7 +261,10 @@ def test_natural_interface_is_primary_and_classic_topology_is_a_rechart(
 
         payload = receipt.json()
         assert payload["natural_chart"]["kind"] == "EMPTY_FIELD"
-        assert payload["admission_receipt"]["ui_admitted"] is True
+        assert payload["admission_receipt"]["ui_admitted"] is False
+        assert payload["admission_receipt"]["semantic_interface_receipt"] == (
+            "visual_closure.interface_natural_form"
+        )
         assert payload["admission_receipt"]["interaction_lifts_to_supernet_event"] is True
 
         caps = capabilities.json()
@@ -268,4 +272,4 @@ def test_natural_interface_is_primary_and_classic_topology_is_a_rechart(
         assert caps["canonical_pixel_layout_selected"] is False
         assert caps["determination_issues_truth"] is False
         assert caps["live_sense"]["interaction_time_sense"] is True
-        assert app.version == "3.10.0"
+        assert app.version == "3.11.0"

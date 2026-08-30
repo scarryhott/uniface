@@ -5,7 +5,7 @@ import json
 from typing import Any, TYPE_CHECKING
 
 from .axiometry import operator_keys
-from .models import Verdict
+from .models import RelationType, Verdict
 from .natural_interface import NaturalInterfaceManager
 from .natural_interface_models import NaturalChartKind
 from .nrrf825 import closure_level_receipt
@@ -58,10 +58,13 @@ class LiveSenseManager:
             "unified_visual_translational_closure": True,
             "black_mirror_slearn_ai_tokenomic_one_receipt": True,
             "slearn_memory_changes_candidate_priority": True,
+            "slearn_memory_basis": "closure-admitted translational-truth witnesses only",
+            "open_candidates_change_slearn_truth_memory": False,
             "tokenomic_units_are_equality_classes": True,
             "visual_network_drives_next_operation": True,
             "level_derived_from_admitted_returns": True,
             "projective_zero_infinity_fold": "tan((π/2)·collapse)",
+            "projective_fold_requires_explicit_visual_axiometry_witness": True,
             "projective_fold_is_user_selected": False,
             "background_autonomy_required": False,
             "exact_source_preserved_before_sense": True,
@@ -267,6 +270,25 @@ class LiveSenseManager:
             verdict = str(admission["verdict"]) if admission else Verdict.OPEN.value
             if verdict != Verdict.FALSE.value:
                 admissible_symbols.append(candidate["id"])
+            admission_checks = dict((admission or {}).get("checks") or {})
+            compatibility_keys = (
+                "SOURCE_REVERSIBLE",
+                "STATUS_EXPLICIT",
+                "AFFECTED_PERSPECTIVES_RETAINED",
+                "FORMAL_SCOPE_EXPLICIT",
+                "EMPIRICAL_SCOPE_EXPLICIT",
+                "REOPENING_AVAILABLE",
+                "NO_TURING_COMPLETENESS_ASSUMPTION",
+            )
+            compatible = verdict == Verdict.TRUE.value and all(
+                admission_checks.get(key) is True for key in compatibility_keys
+            )
+            deterministic_equation = verdict == Verdict.TRUE.value and str(
+                candidate["relation_type"]
+            ) in {
+                RelationType.SAME_LITERAL_EQUATION.value,
+                RelationType.SAME_OPERATOR_PATH.value,
+            }
             relation_receipts.append(
                 {
                     "candidate_relation_id": candidate["id"],
@@ -281,6 +303,42 @@ class LiveSenseManager:
                     "admission_id": admission.get("id") if admission else None,
                     "verdict": verdict,
                     "admission_reason": admission.get("reason") if admission else None,
+                    "source_return_ids": [
+                        candidate["source_occurrence"],
+                        candidate["target_occurrence"],
+                    ],
+                    "visual_equation": {
+                        "id": f"visual-equation:{candidate['id']}",
+                        "source": candidate["source_occurrence"],
+                        "target": candidate["target_occurrence"],
+                        "equation": candidate["relation_type"],
+                        "deterministic": deterministic_equation,
+                        "source_return_ids": [
+                            candidate["source_occurrence"],
+                            candidate["target_occurrence"],
+                        ],
+                    },
+                    "compatible": {
+                        "witnessed": compatible,
+                        "basis": "AdmissionPolicy source-reversibility and scope checks",
+                        "provenance": [
+                            admission.get("id") if admission else None,
+                            *[
+                                key
+                                for key in compatibility_keys
+                                if admission_checks.get(key) is True
+                            ],
+                        ],
+                    },
+                    "closure_explicit": {
+                        "witnessed": deterministic_equation,
+                        "basis": (
+                            "deterministic visual equation with exact endpoints"
+                            if deterministic_equation
+                            else "OPEN: no exact visual equation closes this relation"
+                        ),
+                        "provenance": [candidate["id"]],
+                    },
                 }
             )
 

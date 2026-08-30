@@ -42,13 +42,12 @@ def test_one_sense_executes_and_persists_all_visual_closure_functions(
         first = offer(client, "person-a")
         first_closure = first["sense_receipt"]["visual_closure"]
         assert first_closure["closure_relation"] == [
-            "BLACK_MIRROR_SENSE",
-            "SLEARN_MEMORY",
-            "AI_TRANSLATION",
-            "TOKENOMIC_ADMISSION",
-            "VISUAL_CLOSURE",
-            "NETWORK_RETURN",
-            "BLACK_MIRROR_SENSE",
+            "VISUAL_EXISTENCE",
+            "TRANSLATIONAL_TRUTH",
+            "VISUAL_AXIOMETRY",
+            "CLOSURE_EXPLICIT_MEETING",
+            "NATURAL_FORM_ADMISSION",
+            "INTERFACE_NATURAL_FORM",
         ]
         assert all(first_closure["operational_closure"].values())
         assert first_closure["black_mirror"]["source_preserved"] is True
@@ -57,6 +56,29 @@ def test_one_sense_executes_and_persists_all_visual_closure_functions(
         assert first_closure["tokenomic"]["resource_unit_count"] == 1
         assert first_closure["network_return"]["next_operation"]["action"] == "interact"
         assert first_closure["truth_issued"] is False
+        axiometry = first_closure["translational_truth_axiometry"]
+        assert axiometry["schema"] == (
+            "closure.supernet/translational-truth-axiometry-v2"
+        )
+        assert axiometry["closure_meetings"]
+        interface_form = first_closure["interface_natural_form"]
+        assert interface_form["closure_internal"] is True
+        assert interface_form["admitted"] is True
+        assert interface_form["render_state_factorized"] is True
+        assert interface_form["renderer_contract"] == {
+            "can_admit_forms": False,
+            "can_change_closure": False,
+            "can_generate_axioms": False,
+            "can_present": True,
+            "can_witness_truth": False,
+            "role": "TRANSPORT_ONLY",
+        }
+        existence_ids = {
+            item["id"] for item in axiometry["visual_existence"]["forms"]
+        }
+        for member_id, projected in interface_form["closure_projection"].items():
+            assert member_id in existence_ids
+            assert projected["render_state"] == interface_form["render_state"]
 
         second = offer(client, "person-b")
         closure = second["sense_receipt"]["visual_closure"]
@@ -156,6 +178,10 @@ def test_primary_canvas_is_the_unified_network_ui_not_a_component_selector(
         assert "Visual translational closure" in page.text
         assert "fieldKind" not in page.text
         assert 'type="range"' not in page.text
+        assert "priorRender();" not in page.text
+        assert "No factorized closure-derived render state is present" in page.text
+        assert "NO SEMANTIC FALLBACK" in page.text
+        assert "?'CONNECT':" not in page.text
 
         capabilities = client.get("/supernet/interface/capabilities").json()
         assert capabilities[
@@ -165,6 +191,16 @@ def test_primary_canvas_is_the_unified_network_ui_not_a_component_selector(
         assert capabilities[
             "tokenomic_units_derived_from_equality_classes"
         ] is True
+        assert capabilities[
+            "closure_derived_from_translational_truth_axiometry_of_visual_existence"
+        ] is True
+        assert capabilities["closure_defined_by_external_limit_or_fold"] is False
+        assert capabilities["open_relation_generates_equality"] is False
+        assert capabilities["actual_ui_render_state_factorized_through_closure"] is True
+        assert capabilities["external_renderer_is_transport_only"] is True
+        assert capabilities["external_renderer_has_no_semantic_fallback"] is True
+        assert capabilities["authored_form_ids_define_equality"] is False
+        assert capabilities["open_candidates_change_slearn_truth_memory"] is False
 
 
 def test_resource_unit_keeps_source_capabilities_and_constraints_when_relations_add_events(
@@ -203,32 +239,33 @@ def test_resource_unit_keeps_source_capabilities_and_constraints_when_relations_
             "NOTATIONAL_VARIANT"
         )
         assert closure["ai_translation"]["relations"][0]["verdict"] == "OPEN"
-        unit = closure["tokenomic"]["resource_units"][0]
-        assert unit["capabilities"] == [
-            "actuate:irrigation",
-            "sense:soil-moisture",
-        ]
-        assert unit["constraints"] == [
-            "remaining_water_liters<=1",
-            "water_budget_liters<=2",
-        ]
-        assert set(unit["member_event_ids"]) == {
-            first.json()["event_id"],
-            second.json()["event_id"],
+        assert closure["visual_network"]["edges"][0]["admitted"] is False
+        assert closure["visual_network"]["edges"][0]["generates_equality"] is False
+        assert closure["slearn"]["open_candidates_change_truth_memory"] is False
+        assert "NOTATIONAL_VARIANT" not in closure["slearn"]["relation_memory_after"]
+        open_element = next(
+            item
+            for item in closure["interface_natural_form"]["semantic_elements"]
+            if item["kind"] == "TRANSLATION_EDGE"
+        )
+        assert open_element["admission_status"] == "OPEN"
+        assert open_element["derived_inside_closure"] is False
+        units = closure["tokenomic"]["resource_units"]
+        assert len(units) == 2
+        by_author = {
+            unit["member_contributions"][0]["authored_by"]: unit
+            for unit in units
         }
-        contributions = {
-            item["authored_by"]: item for item in unit["member_contributions"]
-        }
-        assert contributions["simulated-sensor-a"]["capabilities"] == [
+        assert by_author["simulated-sensor-a"]["capabilities"] == [
             "sense:soil-moisture"
         ]
-        assert contributions["simulated-sensor-a"]["constraints"] == [
+        assert by_author["simulated-sensor-a"]["constraints"] == [
             "water_budget_liters<=2"
         ]
-        assert contributions["simulated-sensor-b"]["capabilities"] == [
-            "sense:soil-moisture",
+        assert by_author["simulated-sensor-b"]["capabilities"] == [
             "actuate:irrigation",
+            "sense:soil-moisture",
         ]
-        assert contributions["simulated-sensor-b"]["constraints"] == [
+        assert by_author["simulated-sensor-b"]["constraints"] == [
             "remaining_water_liters<=1"
         ]

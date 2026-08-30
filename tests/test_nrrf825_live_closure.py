@@ -25,28 +25,46 @@ def make_config(tmp_path: Path) -> RuntimeConfig:
     )
 
 
-def edge(left: str, right: str, verdict: str = "TRUE") -> dict[str, str]:
+def edge(
+    left: str, right: str, verdict: str = "TRUE", *, tan_seam: bool = False
+) -> dict:
+    witnessed = verdict == "TRUE"
     return {
         "candidate_relation_id": f"{left}:{right}",
         "source_occurrence": left,
         "target_occurrence": right,
         "verdict": verdict,
+        "source_return_ids": [left, right],
+        "visual_equation": {
+            "id": f"visual:{left}:{right}",
+            "source": left,
+            "target": right,
+            "equation": (
+                "tan(pi/2 · collapse) translational seam"
+                if tan_seam
+                else "source-preserved translational equality"
+            ),
+            "deterministic": witnessed,
+        },
+        "compatible": witnessed,
+        "closure_explicit": witnessed,
     }
 
 
-def test_projective_coordinate_is_derived_from_the_admitted_level() -> None:
+def test_projective_coordinate_requires_its_own_visual_axiometry() -> None:
     bottom = closure_level_receipt(
         source_occurrence_ids=["a", "b", "c"], relation_receipts=[]
     )
     assert bottom["endpoint"] == "⊥"
     assert bottom["class_count"] == 3
-    assert bottom["projective_fold"]["collapse"] == 0
-    assert bottom["projective_fold"]["tan_value"] == 0
+    assert bottom["projective_fold"]["collapse"] is None
+    assert bottom["projective_fold"]["tan_value"] is None
+    assert bottom["projective_fold"]["axiometry_witnessed"] is False
     assert bottom["truth_closes_level_alone"]["identity_reading_closed"] is True
 
     relative = closure_level_receipt(
         source_occurrence_ids=["a", "b", "c"],
-        relation_receipts=[edge("a", "b")],
+        relation_receipts=[edge("a", "b", tan_seam=True)],
     )
     assert relative["endpoint"] == "relative"
     assert relative["equality_classes"] == [["a", "b"], ["c"]]
@@ -61,7 +79,10 @@ def test_projective_coordinate_is_derived_from_the_admitted_level() -> None:
 
     top = closure_level_receipt(
         source_occurrence_ids=["a", "b", "c"],
-        relation_receipts=[edge("a", "b"), edge("b", "c", "OPEN")],
+        relation_receipts=[
+            edge("a", "b", tan_seam=True),
+            edge("b", "c", tan_seam=True),
+        ],
     )
     assert top["endpoint"] == "⊤"
     assert top["class_count"] == 1
@@ -112,11 +133,12 @@ def test_live_sense_closes_the_level_and_drives_the_primary_interface(
         assert second.status_code == 200, second.text
         payload = second.json()
         level = payload["sense_receipt"]["closure_level"]
-        assert level["derived_from"].startswith("interaction-time Sense")
+        assert level["derived_from"].startswith("visual existence")
         assert level["endpoint"] == "⊤"
         assert level["class_count"] == 1
         assert level["state_count"] == 2
-        assert level["projective_fold"]["tan_value"] == "∞"
+        assert level["projective_fold"]["tan_value"] is None
+        assert level["projective_fold"]["axiometry_witnessed"] is False
         assert payload["sense_receipt"]["two_person_E2E"] == "OPEN"
 
         interface = client.get(
@@ -142,7 +164,7 @@ def test_primary_supernet_renders_the_live_fold_without_a_level_widget(
         assert "Derived closure level · NRRF825" in root.text
         assert "data-derived-by':'NRRF825'" in root.text
         assert "tan((π/2)·collapse)" in root.text
-        assert "no level control exists" in root.text
+        assert "derived reading only" in root.text
         assert 'type="range"' not in root.text
 
         capabilities = client.get("/supernet/interface/capabilities").json()

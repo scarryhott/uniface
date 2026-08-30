@@ -236,7 +236,9 @@ def test_nrrf837_receipt_computes_continuum_laws_and_preserves_provenance() -> N
 
     modality = receipt["modality"]
     assert modality["first_application"] == modality["second_application"]
-    assert modality["form"]["id"] == modality["first_application"][0]
+    assert modality["presentation"]["id"] == modality["first_application"][0]
+    assert modality["form"]["derived_within_closure"] is True
+    assert modality["defines_closure"] is False
     assert modality["idempotent"] is True
     assert modality["fixed_point"] is True
     assert modality["fixed_points_equal_unity"] is True
@@ -288,15 +290,22 @@ def test_nrrf837_receipt_computes_continuum_laws_and_preserves_provenance() -> N
     } <= {item["actor_id"] for item in authorship["contributors"]}
     assert all(
         item["record_kind"] == "CONTRIBUTOR_AUTHORSHIP"
-        and item["equality_status"] == "WITNESSED"
         for item in authorship["contributor_records"]
     )
-    assert authorship["mutual_authorship_redundancy_applicable"] is True
+    assert any(
+        item["equality_status"] == "OPEN"
+        for item in authorship["contributor_records"]
+    )
+    assert all(
+        item["authored_form_claim_is_truth_witness"] is False
+        for item in authorship["contributor_records"]
+    )
+    assert authorship["mutual_authorship_redundancy_applicable"] is False
     assert authorship["mutual_authorship_redundancy_premise"] == {
         "relevant_contributor_count": 4,
-        "all_contributors_witnessed": True,
-        "same_witnessed_global_reading": True,
-        "same_witnessed_natural_form": True,
+        "all_contributors_witnessed": False,
+        "same_witnessed_global_reading": False,
+        "same_witnessed_natural_form": False,
         "premise_injected": False,
     }
     assert any(
@@ -382,11 +391,30 @@ def test_nrrf837_path_form_equality_requires_actual_compose_equality() -> None:
     assert unequal["natural_form_id"] is None
     assert unequal["source_natural_form_id"] != unequal["target_natural_form_id"]
 
-    equal = edges["event-project-river-street"]
-    assert equal["formal_status"] == "WITNESSED"
-    assert equal["shared_natural_form"] is True
-    assert equal["natural_form_id"] == equal["source_natural_form_id"]
-    assert equal["source_natural_form_id"] == equal["target_natural_form_id"]
+    authored_same = edges["event-project-river-street"]
+    assert authored_same["formal_status"] == "OPEN"
+    assert authored_same["shared_natural_form"] is False
+    assert authored_same["natural_form_id"] is None
+    assert authored_same["source_natural_form_id"] != authored_same[
+        "target_natural_form_id"
+    ]
+
+
+def test_authored_form_id_cannot_collapse_truth_derived_global_kernel() -> None:
+    inputs = community_garden_inputs()
+    inputs["intent"]["natural_form_id"] = "authored-same"
+    inputs["field_events"][0]["natural_form_id"] = "authored-same"
+    inputs["local_event"] = inputs["intent"]
+
+    receipt = build_continuum_receipt(**inputs)
+    kernel = receipt["global_equality_kernel"]
+    assert kernel["authored_ids_define_equality"] is False
+    assert kernel["presentation_metadata_defines_equality"] is False
+    classes = [set(item["members"]) for item in kernel["classes"]]
+    assert not any(
+        {"event-intent-harry", "event-person-maya"} <= members
+        for members in classes
+    )
 
 
 def test_nrrf837_missing_blank_path_references_remain_distinct_and_open() -> None:
@@ -420,7 +448,7 @@ def test_nrrf837_missing_blank_path_references_remain_distinct_and_open() -> Non
     assert set(unknown_records) == {"missing-event-a", "missing-event-b"}
     for record in unknown_records.values():
         assert record["equality_status"] == "OPEN"
-        assert record["equality_basis"] == "UNRESOLVED_PROJECTION_REFERENCE"
+        assert record["equality_basis"] == "UNRESOLVED_TRANSLATIONAL_TRUTH"
         assert record["global_word"] is None
         assert record["global_content_id"] is None
         assert record["global_state_id"] is None
@@ -437,10 +465,9 @@ def test_nrrf837_global_state_is_focus_and_ranking_independent_but_phase_sensiti
     assert target_focus["local_event_id"] != intent_focus["local_event_id"]
     assert target_focus["global_content_id"] == intent_focus["global_content_id"]
     assert target_focus["global_state_id"] == intent_focus["global_state_id"]
-    assert (
-        target_focus["selected_natural_form_id"]
-        == intent_focus["selected_natural_form_id"]
-    )
+    assert target_focus["selected_natural_form_id"] != intent_focus[
+        "selected_natural_form_id"
+    ]
     assert target_focus["modality"]["input"] == intent_focus["modality"]["input"]
 
     reranked_inputs = deepcopy(inputs)
@@ -458,10 +485,9 @@ def test_nrrf837_global_state_is_focus_and_ranking_independent_but_phase_sensiti
     next_phase = build_continuum_receipt(**next_phase_inputs)
     assert next_phase["global_content_id"] == intent_focus["global_content_id"]
     assert next_phase["global_state_id"] != intent_focus["global_state_id"]
-    assert (
-        next_phase["selected_natural_form_id"]
-        != intent_focus["selected_natural_form_id"]
-    )
+    assert next_phase["selected_natural_form_id"] == intent_focus[
+        "selected_natural_form_id"
+    ]
 
     other_level_inputs = deepcopy(inputs)
     other_level_inputs["closure_level_id"] = "different-local-nrrf825-level"
@@ -531,29 +557,25 @@ def test_nrrf837_equal_content_preserves_same_handle_distinct_internal_actors() 
         ("shared-steward", "participant-uuid-one"),
         ("shared-steward", "participant-uuid-two"),
     }
-    group = next(
+    records = [
         item
-        for item in authorship["equal_content_groups"]
-        if expected_identities
-        <= {
-            (identity["actor_id"], identity["internal_actor_id"])
-            for identity in item["actor_identity_records"]
-        }
-    )
-    assert group["actor_ids"] == ["shared-steward"]
+        for item in authorship["event_authorship_records"]
+        if (item["actor_id"], item["internal_actor_id"]) in expected_identities
+    ]
     assert {
-        (identity["actor_id"], identity["internal_actor_id"])
-        for identity in group["actor_identity_records"]
+        (item["actor_id"], item["internal_actor_id"]) for item in records
     } == expected_identities
-    assert group["actors_identified"] is False
+    assert all(item["equality_basis"] == "TRANSLATIONAL_TRUTH_CLOSURE" for item in records)
+    assert len({item["selected_natural_form_id"] for item in records}) == 2
+    assert authorship["equal_global_content_identifies_actors"] is False
 
 
 def test_nrrf837_contributor_redundancy_requires_witnessed_equal_readings() -> None:
     equal_receipt = build_continuum_receipt(**community_garden_inputs())
     equal_authorship = equal_receipt["authorship"]
-    assert equal_authorship["mutual_authorship_redundancy_applicable"] is True
+    assert equal_authorship["mutual_authorship_redundancy_applicable"] is False
     assert all(
-        item["mutual_authorship_redundancy_applicable"] is True
+        item["mutual_authorship_redundancy_applicable"] is False
         for item in equal_authorship["contributor_records"]
     )
 
@@ -563,12 +585,12 @@ def test_nrrf837_contributor_redundancy_requires_witnessed_equal_readings() -> N
     )
     mismatched = build_continuum_receipt(**mismatched_inputs)["authorship"]
     assert mismatched["mutual_authorship_redundancy_applicable"] is False
-    assert mismatched["mutual_authorship_redundancy_premise"][
-        "all_contributors_witnessed"
-    ] is True
-    assert mismatched["mutual_authorship_redundancy_premise"][
-        "same_witnessed_global_reading"
-    ] is False
+    ai_record = next(
+        item
+        for item in mismatched["contributor_records"]
+        if item["actor_id"] == "coordination-ai"
+    )
+    assert ai_record["authored_form_claim_is_truth_witness"] is False
 
     unknown_inputs = community_garden_inputs()
     unknown = unknown_inputs["contributors"][1]
@@ -581,7 +603,7 @@ def test_nrrf837_contributor_redundancy_requires_witnessed_equal_readings() -> N
         if item["actor_id"] == "coordination-ai"
     )
     assert unknown_record["equality_status"] == "OPEN"
-    assert unknown_record["equality_basis"] == "UNRESOLVED"
+    assert unknown_record["equality_basis"] == "UNRESOLVED_TRANSLATIONAL_TRUTH"
     assert unknown_record["global_content_id"] is None
     assert unknown_record["selected_natural_form_id"] is None
     assert unknown_record["unresolved_source_event_ids"] == [
@@ -604,7 +626,7 @@ def test_nrrf837_contributor_redundancy_requires_witnessed_equal_readings() -> N
         if item["actor_id"] == "harry"
     )
     assert resolved_record["equality_status"] == "WITNESSED"
-    assert resolved_record["equality_basis"] == "SOURCE_EVENT_COMPOSE"
+    assert resolved_record["equality_basis"] == "TRANSLATIONAL_TRUTH_CLOSURE"
 
 
 def test_nrrf837_ai_acceptance_cannot_settle_but_independent_humans_can() -> None:
@@ -678,7 +700,9 @@ def test_nrrf837_unity_is_versioned_extra_data_and_issues_no_truth_or_value() ->
     assert v2["unity_selector"]["version"] == "berkeley-garden-unity-v2"
     assert v1["global_monoid"] == v2["global_monoid"]
     assert v1["global_equality_kernel"] == v2["global_equality_kernel"]
-    assert v1["modality"]["form"] != v2["modality"]["form"]
+    assert v1["selected_natural_form_id"] == v2["selected_natural_form_id"]
+    assert v1["modality"]["form"] == v2["modality"]["form"]
+    assert v1["modality"]["presentation"] != v2["modality"]["presentation"]
 
     for receipt in (v1, v2):
         claims = receipt["claims"]

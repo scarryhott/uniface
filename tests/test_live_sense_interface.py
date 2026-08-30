@@ -125,7 +125,13 @@ def test_live_sense_capabilities_are_exposed_on_the_primary_ui(tmp_path: Path) -
         assert payload["unity_selector_network_derived"] is False
         assert payload["modality_idempotence_checked"] is True
         assert payload["global_equality_kernel_exposed"] is True
+        assert payload["global_equality_kernel_uses_only_truth_derived_compose"] is True
+        assert payload["authored_form_ids_define_equality"] is False
+        assert payload["actual_ui_render_state_factorized_through_closure"] is True
+        assert payload["external_renderer_has_no_semantic_fallback"] is True
+        assert payload["open_candidates_change_slearn_truth_memory"] is False
+        assert payload["live_sense"]["open_candidates_change_slearn_truth_memory"] is False
         assert payload["freedom_fibre_exposed"] is True
         assert payload["content_equality_preserves_actor_identity"] is True
         assert payload["partial_consent_natural_form"] == "COMMIT"
-        assert app.version == "3.10.0"
+        assert app.version == "3.11.0"
