@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "closure-supernet"
-version = "3.9.0"
-description = "Intent-to-agreement Supernet joining explainable AI paths, mutual authorship, scoped commitment receipts, action returns, and visual translational closure"
+version = "3.10.0"
+description = "NRRF837 Supernet joining local-global composition, natural-form UI, explainable AI paths, independent token gates, scoped commitments, and living returns"
 readme = "UNIFIED_SUPERNET_RUNTIME.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}

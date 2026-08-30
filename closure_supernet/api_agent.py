@@ -8,9 +8,10 @@ from . import api_natural_interface as base_api
 from . import agent_mcp as agent_mcp_module
 from .agent_mcp import attach_supernet_agent_mcp
 from .config import RuntimeConfig
+from .nrrf837_continuum import SCHEMA as NRRF837_SCHEMA
 
 
-def _compact_interface_with_focus(
+async def _compact_interface_with_focus(
     runtime: Any,
     event_id: str | None,
     perspective_id: str | None,
@@ -22,8 +23,23 @@ def _compact_interface_with_focus(
         perspective_id=perspective_id,
     )
     focused = receipt.get("focus_event") or {}
+    focused_event_id = str(focused.get("id") or event_id or "")
+    visual = receipt.get("visual_closure") or {}
+    coordination = visual.get("coordination") or {}
+    continuum = coordination.get("nrrf837_continuum") or coordination.get(
+        "continuum"
+    ) or {}
+    if visual and continuum.get("schema") != NRRF837_SCHEMA and focused_event_id:
+        await runtime.live_sense.sense_event(focused_event_id)
+        receipt = runtime.natural_interface.select(
+            focus_event_id=focused_event_id,
+            perspective_id=perspective_id,
+        )
+        focused = receipt.get("focus_event") or focused
     return {
-        "focus_event_id": receipt.get("focus_event_id") or focused.get("id") or event_id,
+        "focus_event_id": (
+            receipt.get("focus_event_id") or focused.get("id") or event_id
+        ),
         "perspective_id": perspective_id,
         "natural_chart": receipt.get("natural_chart"),
         "sense_depth": receipt.get("sense_depth"),

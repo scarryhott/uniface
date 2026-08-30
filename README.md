@@ -1,4 +1,4 @@
-Live field (join here): https://uniface-tawny.vercel.app
+Live field (join here): https://uniface-supernet-production.up.railway.app
 
 A second person joins the Supernet by opening that URL and interacting. The repository is a chart; the living field is the source-preserving interaction. TRUE is not issued merely because a local form returns.
 
@@ -23,6 +23,30 @@ exact source or returned form
 Closure is not the protocol, database, AI model, proof object, user-interface
 chart, resource metric, token, hardware device, counterterm, or selected
 presentation. Those carry or render the same active field.
+
+## Version 3.10 — NRRF837 socioeconomic super-brain interface
+
+The primary surface now renders the product-level continuum directly:
+
+```text
+local interaction
+→ compose
+→ collective global state
+→ versioned unity selector
+→ selected natural-form interface
+→ source-preserved local freedom fibre
+```
+
+The runtime keeps AI interaction admission, token form admission and correlated
+human commitment as three separate relations. Partial consent derives
+`COMMIT`; unanimous current consent admits `ACT`; a consequence following that
+acceptance derives `RETURN`. Ordinary interaction remains open throughout.
+Equal translated content never collapses actor identity, and unity is recorded
+as chosen product data rather than inferred from the network.
+
+See
+[SUPERNET_SOCIOECONOMIC_SUPER_BRAIN_INTERFACE_NRRF837_RUNTIME.md](SUPERNET_SOCIOECONOMIC_SUPER_BRAIN_INTERFACE_NRRF837_RUNTIME.md)
+for the formal-to-runtime correspondence and explicit non-claims.
 
 ## Version 2.5 — embodied eight-sheaf Supernet
 

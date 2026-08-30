@@ -132,6 +132,11 @@ class SupernetIntegrationStore:
             intent_event_id TEXT NOT NULL
               REFERENCES supernet_integration_events(id),
             action_id TEXT,
+            title TEXT NOT NULL DEFAULT 'Coordination proposal',
+            proposed_by TEXT NOT NULL DEFAULT 'participant',
+            exact_terms TEXT NOT NULL DEFAULT '',
+            open_assumptions TEXT NOT NULL DEFAULT '[]',
+            unity_selector_version TEXT NOT NULL DEFAULT 'nrrf837-unity-selector/v1',
             target_event_ids TEXT NOT NULL,
             required_participant_ids TEXT NOT NULL,
             resource_conditions TEXT NOT NULL,
@@ -172,6 +177,116 @@ class SupernetIntegrationStore:
         """
         with self._lock:
             self._conn.executescript(schema)
+            proposal_columns = {
+                str(row["name"])
+                for row in self._conn.execute(
+                    "PRAGMA table_info(supernet_commitment_proposals)"
+                ).fetchall()
+            }
+            proposal_migrations = {
+                "title": (
+                    "ALTER TABLE supernet_commitment_proposals ADD COLUMN "
+                    "title TEXT NOT NULL DEFAULT 'Coordination proposal'"
+                ),
+                "proposed_by": (
+                    "ALTER TABLE supernet_commitment_proposals ADD COLUMN "
+                    "proposed_by TEXT NOT NULL DEFAULT 'participant'"
+                ),
+                "exact_terms": (
+                    "ALTER TABLE supernet_commitment_proposals ADD COLUMN "
+                    "exact_terms TEXT NOT NULL DEFAULT ''"
+                ),
+                "open_assumptions": (
+                    "ALTER TABLE supernet_commitment_proposals ADD COLUMN "
+                    "open_assumptions TEXT NOT NULL DEFAULT '[]'"
+                ),
+                "unity_selector_version": (
+                    "ALTER TABLE supernet_commitment_proposals ADD COLUMN "
+                    "unity_selector_version TEXT NOT NULL DEFAULT "
+                    "'nrrf837-unity-selector/v1'"
+                ),
+            }
+            for column, statement in proposal_migrations.items():
+                if column not in proposal_columns:
+                    self._conn.execute(statement)
+            tables = {
+                str(row["name"])
+                for row in self._conn.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table'"
+                ).fetchall()
+            }
+            if "occurrences" in tables:
+                historical = self._conn.execute(
+                    """SELECT id,proposal_event_id,title,proposed_by,exact_terms,
+                    open_assumptions,resource_conditions,metadata
+                    FROM supernet_commitment_proposals
+                    WHERE exact_terms='' OR open_assumptions='[]'"""
+                ).fetchall()
+                for proposal in historical:
+                    event = self._conn.execute(
+                        """SELECT exact_source_ids,metadata
+                        FROM supernet_integration_events WHERE id=?""",
+                        (proposal["proposal_event_id"],),
+                    ).fetchone()
+                    if event is None:
+                        continue
+                    source_ids = _loads(event["exact_source_ids"], [])
+                    occurrence = None
+                    for source_id in source_ids:
+                        occurrence = self._conn.execute(
+                            "SELECT exact_text,metadata FROM occurrences WHERE id=?",
+                            (str(source_id),),
+                        ).fetchone()
+                        if occurrence is not None:
+                            break
+                    event_metadata = _loads(event["metadata"], {})
+                    occurrence_metadata = (
+                        _loads(occurrence["metadata"], {})
+                        if occurrence is not None
+                        else {}
+                    )
+                    proposal_metadata = _loads(proposal["metadata"], {})
+                    resource_conditions = set(
+                        _loads(proposal["resource_conditions"], [])
+                    )
+                    recovered_assumptions = [
+                        item
+                        for item in (
+                            event_metadata.get("open_assumptions")
+                            or occurrence_metadata.get("open_assumptions")
+                            or []
+                        )
+                        if item not in resource_conditions
+                    ]
+                    self._conn.execute(
+                        """UPDATE supernet_commitment_proposals
+                        SET title=?,proposed_by=?,exact_terms=?,open_assumptions=?
+                        WHERE id=?""",
+                        (
+                            str(
+                                proposal_metadata.get("title")
+                                or proposal["title"]
+                            ),
+                            str(
+                                proposal_metadata.get("proposed_by")
+                                or proposal["proposed_by"]
+                            ),
+                            str(
+                                proposal["exact_terms"]
+                                or (
+                                    occurrence["exact_text"]
+                                    if occurrence is not None
+                                    else ""
+                                )
+                            ),
+                            (
+                                proposal["open_assumptions"]
+                                if proposal["open_assumptions"] != "[]"
+                                else _json(recovered_assumptions)
+                            ),
+                            proposal["id"],
+                        ),
+                    )
             self._conn.commit()
 
     def create_event(self, data: dict[str, Any]) -> tuple[dict[str, Any], bool]:
@@ -382,15 +497,24 @@ class SupernetIntegrationStore:
                 return self.get_commitment_proposal(str(existing["id"])), False
             self._conn.execute(
                 """INSERT INTO supernet_commitment_proposals(
-                    id,proposal_event_id,intent_event_id,action_id,target_event_ids,
+                    id,proposal_event_id,intent_event_id,action_id,title,proposed_by,
+                    exact_terms,open_assumptions,unity_selector_version,target_event_ids,
                     required_participant_ids,resource_conditions,external_key,
                     metadata,created_at
-                ) VALUES(?,?,?,?,?,?,?,?,?,?)""",
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (
                     proposal_id,
                     proposal_event_id,
                     intent_event_id,
                     None if data.get("action_id") is None else str(data["action_id"]),
+                    str(data.get("title") or "Coordination proposal"),
+                    str(data.get("proposed_by") or "participant"),
+                    str(data.get("exact_terms") or ""),
+                    _json(data.get("open_assumptions", [])),
+                    str(
+                        data.get("unity_selector_version")
+                        or "nrrf837-unity-selector/v1"
+                    ),
                     _json(target_event_ids),
                     _json(required_participant_ids),
                     _json(data.get("resource_conditions", [])),
@@ -877,6 +1001,15 @@ class SupernetIntegrationStore:
             status = "PARTIAL"
         else:
             status = "PROPOSED"
+        consent_updated_at = max(
+            (str(item.get("created_at") or "") for item in latest_required.values()),
+            default=None,
+        )
+        unanimous_acceptance_at = (
+            consent_updated_at
+            if status == "ACCEPTED" and len(accepted) == len(required)
+            else None
+        )
 
         return {
             **proposal,
@@ -888,6 +1021,8 @@ class SupernetIntegrationStore:
             "rejected_participant_ids": rejected,
             "withdrawn_participant_ids": withdrawn,
             "pending_participant_ids": pending,
+            "consent_updated_at": consent_updated_at,
+            "unanimous_acceptance_at": unanimous_acceptance_at,
             "binding": False,
             "transferable": False,
             "currency_issued": False,
@@ -933,6 +1068,7 @@ class SupernetIntegrationStore:
             ("target_event_ids", []),
             ("required_participant_ids", []),
             ("resource_conditions", []),
+            ("open_assumptions", []),
             ("metadata", {}),
         ):
             data[key] = _loads(data[key], default)

@@ -216,3 +216,19 @@ def test_resource_unit_keeps_source_capabilities_and_constraints_when_relations_
             first.json()["event_id"],
             second.json()["event_id"],
         }
+        contributions = {
+            item["authored_by"]: item for item in unit["member_contributions"]
+        }
+        assert contributions["simulated-sensor-a"]["capabilities"] == [
+            "sense:soil-moisture"
+        ]
+        assert contributions["simulated-sensor-a"]["constraints"] == [
+            "water_budget_liters<=2"
+        ]
+        assert contributions["simulated-sensor-b"]["capabilities"] == [
+            "sense:soil-moisture",
+            "actuate:irrigation",
+        ]
+        assert contributions["simulated-sensor-b"]["constraints"] == [
+            "remaining_water_liters<=1"
+        ]

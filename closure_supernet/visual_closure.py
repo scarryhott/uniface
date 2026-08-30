@@ -66,6 +66,23 @@ def _resource_units(
                 "member_event_ids": _unique(
                     [str(event["id"]) for event in events]
                 ),
+                "member_contributions": [
+                    {
+                        "event_id": str(event["id"]),
+                        "authored_by": event.get("authored_by"),
+                        "authorship_role": event.get("metadata", {}).get(
+                            "authorship_role", "HUMAN"
+                        ),
+                        "member_occurrence_ids": [
+                            occurrence_id
+                            for occurrence_id in event.get("exact_source_ids", [])
+                            if str(occurrence_id) in members
+                        ],
+                        "capabilities": list(event.get("capabilities", [])),
+                        "constraints": list(event.get("constraints", [])),
+                    }
+                    for event in events
+                ],
                 "capabilities": sorted(
                     {
                         str(capability)
