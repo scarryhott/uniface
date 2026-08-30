@@ -249,11 +249,13 @@ def test_natural_interface_is_primary_and_classic_topology_is_a_rechart(
 
         assert root.status_code == 200
         assert root.text == supernet.text == natural.text
-        assert "Natural Black Mirror" in root.text
-        assert "One continuous integrator" in root.text
-        assert "truth-diagonal" in root.text
-        assert "ellipse-mirror" in root.text
-        assert "Rigidify" in root.text
+        assert "data-closure-only-contract" in root.text
+        assert "validateContract" in root.text
+        assert "Natural Black Mirror" not in root.text
+        assert "One continuous integrator" not in root.text
+        assert "truth-diagonal" not in root.text
+        assert "ellipse-mirror" not in root.text
+        assert "Rigidify" not in root.text
 
         assert classic.status_code == 200
         assert "Living Continuous Interface" in classic.text
@@ -266,10 +268,19 @@ def test_natural_interface_is_primary_and_classic_topology_is_a_rechart(
             "visual_closure.interface_natural_form"
         )
         assert payload["admission_receipt"]["interaction_lifts_to_supernet_event"] is True
+        contract = payload["closure_ui_contract"]
+        assert contract["schema"] == (
+            "closure.supernet/perspective-interaction-ui-contract-v1"
+        )
+        assert contract["status"] == "OPEN_SOURCE_BOUNDARY"
+        assert contract["claims"]["natural_form_admitted"] is False
+        assert {
+            item["id"] for item in contract["action_bindings"]
+        } == {"offer-source"}
 
         caps = capabilities.json()
         assert caps["natural_form_unique_under_declared_contract"] is True
         assert caps["canonical_pixel_layout_selected"] is False
         assert caps["determination_issues_truth"] is False
         assert caps["live_sense"]["interaction_time_sense"] is True
-        assert app.version == "3.11.0"
+        assert app.version == "3.17.0"

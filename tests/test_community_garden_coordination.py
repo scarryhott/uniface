@@ -1108,7 +1108,7 @@ def test_pre_nrrf837_latest_visual_is_lazily_upgraded_without_rewriting_history(
         same_schema_payload = same_schema_upgrade.json()
         assert same_schema_payload["id"] != same_schema_historical_id
         assert same_schema_payload["translational_truth_axiometry"]["schema"] == (
-            "closure.supernet/translational-truth-axiometry-v2"
+            "closure.supernet/translational-truth-axiometry-v3"
         )
         assert same_schema_payload["interface_natural_form"][
             "render_state_factorized"

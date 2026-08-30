@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 
 from closure_supernet.api_natural_interface import create_app
 from closure_supernet.config import RuntimeConfig
-from closure_supernet.complete_interface_finish import FINAL_COMPLETE_SUPERNET_HTML
+from closure_supernet.closure_only_interface import CLOSURE_ONLY_SUPERNET_HTML
 from closure_supernet.nrrf825 import closure_level_receipt
 
 
@@ -161,10 +161,12 @@ def test_primary_supernet_renders_the_live_fold_without_a_level_widget(
     with TestClient(app) as client:
         root = client.get("/")
         assert root.status_code == 200
-        assert "Derived closure level · NRRF825" in root.text
-        assert "data-derived-by':'NRRF825'" in root.text
-        assert "tan((π/2)·collapse)" in root.text
-        assert "derived reading only" in root.text
+        assert "data-closure-only-contract" in root.text
+        assert "validateContract" in root.text
+        assert "Derived closure level · NRRF825" not in root.text
+        assert "data-derived-by':'NRRF825'" not in root.text
+        assert "tan((π/2)·collapse)" not in root.text
+        assert "derived reading only" not in root.text
         assert 'type="range"' not in root.text
 
         capabilities = client.get("/supernet/interface/capabilities").json()
@@ -178,7 +180,9 @@ def test_primary_supernet_browser_program_is_valid_javascript() -> None:
     if node is None:
         return
     program = "\n".join(
-        re.findall(r"<script>(.*?)</script>", FINAL_COMPLETE_SUPERNET_HTML, re.S)
+        re.findall(
+            r"<script>(.*?)</script>", CLOSURE_ONLY_SUPERNET_HTML, re.S
+        )
     )
     result = subprocess.run(
         [node, "--check"],

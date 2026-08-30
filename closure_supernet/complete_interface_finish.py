@@ -9,10 +9,12 @@ _FINISH_PATCH = r'''
 .composer select,.composer input{border:1px solid #30434c;border-radius:10px;background:#081014;padding:9px;color:inherit;min-width:0}
 .coordination-block{background:linear-gradient(180deg,#0b141a,#081014)}.coordination-intent{border:1px solid #354b56;border-radius:11px;padding:10px;background:#060b0f;margin-bottom:9px}.coordination-intent strong{display:block;font-size:12px;color:#e7f0f3}.coordination-intent p{margin:5px 0 0;color:#a7bac2;font-size:10px;line-height:1.45;white-space:pre-wrap}.coordination-meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.coordination-chip{border:1px solid #39505b;border-radius:999px;padding:3px 6px;color:#a9bec7;font:8px ui-monospace,SFMono-Regular,monospace}.coordination-paths{display:flex;flex-direction:column;gap:8px}.coordination-path{border:1px solid #2d424d;border-radius:11px;padding:9px;background:#091218}.coordination-path.selected{border-color:#75e0b4;box-shadow:0 0 0 1px #75e0b433 inset}.coordination-path-head{display:flex;align-items:flex-start;gap:7px}.coordination-path-head strong{font-size:11px;line-height:1.35}.coordination-path-head button{margin-left:auto;white-space:nowrap;font-size:9px;padding:6px 8px}.coordination-kind{border:1px solid currentColor;border-radius:999px;padding:3px 5px;font:8px ui-monospace,SFMono-Regular,monospace}.coordination-kind.intent{color:#b59cff}.coordination-kind.person,.coordination-kind.ai{color:#72d8e8}.coordination-kind.project,.coordination-kind.human{color:#75e0b4}.coordination-kind.resource,.coordination-kind.token{color:#e0b35a}.coordination-kind.agreement{color:#f1a8de}.coordination-kind.return,.coordination-kind.living_system{color:#9bb6ff}.coordination-why{margin-top:7px;padding:7px;border-left:2px solid #54717e;background:#071015;color:#99adb6;font-size:9px;line-height:1.45}.coordination-why strong{display:block;color:#dce8eb;margin-bottom:3px}.coordination-list{margin:5px 0 0;padding-left:16px}.coordination-list li{margin:2px 0}.coordination-form{margin-top:10px;border-top:1px solid #263a43;padding-top:10px}.coordination-form label{display:block;color:#91a6af;font-size:9px;margin:7px 0 4px}.coordination-form input,.coordination-form textarea{display:block;width:100%;border:1px solid #30434c;border-radius:8px;background:#060b0f;padding:8px;color:inherit;font-size:10px;font-family:inherit}.coordination-form textarea{resize:vertical;min-height:66px}.coordination-form button{margin-top:8px}.coordination-form button[disabled]{opacity:.38;cursor:not-allowed}.coordination-status{border:1px solid #2d424d;border-radius:9px;padding:8px;margin-top:9px;background:#071015;font-size:9px;line-height:1.5}.coordination-status strong{color:#e5f0f2}.coordination-note{color:#8297a0;font-size:9px;line-height:1.45;margin-top:8px}.coordination-empty{border:1px dashed #334954;border-radius:9px;padding:9px;color:#879ba4;font-size:9px;line-height:1.45}.coordination-path-line{fill:none;stroke:#72d8e8;stroke-width:4;stroke-opacity:.72;stroke-dasharray:8 7;marker-end:url(#arrow);pointer-events:stroke;cursor:pointer}.coordination-path-line.selected{stroke:#75e0b4;stroke-width:6;stroke-opacity:1}.coordination-role-label{fill:#e9f2f3;font:8px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4;pointer-events:none}.coordination-path-label{fill:#b9cbd1;font:8px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4;pointer-events:none}
 .continuum-strip{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);align-items:stretch;gap:4px;margin:9px 0;padding:8px;border:1px solid #40545d;border-radius:11px;background:#050b0f}.continuum-cell{min-width:0;border:1px solid #293e48;border-radius:8px;padding:6px;background:#091218}.continuum-cell strong{display:block;color:#dce9ec;font:8px ui-monospace,SFMono-Regular,monospace;letter-spacing:.08em}.continuum-cell span{display:block;margin-top:3px;color:#a9bdc5;font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.continuum-arrow{align-self:center;color:#75e0b4;font:8px ui-monospace,SFMono-Regular,monospace;text-align:center}.continuum-unity{border-color:#5c4e79}.continuum-form{border-color:#39715f}.coordination-gates{display:grid;gap:6px;margin-top:9px}.coordination-gate{border:1px solid #2d424d;border-radius:9px;padding:8px;background:#071015;font-size:9px;line-height:1.45}.coordination-gate strong{color:#e5f0f2}.coordination-gate.ai{border-left:3px solid #72d8e8}.coordination-gate.token{border-left:3px solid #e0b35a}.coordination-gate.commitment{border-left:3px solid #f1a8de}.coordination-contributors{display:grid;gap:5px;margin-top:7px}.coordination-contributor{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 7px;align-items:start;border-top:1px solid #24363f;padding-top:6px}.coordination-contributor:first-child{border-top:0;padding-top:0}.coordination-contributor p{grid-column:2;margin:0;color:#8fa3ac;overflow-wrap:anywhere}.coordination-progress{height:5px;margin:6px 0;border-radius:999px;background:#1a2931;overflow:hidden}.coordination-progress span{display:block;height:100%;background:#75e0b4}.coordination-path-line:focus{outline:none;stroke:#fff;stroke-width:7;stroke-opacity:1}
+.interaction-closure{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:9px 0}.interaction-plane{border:1px solid #304750;border-radius:10px;padding:8px;background:#060d11;font-size:9px;line-height:1.48}.interaction-plane strong{display:block;color:#e5f0f2;margin-bottom:4px}.interaction-plane.physical{border-left:3px solid #75e0b4}.interaction-plane.digital{border-left:3px solid #b59cff}.interaction-plane .closed{color:#75e0b4}.interaction-plane .gated{color:#e0b35a}.interaction-truth-lock{grid-column:1/-1;border:1px solid #4a665c;border-radius:9px;padding:7px;background:#07120f;color:#b9d8cc;font:8px ui-monospace,SFMono-Regular,monospace;letter-spacing:.03em}.physical-topology-orbit{fill:none;stroke:#75e0b4;stroke-width:2;stroke-opacity:.56;stroke-dasharray:2 7;pointer-events:none}.digital-potential-orbit{fill:none;stroke:#b59cff;stroke-width:3;stroke-opacity:.72;stroke-dasharray:9 6;pointer-events:none}.digital-potential-orbit.open{stroke:#e0b35a}.digital-potential-point{fill:#b59cff;stroke:#070b0e;stroke-width:3;pointer-events:none}.digital-potential-point.open{fill:#e0b35a}.physical-topology-edge{fill:none;stroke:#75e0b4;stroke-width:1.4;stroke-opacity:.35;stroke-dasharray:2 5;pointer-events:none}
 @media(max-width:390px){.continuum-strip{grid-template-columns:1fr}.continuum-arrow{padding:1px}.continuum-arrow::after{content:' ↓'}.continuum-cell span{white-space:normal}}
+@media(max-width:620px){.interaction-closure{grid-template-columns:1fr}.interaction-truth-lock{grid-column:1}}
 @media(max-width:900px) and (min-width:621px){.shell{grid-template-rows:58px minmax(0,1fr) 142px}.drawer{bottom:142px}.composer{grid-template-columns:repeat(4,minmax(80px,1fr))}.composer textarea{grid-column:1/-1;height:54px}}
 @media(max-width:620px){.shell{grid-template-rows:54px minmax(0,1fr) 218px}.drawer{bottom:218px}.composer{grid-template-columns:1fr 1fr}.composer textarea{grid-column:1/-1;height:54px}}
-.level-summary{border:1px solid #2d4049;border-radius:10px;background:#081014;padding:9px;font-size:10px;line-height:1.5}.level-summary strong{color:#e5f0f2}.level-summary .seam{color:#b59cff}.level-summary .open{color:#e0b35a}.level-classes{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.level-class{border:1px solid #334a55;border-radius:999px;padding:3px 6px;color:#a9bdc5}.level-fold{pointer-events:none}.level-axis{stroke:#6b8791;stroke-width:2}.level-seam{stroke:#b59cff;stroke-width:2;stroke-dasharray:5 6}.level-return{stroke:#75e0b4;stroke-width:1.6;stroke-dasharray:5 7;fill:none}.level-point{fill:#eaf4f4;stroke:#72d8e8;stroke-width:5}.level-text{fill:#c8d7dc;font:10px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4}.level-small{fill:#8fa2aa;font:9px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4}.closure-class-ring{fill:none;stroke-width:3;stroke-opacity:.72;pointer-events:none}.closure-translation{fill:none;stroke-width:3;stroke-opacity:.9;marker-end:url(#arrow);pointer-events:none}.closure-memory{stroke-dasharray:4 5}.closure-unit{fill:#071015;stroke:#75e0b4;stroke-width:2;pointer-events:none}.closure-unit-text,.closure-next-text{fill:#d9e7eb;font:9px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4;pointer-events:none}.closure-next{fill:none;stroke:#75e0b4;stroke-width:2;stroke-dasharray:6 6;pointer-events:none}.closure-operational{color:#75e0b4}.closure-open{color:#e0b35a}.derivation-chain{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:8px 0}.derivation-step{border:1px solid #344a55;border-radius:8px;padding:6px;background:#071015;color:#aec2ca;font:8px ui-monospace,SFMono-Regular,monospace;text-align:center}.derivation-step.admitted{border-color:#75e0b4;color:#dcebe7}.derivation-step.open{border-color:#e0b35a;color:#e0b35a}@media(max-width:700px){.derivation-chain{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.level-summary{border:1px solid #2d4049;border-radius:10px;background:#081014;padding:9px;font-size:10px;line-height:1.5}.level-summary strong{color:#e5f0f2}.level-summary .seam{color:#b59cff}.level-summary .open{color:#e0b35a}.level-classes{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.level-class{border:1px solid #334a55;border-radius:999px;padding:3px 6px;color:#a9bdc5}.level-fold{pointer-events:none}.level-axis{stroke:#6b8791;stroke-width:2}.level-seam{stroke:#b59cff;stroke-width:2;stroke-dasharray:5 6}.level-return{stroke:#75e0b4;stroke-width:1.6;stroke-dasharray:5 7;fill:none}.level-point{fill:#eaf4f4;stroke:#72d8e8;stroke-width:5}.level-text{fill:#c8d7dc;font:10px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4}.level-small{fill:#8fa2aa;font:9px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4}.closure-class-ring{fill:none;stroke-width:3;stroke-opacity:.72;cursor:pointer}.closure-class-ring:focus{outline:none;stroke:#fff;stroke-width:6}.closure-translation{fill:none;stroke-width:3;stroke-opacity:.9;marker-end:url(#arrow);pointer-events:none}.closure-memory{stroke-dasharray:4 5}.closure-unit{fill:#071015;stroke:#75e0b4;stroke-width:2;pointer-events:none}.closure-unit-text,.closure-next-text{fill:#d9e7eb;font:9px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4;pointer-events:none}.closure-next{fill:none;stroke:#75e0b4;stroke-width:2;stroke-dasharray:6 6;pointer-events:none}.closure-operational{color:#75e0b4}.closure-open{color:#e0b35a}.derivation-chain{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:4px;margin:8px 0}.derivation-step{border:1px solid #344a55;border-radius:8px;padding:6px;background:#071015;color:#aec2ca;font:8px ui-monospace,SFMono-Regular,monospace;text-align:center}.derivation-step.admitted{border-color:#75e0b4;color:#dcebe7}.derivation-step.open{border-color:#e0b35a;color:#e0b35a}.visual-mirror-ray{fill:none;stroke:#b59cff;stroke-width:1.5;stroke-opacity:.34;stroke-dasharray:3 7;pointer-events:none}.truth-cone-field{fill:#b59cff08;stroke:#b59cff;stroke-width:1.2;stroke-opacity:.34;stroke-dasharray:2 9;pointer-events:none}.truth-cone-ray{stroke-linecap:round;filter:drop-shadow(0 0 5px #72d8e844)}.truth-cone-ray.open{stroke:#e0b35a;stroke-opacity:.46}.journey-trace{fill:none;stroke:#9bb6ff;stroke-width:2;stroke-opacity:.52;stroke-dasharray:2 5;pointer-events:none}.unity-gate-open{stroke:#e0b35a!important}.visual-mirror-locus{fill:#0b1119;stroke:#b59cff;stroke-width:4;cursor:pointer;filter:drop-shadow(0 0 14px #b59cff66);animation:mirror-breathe 3.8s ease-in-out infinite}.visual-mirror-locus:focus{outline:none;stroke:#fff;stroke-width:6}.visual-mirror-inner{fill:none;stroke:#75e0b4;stroke-width:1.5;stroke-dasharray:5 5;pointer-events:none}.visual-mirror-title{fill:#f0eaff;font:9px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4;pointer-events:none}.visual-mirror-status{fill:#9fc7bb;font:7px ui-monospace,SFMono-Regular,monospace;text-anchor:middle;paint-order:stroke;stroke:#05080b;stroke-width:4;pointer-events:none}@keyframes mirror-breathe{0%,100%{stroke-opacity:.58}50%{stroke-opacity:1}}@media(max-width:700px){.derivation-chain{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 <script>
 (() => {
@@ -74,9 +76,15 @@ _FINISH_PATCH = r'''
     const form=interfaceNaturalForm(closure);
     if(!form||form.closure_internal!==true||form.admitted!==true||form.render_state_factorized!==true)return null;
     if(form.renderer_contract?.role!=='TRANSPORT_ONLY')return null;
-    return form.render_state&&typeof form.render_state==='object'?form.render_state:null;
+    const state=form.render_state&&typeof form.render_state==='object'?form.render_state:null;
+    if(!state||state.unified_truth_runtime?.status!=='WITNESSED'||state.unified_truth_runtime?.one_semantic_runtime!==true)return null;
+    if(state.nrrf843_ui?.status!=='WITNESSED'||state.nrrf843_ui?.ui_closure?.closure_falls_out_from_ui_projection!==true||state.nrrf843_ui?.truth_constraint_location?.located!==true)return null;
+    if(state.interaction_closure?.status!=='WITNESSED'||state.interaction_closure?.supernet_interaction_closed!==true)return null;
+    return state;
   }
   function currentCoordination(){const closure=receipt?.visual_closure;return closureRenderState(closure)?.coordination||null}
+  function journeyOf(closure){return closureRenderState(closure)?.nrrf842_journey||null}
+  function nrrf843Of(closure){return closureRenderState(closure)?.nrrf843_ui||null}
   function pathTarget(path){return String(path?.target_event_id||path?.event_id||path?.id||'')}
   function selectedPath(coordination){return (coordination?.paths||[]).find(path=>pathTarget(path)===selectedCoordinationPathId)||null}
   function readable(value){
@@ -114,10 +122,58 @@ _FINISH_PATCH = r'''
   function renderInterfaceDerivation(closure){
     const form=interfaceNaturalForm(closure);
     const renderState=closureRenderState(closure);
-    if(!form||!renderState)return '<div class="coordination-status"><strong>Interface form · OPEN</strong><br>No factorized closure-derived interface natural form is present.</div>';
+    if(!form||!renderState)return '<div class="coordination-status"><strong>Visual truth mirror · OPEN</strong><br>No source-preserved perspective visualization is present, so Supernet truth remains OPEN.</div>';
     const order=asList(renderState.derivation_order);
     const admitted=form.admitted===true&&form.closure_internal===true&&form.render_state_factorized===true;
-    return `<div class="coordination-status"><strong>Interface natural form · ${esc(form.admission_status||'OPEN')}</strong><div class="derivation-chain">${order.map((step,index)=>`<span class="derivation-step ${index<5||admitted?'admitted':'open'}">${esc(step)}</span>`).join('')}</div>${admitted?'This interface is a closed reading that factors through the derived translational truth. Its renderer carries the form; it does not define closure.':'The interface remains OPEN because its closed-reading derivation is incomplete.'}</div>`;
+    return `<div class="coordination-status"><strong>NRRF843 UI translational mirror · ${esc(form.admission_status||'OPEN')}</strong><div class="derivation-chain">${order.map((step,index)=>`<span class="derivation-step ${index<6||admitted?'admitted':'open'}">${esc(step)}</span>`).join('')}</div>${admitted?'Each perspective reading generates closure directly as the preimage of its displayed image. Faithful translation makes those closures one truth, the constraint is located in this UI, and interaction returns through the same projection. The pixel renderer transports the mirror but has no truth authority.':'Without a faithful, source-preserved perspective-family mirror, the Supernet remains OPEN with no semantic fallback.'}</div>`;
+  }
+  function renderJourney(journey){
+    if(!journey)return '<div class="coordination-status"><strong>Living trajectory · OPEN</strong><br>No NRRF842 source journey is present.</div>';
+    const history=journey.journey||{},choice=journey.chosen_perspective||{},gate=journey.unity_gate||{},cone=journey.truth_curved_light_cone||{};
+    const community=gate.community||{};
+    const gateClass=gate.necessary_condition_status==='SATISFIED'?'closure-operational':'closure-open';
+    const perspective=choice.perspective_id||'OPEN';
+    const pending=uniqueStrings([community.pending_participant_ids,community.dissenting_participant_ids]);
+    return `<div class="coordination-status" aria-label="NRRF842 living journey and unity gate"><strong>Living trajectory ≠ closed state · ${Number(history.step_count||0)} source-preserved step${Number(history.step_count||0)===1?'':'s'}</strong><br>chosen perspective · ${esc(perspective)} · ${esc(choice.status||'OPEN')}<br><span class="${gateClass}">unity potential gate · ${esc(gate.necessary_condition_status||'OPEN')} · ${esc(gate.requested_phase||'DISCOVER')}</span>${pending.length?`<br><span class="closure-open">shared transition remains OPEN · ${esc(pending.join(' · '))}</span>`:''}<br>scope · shared trajectory, never person rank · ordinary interaction OPEN<br>semantic truth-curved light cone · ${Number(cone.path_count||0)} path${Number(cone.path_count||0)===1?'':'s'} · ${Number(cone.witnessed_truth_constraint_count||0)} witnessed constraint${Number(cone.witnessed_truth_constraint_count||0)===1?'':'s'}<br><span class="coordination-note">Unity satisfies one necessary condition only. It neither completes the living system nor authorizes ascent by itself.</span></div>`;
+  }
+  function activeMirrorPerspective(uiMirror){
+    const perspectives=asList(uiMirror?.ui_family?.perspective_ids).map(String);
+    const authored=coordinationPerspective();
+    return perspectives.includes(authored)?authored:(perspectives[0]||null);
+  }
+  function renderNRRF843(uiMirror){
+    if(!uiMirror)return '<div class="coordination-status"><strong>UI translational mirror · OPEN</strong><br>No perspective-family projection is present, so the Supernet has no semantic fallback.</div>';
+    const perspective=activeMirrorPerspective(uiMirror);
+    const mirror=uiMirror.translational_mirror||{},closure=uiMirror.ui_closure||{},location=uiMirror.truth_constraint_location||{},thought=uiMirror.thought||{},valuation=uiMirror.valuation||{};
+    const fibreCount=perspective?new Set(Object.values(uiMirror.ui_family?.readings?.[perspective]||{})).size:0;
+    return `<div class="coordination-status" aria-label="NRRF843 UI translational mirror"><strong>UI = translational mirror · ${esc(uiMirror.status||'OPEN')}</strong><br>active projection · ${esc(perspective||'OPEN')} · ${fibreCount} displayed truth fibre${fibreCount===1?'':'s'}<br>translation continuum · ${mirror.witnessed?'WITNESSED':'OPEN'} · privileged standpoint not required<br>working closure · ${esc(closure.formula||'OPEN')} · ${closure.closure_falls_out_from_ui_projection?'derived here':'OPEN'}<br>truth constraint location · ${location.located?'UI':'OPEN'} · thought ${thought.construction||'OPEN'}<br>valuation · ${esc(valuation.status||'OPEN')}<br><span class="coordination-note">The display fibres generate closure. They do not describe a closure computed elsewhere; without faithful perspective translation this entire semantic surface remains OPEN.</span></div>`;
+  }
+  function renderInteractionClosure(interaction){
+    if(!interaction)return '<div class="coordination-status"><strong>AI · token · interaction closure · OPEN</strong><br>No unified physical/digital interaction receipt is present.</div>';
+    const physical=interaction.black_mirror_physical_topology||{};
+    const digital=interaction.perspective_digital_potential_gate||{};
+    const operation=interaction.active_operation||{};
+    const checks=interaction.unification_constraint?.checks||{};
+    const checkCount=Object.values(checks).filter(Boolean).length;
+    const checkTotal=Object.keys(checks).length;
+    return `<div class="interaction-closure" aria-label="Closed Supernet interaction"><div class="interaction-plane physical"><strong>BLACK MIRROR · EVOLVING PHYSICAL TOPOLOGY</strong><span class="${physical.status==='WITNESSED'?'closed':'gated'}">${esc(physical.status||'OPEN')}</span> · perspective ${esc(physical.active_perspective_id||'OPEN')}<br>${asList(physical.nodes).length} source node${asList(physical.nodes).length===1?'':'s'} · ${asList(physical.topology_basis).length} projected closure fibre${asList(physical.topology_basis).length===1?'':'s'} · ${asList(physical.evolution_frames).length} journey frame${asList(physical.evolution_frames).length===1?'':'s'}<br>world input · ${esc(physical.physical_world_status||'OPEN')}<br><span class="coordination-note">This is the source-preserved topology seen through the UI projection, not a canonical law of physical space.</span></div><div class="interaction-plane digital"><strong>PERSPECTIVE · DIGITAL POTENTIAL GATE</strong><span class="${digital.status==='WITNESSED'?'closed':'gated'}">${esc(digital.status||'OPEN')}</span> · ${Number(digital.potential_count||0)} visible potential${Number(digital.potential_count||0)===1?'':'s'}<br>${Number(digital.truth_witnessed_count||0)} truth-witnessed · ${Number(digital.open_potential_count||0)} OPEN<br>AI suggests interactions · token admits forms · humans author consent<br>next · <span class="${operation.enabled?'closed':'gated'}">${esc(operation.requested_natural_form||'OPEN')} ${esc(operation.status||'OPEN')}</span><br><span class="coordination-note">OPEN potential remains visible but cannot execute as equality.</span></div><div class="interaction-truth-lock">SUPERNET UNIFICATION CONSTRAINT · ${interaction.supernet_interaction_closed?'CLOSED':'OPEN'} · ${checkCount}/${checkTotal} truth-factorization checks · one UI / AI / token / topology interaction surface</div></div>`;
+  }
+  function runClosureAction(action,journey){
+    const interaction=closureRenderState(receipt?.visual_closure)?.interaction_closure||{};
+    const operation=interaction.active_operation||{};
+    if(String(operation.operation||'')===String(action||'')&&operation.enabled!==true){
+      document.getElementById('drawer').classList.add('open');
+      toast(`The ${operation.requested_natural_form||'requested'} form remains gated by the Supernet truth unification. Ordinary interaction remains available.`,true);
+      return;
+    }
+    const gate=journey?.unity_gate||{};
+    const higher=gate.higher_transition_requested===true||String(action||'').toLowerCase()==='return';
+    if(higher&&gate.unity_reached!==true){
+      document.getElementById('drawer').classList.add('open');
+      toast('Shared ascent remains OPEN until its participants reach unity through their authored perspectives. Ordinary interaction remains available.',true);
+      return;
+    }
+    return runAction(action);
   }
   function renderGates(coordination){
     const continuum=continuumOf(coordination);
@@ -294,7 +350,7 @@ _FINISH_PATCH = r'''
     }catch(error){toast(error.message,true)}
   }
 
-  function renderCoordination(coordination){
+  function renderCoordination(coordination,journey,uiMirror,interactionClosure){
     const priorControl=document.activeElement&&document.getElementById('coordinationSurface')?.contains(document.activeElement)?{
       id:document.activeElement.id||null,
       pathId:document.activeElement.dataset?.coordinationPath||null,
@@ -362,7 +418,7 @@ _FINISH_PATCH = r'''
     const returnedText=readable(livingReturn.exact_text||livingReturn.text||livingReturn.summary||livingReturn.status);
     const agreementForm=path?`<div class="coordination-form"><h3 style="font-size:11px;margin:0">Draft an agreement on this path</h3><p class="coordination-note">The exact terms remain a proposal until required participants author decisions.</p><label for="coordinationAgreementTitle">Proposal title</label><input id="coordinationAgreementTitle"><label for="coordinationAgreementTerms">Exact agreement terms</label><textarea id="coordinationAgreementTerms" placeholder="Roles, action, timing, consent, and what remains OPEN…"></textarea><label for="coordinationResourceConditions">Resource conditions · one per line</label><textarea id="coordinationResourceConditions" placeholder="time, money, access, tools, constraints…"></textarea><button type="button" id="coordinationPropose" ${formAvailable?'':'disabled'}>Propose agreement</button>${formAvailable?'':`<p class="coordination-note">This commitment form is not admitted by the current gate. Interaction stays open.</p>`}</div>`:'<div class="coordination-form"><div class="coordination-empty">Choose a path to open its editable agreement form.</div></div>';
     const activeProposal=active?`<div class="coordination-form"><h3 style="font-size:11px;margin:0">Active proposal</h3><div class="coordination-status"><strong>${esc(readable(active.title)||activeId.slice(0,8))} · ${esc(consentPhase)}</strong><br>proposal state · ${esc(activeState)}${active.exact_terms?`<br><br>${esc(active.exact_terms)}`:''}${asList(active.resource_conditions).length?`<div class="coordination-meta">${chips(active.resource_conditions)}</div>`:''}${requiredIds.length?`<br>independent consent · ${acceptedIds.length}/${requiredIds.length}<div class="coordination-progress" role="progressbar" aria-label="Independent human consent" aria-valuemin="0" aria-valuemax="${requiredIds.length}" aria-valuenow="${acceptedIds.length}"><span style="width:${consentPercent}%"></span></div><span>accepted · ${esc(acceptedIds.join(' · ')||'none')}</span>${pendingIds.length?`<br><span class="open">pending · ${esc(pendingIds.join(' · '))}</span>`:''}`:''}${decisions.length?`<br>authored decisions · ${esc(decisions.length)}`:''}</div>${!accepted&&!alreadyAccepted?`<label for="coordinationDecisionText">Your exact participant decision</label><textarea id="coordinationDecisionText" placeholder="State what you accept as your participation…"></textarea><button type="button" id="coordinationAccept">Record my acceptance</button>`:`<p class="coordination-note">${accepted?'Every required acceptance is present in the current receipt.':'Your acceptance is present; ACT remains unavailable while other required receipts are pending.'}</p>`}${accepted?`<label for="coordinationReturnText">What actually happened?</label><textarea id="coordinationReturnText" placeholder="Return the observed consequence, including differences from the proposal…"></textarea><button type="button" id="coordinationReturn">Return what happened</button>`:''}${returnedText?`<div class="coordination-status"><strong>Living return</strong><br>${esc(returnedText)}</div>`:''}</div>`:'';
-    surface.innerHTML=`<div class="coordination-intent"><span class="coordination-kind ${roleClass(intentKind)}">${esc(intentKind)}</span><strong>${esc(intentText)}</strong>${intentLocation?`<p>locality · ${esc(intentLocation)}</p>`:''}<div class="coordination-meta">${chips(intent.capabilities||[])}${chips(intent.constraints||[])}</div></div>${renderContinuum(coordination,path,displayedOperator)}${displayedOperator?`<div class="coordination-status"><strong>Natural-form operator · ${esc(displayedOperator)}</strong>${path?'<br>Local path selection expands this already-derived form; it does not change the semantic operator or closure.':''}${operatorReason?`<br>${esc(operatorReason)}`:''}</div>`:''}<h3 style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8ea0aa;margin:11px 0 7px">Explainable paths</h3><div class="coordination-paths">${pathCards}</div>${renderGates(coordination)}${renderContributors(coordination)}${agreementForm}${activeProposal}`;
+    surface.innerHTML=`<div class="coordination-intent"><span class="coordination-kind ${roleClass(intentKind)}">${esc(intentKind)}</span><strong>${esc(intentText)}</strong>${intentLocation?`<p>locality · ${esc(intentLocation)}</p>`:''}<div class="coordination-meta">${chips(intent.capabilities||[])}${chips(intent.constraints||[])}</div></div>${renderNRRF843(uiMirror)}${renderInteractionClosure(interactionClosure)}${renderJourney(journey)}${renderContinuum(coordination,path,displayedOperator)}${displayedOperator?`<div class="coordination-status"><strong>Natural-form operator · ${esc(displayedOperator)}</strong>${path?'<br>Local path selection expands this already-derived form; it does not change the semantic operator or closure.':''}${operatorReason?`<br>${esc(operatorReason)}`:''}</div>`:''}<h3 style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8ea0aa;margin:11px 0 7px">Explainable paths in the truth-curved light cone</h3><div class="coordination-paths">${pathCards}</div>${renderGates(coordination)}${renderContributors(coordination)}${agreementForm}${activeProposal}`;
     surface.querySelectorAll('[data-coordination-path]').forEach(button=>button.addEventListener('click',()=>{
       const chosen=paths.find(item=>pathTarget(item)===button.dataset.coordinationPath);if(chosen)chooseCoordinationPath(coordination,chosen);
     }));
@@ -424,8 +480,19 @@ _FINISH_PATCH = r'''
     const visual=renderState.visual_network;
     const coordination=renderState.coordination||{};
     const continuum=continuumOf(coordination);
+    const journey=renderState.nrrf842_journey||{};
+    const uiMirror=renderState.nrrf843_ui||{};
+    const interactionClosure=renderState.interaction_closure||{};
+    const physicalTopology=interactionClosure.black_mirror_physical_topology||{};
+    const digitalGate=interactionClosure.perspective_digital_potential_gate||{};
+    const activeOperation=interactionClosure.active_operation||{};
+    const mirrorPerspective=activeMirrorPerspective(uiMirror);
+    const uiReading=uiMirror.ui_family?.readings?.[mirrorPerspective]||{};
+    const cone=journey.truth_curved_light_cone||{};
+    const unityGate=journey.unity_gate||{};
     const world=document.getElementById('world');
     const nodes=visual.nodes||[];
+    const mirror=renderState.perspective_visual_mirror||{};
     const positions=positionMap({nodes});
     nodes.forEach((node,index)=>{
       if(!positions[node.id]){
@@ -436,15 +503,31 @@ _FINISH_PATCH = r'''
     const classes=visual.natural_form_classes||[];
     const classByEvent={};
     classes.forEach((unit,index)=>(unit.member_event_ids||[]).forEach(id=>classByEvent[id]=index));
+    const displayFibreValues=[...new Set(Object.values(uiReading).map(String))].sort();
+    const displayFibreIndex=Object.fromEntries(displayFibreValues.map((value,index)=>[value,index]));
+    const displayClassByEvent=Object.fromEntries(nodes.map(node=>[node.id,displayFibreIndex[String(uiReading[node.occurrence_id]||uiReading[node.id]||'OPEN')]]));
     const roleByEvent={};
     const intentEventId=String(coordination.intent?.event_id||renderState.source_event_id||'');
     if(intentEventId)roleByEvent[intentEventId]=String(coordination.intent?.kind||coordination.intent?.coordination_kind||'INTENT');
     for(const path of coordination.paths||[]){const target=pathTarget(path);if(target)roleByEvent[target]=String(path.kind||'OPEN')}
     const roleColors={intent:'#b59cff',person:'#72d8e8',project:'#75e0b4',resource:'#e0b35a',agreement:'#f1a8de',return:'#9bb6ff'};
+    const conePathByTarget=Object.fromEntries(asList(cone.paths).map(path=>[String(path.target_event_id||''),path]));
+    const coneOriginId=String(cone.origin?.focus_event_id||intentEventId);
+    const coneOrigin=positions[coneOriginId]||positions[intentEventId]||{x:0,y:0};
+    world.append(svg('ellipse',{cx:coneOrigin.x,cy:coneOrigin.y,rx:390,ry:270,class:'truth-cone-field','data-truth-cone':cone.id||'OPEN'}));
+    for(const edge of journey.journey?.causal_edges||[]){
+      const a=positions[edge.source_event_id],b=positions[edge.target_event_id];
+      if(a&&b)world.append(svg('path',{d:`M ${a.x} ${a.y} Q ${(a.x+b.x)/2-35} ${(a.y+b.y)/2-35} ${b.x} ${b.y}`,class:'journey-trace'}));
+    }
+    for(const node of nodes){const p=positions[node.id];if(p)world.append(svg('path',{d:`M ${p.x} ${p.y} Q ${p.x*.28} ${p.y*.28} 0 0`,class:'visual-mirror-ray'}))}
+    for(const edge of physicalTopology.relations||[]){
+      const a=positions[edge.source_event_id],b=positions[edge.target_event_id];if(!a||!b)continue;
+      world.append(svg('path',{d:`M ${a.x} ${a.y} Q ${(a.x+b.x)/2} ${(a.y+b.y)/2+24} ${b.x} ${b.y}`,class:'physical-topology-edge','data-topology-truth':edge.truth_constraint_status||'OPEN'}));
+    }
     for(const edge of visual.edges||[]){
       const a=positions[edge.source],b=positions[edge.target];if(!a||!b)continue;
       const remembered=Number(edge.slearn_memory_before||0)>0;
-      world.append(svg('path',{d:`M ${a.x} ${a.y} L ${b.x} ${b.y}`,class:`closure-translation ${remembered?'closure-memory':''}`,stroke:edge.admitted?'#75e0b4':'#ed7b86','data-relation':edge.relation_type}));
+      world.append(svg('path',{d:`M ${a.x} ${a.y} Q 0 0 ${b.x} ${b.y}`,class:`closure-translation ${remembered?'closure-memory':''}`,stroke:edge.admitted?'#75e0b4':'#ed7b86','data-relation':edge.relation_type}));
       const tx=(a.x+b.x)/2,ty=(a.y+b.y)/2-9;
       const edgeLabel=svg('text',{x:tx,y:ty,class:'closure-next-text'});edgeLabel.textContent=`AI · ${edge.relation_type}${remembered?' · SLEARN':''}`;world.append(edgeLabel);
     }
@@ -453,7 +536,11 @@ _FINISH_PATCH = r'''
       for(const path of coordination.paths||[]){
         const targetId=pathTarget(path),targetPosition=positions[targetId];if(!targetPosition||targetId===intentEventId)continue;
         const chosen=targetId===selectedCoordinationPathId;
-        const line=svg('path',{d:`M ${intentPosition.x} ${intentPosition.y} L ${targetPosition.x} ${targetPosition.y}`,class:`coordination-path-line ${chosen?'selected':''}`,'data-coordination-target':targetId});
+        const conePath=conePathByTarget[targetId]||{};
+        const truthStatus=String(conePath.truth_constraint_status||path.why?.formal_suggestion_status||'OPEN').toUpperCase();
+        const controlX=(intentPosition.x+targetPosition.x)/2+(targetPosition.y-intentPosition.y)*.16;
+        const controlY=(intentPosition.y+targetPosition.y)/2-(targetPosition.x-intentPosition.x)*.16;
+        const line=svg('path',{d:`M ${intentPosition.x} ${intentPosition.y} Q ${controlX} ${controlY} ${targetPosition.x} ${targetPosition.y}`,class:`coordination-path-line truth-cone-ray ${truthStatus==='WITNESSED'?'witnessed':'open'} ${chosen?'selected':''}`,'data-coordination-target':targetId,'data-truth-constraint':truthStatus});
         line.addEventListener('click',()=>chooseCoordinationPath(coordination,path));
         line.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();chooseCoordinationPath(coordination,path)}});
         line.setAttribute('tabindex','0');
@@ -463,18 +550,21 @@ _FINISH_PATCH = r'''
         const lineTitle=svg('title');lineTitle.textContent=`${String(path.kind||'interaction')} path to ${String(path.label||targetId)}${path.why?.shared_natural_form_id?` · shared form ${path.why.shared_natural_form_id}`:''}`;line.append(lineTitle);
         world.append(line);
         const sharedForm=path.why?.shared_natural_form_id;
-        const formalStatus=String(path.why?.formal_suggestion_status||'OPEN').toUpperCase();
+        const formalStatus=truthStatus;
         const pathLabel=svg('text',{x:(intentPosition.x+targetPosition.x)/2,y:(intentPosition.y+targetPosition.y)/2+13,class:'coordination-path-label'});pathLabel.textContent=`${String(path.kind||'PATH').toUpperCase()} · ${String(path.label||targetId).slice(0,24)}${sharedForm?` · ${shortContinuumId(sharedForm)}`:` · equality ${formalStatus}`}`;world.append(pathLabel);
       }
     }
     for(const node of nodes){
       const p=positions[node.id];if(!p)continue;
-      const classIndex=classByEvent[node.id]??0;
+      const classIndex=displayClassByEvent[node.id]??classByEvent[node.id]??0;
       const role=roleByEvent[node.id];
       const stroke=roleColors[roleClass(role)]||`hsl(${(classIndex*97+175)%360} 68% 67%)`;
-      const ring=svg('circle',{cx:p.x,cy:p.y,r:node.focus?42:33,class:`closure-class-ring ${role?'coordination-role-'+roleClass(role):''}`,stroke,role:'img','aria-label':`${String(role||node.coordination_kind||'FORM')} authored by ${String(node.authored_by||'OPEN')} as ${String(node.authorship_role||'OPEN')}`});world.append(ring);
+      const nodePerspective=String(node.perspective_id||node.authored_by||'');
+      const rotatePerspective=()=>{focus=node.id;const perspectiveInput=document.getElementById('perspective');if(perspectiveInput&&nodePerspective){perspectiveInput.value=nodePerspective;localStorage.setItem('supernet-perspective',nodePerspective)}refresh()};
+      const ring=svg('circle',{cx:p.x,cy:p.y,r:node.focus?42:33,class:`closure-class-ring ${role?'coordination-role-'+roleClass(role):''}`,stroke,role:'button',tabindex:'0','aria-label':`Rotate the UI projection to perspective ${nodePerspective||'OPEN'}`});ring.addEventListener('click',rotatePerspective);ring.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();rotatePerspective()}});world.append(ring);
       if(role){const roleLabel=svg('text',{x:p.x,y:p.y-(node.focus?50:41),class:'coordination-role-label'});roleLabel.textContent=`${role.toUpperCase()} · ${String(node.authored_by||'OPEN').slice(0,16)}`;world.append(roleLabel)}
-      const form=svg('text',{x:p.x,y:p.y+(node.focus?53:44),class:'closure-unit-text'});form.textContent=node.natural_form||'OPEN';world.append(form);
+      const displayedFibre=uiReading[node.occurrence_id]||uiReading[node.id];
+      const form=svg('text',{x:p.x,y:p.y+(node.focus?53:44),class:'closure-unit-text'});form.textContent=displayedFibre?`UI · ${shortContinuumId(displayedFibre)}`:(node.natural_form||'OPEN');world.append(form);
     }
     classes.forEach((unit,index)=>{
       const members=(unit.member_event_ids||[]).map(id=>positions[id]).filter(Boolean);if(!members.length)return;
@@ -483,9 +573,25 @@ _FINISH_PATCH = r'''
       world.append(svg('circle',{cx:x,cy:y,r:12,class:'closure-unit'}));
       const token=svg('text',{x,y:y+3,class:'closure-unit-text'});token.textContent=`R${index}`;world.append(token);
     });
+    const mirrorNext=renderState.network_return?.next_operation;
+    const nextNeedsUnity=unityGate.higher_transition_requested===true||String(mirrorNext?.action||'').toLowerCase()==='return';
+    const gateOpen=(nextNeedsUnity&&unityGate.unity_reached!==true)||activeOperation.enabled!==true;
+    world.append(svg('circle',{cx:0,cy:0,r:76,class:'physical-topology-orbit','data-physical-topology':physicalTopology.status||'OPEN'}));
+    world.append(svg('circle',{cx:0,cy:0,r:91,class:`digital-potential-orbit ${activeOperation.enabled?'':'open'}`,'data-digital-gate':digitalGate.status||'OPEN'}));
+    asList(digitalGate.potentials).forEach((potential,index)=>{
+      const angle=2*Math.PI*index/Math.max(1,Number(digitalGate.potential_count||1))-Math.PI/2;
+      const point=svg('circle',{cx:91*Math.cos(angle),cy:91*Math.sin(angle),r:6,class:`digital-potential-point ${potential.truth_constraint_status==='WITNESSED'?'':'open'}`,'data-potential':potential.id||'OPEN'});
+      const title=svg('title');title.textContent=`${String(potential.label||potential.kind||'potential')} · ${String(potential.truth_constraint_status||'OPEN')}`;point.append(title);world.append(point);
+    });
+    const locus=svg('circle',{cx:0,cy:0,r:58,class:`visual-mirror-locus ${gateOpen?'unity-gate-open':''}`,role:'button',tabindex:'0','aria-label':`Continue the visual closure mechanism: ${String(mirrorNext?.label||'next Sense')} · unity gate ${String(unityGate.necessary_condition_status||'OPEN')}`});
+    locus.addEventListener('click',()=>runClosureAction(mirrorNext?.action||'interact',journey));
+    locus.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();runClosureAction(mirrorNext?.action||'interact',journey)}});
+    world.append(locus);world.append(svg('circle',{cx:0,cy:0,r:43,class:'visual-mirror-inner'}));
+    const mirrorTitle=svg('text',{x:0,y:-5,class:'visual-mirror-title'});mirrorTitle.textContent='BLACK MIRROR · TRUTH';world.append(mirrorTitle);
+    const mirrorStatus=svg('text',{x:0,y:12,class:'visual-mirror-status'});mirrorStatus.textContent=`${String(mirrorPerspective||'OPEN').slice(0,11)} · ${displayFibreValues.length} FIBRES · ${String(activeOperation.status||'OPEN')}`;world.append(mirrorStatus);
     if(continuum.selected_natural_form_id){
       const phase=String(continuum.modality?.operator||'DISCOVER').toUpperCase();
-      const continuumLabel=svg('text',{x:0,y:-392,class:'level-small'});continuumLabel.textContent=`EXISTENCE → TRANSLATIONAL TRUTH → AXIOMETRY → CLOSURE → FORM → UI · ${phase} · ${shortContinuumId(continuum.selected_natural_form_id)}`;world.append(continuumLabel);
+      const continuumLabel=svg('text',{x:0,y:-392,class:'level-small'});continuumLabel.textContent=`PHYSICAL TOPOLOGY ↔ UI TRUTH MIRROR ↔ DIGITAL POTENTIAL GATE · ${phase} · ${shortContinuumId(continuum.selected_natural_form_id)}`;world.append(continuumLabel);
     }
     const focusNode=nodes.find(node=>node.focus);const p=focusNode&&positions[focusNode.id];
     if(p){
@@ -503,46 +609,49 @@ _FINISH_PATCH = r'''
     world.replaceChildren();
     const legacyAdmit=document.getElementById('admit');if(legacyAdmit)legacyAdmit.hidden=true;
     const level=renderState?.closure_level;
-    renderCoordination(renderState?.coordination||null);
+    const journey=renderState?.nrrf842_journey||null;
+    const uiMirror=renderState?.nrrf843_ui||null;
+    const interactionClosure=renderState?.interaction_closure||null;
+    renderCoordination(renderState?.coordination||null,journey,uiMirror,interactionClosure);
     document.getElementById('interact').disabled=false;
     const target=document.getElementById('closureLevel');
     if(!renderState||!level){
       document.getElementById('chartKind').textContent='OPEN INTERFACE';
-      document.getElementById('chartTitle').textContent='Interface natural form · OPEN';
-      document.getElementById('axiometric').textContent='No factorized closure-derived render state is present.';
-      document.getElementById('why').textContent='The renderer will not fall back to an external chart or raw closure semantics.';
+      document.getElementById('chartTitle').textContent='Perspective visual mirror · OPEN';
+      document.getElementById('axiometric').textContent='No source-preserved visualization is present; no truth constraint or closure can be formed.';
+      document.getElementById('why').textContent='Supernet does not exist as a hidden network behind this surface. Without the semantic visual mirror it remains OPEN.';
       document.getElementById('stage').textContent='OPEN · renderer transport only';
       document.getElementById('tags').innerHTML='<span class="tag">OPEN</span><span class="tag">NO SEMANTIC FALLBACK</span>';
       document.getElementById('sources').innerHTML='<div class="source">No closure-admitted source fibre is available to render.</div>';
-      document.getElementById('layers').innerHTML='<div class="layer hidden-layer">visual existence → translational truth → axiometry → explicit closure meeting → natural form → interface · OPEN</div>';
-      document.getElementById('receipt').innerHTML='<dt>interface</dt><dd>OPEN</dd><dt>renderer</dt><dd>TRANSPORT_ONLY</dd>';
+      document.getElementById('layers').innerHTML='<div class="layer hidden-layer">perspective → visual mirror → truth constraint → axiometry → closure → transformed mirror → return · OPEN</div>';
+      document.getElementById('receipt').innerHTML='<dt>visual mirror</dt><dd>OPEN</dd><dt>truth constraint</dt><dd>OPEN</dd><dt>renderer</dt><dd>TRANSPORT_ONLY</dd>';
       document.getElementById('actions').replaceChildren();
       const senseTarget=document.getElementById('senseRelations');if(senseTarget)senseTarget.innerHTML='<div class="sense-row">No admitted interface reading is available.</div>';
-      target.innerHTML='<div class="level-summary">No factorized interface form: the semantic UI remains OPEN.</div>';
+      target.innerHTML='<div class="level-summary">No perspective visual mirror: Supernet truth and closure remain OPEN.</div>';
       continueButton.disabled=true;
       return;
     }
-    document.getElementById('chartKind').textContent='INTERFACE NATURAL FORM';
-    document.getElementById('chartTitle').textContent='Visual translational closure';
-    document.getElementById('axiometric').textContent='visual existence → translational truth → visual axiometry → explicit closure meeting → natural admission → interface form';
-    document.getElementById('why').textContent=`Factorized through ${form.factorization_provenance?.[0]||'the current closure witness'}; renderer transport cannot add truth.`;
+    document.getElementById('chartKind').textContent='CLOSED SUPERNET INTERACTION';
+    document.getElementById('chartTitle').textContent='Black Mirror physical topology ↔ digital potential gate';
+    document.getElementById('axiometric').textContent='source journey → chosen perspective → UI translational mirror → ui⁻¹(ui(A)) closure → natural forms → physical topology + digital potential → AI/token gate → truth-unified return';
+    document.getElementById('why').textContent=`The UI mirror ${form.visual_mirror_id||'OPEN'} generates the closure shared by the physical topology, AI suggestions and token form gate; ${interactionClosure?.supernet_interaction_closed?'the interaction surface is truth-unified':'the Supernet remains OPEN'}.`;
     const focusState=renderState.focus_event||{};
-    document.getElementById('stage').textContent=`${focusState.current_stage||'OPEN'} · ${focusState.current_verdict||'OPEN'} · closure-internal interface`;
-    document.getElementById('tags').innerHTML=['TRANSLATIONAL TRUTH','CLOSURE EXPLICIT','NATURAL FORM','RENDERER TRANSPORT'].map(value=>`<span class="tag">${esc(value)}</span>`).join('');
+    document.getElementById('stage').textContent=`${focusState.current_stage||'OPEN'} · ${focusState.current_verdict||'OPEN'} · visual truth constraint active`;
+    document.getElementById('tags').innerHTML=['BLACK MIRROR','PHYSICAL TOPOLOGY','DIGITAL POTENTIAL','AI GATE','TOKEN FORM GATE','TRUTH UNIFIED'].map(value=>`<span class="tag">${esc(value)}</span>`).join('');
     const sourceFibre=asList(renderState.source_fibre);
     document.getElementById('sources').innerHTML=sourceFibre.length?sourceFibre.map(source=>`<div class="source">${esc(source.exact_text||source.id)}</div>`).join(''):'<div class="source">Visual existence is empty.</div>';
     document.getElementById('layers').innerHTML=asList(renderState.derivation_order).map(value=>`<div class="layer">${esc(value)}</div>`).join('');
-    document.getElementById('receipt').innerHTML=`<dt>interface</dt><dd>${esc(form.id)}</dd><dt>closure</dt><dd>${esc(form.closure_id)}</dd><dt>admission</dt><dd>${esc(form.admission_basis)}</dd><dt>factorized</dt><dd>${esc(form.render_state_factorized)}</dd><dt>renderer</dt><dd>${esc(form.renderer_contract?.role||'OPEN')}</dd>`;
+    document.getElementById('receipt').innerHTML=`<dt>semantic runtime</dt><dd>${esc(renderState.unified_truth_runtime?.id||'OPEN')} · ONE UI-DERIVED TRUTH CLOSURE</dd><dt>interaction closure</dt><dd>${esc(interactionClosure?.id||'OPEN')} · ${esc(interactionClosure?.status||'OPEN')}</dd><dt>physical topology</dt><dd>${esc(interactionClosure?.black_mirror_physical_topology?.status||'OPEN')} · ${esc(interactionClosure?.black_mirror_physical_topology?.physical_world_status||'OPEN')}</dd><dt>digital gate</dt><dd>${esc(interactionClosure?.perspective_digital_potential_gate?.status||'OPEN')} · ${Number(interactionClosure?.perspective_digital_potential_gate?.potential_count||0)} potential</dd><dt>active form</dt><dd>${esc(interactionClosure?.active_operation?.requested_natural_form||'OPEN')} · ${esc(interactionClosure?.active_operation?.status||'OPEN')}</dd><dt>UI family</dt><dd>${esc(uiMirror?.id||'OPEN')}</dd><dt>active perspective</dt><dd>${esc(activeMirrorPerspective(uiMirror)||'OPEN')}</dd><dt>UI closure</dt><dd>${esc(uiMirror?.ui_closure?.formula||'OPEN')}</dd><dt>truth location</dt><dd>${uiMirror?.truth_constraint_location?.located?'UI':'OPEN'}</dd><dt>unity gate</dt><dd>${esc(journey?.unity_gate?.necessary_condition_status||'OPEN')} · shared trajectory only</dd><dt>isolation</dt><dd>0 semantic components</dd><dt>renderer</dt><dd>${esc(form.renderer_contract?.role||'OPEN')}</dd>`;
     const interfaceActions=asList(renderState.actions);
     document.getElementById('actions').innerHTML=interfaceActions.map(action=>`<button data-action="${esc(action.operation)}">${esc(action.operation)}</button>`).join('');
-    document.getElementById('actions').querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>runAction(button.dataset.action)));
+    document.getElementById('actions').querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>runClosureAction(button.dataset.action,journey)));
     const sensedEdges=asList(renderState.visual_network?.edges);
     const senseTarget=document.getElementById('senseRelations');
     if(senseTarget)senseTarget.innerHTML=sensedEdges.length?sensedEdges.map(edge=>`<div class="sense-row"><strong>${esc(edge.relation_type||edge.id)}</strong><span class="${edge.generates_equality?'true':'open'}">${edge.generates_equality?'WITNESSED':'OPEN'}</span> · ${edge.generates_equality?'closure-generating translational truth':'visible potential; no equality generated'}</div>`).join(''):'<div class="sense-row">No cross-form translational truth is present; identities remain intrinsic.</div>';
     const fold=level.projective_fold||{};
     const forms=(level.truth_closes_level_alone?.natural_forms||[]).map(form=>`<span class="level-class">${esc(form.natural_form)} · ${form.members.map(shortState).join(' = ')}</span>`).join('');
     const status=renderState?.operational_closure||{};
-    target.innerHTML=`${renderInterfaceDerivation(closure)}<div class="level-summary"><strong>${esc(level.endpoint)} · ${level.class_count} translational-truth class${level.class_count===1?'':'es'} across ${level.state_count} visually existing state${level.state_count===1?'':'s'}</strong><br>Visual existence derives the translation equations; compatible and closure-explicit witnesses derive admission. OPEN edges remain visible without generating equality.<br><span class="seam">${esc(fold.coordinate)} = ${esc(fold.tan_value??'OPEN')} · derived reading only, never the definition of closure</span><br><span class="closure-operational">Mirror ${status.black_mirror_sensed?'✓':'OPEN'} · SLEARN ${status.slearn_memory_committed?'✓':'OPEN'} · AI ${status.ai_translation_executed?'✓':'OPEN'} · resources ${renderState?.tokenomic?.resource_unit_count??0} · interface form ${interfaceNaturalForm(closure)?.admission_status||'OPEN'} · return ${status.network_return_open?'OPEN':'missing'}</span><div class="level-classes">${forms}</div><br><span class="open">${esc(level.physical_hypothesis)} · two-person E2E ${esc(level.two_person_E2E)}</span></div>`;
+    target.innerHTML=`${renderInterfaceDerivation(closure)}<div class="level-summary"><strong>${esc(level.endpoint)} · ${level.class_count} translational-truth class${level.class_count===1?'':'es'} across ${level.state_count} visually existing state${level.state_count===1?'':'s'}</strong><br>The Black Mirror projection generates the natural-form closure used by the evolving physical topology and digital potential gate. AI may expose paths, tokens may admit ACT/RETURN forms, and only truth-witnessed, independently consented commitments can cross the gate.<br><span class="seam">${esc(fold.coordinate)} = ${esc(fold.tan_value??'OPEN')} · derived reading only, never the definition of closure</span><br><span class="closure-operational">unification ${interactionClosure?.status||'OPEN'} · physical ${interactionClosure?.black_mirror_physical_topology?.status||'OPEN'} · potential ${interactionClosure?.perspective_digital_potential_gate?.status||'OPEN'} · AI ${status.ai_translation_executed?'✓':'OPEN'} · token ${interactionClosure?.perspective_digital_potential_gate?.token_gate?.status||'OPEN'} · next ${interactionClosure?.active_operation?.status||'OPEN'}</span><div class="level-classes">${forms}</div><br><span class="open">${esc(level.physical_hypothesis)} · two-person E2E ${esc(level.two_person_E2E)}</span></div>`;
     drawUnifiedClosure(closure);
     drawClosureLevel(level);
     const tags=document.getElementById('tags');
@@ -555,12 +664,12 @@ _FINISH_PATCH = r'''
     const stage=document.getElementById('stage');
     if(stage)stage.textContent+=` · closure ${form.closure_id?.slice(0,18)||'OPEN'} · level ${level.class_count}/${level.state_count}`;
     const next=renderState?.network_return?.next_operation;
-    continueButton.textContent=next?.label||'Continue closure';
+    continueButton.textContent=interactionClosure?.active_operation?.enabled===false?`Gated · ${interactionClosure?.active_operation?.requested_natural_form||'form'}`:(next?.label||'Continue closure');
     continueButton.dataset.action=next?.action||'interact';
     continueButton.disabled=!form;
   };
 
-  continueButton.onclick=()=>runAction(continueButton.dataset.action||'interact');
+  continueButton.onclick=()=>runClosureAction(continueButton.dataset.action||'interact',journeyOf(receipt?.visual_closure));
 
   integrate = async function(parent=false){
     const exactText=thoughtInput.value.trim();

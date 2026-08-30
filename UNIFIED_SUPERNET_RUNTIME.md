@@ -20,6 +20,34 @@ collective action, agents, Black Mirror and bounded hardware loop remain useful
 code modules and API views. They are now **lenses** over one canonical field
 rather than separate foundations.
 
+## Closure-only website execution
+
+Version 3.17 makes the browser a contract interpreter rather than a second
+semantic runtime. **closure_ui_contract** is derived after the active
+perspective's NRRF843 display reading and interaction closure, then included
+in the state that is factorized by **interface_natural_form**.
+
+The contract validator fails closed on mismatched closure/UI/perspective IDs,
+missing source provenance, duplicate or unreachable controls, undeclared
+fields, unsafe operations, raw endpoints, topology records outside the active
+perspective projection, or any visible node without a derivation. The unified
+runtime witnesses **INTERACTIVE_UI_FORM** only when the complete contract
+passes that validator.
+
+The website source contains no Supernet controls or labels. The server sends
+an OPEN source-boundary contract for first authorship and a WITNESSED contract
+after closure. Each perspective request rebuilds the complete interface natural
+form from that perspective's NRRF843 reading; it does not reuse another
+participant's render state, quotient, closure projection, or factorization.
+
+One generic executor checks the persisted contract identity, authored context,
+participant identity, and exact field revision without mutating the field. It
+then executes only a declared semantic operation and returns the successor
+contract. Persistent execution fingerprints make exact retries return their
+original result without repeating the interaction. Specialized API routes
+remain available for compatibility, but the primary website never calls them
+directly.
+
 ## Canonical operation
 
 ```python

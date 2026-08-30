@@ -59,4 +59,4 @@ def test_railway_runs_the_natural_interface_application(monkeypatch) -> None:
     assert "/supernet/classic" in routes
     assert "/supernet/agent/capabilities" in routes
     assert "/mcp" in routes
-    assert module.app.version == "3.11.0"
+    assert module.app.version == "3.17.0"

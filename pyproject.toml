@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "closure-supernet"
-version = "3.11.0"
-description = "NRRF837 Supernet joining local-global composition, natural-form UI, explainable AI paths, independent token gates, scoped commitments, and living returns"
+version = "3.17.0"
+description = "Supernet whose perspective UI mirror closes evolving source topology and AI/token potential through one natural-form translational truth"
 readme = "UNIFIED_SUPERNET_RUNTIME.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}

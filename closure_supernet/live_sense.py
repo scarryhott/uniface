@@ -2,9 +2,17 @@ from __future__ import annotations
 
 import hashlib
 import json
+from copy import deepcopy
 from typing import Any, TYPE_CHECKING
 
 from .axiometry import operator_keys
+from .closure_ui_contract import (
+    BUILDER_VERSION as CLOSURE_UI_BUILDER_VERSION,
+    SCHEMA as CLOSURE_UI_SCHEMA,
+    derive_closure_ui_contract,
+    derive_open_ui_contract,
+)
+from .interaction_closure import derive_interaction_closure
 from .models import RelationType, Verdict
 from .natural_interface import NaturalInterfaceManager
 from .natural_interface_models import NaturalChartKind
@@ -13,6 +21,7 @@ from .nrrf837_continuum import SCHEMA as NRRF837_SCHEMA
 from .nrrf837_continuum import UNITY_SELECTOR_VERSION
 from .selection_models import SelectionReadingCreate
 from .supernet_models import ResourceEnvelope
+from .truth_constrained_runtime import derive_unified_truth_runtime
 from .topology_models import TopologyMode
 from .visual_closure import (
     build_visual_closure_receipt,
@@ -31,6 +40,10 @@ def _unique(values: list[str]) -> list[str]:
     return list(dict.fromkeys(str(item) for item in values if str(item)))
 
 
+def _full_digest(prefix: str, value: Any) -> str:
+    return f"{prefix}:{hashlib.sha256(_stable(value).encode('utf-8')).hexdigest()}"
+
+
 class LiveSenseManager:
     """Interaction-time orchestration of the already existing closure agents.
 
@@ -44,6 +57,49 @@ class LiveSenseManager:
 
     def __init__(self, runtime: "ClosureSupernetRuntime"):
         self.runtime = runtime
+
+    def _field_events_snapshot(
+        self, *, batch_size: int = 50_000
+    ) -> tuple[list[dict[str, Any]], int]:
+        """Read the complete ordered field and its authoritative revision."""
+
+        if batch_size < 1:
+            raise ValueError("batch_size must be positive")
+        events: list[dict[str, Any]] = []
+        offset = 0
+        while True:
+            batch = self.runtime.supernet_store.list_events(
+                limit=batch_size,
+                offset=offset,
+            )
+            events.extend(batch)
+            if len(batch) < batch_size:
+                break
+            offset += len(batch)
+        return (
+            events,
+            self.runtime.supernet_store.latest_event_sequence(),
+        )
+
+    def _field_occurrences_snapshot(
+        self, *, batch_size: int = 50_000
+    ) -> list[dict[str, Any]]:
+        """Read every source occurrence used by the visual field."""
+
+        if batch_size < 1:
+            raise ValueError("batch_size must be positive")
+        occurrences: list[dict[str, Any]] = []
+        offset = 0
+        while True:
+            batch = self.runtime.store.list_occurrences(
+                limit=batch_size,
+                offset=offset,
+            )
+            occurrences.extend(batch)
+            if len(batch) < batch_size:
+                break
+            offset += len(batch)
+        return occurrences
 
     def capabilities(self) -> dict[str, Any]:
         return {
@@ -409,9 +465,8 @@ class LiveSenseManager:
         living_problems = self.runtime.living_store.list_problems(limit=100_000)
         living_actions = self.runtime.living_store.list_actions(limit=100_000)
         living_returns = self.runtime.living_store.list_action_returns(limit=100_000)
-        field_occurrences = self.runtime.store.list_occurrences(
-            limit=200_000, offset=0
-        )
+        field_occurrences = self._field_occurrences_snapshot()
+        field_events, field_event_seq = self._field_events_snapshot()
         current_event = self.runtime.supernet_store.get_event(event_id)
         source_occurrences = [
             self.runtime.store.get_occurrence(occurrence_id)
@@ -424,17 +479,23 @@ class LiveSenseManager:
             closure_level=closure_level,
             selection_reading=selection_reading,
             prior_receipts=prior_visual_receipts,
-            field_events=self.runtime.supernet_store.list_events(limit=200_000),
+            field_events=field_events,
             field_occurrences=field_occurrences,
             commitment_proposals=commitment_proposals,
             living_problems=living_problems,
             living_actions=living_actions,
             living_returns=living_returns,
+            field_event_seq=field_event_seq,
         )
         visual_signature = hashlib.sha256(
             _stable(
                 {
                     "visual_closure_schema": NRRF837_SCHEMA,
+                    "closure_ui_contract_schema": CLOSURE_UI_SCHEMA,
+                    "closure_ui_contract_builder_version": (
+                        CLOSURE_UI_BUILDER_VERSION
+                    ),
+                    "field_event_seq": field_event_seq,
                     "unity_selector_version": UNITY_SELECTOR_VERSION,
                     "source_event_id": event_id,
                     "current_stage": current_event["current_stage"],
@@ -558,6 +619,24 @@ class LiveNaturalInterfaceManager(NaturalInterfaceManager):
             ]
             if relative:
                 sensed = relative
+            else:
+                unsensed_relative = [
+                    event
+                    for event in events
+                    if event.get("authored_by") == perspective_id
+                    or perspective_id in event.get(
+                        "affected_perspectives", []
+                    )
+                    or event.get("perspective_id") == perspective_id
+                ]
+                return (
+                    max(
+                        unsensed_relative,
+                        key=lambda item: int(item["seq"]),
+                    )
+                    if unsensed_relative
+                    else None
+                )
         if sensed:
             return max(sensed, key=lambda item: int(item["seq"]))
         return super()._focus_event(events, focus_event_id, perspective_id)
@@ -582,6 +661,191 @@ class LiveNaturalInterfaceManager(NaturalInterfaceManager):
                 event["id"]
             ),
         }
+
+    def _project_visual_for_perspective(
+        self,
+        visual: dict[str, Any],
+        *,
+        event: dict[str, Any],
+        perspective_id: str | None,
+    ) -> dict[str, Any]:
+        """Recompute the UI/interaction projection for the requested witness.
+
+        The persisted receipt contains the whole NRRF843 mirror family.  Its
+        originally active projection is not reused for another participant:
+        selection derives a new interaction closure and UI contract from that
+        participant's witnessed reading without mutating the stored receipt.
+        """
+
+        if not perspective_id:
+            return visual
+        requested = str(perspective_id)
+        nrrf843_ui = visual.get("nrrf843_ui") or {}
+        perspectives = {
+            str(item)
+            for item in nrrf843_ui.get("ui_family", {}).get(
+                "perspective_ids", []
+            )
+        }
+        projected = deepcopy(visual)
+        if requested not in perspectives:
+            projected["selected_closure_ui_contract"] = derive_open_ui_contract(
+                perspective_id=requested
+            )
+            projected["perspective_projection_status"] = (
+                "OPEN_UNWITNESSED_PERSPECTIVE"
+            )
+            return projected
+
+        journey = deepcopy(visual.get("nrrf842_journey") or {})
+        chosen = dict(journey.get("chosen_perspective") or {})
+        chosen.update(
+            {
+                "perspective_id": requested,
+                "status": "CHOSEN",
+                "chosen": True,
+                "choice_source": "REQUESTED_NRRF843_PERSPECTIVE_READING",
+                "free_choice_of_perspective": True,
+            }
+        )
+        journey["chosen_perspective"] = chosen
+        interaction = derive_interaction_closure(
+            truth_derivation=visual["translational_truth_axiometry"],
+            nrrf843_ui=nrrf843_ui,
+            nrrf842_journey=journey,
+            coordination=visual["coordination"],
+            ai_translation=visual["ai_translation"],
+            tokenomic=visual["tokenomic"],
+            visual_network=visual["visual_network"],
+            black_mirror=visual["black_mirror"],
+            network_return=visual["network_return"],
+        )
+        source_occurrences = (
+            visual.get("interface_natural_form", {})
+            .get("render_state", {})
+            .get("source_fibre", [])
+        )
+        contract = derive_closure_ui_contract(
+            truth_derivation=visual["translational_truth_axiometry"],
+            nrrf843_ui=nrrf843_ui,
+            nrrf842_journey=journey,
+            interaction_closure=interaction,
+            coordination=visual["coordination"],
+            visual_network=visual["visual_network"],
+            source_occurrences=source_occurrences,
+            focus_event=event,
+            field_event_seq=visual.get("closure_ui_contract", {}).get(
+                "field_event_seq"
+            ),
+        )
+        unified = derive_unified_truth_runtime(
+            truth_derivation=visual["translational_truth_axiometry"],
+            nrrf843_ui=nrrf843_ui,
+            nrrf842_journey=journey,
+            interaction_closure=interaction,
+            closure_ui_contract=contract,
+            coordination=visual["coordination"],
+            semantic_elements=visual.get("interface_natural_form", {}).get(
+                "semantic_elements", []
+            ),
+            interface_actions=visual.get("interface_natural_form", {}).get(
+                "actions", []
+            ),
+            slearn=visual["slearn"],
+            ai_translation=visual["ai_translation"],
+            tokenomic=visual["tokenomic"],
+        )
+        render_state = deepcopy(
+            visual.get("interface_natural_form", {}).get("render_state", {})
+        )
+        render_state["nrrf842_journey"] = journey
+        render_state["interaction_closure"] = interaction
+        render_state["closure_ui_contract"] = contract
+        render_state["unified_truth_runtime"] = unified
+        interface_form = self._refactor_interface_natural_form(
+            visual=visual,
+            render_state=render_state,
+        )
+        projected["nrrf842_journey"] = journey
+        projected["interaction_closure"] = interaction
+        projected["closure_ui_contract"] = contract
+        projected["unified_truth_runtime"] = unified
+        projected["interface_natural_form"] = interface_form
+        projected["perspective_projection_status"] = "WITNESSED"
+        return projected
+
+    def _refactor_interface_natural_form(
+        self,
+        *,
+        visual: dict[str, Any],
+        render_state: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Re-run the quotient factorization for a perspective render state."""
+
+        truth = visual["translational_truth_axiometry"]
+        form_by_member = {
+            str(member): str(form["id"])
+            for form in truth.get("natural_forms", [])
+            for member in form.get("members", [])
+        }
+        members = sorted(
+            str(item["id"])
+            for item in truth.get("visual_existence", {}).get("forms", [])
+        )
+        payload_by_form = {
+            str(form["id"]): {
+                "natural_form_id": str(form["id"]),
+                "render_state": render_state,
+            }
+            for form in truth.get("natural_forms", [])
+        }
+        quotient = {
+            form_id: payload_by_form[form_id]
+            for form_id in sorted(payload_by_form)
+        }
+        projection = {
+            member: payload_by_form[form_by_member[member]]
+            for member in members
+        }
+        render_states = [
+            {"member_id": member, **projection[member]}
+            for member in members
+        ]
+        closure_id = str(truth["id"])
+        factorization_id = _full_digest(
+            "interface-factorization-witness",
+            {
+                "closure": closure_id,
+                "quotient_render_state": quotient,
+                "projection": projection,
+            },
+        )
+        interface_id = _full_digest(
+            "interface-natural-form",
+            {
+                "closure": closure_id,
+                "quotient_render_state": quotient,
+                "factorization": factorization_id,
+            },
+        )
+        interface_form = deepcopy(visual["interface_natural_form"])
+        interface_form.update(
+            {
+                "id": interface_id,
+                "members": members,
+                "render_states": render_states,
+                "quotient_render_state": quotient,
+                "closure_projection": projection,
+                "factorization_provenance": [factorization_id],
+                "render_state": render_state,
+                "render_state_factorized": True,
+                "semantic_elements": render_state.get(
+                    "semantic_elements", []
+                ),
+                "actions": render_state.get("actions", []),
+            }
+        )
+        return interface_form
 
     def _select_chart(
         self,
@@ -670,6 +934,31 @@ class LiveNaturalInterfaceManager(NaturalInterfaceManager):
                 )
                 if event is not None
                 else None
+            )
+        )
+        if event is not None and result["visual_closure"] is not None:
+            result["visual_closure"] = self._project_visual_for_perspective(
+                result["visual_closure"],
+                event=event,
+                perspective_id=perspective_id,
+            )
+        visual = result["visual_closure"] or {}
+        selected_contract = visual.get("selected_closure_ui_contract")
+        if selected_contract is not None:
+            # An unwitnessed requested perspective must not receive another
+            # perspective's WITNESSED receipt alongside its OPEN contract.
+            result["visual_closure"] = None
+            result["closure_level"] = None
+            visual = {}
+            sense = None
+        result["closure_ui_contract"] = selected_contract or visual.get(
+            "closure_ui_contract"
+        ) or derive_open_ui_contract(
+            perspective_id=(
+                perspective_id
+                or (event or {}).get("perspective_id")
+                or (event or {}).get("authored_by")
+                or "participant"
             )
         )
         result["two_person_E2E"] = "OPEN"

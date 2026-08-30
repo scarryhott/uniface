@@ -3,8 +3,9 @@
 This module deliberately starts with *visual existence*, not with a quotient,
 selector, metric, topology, or externally chosen interface.  Relative truth is
 first evaluated between things that visually exist.  Only witnessed truth is
-promoted to an axiom; the equivalence relation and its natural forms are then
-the finite closure of those axioms.
+promoted to an axiom.  The admitted axiometry derives a joint truth reading;
+NRRF840 closure is then the preimage of the image of a seed under that reading,
+and natural forms are precisely its saturated truth fibres.
 
 The external renderer has one role: transporting an already-derived interface
 natural form to pixels or another presentation medium.  It cannot witness
@@ -23,7 +24,15 @@ from typing import Any
 
 
 PROTOCOL = "TRANSLATIONAL_TRUTH_AXIOMETRY"
-SCHEMA = "closure.supernet/translational-truth-axiometry-v2"
+SCHEMA = "closure.supernet/translational-truth-axiometry-v3"
+NRRF840_MODULE = (
+    "NRRF840ClosureDerivedFromTranslationalTruthAxiometryNotAnExternalLimit"
+)
+NRRF840_CRITERION = (
+    "x in visClosure(vis, A) iff exists a in A, for every observer o, "
+    "vis(o, x) = vis(o, a)"
+)
+JOINT_TRUTH_OBSERVER = "TRANSLATIONAL_TRUTH_JOINT_READING"
 
 
 class TruthVerdict(str, Enum):
@@ -372,6 +381,64 @@ class RelativeTruth:
 
 
 @dataclass(frozen=True)
+class VisualMirrorConstraint:
+    """One relation presented by the semantic UI as a truth constraint."""
+
+    id: str
+    truth_id: str
+    source: str
+    target: str
+    verdict: TruthVerdict
+    statement: str | None
+    visual_equation_id: str | None
+    endpoints_visually_exist: bool
+    source_return_provenance: tuple[str, ...]
+    presentation_status: str
+
+
+@dataclass(frozen=True)
+class PerspectiveVisualMirror:
+    """The UI-semantic visualization in which truth is constrained.
+
+    This is not the HTML/SVG renderer and not a post-closure dashboard.  It is
+    the source-preserving perspectival projection of visual existence and its
+    proposed translation equations.  Axiometry can only evaluate constraints
+    presented here; without this mirror the Supernet truth relation is OPEN.
+    """
+
+    id: str
+    form_ids: tuple[str, ...]
+    perspective_ids: tuple[str, ...]
+    projected_forms: Mapping[str, Mapping[str, Any]]
+    constraints: tuple[VisualMirrorConstraint, ...]
+    source_return_provenance: tuple[str, ...]
+    semantic_observers: tuple[str, ...] = (
+        "PERSPECTIVE_FORM",
+        "RELATIVE_VISUAL_EQUATION",
+    )
+    role: str = "METAPHORICAL_FORM_TRANSLATION_AND_TRUTH_CONSTRAINT_SURFACE"
+    static_external_network_map: bool = False
+    essential_to_supernet_truth: bool = True
+    metaphorical_forms_are_semantic: bool = True
+    thought_derivation: str = "THOUGHT_IS_CLOSURE_OF_METAPHOR_INTO_RELATIONS"
+    without_visualization_status: str = "OPEN"
+    participates_in_closure: bool = True
+    closes_and_reopens_through_returns: bool = True
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "projected_forms", _freeze(self.projected_forms))
+
+    def constraint_for(self, truth_id: str) -> VisualMirrorConstraint | None:
+        for item in self.constraints:
+            if item.truth_id == truth_id:
+                return item
+        return None
+
+    def to_dict(self) -> dict[str, Any]:
+        return _to_dict(self)
+
+
+@dataclass(frozen=True)
 class RelativeTruthEvaluation:
     truth_id: str
     source: str
@@ -402,6 +469,7 @@ class TruthWitness:
     visual_equation_provenance: tuple[str, ...]
     compatibility_provenance: tuple[str, ...]
     closure_explicit_provenance: tuple[str, ...]
+    visual_mirror_provenance: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -419,6 +487,7 @@ class TranslationAxiom:
     visual_equation_provenance: tuple[str, ...]
     compatibility_provenance: tuple[str, ...]
     closure_explicit_provenance: tuple[str, ...]
+    visual_mirror_provenance: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -444,6 +513,7 @@ class ClosureMeeting:
     axiom_id: str
     witness_id: str
     truth_id: str
+    visual_mirror_constraint_id: str
     source: str
     target: str
     compatible: bool
@@ -479,6 +549,145 @@ class EquivalenceClosure:
 
 
 @dataclass(frozen=True)
+class ObserverEquality:
+    """One observer equation used by the NRRF840 closure criterion."""
+
+    observer_id: str
+    member_id: str
+    source_form_id: str
+    member_reading: str
+    source_reading: str
+    equal: bool
+    provenance: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class VisClosureMembership:
+    """Executable witness of ``x ∈ visClosure vis A`` for a singleton seed."""
+
+    id: str
+    member_id: str
+    source_form_id: str
+    source_return_provenance: tuple[str, ...]
+    observer_equalities: tuple[ObserverEquality, ...]
+    source_exists: bool = True
+    source_in_seed: bool = True
+    all_observers_equal: bool = True
+    admitted: bool = True
+    formal_criterion: str = NRRF840_CRITERION
+
+
+@dataclass(frozen=True)
+class VisClosureProperties:
+    """The NRRF840 laws inherited from the preimage/image construction."""
+
+    extensive: bool = True
+    monotone: bool = True
+    additive: bool = True
+    idempotent: bool = True
+    least_naturally_admitted_superset: bool = True
+    naturally_admitted_closed_under_complement: bool = True
+    naturally_admitted_closed_under_arbitrary_unions: bool = True
+    naturally_admitted_closed_under_arbitrary_intersections: bool = True
+    external_limit_used: bool = False
+    unnatural_limit: bool = False
+
+
+@dataclass(frozen=True)
+class DerivedVisualClosure:
+    """The finite executable form of NRRF840 ``visClosure``.
+
+    Axiometry first derives one joint translational-truth reading for every
+    visually existing form.  Closure is then computed *only* as
+    ``preimage(image(A))`` under that reading.  The axiom graph is retained as
+    provenance for the reading; it is no longer presented as the definition of
+    closure.
+    """
+
+    id: str
+    visual_mirror_id: str
+    observer_ids: tuple[str, ...]
+    joint_reading_by_form: Mapping[str, str]
+    classes: tuple[tuple[str, ...], ...]
+    singleton_closure: Mapping[str, tuple[str, ...]]
+    memberships: tuple[VisClosureMembership, ...]
+    properties: VisClosureProperties = VisClosureProperties()
+    construction: str = "PREIMAGE_OF_IMAGE_OF_JOINT_TRANSLATIONAL_TRUTH_READING"
+    formal_module: str = NRRF840_MODULE
+    formal_theorems: tuple[str, ...] = (
+        "visClosure_eq_reachOp_axiometry",
+        "visClosure_eq_preimage_image",
+        "visClosure_eq_truth_preimage_image",
+        "naturallyAdmitted_iff_derivedTranslationalTruths",
+        "isLeast_visClosure",
+        "visClosure_not_unnaturalLimit",
+    )
+    formal_criterion: str = NRRF840_CRITERION
+    natural_admission_criterion: str = (
+        "form = preimage(image(form)); equivalently, form is a union of "
+        "translational-truth fibres"
+    )
+    closure_matches_axiometry_truth_classes: bool = True
+    correspondence_status: str = (
+        "EXECUTABLE_RUNTIME_WITNESS_LINKED_TO_NRRF840; "
+        "PYTHON_EXECUTION_DOES_NOT_REPROVE_THE_LEAN_THEOREMS"
+    )
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "joint_reading_by_form",
+            _freeze(self.joint_reading_by_form),
+        )
+        object.__setattr__(
+            self,
+            "singleton_closure",
+            _freeze(self.singleton_closure),
+        )
+
+    def close(self, seed_form_ids: Iterable[str]) -> tuple[str, ...]:
+        """Return ``visClosure vis A`` by the exact NRRF840 criterion."""
+
+        seeds = tuple(dict.fromkeys(str(item) for item in seed_form_ids))
+        unknown = sorted(set(seeds) - set(self.joint_reading_by_form))
+        if unknown:
+            raise KeyError(
+                "closure seed is outside visual existence: " + ", ".join(unknown)
+            )
+        seed_readings = {
+            self.joint_reading_by_form[item]
+            for item in seeds
+        }
+        return tuple(
+            form_id
+            for form_id in sorted(self.joint_reading_by_form)
+            if self.joint_reading_by_form[form_id] in seed_readings
+        )
+
+    def is_naturally_admitted(self, form_ids: Iterable[str]) -> bool:
+        """A form is admitted exactly when it is already truth-saturated."""
+
+        members = tuple(sorted(dict.fromkeys(str(item) for item in form_ids)))
+        return self.close(members) == members
+
+    def membership(
+        self,
+        member_id: str,
+        source_form_id: str,
+    ) -> VisClosureMembership | None:
+        for item in self.memberships:
+            if (
+                item.member_id == member_id
+                and item.source_form_id == source_form_id
+            ):
+                return item
+        return None
+
+    def to_dict(self) -> dict[str, Any]:
+        return _to_dict(self)
+
+
+@dataclass(frozen=True)
 class NaturalForm:
     """An equivalence class admitted only after translational-truth closure."""
 
@@ -493,9 +702,13 @@ class NaturalForm:
     visual_equation_provenance: tuple[str, ...]
     compatibility_provenance: tuple[str, ...]
     closure_explicit_provenance: tuple[str, ...]
+    visual_mirror_provenance: tuple[str, ...]
     factorization_provenance: tuple[str, ...]
+    visual_closure_id: str
+    vis_closure_membership_witness_ids: tuple[str, ...]
+    formal_basis: str = NRRF840_MODULE
     admitted: bool = True
-    admission_basis: str = "TRANSLATIONAL_TRUTH_CLOSURE"
+    admission_basis: str = "NRRF840_VIS_CLOSURE_TRANSLATIONAL_TRUTHS"
     derived_within_closure: bool = True
 
     def to_dict(self) -> dict[str, Any]:
@@ -535,9 +748,22 @@ class InterfaceNaturalForm:
     visual_equation_provenance: tuple[str, ...]
     compatibility_provenance: tuple[str, ...]
     closure_explicit_provenance: tuple[str, ...]
+    visual_mirror_provenance: tuple[str, ...]
+    visual_mirror_id: str
+    visual_closure_id: str
+    vis_closure_membership_witness_ids: tuple[str, ...]
+    formal_basis: str = NRRF840_MODULE
+    formal_criterion: str = NRRF840_CRITERION
+    mechanism_role: str = "VISUAL_TRUTH_CONSTRAINT_AND_CLOSURE_RETURN"
+    essential_to_supernet_truth: bool = True
+    metaphorical_forms_are_semantic: bool = True
+    thought_derivation: str = "THOUGHT_IS_CLOSURE_OF_METAPHOR_INTO_RELATIONS"
+    without_interface_status: str = "OPEN"
+    static_external_network_map: bool = False
+    closes_and_reopens_through_returns: bool = True
     closure_internal: bool = True
     admitted: bool = True
-    admission_basis: str = "TRANSLATIONAL_TRUTH_CLOSURE"
+    admission_basis: str = "NRRF840_VIS_CLOSURE_TRANSLATIONAL_TRUTHS"
     renderer_contract: ExternalRendererContract = EXTERNAL_RENDERER_CONTRACT
 
     def to_dict(self) -> dict[str, Any]:
@@ -550,11 +776,13 @@ class ClosureDerivation:
 
     id: str
     visual_existence: VisualExistence
+    perspective_visual_mirror: PerspectiveVisualMirror
     relative_truths: tuple[RelativeTruth, ...]
     truth_evaluations: tuple[RelativeTruthEvaluation, ...]
     witnesses: tuple[TruthWitness, ...]
     axiometry: Axiometry
     closure_meetings: tuple[ClosureMeeting, ...]
+    visual_truth_closure: DerivedVisualClosure
     equivalence_closure: EquivalenceClosure
     natural_forms: tuple[NaturalForm, ...]
     protocol: str = PROTOCOL
@@ -568,6 +796,12 @@ class ClosureDerivation:
 
     def relation(self, source: str, target: str) -> EquivalenceRelation | None:
         return self.equivalence_closure.relation(source, target)
+
+    def vis_closure(self, seed_form_ids: Iterable[str]) -> tuple[str, ...]:
+        return self.visual_truth_closure.close(seed_form_ids)
+
+    def is_naturally_admitted(self, form_ids: Iterable[str]) -> bool:
+        return self.visual_truth_closure.is_naturally_admitted(form_ids)
 
     @property
     def admitted_axiom_ids(self) -> tuple[str, ...]:
@@ -731,7 +965,94 @@ def _coerce_relative_truth(
     )
 
 
-def _identity_witness(form: VisualForm) -> TruthWitness:
+def _derive_perspective_visual_mirror(
+    existence: VisualExistence,
+    truths: tuple[RelativeTruth, ...],
+) -> PerspectiveVisualMirror:
+    form_ids = set(existence.form_ids)
+    perspective_ids = tuple(
+        sorted(
+            {
+                str(form.state.get("perspective_id"))
+                for form in existence.forms
+                if form.state.get("perspective_id") not in {None, ""}
+            }
+        )
+    )
+    constraints: list[VisualMirrorConstraint] = []
+    for truth in truths:
+        equation = truth.visual_equation
+        endpoints_exist = truth.source in form_ids and truth.target in form_ids
+        constraint_id = _stable_id(
+            "visual-mirror-constraint",
+            {
+                "truth": truth.id,
+                "source": truth.source,
+                "target": truth.target,
+                "verdict": truth.verdict.value,
+                "equation": equation.id if equation is not None else None,
+            },
+        )
+        constraints.append(
+            VisualMirrorConstraint(
+                id=constraint_id,
+                truth_id=truth.id,
+                source=truth.source,
+                target=truth.target,
+                verdict=truth.verdict,
+                statement=truth.statement,
+                visual_equation_id=(
+                    equation.id if equation is not None else None
+                ),
+                endpoints_visually_exist=endpoints_exist,
+                source_return_provenance=tuple(
+                    dict.fromkeys(
+                        (
+                            *truth.source_returns,
+                            *(equation.source_returns if equation is not None else ()),
+                        )
+                    )
+                ),
+                presentation_status=(
+                    "PRESENTED_TRUE_CONSTRAINT"
+                    if truth.verdict is TruthVerdict.TRUE
+                    else "PRESENTED_OPEN_POTENTIAL"
+                    if truth.verdict is TruthVerdict.OPEN
+                    else "PRESENTED_FALSE_CONSTRAINT"
+                ),
+            )
+        )
+    mirror_id = _stable_id(
+        "perspective-visual-mirror",
+        {
+            "forms": sorted(existence.form_ids),
+            "perspectives": perspective_ids,
+            "projected_forms": {
+                form.id: form.state for form in existence.forms
+            },
+            "constraints": [item.id for item in constraints],
+        },
+    )
+    return PerspectiveVisualMirror(
+        id=mirror_id,
+        form_ids=tuple(sorted(existence.form_ids)),
+        perspective_ids=perspective_ids,
+        projected_forms={form.id: form.state for form in existence.forms},
+        constraints=tuple(sorted(constraints, key=lambda item: item.id)),
+        source_return_provenance=tuple(
+            dict.fromkeys(
+                source_return
+                for form in existence.forms
+                for source_return in form.source_returns
+            )
+        ),
+    )
+
+
+def _identity_witness(
+    form: VisualForm,
+    visual_mirror: PerspectiveVisualMirror,
+) -> TruthWitness:
     truth_id = f"identity-truth:{form.id}"
     witness_id = _stable_id(
         "truth-witness",
@@ -749,6 +1070,10 @@ def _identity_witness(form: VisualForm) -> TruthWitness:
         visual_equation_provenance=(f"visual-equation:identity:{form.id}",),
         compatibility_provenance=(f"compatibility:identity:{form.id}",),
         closure_explicit_provenance=(f"closure-explicit:identity:{form.id}",),
+        visual_mirror_provenance=(
+            visual_mirror.id,
+            f"visual-mirror-identity:{form.id}",
+        ),
     )
 
 
@@ -756,10 +1081,16 @@ def _cross_witness(
     truth: RelativeTruth,
     source: VisualForm,
     target: VisualForm,
+    visual_mirror: PerspectiveVisualMirror,
 ) -> TruthWitness:
     if truth.visual_equation is None:
         raise ValueError(
             "a cross-form truth witness requires a visual equation"
+        )
+    mirror_constraint = visual_mirror.constraint_for(truth.id)
+    if mirror_constraint is None:
+        raise ValueError(
+            "a cross-form truth witness requires a visual-mirror constraint"
         )
     witness_id = _stable_id(
         "truth-witness",
@@ -801,6 +1132,10 @@ def _cross_witness(
         ),
         compatibility_provenance=truth.compatibility.provenance,
         closure_explicit_provenance=truth.closure_explicit.provenance,
+        visual_mirror_provenance=(
+            visual_mirror.id,
+            mirror_constraint.id,
+        ),
     )
 
 
@@ -825,6 +1160,7 @@ def _promote_axiom(witness: TruthWitness) -> TranslationAxiom:
         visual_equation_provenance=witness.visual_equation_provenance,
         compatibility_provenance=witness.compatibility_provenance,
         closure_explicit_provenance=witness.closure_explicit_provenance,
+        visual_mirror_provenance=witness.visual_mirror_provenance,
     )
 
 
@@ -832,6 +1168,7 @@ def _derive_closure_meetings(
     axioms: tuple[TranslationAxiom, ...],
     witnesses: tuple[TruthWitness, ...],
     truths: tuple[RelativeTruth, ...],
+    visual_mirror: PerspectiveVisualMirror,
 ) -> tuple[ClosureMeeting, ...]:
     witness_by_id = {witness.id: witness for witness in witnesses}
     truth_by_id = {truth.id: truth for truth in truths}
@@ -839,6 +1176,7 @@ def _derive_closure_meetings(
     for axiom in axioms:
         witness = witness_by_id[axiom.witness_id]
         if witness.kind is WitnessKind.IDENTITY:
+            mirror_constraint_id = f"visual-mirror-identity:{witness.source}"
             admitted = True
             compatible = True
             closure_explicit = True
@@ -848,11 +1186,16 @@ def _derive_closure_meetings(
                     (
                         *witness.existence_provenance,
                         *witness.closure_explicit_provenance,
+                        *witness.visual_mirror_provenance,
                     )
                 )
             )
         else:
             truth = truth_by_id[witness.truth_id]
+            mirror_constraint = visual_mirror.constraint_for(truth.id)
+            if mirror_constraint is None:  # pragma: no cover - constructor invariant
+                raise RuntimeError("axiom lost its visual-mirror constraint")
+            mirror_constraint_id = mirror_constraint.id
             compatible = truth.compatibility.witnessed
             closure_explicit = truth.closure_explicit.witnessed
             admitted = bool(
@@ -870,6 +1213,8 @@ def _derive_closure_meetings(
                         truth.visual_equation.id
                         if truth.visual_equation is not None
                         else "",
+                        visual_mirror.id,
+                        mirror_constraint.id,
                     )
                 )
             )
@@ -887,6 +1232,7 @@ def _derive_closure_meetings(
                 axiom_id=axiom.id,
                 witness_id=witness.id,
                 truth_id=witness.truth_id,
+                visual_mirror_constraint_id=mirror_constraint_id,
                 source=axiom.source,
                 target=axiom.target,
                 compatible=compatible,
@@ -999,12 +1345,127 @@ def _closure(
     return EquivalenceClosure(classes=tuple(classes), relations=tuple(relations))
 
 
+def _derive_visual_truth_closure(
+    existence: VisualExistence,
+    equivalence: EquivalenceClosure,
+    visual_mirror: PerspectiveVisualMirror,
+) -> DerivedVisualClosure:
+    """Factor axiometry into a joint reading, then apply NRRF840 exactly."""
+
+    class_by_form = {
+        member: members
+        for members in equivalence.classes
+        for member in members
+    }
+    joint_reading_by_form = {
+        member: _stable_id(
+            "joint-translational-truth-reading",
+            {"members": class_by_form[member]},
+        )
+        for member in sorted(existence.form_ids)
+    }
+    singleton_closure = {
+        source: tuple(
+            member
+            for member in sorted(existence.form_ids)
+            if joint_reading_by_form[member] == joint_reading_by_form[source]
+        )
+        for source in sorted(existence.form_ids)
+    }
+    memberships: list[VisClosureMembership] = []
+    for source in sorted(existence.form_ids):
+        source_form = existence.form(source)
+        source_reading = joint_reading_by_form[source]
+        for member in singleton_closure[source]:
+            member_form = existence.form(member)
+            relation = equivalence.relation(source, member)
+            if relation is None:  # pragma: no cover - guarded by equal class
+                raise RuntimeError(
+                    "joint truth reading lacks its axiometry provenance"
+                )
+            equality_provenance = tuple(
+                dict.fromkeys(
+                    (
+                        *source_form.source_returns,
+                        *member_form.source_returns,
+                        *relation.axiom_ids,
+                        *relation.witness_ids,
+                        *relation.truth_ids,
+                    )
+                )
+            )
+            observer_equality = ObserverEquality(
+                observer_id=JOINT_TRUTH_OBSERVER,
+                member_id=member,
+                source_form_id=source,
+                member_reading=joint_reading_by_form[member],
+                source_reading=source_reading,
+                equal=True,
+                provenance=equality_provenance,
+            )
+            membership_id = _stable_id(
+                "vis-closure-membership",
+                {
+                    "member": member,
+                    "source": source,
+                    "observer_equalities": (observer_equality,),
+                },
+            )
+            memberships.append(
+                VisClosureMembership(
+                    id=membership_id,
+                    member_id=member,
+                    source_form_id=source,
+                    source_return_provenance=tuple(
+                        dict.fromkeys(
+                            (
+                                *source_form.source_returns,
+                                *member_form.source_returns,
+                            )
+                        )
+                    ),
+                    observer_equalities=(observer_equality,),
+                )
+            )
+
+    closure_id = _stable_id(
+        "nrrf840-vis-closure",
+        {
+            "formal_module": NRRF840_MODULE,
+            "visual_mirror": visual_mirror.id,
+            "joint_reading_by_form": joint_reading_by_form,
+            "singleton_closure": singleton_closure,
+        },
+    )
+    result = DerivedVisualClosure(
+        id=closure_id,
+        visual_mirror_id=visual_mirror.id,
+        observer_ids=(JOINT_TRUTH_OBSERVER,),
+        joint_reading_by_form=joint_reading_by_form,
+        classes=equivalence.classes,
+        singleton_closure=singleton_closure,
+        memberships=tuple(memberships),
+    )
+    # This assertion is the executable bridge: the retained axiom graph and
+    # the NRRF840 preimage/image construction must select exactly the same
+    # finite truth fibres.  Neither one is allowed to silently widen the other.
+    derived_classes = tuple(
+        dict.fromkeys(result.close((source,)) for source in sorted(existence.form_ids))
+    )
+    if derived_classes != equivalence.classes:
+        raise RuntimeError(
+            "NRRF840 visClosure disagrees with the derived axiometry truth classes"
+        )
+    return result
+
+
 def _natural_forms(
+    visual_closure: DerivedVisualClosure,
     equivalence: EquivalenceClosure,
     axioms: tuple[TranslationAxiom, ...],
 ) -> tuple[NaturalForm, ...]:
     forms: list[NaturalForm] = []
-    for members in equivalence.classes:
+    for members in visual_closure.classes:
         member_set = set(members)
         class_axioms = tuple(
             axiom
@@ -1059,8 +1520,18 @@ def _natural_forms(
                 closure_explicit_provenance=provenance(
                     "closure_explicit_provenance"
                 ),
+                visual_mirror_provenance=provenance(
+                    "visual_mirror_provenance"
+                ),
                 factorization_provenance=(
                     f"factorization-witness:{natural_form_id}",
+                ),
+                visual_closure_id=visual_closure.id,
+                vis_closure_membership_witness_ids=tuple(
+                    membership.id
+                    for membership in visual_closure.memberships
+                    if membership.source_form_id in member_set
+                    and membership.member_id in member_set
                 ),
             )
         )
@@ -1076,8 +1547,8 @@ def derive_translational_truth_axiometry(
     The stages are explicit in the result:
 
     ``visual existence -> witnessed relative truths -> visual axiometry ->
-    closure-explicit meeting -> equivalence closure -> naturally admitted
-    forms``.
+    closure-explicit meeting -> joint translational-truth reading -> NRRF840
+    ``preimage(image(A))`` closure -> naturally admitted forms``.
 
     Every existing form receives an identity witness.  A non-identity proposal
     receives a truth witness exactly when both endpoints exist, its verdict is
@@ -1098,9 +1569,11 @@ def derive_translational_truth_axiometry(
     truth_ids = tuple(truth.id for truth in truths)
     if len(truth_ids) != len(set(truth_ids)):
         raise ValueError("relative truths contain duplicate truth ids")
+    visual_mirror = _derive_perspective_visual_mirror(existence, truths)
 
     witnesses: list[TruthWitness] = [
-        _identity_witness(form) for form in sorted(forms, key=lambda item: item.id)
+        _identity_witness(form, visual_mirror)
+        for form in sorted(forms, key=lambda item: item.id)
     ]
     evaluations: list[RelativeTruthEvaluation] = []
     for truth in truths:
@@ -1217,6 +1690,7 @@ def derive_translational_truth_axiometry(
                 truth,
                 form_by_id[truth.source],
                 form_by_id[truth.target],
+                visual_mirror,
             )
             witnesses.append(witness)
             evaluations.append(
@@ -1255,6 +1729,7 @@ def derive_translational_truth_axiometry(
         axioms,
         witness_tuple,
         truths,
+        visual_mirror,
     )
     admitted_axiom_ids = {
         meeting.axiom_id for meeting in closure_meetings if meeting.admitted
@@ -1263,7 +1738,16 @@ def derive_translational_truth_axiometry(
         axiom for axiom in axioms if axiom.id in admitted_axiom_ids
     )
     equivalence = _closure(form_ids, admitted_axioms)
-    natural_forms = _natural_forms(equivalence, admitted_axioms)
+    visual_truth_closure = _derive_visual_truth_closure(
+        existence,
+        equivalence,
+        visual_mirror,
+    )
+    natural_forms = _natural_forms(
+        visual_truth_closure,
+        equivalence,
+        admitted_axioms,
+    )
     derivation_id = _stable_id(
         "closure-derivation",
         {
@@ -1276,6 +1760,7 @@ def derive_translational_truth_axiometry(
                 }
                 for form in sorted(forms, key=lambda item: item.id)
             ],
+            "perspective_visual_mirror": visual_mirror.id,
             "truths": [
                 {
                     "id": truth.id,
@@ -1304,16 +1789,19 @@ def derive_translational_truth_axiometry(
                 }
                 for meeting in closure_meetings
             ],
+            "nrrf840_visual_truth_closure": visual_truth_closure.id,
         },
     )
     return ClosureDerivation(
         id=derivation_id,
         visual_existence=existence,
+        perspective_visual_mirror=visual_mirror,
         relative_truths=truths,
         truth_evaluations=tuple(evaluations),
         witnesses=witness_tuple,
         axiometry=axiometry,
         closure_meetings=closure_meetings,
+        visual_truth_closure=visual_truth_closure,
         equivalence_closure=equivalence,
         natural_forms=natural_forms,
     )
@@ -1489,6 +1977,14 @@ def derive_interface_natural_form(
         closure_explicit_provenance=natural_form_provenance(
             "closure_explicit_provenance"
         ),
+        visual_mirror_provenance=natural_form_provenance(
+            "visual_mirror_provenance"
+        ),
+        visual_mirror_id=derivation.perspective_visual_mirror.id,
+        visual_closure_id=derivation.visual_truth_closure.id,
+        vis_closure_membership_witness_ids=tuple(
+            item.id for item in derivation.visual_truth_closure.memberships
+        ),
     )
 
 
@@ -1497,12 +1993,17 @@ __all__ = [
     "ClosureDerivation",
     "ClosureMeeting",
     "ConditionWitness",
+    "DerivedVisualClosure",
     "EquivalenceClosure",
     "EquivalenceRelation",
     "EXTERNAL_RENDERER_CONTRACT",
     "ExternalRendererContract",
     "InterfaceNaturalForm",
     "NaturalForm",
+    "NRRF840_CRITERION",
+    "NRRF840_MODULE",
+    "ObserverEquality",
+    "PerspectiveVisualMirror",
     "PROTOCOL",
     "RelativeTruth",
     "RelativeTruthEvaluation",
@@ -1514,6 +2015,9 @@ __all__ = [
     "VisualEquation",
     "VisualExistence",
     "VisualForm",
+    "VisualMirrorConstraint",
+    "VisClosureMembership",
+    "VisClosureProperties",
     "WitnessKind",
     "WitnessStatus",
     "derive_closure",

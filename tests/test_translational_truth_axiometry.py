@@ -7,6 +7,8 @@ import pytest
 from closure_supernet.translational_truth_axiometry import (
     ConditionWitness,
     EXTERNAL_RENDERER_CONTRACT,
+    NRRF840_CRITERION,
+    NRRF840_MODULE,
     RendererRole,
     TruthVerdict,
     WitnessKind,
@@ -343,7 +345,15 @@ def test_equivalence_closure_and_natural_form_retain_full_provenance() -> None:
     assert natural_form.members == ("a", "b", "c")
     assert natural_form.admitted is True
     assert natural_form.derived_within_closure is True
-    assert natural_form.admission_basis == "TRANSLATIONAL_TRUTH_CLOSURE"
+    assert natural_form.admission_basis == (
+        "NRRF840_VIS_CLOSURE_TRANSLATIONAL_TRUTHS"
+    )
+    assert natural_form.formal_basis == NRRF840_MODULE
+    assert natural_form.visual_closure_id == derivation.visual_truth_closure.id
+    assert natural_form.vis_closure_membership_witness_ids
+    assert derivation.perspective_visual_mirror.id in (
+        natural_form.visual_mirror_provenance
+    )
     assert "source-return:truth:a-b" in natural_form.source_return_provenance
     assert "eq:truth:a-b" in natural_form.visual_equation_provenance
     assert (
@@ -389,7 +399,21 @@ def test_interface_is_total_closed_reading_of_the_quotient() -> None:
     )
 
     assert interface.closure_internal is True
-    assert interface.admission_basis == "TRANSLATIONAL_TRUTH_CLOSURE"
+    assert interface.admission_basis == (
+        "NRRF840_VIS_CLOSURE_TRANSLATIONAL_TRUTHS"
+    )
+    assert interface.formal_basis == NRRF840_MODULE
+    assert interface.formal_criterion == NRRF840_CRITERION
+    assert interface.visual_closure_id == derivation.visual_truth_closure.id
+    assert interface.vis_closure_membership_witness_ids
+    assert interface.visual_mirror_id == derivation.perspective_visual_mirror.id
+    assert interface.mechanism_role == (
+        "VISUAL_TRUTH_CONSTRAINT_AND_CLOSURE_RETURN"
+    )
+    assert interface.essential_to_supernet_truth is True
+    assert interface.without_interface_status == "OPEN"
+    assert interface.static_external_network_map is False
+    assert interface.closes_and_reopens_through_returns is True
     assert len(interface.natural_form_ids) == 2
     assert len(interface.quotient_render_state) == 2
     assert interface.closure_projection["thought"] == shared_state
@@ -442,6 +466,144 @@ def test_empty_visual_existence_has_empty_total_interface_reading() -> None:
     assert interface.natural_form_ids == ()
     assert dict(interface.quotient_render_state) == {}
     assert dict(interface.closure_projection) == {}
+    assert derivation.perspective_visual_mirror.without_visualization_status == (
+        "OPEN"
+    )
+
+
+def test_perspective_visual_mirror_precedes_and_constrains_axiometry() -> None:
+    derivation = derive_closure(
+        [
+            {
+                "id": "thought",
+                "state": {"perspective_id": "harry"},
+                "source_return_ids": ["return:thought"],
+            },
+            {
+                "id": "garden",
+                "state": {"perspective_id": "maya"},
+                "source_return_ids": ["return:garden"],
+            },
+        ],
+        [_admitted_truth("truth:garden", "thought", "garden")],
+    )
+    mirror = derivation.perspective_visual_mirror
+    constraint = mirror.constraint_for("truth:garden")
+
+    assert mirror.perspective_ids == ("harry", "maya")
+    assert mirror.role == (
+        "METAPHORICAL_FORM_TRANSLATION_AND_TRUTH_CONSTRAINT_SURFACE"
+    )
+    assert mirror.static_external_network_map is False
+    assert mirror.essential_to_supernet_truth is True
+    assert mirror.participates_in_closure is True
+    assert mirror.metaphorical_forms_are_semantic is True
+    assert mirror.thought_derivation == (
+        "THOUGHT_IS_CLOSURE_OF_METAPHOR_INTO_RELATIONS"
+    )
+    assert mirror.projected_forms["thought"]["perspective_id"] == "harry"
+    assert constraint is not None
+    assert constraint.presentation_status == "PRESENTED_TRUE_CONSTRAINT"
+    assert constraint.visual_equation_id == "eq:truth:garden"
+    cross_witness = next(
+        item
+        for item in derivation.witnesses
+        if item.kind is WitnessKind.RELATIVE_TRANSLATION
+    )
+    assert mirror.id in cross_witness.visual_mirror_provenance
+    assert constraint.id in cross_witness.visual_mirror_provenance
+    assert derivation.visual_truth_closure.visual_mirror_id == mirror.id
+
+
+def test_perspective_projection_changes_mirror_not_unwitnessed_equality() -> None:
+    first = derive_closure(
+        [{"id": "form", "state": {"perspective_id": "local"}}],
+        [],
+    )
+    second = derive_closure(
+        [{"id": "form", "state": {"perspective_id": "global"}}],
+        [],
+    )
+
+    assert (
+        first.perspective_visual_mirror.id
+        != second.perspective_visual_mirror.id
+    )
+    assert first.visual_truth_closure.id != second.visual_truth_closure.id
+    assert first.natural_form_for("form").members == ("form",)
+    assert second.natural_form_for("form").members == ("form",)
+
+
+def test_nrrf840_vis_closure_is_exact_preimage_image_with_source_witnesses() -> None:
+    derivation = derive_closure(
+        [
+            {
+                "id": "a",
+                "source_return_ids": ["return:a"],
+                "existence_provenance": ["existence:a"],
+            },
+            {
+                "id": "b",
+                "source_return_ids": ["return:b"],
+                "existence_provenance": ["existence:b"],
+            },
+            {
+                "id": "c",
+                "source_return_ids": ["return:c"],
+                "existence_provenance": ["existence:c"],
+            },
+        ],
+        [_admitted_truth("truth:a-b", "a", "b")],
+    )
+    closure = derivation.visual_truth_closure
+
+    assert closure.formal_module == NRRF840_MODULE
+    assert closure.formal_criterion == NRRF840_CRITERION
+    assert "visClosure_eq_preimage_image" in closure.formal_theorems
+    assert "visClosure_not_unnaturalLimit" in closure.formal_theorems
+    assert "DOES_NOT_REPROVE_THE_LEAN_THEOREMS" in (
+        closure.correspondence_status
+    )
+    assert closure.construction == (
+        "PREIMAGE_OF_IMAGE_OF_JOINT_TRANSLATIONAL_TRUTH_READING"
+    )
+    assert closure.close(["a"]) == ("a", "b")
+    assert closure.close(["b"]) == ("a", "b")
+    assert closure.close(["c"]) == ("c",)
+    assert closure.close(["a", "c"]) == ("a", "b", "c")
+    assert closure.close([]) == ()
+    assert derivation.vis_closure(["a"]) == ("a", "b")
+
+    witness = closure.membership("b", "a")
+    assert witness is not None
+    assert witness.source_exists is True
+    assert witness.source_in_seed is True
+    assert witness.all_observers_equal is True
+    assert witness.admitted is True
+    assert "return:a" in witness.source_return_provenance
+    assert witness.observer_equalities[0].equal is True
+    assert (
+        witness.observer_equalities[0].member_reading
+        == witness.observer_equalities[0].source_reading
+    )
+
+
+def test_nrrf840_natural_admission_is_exact_truth_saturation() -> None:
+    derivation = derive_closure(
+        ["a", "b", "c"],
+        [_admitted_truth("truth:a-b", "a", "b")],
+    )
+
+    assert derivation.is_naturally_admitted([]) is True
+    assert derivation.is_naturally_admitted(["a"]) is False
+    assert derivation.is_naturally_admitted(["a", "b"]) is True
+    assert derivation.is_naturally_admitted(["c"]) is True
+    assert derivation.is_naturally_admitted(["a", "b", "c"]) is True
+    assert derivation.visual_truth_closure.properties.external_limit_used is False
+    assert derivation.visual_truth_closure.properties.unnatural_limit is False
+
+    with pytest.raises(KeyError, match="outside visual existence"):
+        derivation.vis_closure(["missing"])
 
 
 def test_interface_cannot_hide_non_factorization_or_incomplete_existence() -> None:

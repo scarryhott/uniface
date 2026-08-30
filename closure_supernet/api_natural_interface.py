@@ -5,13 +5,22 @@ import hashlib
 from functools import wraps
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import HTMLResponse, JSONResponse
 
 from . import api_proof_completion as base_api
-from .complete_interface_finish import FINAL_COMPLETE_SUPERNET_HTML
+from .closure_only_interface import CLOSURE_ONLY_SUPERNET_HTML
+from .closure_ui_contract import (
+    OPEN_STATUS as CLOSURE_UI_OPEN_STATUS,
+    SCHEMA as CLOSURE_UI_SCHEMA,
+    WITNESSED_STATUS as CLOSURE_UI_WITNESSED_STATUS,
+    derive_open_ui_contract,
+    validate_ui_contract,
+)
 from .complete_interface_models import (
     AuthorshipRole,
+    ClosureUIExecutionRequest,
     CompleteInterfaceCollective,
     CompleteInterfaceCommitmentDecision,
     CompleteInterfaceCommitmentProposal,
@@ -20,6 +29,7 @@ from .complete_interface_models import (
     CompleteInterfaceSelection,
 )
 from .config import RuntimeConfig
+from .interaction_closure import SCHEMA as INTERACTION_CLOSURE_SCHEMA
 from .living_models import (
     ActionReturnCreate,
     ActionState,
@@ -34,10 +44,13 @@ from .natural_interface_models import NaturalInterfaceAdmissionCreate
 from .nrrf837_continuum import SCHEMA as NRRF837_SCHEMA
 from .nrrf837_continuum import UNITY_SELECTOR_VERSION
 from .nrrf837_continuum import canonical_hash
+from .nrrf842_journey import SCHEMA as NRRF842_SCHEMA
+from .nrrf843_ui_mirror import SCHEMA as NRRF843_SCHEMA
 from .selection_models import SelectionReadingCreate
 from .supernet_models import IntegrationLens, ResourceEnvelope
 from .topology_models import CollectiveTraceCreate
 from .translational_truth_axiometry import SCHEMA as AXIOMETRY_SCHEMA
+from .truth_constrained_runtime import SCHEMA as UNIFIED_TRUTH_RUNTIME_SCHEMA
 
 
 def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
@@ -46,12 +59,47 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
     runtime = app.state.runtime
     app.state.natural_interface_routes_attached = True
     proposal_creation_lock = asyncio.Lock()
-    app.version = "3.11.0"
+    closure_mutation_lock = asyncio.Lock()
+    contract_execution_lock = asyncio.Lock()
+
+    @app.middleware("http")
+    async def serialize_closure_mutations(
+        request: Request,
+        call_next: Any,
+    ) -> Any:
+        """Keep revalidation and every HTTP mutation in one process-local order."""
+
+        if request.method.upper() in {"POST", "PUT", "PATCH", "DELETE"}:
+            async with closure_mutation_lock:
+                return await call_next(request)
+        return await call_next(request)
+    app.version = "3.17.0"
     app.description += (
         "; the public Black Mirror is the complete operational surface of the one "
-        "Supernet field: visual existence → witnessed translational truth → visual "
-        "axiometry → closure-explicit meeting → naturally admitted forms → a "
-        "factorized interface natural form → source-preserving return → next Sense. "
+        "Supernet field: visual existence → perspective visual mirror → witnessed "
+        "translational truth constraint → visual axiometry → closure-explicit meeting "
+        "→ NRRF840 preimage/image closure → naturally admitted forms → a "
+        "closure-transformed visual mirror → source-preserving interface return → "
+        "next Sense. The semantic UI is the truth-constraint mechanism, not a static "
+        "map of a closure computed elsewhere; without it Supernet truth remains OPEN. "
+        "NRRF842 preserves the living source journey separately from its closed state, "
+        "makes perspective an authored choice, scopes unity to one necessary gate on a "
+        "shared transition rather than a rank on people, and derives the available paths "
+        "as a semantic truth-curved light cone while ordinary interaction stays open. "
+        "One unified runtime receipt now requires journey, mirror, SLEARN, AI, tokenomic "
+        "forms, coordination, unity and UI actions to factor through that same truth "
+        "closure; no external or internally isolated component has semantic authority. "
+        "NRRF843 now executes the stronger direction: every perspective is a UI reading, "
+        "faithful display translations share one equality, and closure is recomputed as "
+        "the preimage of the displayed image. The UI therefore locates the truth "
+        "constraint. The closed interaction receipt now makes the evolving "
+        "source-preserved physical topology and the perspective digital potential "
+        "gate two projections of that same UI truth: AI admits suggested edges for "
+        "inspection, tokens admit natural interface forms, OPEN potential stays "
+        "visible, and no path executes as equality or commitment without natural-form "
+        "truth and independently authored consent. The interface locates the constraint "
+        "and generates the closure it presents; a missing or non-mirror UI "
+        "keeps the whole semantic Supernet OPEN without fallback. "
         "NRRF837 local/global composition, presentation selection, modality and freedom "
         "fibre are readings after truth; an explicitly witnessed 0↔∞ projective fold is "
         "also only a derived reading and never defines closure. "
@@ -59,7 +107,11 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
         "tokenomic resource resolution and operational canvas topology. "
         "Perspective and eight-sheaf placement are carried on the same canonical event; "
         "no subsystem page is required for core interaction, no background autonomy is "
-        "required, and presentation never manufactures truth."
+        "required, and presentation never manufactures truth. The primary website now "
+        "contains only a generic transport mount: its complete visible scene, active "
+        "perspective topology and executable controls come from a content-addressed "
+        "closure UI contract. One server endpoint re-derives that contract before "
+        "execution and rejects stale, altered or undeclared actions without fallback."
     )
 
     def _event_for_occurrence(occurrence_id: str) -> dict[str, Any]:
@@ -224,10 +276,30 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
         ) or {}
         axiometry = (receipt or {}).get("translational_truth_axiometry") or {}
         interface = (receipt or {}).get("interface_natural_form") or {}
+        journey = (receipt or {}).get("nrrf842_journey") or {}
+        nrrf843_ui = (receipt or {}).get("nrrf843_ui") or {}
+        interaction_closure = (receipt or {}).get("interaction_closure") or {}
+        unified_runtime = (receipt or {}).get("unified_truth_runtime") or {}
+        closure_ui_contract = (receipt or {}).get("closure_ui_contract") or {}
+        closure_ui_validation = validate_ui_contract(closure_ui_contract)
         renderer = interface.get("renderer_contract") or {}
         return bool(
             continuum.get("schema") == NRRF837_SCHEMA
             and axiometry.get("schema") == AXIOMETRY_SCHEMA
+            and journey.get("schema") == NRRF842_SCHEMA
+            and nrrf843_ui.get("schema") == NRRF843_SCHEMA
+            and nrrf843_ui.get("status") == "WITNESSED"
+            and interaction_closure.get("schema") == INTERACTION_CLOSURE_SCHEMA
+            and interaction_closure.get("status") == "WITNESSED"
+            and interaction_closure.get("supernet_interaction_closed") is True
+            and unified_runtime.get("schema") == UNIFIED_TRUTH_RUNTIME_SCHEMA
+            and unified_runtime.get("status") == "WITNESSED"
+            and closure_ui_contract.get("schema") == CLOSURE_UI_SCHEMA
+            and closure_ui_contract.get("status")
+            == CLOSURE_UI_WITNESSED_STATUS
+            and closure_ui_validation["valid"]
+            and closure_ui_contract.get("field_event_seq")
+            == runtime.supernet_store.latest_event_sequence()
             and interface.get("closure_internal") is True
             and interface.get("admitted") is True
             and interface.get("render_state_factorized") is True
@@ -298,7 +370,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
         return primary_sense
 
     async def _complete_page() -> str:
-        return FINAL_COMPLETE_SUPERNET_HTML
+        return CLOSURE_ONLY_SUPERNET_HTML
 
     @app.get("/", response_class=HTMLResponse, include_in_schema=False)
     async def completed_root() -> str:
@@ -344,15 +416,68 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
             "intent_to_explainable_paths_on_primary_surface": True,
             "mutual_authorship_receipt_on_primary_surface": True,
             "nrrf837_continuum_on_primary_surface": True,
+            "nrrf842_journey_state_separation": True,
+            "chosen_perspective_receipt": True,
+            "unity_gates_shared_trajectory_not_person": True,
+            "no_human_level_ranking": True,
+            "ordinary_interaction_remains_open": True,
+            "truth_curved_light_cone": True,
+            "semantic_not_physical_spacetime_curvature": True,
+            "closure_does_not_end_living_journey": True,
+            "necessary_conditions_not_sufficient": True,
+            "one_translational_truth_semantic_runtime": True,
+            "all_semantic_execution_factors_through_one_closure": True,
+            "semantically_external_components": 0,
+            "semantically_isolated_internal_components": 0,
+            "open_potential_executes_as_equality": False,
+            "browser_network_sensor_semantic_authority": False,
+            "nrrf843_ui_is_translational_mirror": True,
+            "ui_closure_is_preimage_of_displayed_image": True,
+            "ui_projection_closure_matches_nrrf840": True,
+            "truth_constraint_located_in_ui": True,
+            "non_mirror_ui_supernet_status": "OPEN",
+            "no_perspective_no_distinction": True,
+            "thought_is_relation_eqvgen_of_visual_metaphor": True,
+            "joint_ui_reading_unifies_natural_forms": True,
+            "valuation_must_factor_through_ui_truth": True,
+            "ui_price_issued": False,
+            "black_mirror_evolving_physical_topology": True,
+            "physical_topology_is_source_preserved_not_physical_law": True,
+            "perspective_digital_potential_gate": True,
+            "ai_suggestions_and_token_forms_share_ui_truth": True,
+            "open_potential_remains_visible": True,
+            "open_potential_can_execute_as_equality": False,
+            "interaction_execution_requires_truth_unification": True,
+            "token_gate_does_not_gate_ordinary_interaction": True,
+            "commitment_requires_independent_human_consent": True,
             "closure_derived_from_translational_truth_axiometry_of_visual_existence": True,
+            "nrrf840_exact_vis_closure_runtime_receipt": True,
+            "nrrf840_closure_is_preimage_of_image": True,
+            "every_admitted_member_has_source_return_observer_equality_witness": True,
             "closure_defined_by_external_limit_or_fold": False,
             "open_relation_generates_equality": False,
             "natural_forms_admitted_only_after_explicit_closure_derivation": True,
+            "semantic_ui_is_perspective_visual_mirror": True,
+            "semantic_ui_is_truth_constraint_location": True,
+            "semantic_ui_participates_in_closure": True,
+            "supernet_without_semantic_ui_status": "OPEN",
+            "semantic_ui_is_static_external_network_map": False,
+            "visual_geometry_is_interactive_closure_operator": True,
+            "metaphorical_visual_forms_are_semantic": True,
+            "thought_is_closure_of_metaphor_into_relations": True,
             "selected_form_closure_derived": True,
             "ui_is_closure_internal_natural_form": True,
             "actual_ui_render_state_factorized_through_closure": True,
             "external_renderer_is_transport_only": True,
             "external_renderer_has_no_semantic_fallback": True,
+            "closure_only_ui_contract": True,
+            "complete_visible_ui_derived_from_perspective_contract": True,
+            "hardcoded_visible_ui_instances": False,
+            "primary_browser_client_authored_action_routes": False,
+            "single_server_revalidated_contract_executor": True,
+            "stale_ui_contract_executes": False,
+            "ui_topology_uses_active_nrrf843_perspective_reading": True,
+            "open_source_boundary_claims_closure": False,
             "legacy_chart_is_transport_only": True,
             "legacy_chart_admission_defines_truth_or_closure": False,
             "ui_actions_are_returns_in_the_same_closure_environment": True,
@@ -389,13 +514,18 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
 
     @app.get("/supernet/interface")
     async def natural_interface_receipt(
+        request: Request,
         focus_event_id: str | None = None,
         perspective_id: str | None = None,
     ) -> dict[str, Any]:
         try:
+            principal = getattr(request.state, "principal", None) or {}
+            selected_perspective = perspective_id or principal.get(
+                "participant_id"
+            )
             interface = runtime.natural_interface.select(
                 focus_event_id=focus_event_id,
-                perspective_id=perspective_id,
+                perspective_id=selected_perspective,
             )
             focus = interface.get("focus_event") or {}
             event_id = str(focus.get("id") or "")
@@ -406,7 +536,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                 await _upgrade_visual_if_stale(event_id, visual)
                 interface = runtime.natural_interface.select(
                     focus_event_id=event_id,
-                    perspective_id=perspective_id,
+                    perspective_id=selected_perspective,
                 )
                 interface["visual_receipt_upgraded_to"] = NRRF837_SCHEMA
             return interface
@@ -595,6 +725,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
             metadata = {
                 **data.metadata,
                 "authored_by": data.authored_by,
+                "supernet_perspective_handle": data.perspective_id,
                 "form_label": "intent",
                 "coordination_kind": "intent",
                 "authorship_role": AuthorshipRole.HUMAN.value,
@@ -801,6 +932,9 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                     metadata={
                         **data.metadata,
                         "authored_by": data.proposed_by,
+                        "perspective_id": (
+                            data.perspective_id or data.proposed_by
+                        ),
                         "form_label": "coordination agreement proposal",
                         "coordination_kind": "agreement",
                         "authorship_role": AuthorshipRole.HUMAN.value,
@@ -1055,6 +1189,9 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                         **data.metadata,
                         "authored_handle": data.authored_by,
                         "authored_by": data.authored_by,
+                        "perspective_id": (
+                            data.perspective_id or data.authored_by
+                        ),
                         "form_label": "living action return",
                         "coordination_kind": "living_return",
                         "authorship_role": data.authorship_role.value,
@@ -1199,6 +1336,526 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    def _closure_ui_nodes(root: dict[str, Any]) -> list[dict[str, Any]]:
+        nodes = [root]
+        for child in root.get("children", []):
+            nodes.extend(_closure_ui_nodes(child))
+        return nodes
+
+    async def _authoritative_closure_ui_contract(
+        contract_id: str,
+        *,
+        perspective_id: str,
+        focus_event_id: str | None,
+    ) -> tuple[dict[str, Any], dict[str, Any] | None]:
+        """Re-derive the exact contract; never trust a browser-carried binding."""
+
+        if focus_event_id:
+            runtime.supernet_store.get_event(focus_event_id)
+            before_interface = runtime.natural_interface.select(
+                focus_event_id=focus_event_id,
+                perspective_id=perspective_id,
+            )
+            before = before_interface.get("closure_ui_contract") or {}
+            if (
+                before.get("id") != contract_id
+                or before.get("perspective_id") != perspective_id
+                or before.get("focus_event_id") != focus_event_id
+            ):
+                return before, before_interface
+            return before, before_interface
+
+        current_interface = runtime.natural_interface.select(
+            perspective_id=perspective_id,
+        )
+        current = current_interface.get("closure_ui_contract") or {}
+        if current:
+            return current, current_interface
+        candidate = derive_open_ui_contract(perspective_id=perspective_id)
+        return candidate, current_interface
+
+    def _closure_ui_execution_fingerprint(
+        *,
+        contract_id: str,
+        action_id: str,
+        perspective_id: str,
+        focus_event_id: str | None,
+        values: dict[str, Any],
+    ) -> str:
+        return "closure-ui-execution:" + canonical_hash(
+            {
+                "contract_id": contract_id,
+                "action_id": action_id,
+                "perspective_id": perspective_id,
+                "focus_event_id": focus_event_id,
+                "values": values,
+            }
+        )
+
+    def _closure_ui_principal_id(request: Request) -> str | None:
+        principal = getattr(request.state, "principal", None) or {}
+        role = str(principal.get("role") or "anonymous")
+        participant_id = principal.get("participant_id")
+        if role == "member" and not participant_id:
+            raise HTTPException(
+                status_code=403,
+                detail="authenticated member has no bound participant identity",
+            )
+        if role == "operator" or not participant_id:
+            return None
+        return str(participant_id)
+
+    def _bind_replayed_execution_to_principal(
+        values: dict[str, Any], principal_id: str | None
+    ) -> None:
+        if principal_id is None:
+            return
+        actors = [
+            item
+            for key in ("author", "decision_participant", "return_author")
+            if isinstance((item := values.get(key)), str) and item
+        ]
+        if not actors or any(item != principal_id for item in actors):
+            raise HTTPException(
+                status_code=403,
+                detail="action author must match the authenticated participant",
+            )
+
+    def _validated_contract_action(
+        contract: dict[str, Any],
+        action_id: str,
+        submitted: dict[str, Any],
+        *,
+        principal_id: str | None,
+    ) -> tuple[dict[str, Any], dict[str, str]]:
+        validation = validate_ui_contract(contract)
+        if not validation["valid"]:
+            raise ValueError("The current closure UI contract is invalid")
+        if contract.get("status") not in {
+            CLOSURE_UI_OPEN_STATUS,
+            CLOSURE_UI_WITNESSED_STATUS,
+        }:
+            raise ValueError("The current truth constraint admits no UI action")
+        allowed = contract.get("execution", {}).get("allowed_action_ids", [])
+        binding = next(
+            (
+                item
+                for item in contract.get("action_bindings", [])
+                if item.get("id") == action_id
+            ),
+            None,
+        )
+        if binding is None or action_id not in allowed:
+            raise ValueError("The action is not admitted by this contract")
+        if binding.get("enabled") is not True:
+            raise ValueError("The contract action is not enabled")
+        expected_ids = [str(item) for item in binding["input_field_ids"]]
+        if set(submitted) != set(expected_ids):
+            raise ValueError(
+                "Submitted fields do not equal the contract input schema"
+            )
+        fields = {
+            str(item["id"]): item
+            for item in _closure_ui_nodes(contract["root"])
+            if item.get("kind") in {"input", "textarea", "select"}
+        }
+        normalized: dict[str, str] = {}
+        for field_id in expected_ids:
+            value = submitted[field_id]
+            if not isinstance(value, str):
+                raise ValueError(
+                    f"Closure UI field {field_id!r} must be text"
+                )
+            field = fields[field_id]
+            if len(value) > int(field.get("max_length") or 0):
+                raise ValueError(
+                    f"Closure UI field {field_id!r} exceeds its contract limit"
+                )
+            if field_id in binding.get("required_field_ids", []) and not value.strip():
+                raise ValueError(
+                    f"Closure UI field {field_id!r} is required"
+                )
+            if field.get("kind") == "select":
+                options = {
+                    str(item.get("value"))
+                    for item in field.get("options", [])
+                }
+                if value not in options:
+                    raise ValueError(
+                        f"Closure UI field {field_id!r} is outside its contract options"
+                    )
+            normalized[field_id] = value
+        operation = str(binding["operation"])
+        actor_field = {
+            "OFFER_SOURCE": "author",
+            "CONTINUE_INTERACTION": "author",
+            "PROPOSE_AGREEMENT": "author",
+            "DECIDE_AGREEMENT": "decision_participant",
+            "RETURN_AGREEMENT": "return_author",
+        }[operation]
+        actor = normalized.get(actor_field, "")
+        perspective = normalized.get("perspective", "")
+        if actor != perspective:
+            raise ValueError(
+                "The action author must equal its authored perspective"
+            )
+        perspective_transition = bool(
+            binding.get("immutable", {}).get("perspective_transition")
+        )
+        if (
+            contract.get("status") == CLOSURE_UI_WITNESSED_STATUS
+            and not perspective_transition
+            and perspective != contract.get("perspective_id")
+        ):
+            raise ValueError(
+                "The submitted perspective does not equal the witnessed contract"
+            )
+        if principal_id is not None and actor != principal_id:
+            raise HTTPException(
+                status_code=403,
+                detail=(
+                    f"{actor_field} must match the authenticated participant"
+                ),
+            )
+        return binding, normalized
+
+    def _closure_ui_lines(value: str) -> list[str]:
+        return list(
+            dict.fromkeys(
+                line.strip() for line in value.splitlines() if line.strip()
+            )
+        )
+
+    def _closure_ui_optional(value: str) -> str | None:
+        return value.strip() or None
+
+    @app.post(
+        "/supernet/interface/contracts/{contract_id}/execute",
+        response_model=None,
+    )
+    async def execute_closure_ui_contract(
+        contract_id: str,
+        data: ClosureUIExecutionRequest,
+        request: Request,
+    ) -> Any:
+        """Execute only an operation admitted by the freshly derived UI truth."""
+
+        async with contract_execution_lock:
+            claimed_fingerprint: str | None = None
+            try:
+                principal_id = _closure_ui_principal_id(request)
+                claimed_fingerprint = _closure_ui_execution_fingerprint(
+                    contract_id=contract_id,
+                    action_id=data.action_id,
+                    perspective_id=data.perspective_id,
+                    focus_event_id=data.focus_event_id,
+                    values=data.values,
+                )
+                prior_execution = (
+                    runtime.supernet_store.get_closure_ui_execution(
+                        claimed_fingerprint
+                    )
+                )
+                if prior_execution is not None:
+                    _bind_replayed_execution_to_principal(
+                        prior_execution["request_values"], principal_id
+                    )
+                    if (
+                        prior_execution["contract_id"] != contract_id
+                        or prior_execution["action_id"] != data.action_id
+                        or prior_execution["perspective_id"]
+                        != data.perspective_id
+                        or prior_execution["focus_event_id"]
+                        != data.focus_event_id
+                        or prior_execution["request_values"] != data.values
+                    ):
+                        raise ValueError(
+                            "The execution fingerprint does not match its request"
+                        )
+                    if (
+                        prior_execution["status"] == "COMPLETED"
+                        and isinstance(prior_execution.get("response"), dict)
+                    ):
+                        return {
+                            **prior_execution["response"],
+                            "replayed": True,
+                        }
+                    return JSONResponse(
+                        status_code=409,
+                        content={
+                            "status": "EXECUTION_ALREADY_CLAIMED",
+                            "executed": False,
+                            "execution_fingerprint": claimed_fingerprint,
+                            "prior_status": prior_execution["status"],
+                        },
+                    )
+                current, current_interface = (
+                    await _authoritative_closure_ui_contract(
+                        contract_id,
+                        perspective_id=data.perspective_id,
+                        focus_event_id=data.focus_event_id,
+                    )
+                )
+                if current.get("perspective_id") != data.perspective_id:
+                    return JSONResponse(
+                        status_code=409,
+                        content={
+                            "status": "STALE_CONTRACT",
+                            "executed": False,
+                            "closure_ui_contract": current,
+                        },
+                    )
+                if current.get("focus_event_id") != data.focus_event_id:
+                    return JSONResponse(
+                        status_code=409,
+                        content={
+                            "status": "STALE_CONTRACT",
+                            "executed": False,
+                            "closure_ui_contract": current,
+                        },
+                    )
+                if current.get("id") != contract_id:
+                    return JSONResponse(
+                        status_code=409,
+                        content={
+                            "status": "STALE_CONTRACT",
+                            "executed": False,
+                            "closure_ui_contract": current,
+                        },
+                    )
+                if (
+                    current.get("status") == CLOSURE_UI_WITNESSED_STATUS
+                    and current.get("field_event_seq")
+                    != runtime.supernet_store.latest_event_sequence()
+                ):
+                    return JSONResponse(
+                        status_code=409,
+                        content={
+                            "status": "STALE_CONTRACT",
+                            "executed": False,
+                            "refresh_required": True,
+                            "prior_contract_id": contract_id,
+                        },
+                    )
+                binding, values = _validated_contract_action(
+                    current,
+                    data.action_id,
+                    data.values,
+                    principal_id=principal_id,
+                )
+                operation = str(binding["operation"])
+                immutable = dict(binding.get("immutable") or {})
+                if values != data.values:
+                    raise ValueError(
+                        "Normalized closure fields changed the execution identity"
+                    )
+                prior, claimed = (
+                    runtime.supernet_store.claim_closure_ui_execution(
+                        fingerprint=claimed_fingerprint,
+                        contract_id=contract_id,
+                        action_id=data.action_id,
+                        perspective_id=data.perspective_id,
+                        focus_event_id=data.focus_event_id,
+                        request_values=values,
+                    )
+                )
+                if not claimed:
+                    if prior["status"] == "COMPLETED" and isinstance(
+                        prior.get("response"), dict
+                    ):
+                        return {
+                            **prior["response"],
+                            "replayed": True,
+                        }
+                    return JSONResponse(
+                        status_code=409,
+                        content={
+                            "status": "EXECUTION_ALREADY_CLAIMED",
+                            "executed": False,
+                            "execution_fingerprint": claimed_fingerprint,
+                            "prior_status": prior["status"],
+                            "closure_ui_contract": current,
+                        },
+                    )
+                result: dict[str, Any]
+                if operation in {"OFFER_SOURCE", "CONTINUE_INTERACTION"}:
+                    coordination_kind = values["coordination_kind"]
+                    location = _closure_ui_optional(values["location"])
+                    offer = CompleteInterfaceOffer(
+                        exact_text=values["thought"],
+                        authored_by=values["author"],
+                        form_label=coordination_kind,
+                        perspective_id=values["perspective"],
+                        parent_event_id=(
+                            str(immutable.get("parent_event_id"))
+                            if immutable.get("parent_event_id")
+                            else None
+                        ),
+                        affected_perspectives=[values["perspective"]],
+                        relation_hints=[location] if location else [],
+                        coordination_kind=coordination_kind,
+                        location_label=location,
+                        metadata={
+                            "closure_only_ui_contract_id": current["id"],
+                            "closure_ui_action_id": data.action_id,
+                            "truth_issued": False,
+                        },
+                    )
+                    if (
+                        operation == "OFFER_SOURCE"
+                        and coordination_kind == "intent"
+                    ):
+                        result = await complete_interface_intent(offer)
+                    else:
+                        result = await complete_interface_offer(offer)
+                elif operation == "PROPOSE_AGREEMENT":
+                    target = values["proposal_target"]
+                    allowed_targets = {
+                        str(item)
+                        for item in immutable.get(
+                            "allowed_target_event_ids", []
+                        )
+                    }
+                    if target not in allowed_targets:
+                        raise ValueError(
+                            "The selected path is not admitted by this contract"
+                        )
+                    proposal = CompleteInterfaceCommitmentProposal(
+                        intent_event_id=str(immutable["intent_event_id"]),
+                        target_event_ids=[target],
+                        exact_terms=values["proposal_terms"],
+                        title=values["proposal_title"],
+                        proposed_by=values["author"],
+                        perspective_id=values["perspective"],
+                        required_participant_ids=[],
+                        resource_conditions=_closure_ui_lines(
+                            values["proposal_resources"]
+                        ),
+                        metadata={
+                            "closure_only_ui_contract_id": current["id"],
+                            "closure_ui_action_id": data.action_id,
+                            "truth_issued": False,
+                        },
+                    )
+                    result = await complete_interface_commitment_proposal(
+                        proposal
+                    )
+                elif operation == "DECIDE_AGREEMENT":
+                    participant = values["decision_participant"]
+                    decision = CompleteInterfaceCommitmentDecision(
+                        participant_id=participant,
+                        authored_by=participant,
+                        decision=str(immutable["decision"]),
+                        exact_text=values["decision_text"],
+                        perspective_id=values["perspective"],
+                        resource_offers=_closure_ui_lines(
+                            values["decision_resources"]
+                        ),
+                        constraints=_closure_ui_lines(
+                            values["decision_constraints"]
+                        ),
+                        metadata={
+                            "closure_only_ui_contract_id": current["id"],
+                            "closure_ui_action_id": data.action_id,
+                            "truth_issued": False,
+                        },
+                    )
+                    result = await complete_interface_commitment_decision(
+                        str(immutable["proposal_id"]),
+                        decision,
+                    )
+                elif operation == "RETURN_AGREEMENT":
+                    return_data = CompleteInterfaceCommitmentReturn(
+                        exact_text=values["return_text"],
+                        authored_by=values["return_author"],
+                        perspective_id=values["perspective"],
+                        location_label=_closure_ui_optional(
+                            values["return_location"]
+                        ),
+                        metadata={
+                            "closure_only_ui_contract_id": current["id"],
+                            "closure_ui_action_id": data.action_id,
+                            "truth_issued": False,
+                        },
+                    )
+                    result = await complete_interface_commitment_return(
+                        str(immutable["proposal_id"]),
+                        return_data,
+                    )
+                else:
+                    raise ValueError(
+                        "The contract operation is not server-allowlisted"
+                    )
+
+                focus_event_id = str(
+                    result.get("focus_event_id")
+                    or result.get("event_id")
+                    or result.get("decision_event_id")
+                    or result.get("return_event_id")
+                    or result.get("proposal", {}).get("proposal_event_id")
+                    or ""
+                )
+                if not focus_event_id:
+                    raise ValueError(
+                        "The executed interaction returned no closure focus"
+                    )
+                perspective_id = (
+                    values.get("perspective")
+                    or current.get("perspective_id")
+                    or "participant"
+                )
+                interface = runtime.natural_interface.select(
+                    focus_event_id=focus_event_id,
+                    perspective_id=perspective_id,
+                )
+                successor = interface.get("closure_ui_contract") or {}
+                if not validate_ui_contract(successor)["valid"]:
+                    raise ValueError(
+                        "The interaction did not derive a valid successor UI contract"
+                    )
+                response = {
+                    "status": "EXECUTED",
+                    "executed": True,
+                    "replayed": False,
+                    "execution_fingerprint": claimed_fingerprint,
+                    "prior_contract_id": contract_id,
+                    "action_id": data.action_id,
+                    "result": result,
+                    "interface": interface,
+                    "closure_ui_contract": successor,
+                    "truth_issued": False,
+                }
+                runtime.supernet_store.complete_closure_ui_execution(
+                    claimed_fingerprint,
+                    jsonable_encoder(response),
+                )
+                return response
+            except KeyError as exc:
+                if claimed_fingerprint is not None:
+                    runtime.supernet_store.fail_closure_ui_execution(
+                        claimed_fingerprint, str(exc)
+                    )
+                raise HTTPException(status_code=404, detail=str(exc)) from exc
+            except ValueError as exc:
+                if claimed_fingerprint is not None:
+                    runtime.supernet_store.fail_closure_ui_execution(
+                        claimed_fingerprint, str(exc)
+                    )
+                raise HTTPException(status_code=400, detail=str(exc)) from exc
+            except HTTPException as exc:
+                if claimed_fingerprint is not None:
+                    runtime.supernet_store.fail_closure_ui_execution(
+                        claimed_fingerprint, str(exc.detail)
+                    )
+                raise
+            except Exception as exc:
+                if claimed_fingerprint is not None:
+                    runtime.supernet_store.fail_closure_ui_execution(
+                        claimed_fingerprint,
+                        f"{type(exc).__name__}: {exc}",
+                    )
+                raise
 
     # Compatibility routes keep their URLs, but on the primary app they execute
     # interaction-time Sense rather than stopping after raw transport.

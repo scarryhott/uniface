@@ -125,6 +125,21 @@ class SupernetIntegrationStore:
         CREATE INDEX IF NOT EXISTS idx_supernet_visual_closure_event
           ON supernet_visual_closure_receipts(source_event_id,seq);
 
+        CREATE TABLE IF NOT EXISTS supernet_closure_ui_executions (
+            fingerprint TEXT PRIMARY KEY,
+            contract_id TEXT NOT NULL,
+            action_id TEXT NOT NULL,
+            perspective_id TEXT NOT NULL,
+            focus_event_id TEXT,
+            request_values TEXT NOT NULL,
+            status TEXT NOT NULL,
+            response TEXT,
+            created_at TEXT NOT NULL,
+            completed_at TEXT
+        );
+        CREATE INDEX IF NOT EXISTS idx_supernet_closure_ui_contract
+          ON supernet_closure_ui_executions(contract_id,action_id,created_at);
+
         CREATE TABLE IF NOT EXISTS supernet_commitment_proposals (
             id TEXT PRIMARY KEY,
             proposal_event_id TEXT NOT NULL UNIQUE
@@ -443,6 +458,12 @@ class SupernetIntegrationStore:
             (limit, offset),
         ).fetchall()
         return [self.get_event(str(row["id"])) for row in rows]
+
+    def latest_event_sequence(self) -> int:
+        row = self._conn.execute(
+            "SELECT COALESCE(MAX(seq),0) AS seq FROM supernet_integration_events"
+        ).fetchone()
+        return 0 if row is None else int(row["seq"])
 
     def events_after(self, seq: int, limit: int = 500) -> list[dict[str, Any]]:
         rows = self._conn.execute(
@@ -835,6 +856,104 @@ class SupernetIntegrationStore:
             raise KeyError(f"Visual closure receipt {receipt_id} not found")
         return self._decode_visual_closure_receipt(row)
 
+    def claim_closure_ui_execution(
+        self,
+        *,
+        fingerprint: str,
+        contract_id: str,
+        action_id: str,
+        perspective_id: str,
+        focus_event_id: str | None,
+        request_values: dict[str, Any],
+    ) -> tuple[dict[str, Any], bool]:
+        """Persist a one-shot claim before a closure UI mutation begins."""
+
+        with self._lock, self._conn:
+            existing = self._conn.execute(
+                """SELECT * FROM supernet_closure_ui_executions
+                   WHERE fingerprint=?""",
+                (fingerprint,),
+            ).fetchone()
+            if existing is not None:
+                return self._decode_closure_ui_execution(existing), False
+            now = utcnow()
+            self._conn.execute(
+                """INSERT INTO supernet_closure_ui_executions(
+                       fingerprint,contract_id,action_id,perspective_id,
+                       focus_event_id,request_values,status,response,
+                       created_at,completed_at
+                   ) VALUES(?,?,?,?,?,?,?,NULL,?,NULL)""",
+                (
+                    fingerprint,
+                    contract_id,
+                    action_id,
+                    perspective_id,
+                    focus_event_id,
+                    _json(request_values),
+                    "EXECUTING",
+                    now,
+                ),
+            )
+            row = self._conn.execute(
+                """SELECT * FROM supernet_closure_ui_executions
+                   WHERE fingerprint=?""",
+                (fingerprint,),
+            ).fetchone()
+        assert row is not None
+        return self._decode_closure_ui_execution(row), True
+
+    def get_closure_ui_execution(
+        self, fingerprint: str
+    ) -> dict[str, Any] | None:
+        """Read a durable execution result without creating a new claim."""
+
+        row = self._conn.execute(
+            """SELECT * FROM supernet_closure_ui_executions
+               WHERE fingerprint=?""",
+            (fingerprint,),
+        ).fetchone()
+        return (
+            None
+            if row is None
+            else self._decode_closure_ui_execution(row)
+        )
+
+    def complete_closure_ui_execution(
+        self,
+        fingerprint: str,
+        response: dict[str, Any],
+    ) -> dict[str, Any]:
+        with self._lock, self._conn:
+            self._conn.execute(
+                """UPDATE supernet_closure_ui_executions
+                   SET status='COMPLETED',response=?,completed_at=?
+                   WHERE fingerprint=? AND status='EXECUTING'""",
+                (_json(response), utcnow(), fingerprint),
+            )
+            row = self._conn.execute(
+                """SELECT * FROM supernet_closure_ui_executions
+                   WHERE fingerprint=?""",
+                (fingerprint,),
+            ).fetchone()
+        if row is None:
+            raise KeyError(f"Closure UI execution {fingerprint} not found")
+        return self._decode_closure_ui_execution(row)
+
+    def fail_closure_ui_execution(
+        self,
+        fingerprint: str,
+        detail: str,
+    ) -> None:
+        """Seal a failed claim so a partial mutation cannot be replayed."""
+
+        with self._lock, self._conn:
+            self._conn.execute(
+                """UPDATE supernet_closure_ui_executions
+                   SET status='FAILED',response=?,completed_at=?
+                   WHERE fingerprint=? AND status='EXECUTING'""",
+                (_json({"detail": detail}), utcnow(), fingerprint),
+            )
+
     def latest_visual_closure_receipt(
         self, source_event_id: str
     ) -> dict[str, Any] | None:
@@ -1106,3 +1225,26 @@ class SupernetIntegrationStore:
         receipt.setdefault("parent_receipt_ids", _loads(row["parent_receipt_ids"], []))
         receipt.setdefault("created_at", str(row["created_at"]))
         return receipt
+
+    @staticmethod
+    def _decode_closure_ui_execution(row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "fingerprint": str(row["fingerprint"]),
+            "contract_id": str(row["contract_id"]),
+            "action_id": str(row["action_id"]),
+            "perspective_id": str(row["perspective_id"]),
+            "focus_event_id": (
+                None
+                if row["focus_event_id"] is None
+                else str(row["focus_event_id"])
+            ),
+            "request_values": _loads(row["request_values"], {}),
+            "status": str(row["status"]),
+            "response": _loads(row["response"], None),
+            "created_at": str(row["created_at"]),
+            "completed_at": (
+                None
+                if row["completed_at"] is None
+                else str(row["completed_at"])
+            ),
+        }

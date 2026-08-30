@@ -3,7 +3,7 @@ from __future__ import annotations
 import inspect
 from typing import Any
 
-from . import complete_interface_finish, live_sense, visual_closure
+from . import live_sense, visual_closure
 from .live_sense import LiveSenseManager
 from .natural_interface_runtime import CompleteNaturalInterfaceManager
 from .nrrf837 import attach_continuum_to_visual_receipt
@@ -148,11 +148,13 @@ def _enforce_agreement_natural_form_witness(
 
 
 def install_nrrf837_runtime() -> None:
-    """Attach NRRF837 to the existing Sense receipt and primary UI.
+    """Attach NRRF837 to the existing Sense receipt.
 
     The patch enriches the one existing visual-closure receipt. It does not
     introduce a second event field, selector, ledger, truth authority, or
-    settlement path.
+    settlement path. The closure-only UI contract is the sole source of
+    primary-interface instances, so this compatibility installer never patches
+    browser HTML.
     """
 
     global _PATCHED
@@ -227,13 +229,3 @@ def install_nrrf837_runtime() -> None:
         return base
 
     CompleteNaturalInterfaceManager.capabilities = interface_capabilities
-
-    original_final_html = complete_interface_finish.final_complete_supernet_html
-
-    def final_complete_supernet_html() -> str:
-        return _inject_ui(original_final_html())
-
-    complete_interface_finish.final_complete_supernet_html = final_complete_supernet_html
-    complete_interface_finish.FINAL_COMPLETE_SUPERNET_HTML = _inject_ui(
-        complete_interface_finish.FINAL_COMPLETE_SUPERNET_HTML
-    )

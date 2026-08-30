@@ -106,7 +106,10 @@ class LivingNetworkManager:
                     "title": data.title,
                     "situations": data.situations,
                     "created_by": data.created_by,
-                    "perspective_id": data.perspective_id,
+                    "perspective_id": (
+                        data.metadata.get("supernet_perspective_handle")
+                        or data.perspective_id
+                    ),
                     "visibility": str(data.visibility),
                     "affected_perspectives": data.affected_perspectives,
                     "language_label": data.language_label,

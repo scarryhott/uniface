@@ -100,6 +100,7 @@ def closure_level_receipt(
                 "id": state,
                 "state": {"source_occurrence_id": state},
                 "existence_provenance": [f"source-return:{state}"],
+                "source_return_ids": [state],
             }
             for state in states
         ],
@@ -107,7 +108,7 @@ def closure_level_receipt(
     )
     derivation_receipt = derivation.to_dict()
     level_classes = [
-        list(members) for members in derivation.equivalence_closure.classes
+        list(members) for members in derivation.visual_truth_closure.classes
     ]
     admitted_returns = [
         evaluation
@@ -160,6 +161,11 @@ def closure_level_receipt(
             "factorization_provenance": list(
                 form.factorization_provenance
             ),
+            "visual_closure_id": form.visual_closure_id,
+            "vis_closure_membership_witness_ids": list(
+                form.vis_closure_membership_witness_ids
+            ),
+            "formal_basis": form.formal_basis,
         }
         for form in derivation.natural_forms
     ]
@@ -189,10 +195,15 @@ def closure_level_receipt(
     return {
         "formal_reading": "NRRF825",
         "derived_from": (
-            "visual existence → translational truth → visual axiometry → "
-            "closure-explicit meeting → natural admission"
+            "visual existence → perspective visual mirror → translational truth "
+            "→ visual axiometry → closure-explicit meeting → NRRF840 visClosure "
+            "→ natural admission → interface closure return"
         ),
         "translational_truth_axiometry": derivation_receipt,
+        "perspective_visual_mirror": (
+            derivation.perspective_visual_mirror.to_dict()
+        ),
+        "nrrf840_vis_closure": derivation.visual_truth_closure.to_dict(),
         "level_id": level_id,
         "states": states,
         "state_count": state_count,
@@ -207,9 +218,12 @@ def closure_level_receipt(
             "open_returns_excluded_from_equality": True,
             "false_returns_excluded": True,
             "level_env_characterization": (
-                "a return is naturally admitted only after compatibility and "
-                "closure-explicit visual truth are both witnessed"
+                "x is admitted from A exactly when an existing a in A has the "
+                "same joint visual reading under every observer"
             ),
+            "closure_construction": "preimage(image(A))",
+            "external_limit_used": False,
+            "unnatural_limit": False,
             "current_environment_contained_in_level_env": True,
             "level_env_is_greatest_environment_admitted_at_level": True,
             "truth_form_level_env_equals_level": True,

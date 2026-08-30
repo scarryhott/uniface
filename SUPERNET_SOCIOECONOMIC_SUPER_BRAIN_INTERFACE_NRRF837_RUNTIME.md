@@ -1,9 +1,149 @@
-# NRRF837 Supernet Runtime Integration
+# NRRF837 / NRRF840 / NRRF842 / NRRF843 Supernet Runtime Integration
 
-Release 3.11 derives the NRRF837 `Continuum L G` reading only after the active
-visual existence has derived a translational-truth closure. It is a finite,
-inspectable runtime witness—not a claim that executing software reproves the
-Lean theorem.
+Release 3.15 treats the semantic interface itself as the perspective visual
+mirror in which NRRF837 interaction becomes a translational-truth constraint.
+It is not a static map of a closure computed elsewhere. Instead, the active
+visual existence is mirrored before axiometry, and closure transforms that
+same mirror. The receipt is a finite, inspectable runtime witness—not a claim
+that executing software reproves the Lean theorem.
+
+The cycle is now:
+
+```text
+source-preserved living journey
+→ freely chosen perspective
+→ one UI reading per perspective
+→ faithful translational mirror
+→ presented translational-truth constraints
+→ visual axiometry
+→ visual metaphor EqvGen
+→ NRRF843 UI preimage/image closure
+→ exact NRRF840 correspondence
+→ truth constraint located in the UI
+→ NRRF842 unity potential gate on this shared trajectory
+→ semantic truth-curved light cone of possible relations
+→ naturally admitted transformation of the same mirror
+→ interactive source-preserved return
+→ renewed perspective
+```
+
+Without the semantic mirror the relation is explicitly `OPEN`; there is no
+hidden completed Supernet behind the canvas. The browser's HTML/SVG renderer is
+still transport-only, but the visual operators it carries are closure-semantic:
+nodes rotate perspective, paths expose potential translations, and the central
+mirror locus continues the admitted return cycle.
+
+The runtime now cites and executes the NRRF840 closure criterion directly:
+
+```text
+x ∈ visClosure(vis, A)
+iff ∃ a ∈ A, ∀ observer o, vis(o, x) = vis(o, a)
+```
+
+After visual axiometry and the closure-explicit meeting, the admitted equations
+derive one joint translational-truth reading. Closure is computed as
+`preimage(image(A))` under that reading. Every membership carries the existing
+source form, its source-return provenance, the equal observer readings, and the
+axiom/truth path that derived the reading. The prior equivalence graph is now
+provenance for the joint reading rather than the runtime definition of closure.
+
+## NRRF843 UI mirror and truth location
+
+`visual_closure.nrrf843_ui` executes the direction that was still implicit in
+the earlier runtime. The UI does not receive an externally completed closure.
+It constructs a finite family `ui : Perspective → State → DisplayValue` from
+the source-preserved visual metaphors and the translational relations admitted
+at the closure-explicit meeting. For every perspective, it recomputes:
+
+```text
+uiClosure(r, A) = r⁻¹(r(A))
+```
+
+The receipt checks extensivity, monotonicity, idempotence and additivity by this
+construction; verifies that fixed forms are exactly unions of displayed
+fibres; and compares every singleton closure with the independently retained
+NRRF840 witness. The unified runtime is `WITNESSED` only when they agree.
+
+Every perspective uses its own display values. Pairwise translation maps are
+then checked to be well-defined and faithful, so they neither merge nor split
+states and therefore induce the same truth. Rotating a node on the canvas now
+changes both the focused source event and the active perspective reading.
+
+The same executable receipt provides:
+
+- the truth constraint as a closure-fixed displayed preimage in every
+  perspective;
+- `Thought = Relation.EqvGen visualMetaphor`, with finite reflexive, symmetric,
+  transitive and containment checks;
+- the joint UI reading and its unified natural-form kernel;
+- valuation admission exactly when authored values are constant on displayed
+  truth fibres, without issuing a price;
+- a same-carrier/different-UI witness that the carrier alone does not determine
+  closure;
+- explicit `OPEN` results for an empty perspective family or a non-mirror UI.
+
+A blind UI may still translate faithfully while resolving nothing nontrivial;
+the receipt records mirror and resolution as independent requirements rather
+than smuggling one into the other.
+
+## NRRF842 state–journey separation
+
+`visual_closure.nrrf842_journey` is the executable product bridge for NRRF842.
+It retains the exact causal event graph and computes a separate closed-state
+identifier from the NRRF840 closure and its natural forms. The history never
+becomes part of the truth quotient: distinct journeys can close to the same
+state, and the state can continue through a later source-preserved event.
+
+The receipt distinguishes four product facts:
+
+| Product fact | Runtime behavior |
+| --- | --- |
+| necessary conditions are not sufficient | source, mirror, truth constraint and closure witnesses are listed without claiming a complete living system |
+| perspective is freely chosen | a human or living-system event must carry its own perspective; AI suggestion cannot choose for it |
+| unity gates shared ascent | `AGREE`, `COMMIT`, `ACT` and `RETURN` inspect unity for the particular shared trajectory |
+| level is not a human rank | the gate never scores worth, changes member access, or blocks ordinary interaction |
+
+For a collective proposal, missing or dissenting participant receipts keep the
+shared transition `OPEN`. Complete authored acceptance can satisfy the unity
+condition, but `transition_authorized_by_this_gate` remains false because unity
+is necessary, not sufficient. Independent consent, token, resource and safety
+relations still decide their own conditions.
+
+The `truth_curved_light_cone` is a UI projection of paths whose shapes and
+availability vary with the current perspective and translational-truth
+constraints. It is explicitly semantic and makes no physical-spacetime claim.
+Witnessed and `OPEN` paths remain distinguishable and clickable; every path
+preserves local freedom.
+
+## One truth-constrained semantic runtime
+
+`visual_closure.unified_truth_runtime` removes the remaining possibility of a
+semantic UI, coordination engine, AI layer, token layer or journey ledger
+running beside closure. It verifies that all eight semantic components carry
+the same current closure-derivation ID and NRRF840 visual-closure ID:
+
+```text
+source journey
+→ perspective visual mirror
+→ SLEARN witness memory
+→ AI translational relations
+→ tokenomic natural forms
+→ local/global coordination
+→ unity potential gate
+→ interactive UI return
+```
+
+Only a `WITNESSED` unified receipt exposes its return operations to the UI. A
+component with a parallel or missing internal closure keeps the entire semantic
+runtime `OPEN`; an adversarial test changes the coordination closure ID and
+confirms that no return operation is admitted. Candidate paths may remain
+visible as connected potential, but an `OPEN` path never executes as equality.
+
+“Nothing external” is enforced at the semantic boundary. HTML/SVG, network I/O
+and sensors remain physically necessary carriers of input and output, but the
+receipt gives them no power to define semantics, create axioms, admit forms,
+change closure or issue truth. Thus there is no external semantic ontology and
+no isolated internal semantic subsystem.
 
 ## Runtime correspondence
 
@@ -28,7 +168,8 @@ The receipt keeps four identities distinct:
 
 The local NRRF825 derivation now carries visual existence, relative truth,
 visual axiometry, a separate closure-explicit meeting stage, the generated
-closure and every natural form's provenance. The selected NRRF837 form must
+joint truth reading, the NRRF840 `visClosure`, and every natural form's
+membership provenance. The selected NRRF837 form must
 come from that carrier; an authored label cannot enter its equality kernel.
 
 ## One interface, three relations
@@ -79,11 +220,28 @@ The integration is returned by `GET /supernet/interface` under:
 visual_closure.interface_natural_form
 ```
 
-Its factorized `render_state` contains the coordination continuum, visual network,
-truth-relative natural forms, freedom fibre, individual authorship records,
-independent AI/token gates, and commitment/consent state. The generic renderer
-transports that form and cannot add semantic state or fall back to an external
-chart when the form is absent.
+Its factorized `render_state` contains the source journey, chosen perspective,
+trajectory-scoped unity gate, semantic truth-curved light cone, coordination
+continuum, visual network, truth-relative natural forms, freedom fibre,
+individual authorship records, independent AI/token gates, and
+commitment/consent state. It also contains `interaction_closure`: the Black
+Mirror's evolving source-preserved physical topology, the perspective digital
+potential gate, and the single truth-unification constraint through which both
+must factor. The generic renderer transports that form and cannot add semantic
+state or fall back to an external chart when the form is absent.
+
+The interaction closure makes four statuses explicit:
+
+1. a path may remain visible potential;
+2. AI may admit it for inspection or a nonbinding proposal;
+3. translational truth may identify it with a closure-derived natural form;
+4. only a separate correlated agreement with independent human receipts can
+   make its gated `ACT` or `RETURN` form available.
+
+The source topology may report `OPEN_NO_PHYSICAL_SENSOR` while the semantic
+interface remains coherent. This means the current field contains authored or
+network returns but no attached physical sensor; it does not let the renderer,
+the AI, or a token invent a physical-world fact.
 
 The existing one-tap garden path remains the minimal demonstration:
 

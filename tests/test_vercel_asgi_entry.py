@@ -108,7 +108,8 @@ with TestClient(asgi.app) as client:
     root = client.get("/")
     field = client.get("/supernet/field")
     assert root.status_code == 200
-    assert "One continuous integrator" in root.text
+    assert "data-closure-only-contract" in root.text
+    assert "One continuous integrator" not in root.text
     assert "data-projection=\\"face\\"" not in root.text
     payload = field.json()
     assert payload["canonical_runtime_operation"] == "integrate"

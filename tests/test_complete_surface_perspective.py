@@ -49,6 +49,11 @@ def test_primary_surface_reselects_by_perspective_and_preserves_sheaf_region(tmp
         assert left_ui["focus_event"]["id"] == left["event_id"]
         assert left_ui["natural_chart"]["eight_sheaf"] == "SLEARN_PERSPECTIVE"
         assert left_ui["natural_chart"]["ball_hair_region"] == "LOCAL BALL"
+        left_contract = left_ui["closure_ui_contract"]
+        assert left_contract["perspective_id"] == "person-a"
+        assert left_contract["closure_derivation_id"] == left_ui[
+            "visual_closure"
+        ]["translational_truth_axiometry"]["id"]
 
         right_ui = client.get(
             "/supernet/interface", params={"perspective_id": "person-b"}
@@ -56,8 +61,14 @@ def test_primary_surface_reselects_by_perspective_and_preserves_sheaf_region(tmp
         assert right_ui["focus_event"]["id"] == right["event_id"]
         assert right_ui["natural_chart"]["eight_sheaf"] == "AGI_SECOND_BRAIN"
         assert right_ui["natural_chart"]["ball_hair_region"] == "GLOBAL HAIR"
+        right_contract = right_ui["closure_ui_contract"]
+        assert right_contract["perspective_id"] == "person-b"
+        assert right_contract["closure_derivation_id"] == right_ui[
+            "visual_closure"
+        ]["translational_truth_axiometry"]["id"]
 
         page = client.get("/").text
-        assert "params.set('perspective_id',p)" in page
-        assert "Return sensed as successor potential" in page
-        assert "Reopening re-sensed in the living field" in page
+        assert "data-closure-only-contract" in page
+        assert "validateContract" in page
+        assert "Return sensed as successor potential" not in page
+        assert "Reopening re-sensed in the living field" not in page

@@ -8,6 +8,9 @@ from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
 from closure_supernet.api_production import create_app
+from closure_supernet.api_natural_interface import (
+    create_app as create_natural_interface_app,
+)
 from closure_supernet.config import RuntimeConfig
 
 
@@ -27,6 +30,7 @@ def production_config(tmp_path: Path, **overrides) -> RuntimeConfig:
                     "role": "member",
                     "participant_id": "participant-member",
                 },
+                "unbound-member-key": "unbound-member-user",
                 "operator-key": {
                     "subject": "operator-user",
                     "role": "operator",
@@ -110,6 +114,97 @@ def test_member_cannot_claim_another_author(tmp_path: Path) -> None:
         )
         assert response.status_code == 403
         assert "authenticated participant" in response.json()["detail"]
+
+
+def test_closure_executor_binds_nested_author_to_authenticated_participant(
+    tmp_path: Path,
+) -> None:
+    app = create_natural_interface_app(production_config(tmp_path))
+    headers = {"X-Closure-API-Key": "member-key"}
+    with TestClient(app, base_url="https://testserver") as client:
+        contract = client.get(
+            "/supernet/interface",
+            headers=headers,
+            params={"perspective_id": "participant-member"},
+        ).json()["closure_ui_contract"]
+        values = {
+            "author": "someone-else",
+            "perspective": "someone-else",
+            "coordination_kind": "intent",
+            "location": "",
+            "thought": "This identity escape must not execute.",
+        }
+        escaped = client.post(
+            f"/supernet/interface/contracts/{contract['id']}/execute",
+            headers=headers,
+            json={
+                "action_id": "offer-source",
+                "perspective_id": contract["perspective_id"],
+                "focus_event_id": contract["focus_event_id"],
+                "values": values,
+            },
+        )
+        assert escaped.status_code == 403
+        assert "authenticated participant" in escaped.json()["detail"]
+
+
+def test_unbound_authenticated_member_cannot_author_closure_input(
+    tmp_path: Path,
+) -> None:
+    app = create_natural_interface_app(production_config(tmp_path))
+    headers = {"X-Closure-API-Key": "unbound-member-key"}
+    with TestClient(app, base_url="https://testserver") as client:
+        contract = client.get(
+            "/supernet/interface",
+            headers=headers,
+            params={"perspective_id": "victim"},
+        ).json()["closure_ui_contract"]
+        escaped = client.post(
+            f"/supernet/interface/contracts/{contract['id']}/execute",
+            headers=headers,
+            json={
+                "action_id": "offer-source",
+                "perspective_id": "victim",
+                "focus_event_id": None,
+                "values": {
+                    "author": "victim",
+                    "perspective": "victim",
+                    "coordination_kind": "intent",
+                    "location": "",
+                    "thought": "This unbound identity must not execute.",
+                },
+            },
+        )
+        assert escaped.status_code == 403
+        assert "bound participant identity" in escaped.json()["detail"]
+        assert app.state.runtime.supernet_store.list_events(limit=100) == []
+        unrelated_write = client.post(
+            "/occurrences",
+            headers=headers,
+            json={"exact_text": "Supported shorthand member write."},
+        )
+        assert unrelated_write.status_code == 200, unrelated_write.text
+
+
+def test_generic_metadata_author_is_not_treated_as_request_authorship(
+    tmp_path: Path,
+) -> None:
+    app = create_natural_interface_app(production_config(tmp_path))
+    headers = {"X-Closure-API-Key": "member-key"}
+    with TestClient(app, base_url="https://testserver") as client:
+        response = client.post(
+            "/supernet/interface/offer",
+            headers=headers,
+            json={
+                "exact_text": "A source with cited-author metadata.",
+                "authored_by": "participant-member",
+                "perspective_id": "participant-member",
+                "form_label": "note",
+                "coordination_kind": "resource",
+                "metadata": {"author": "historical-source-author"},
+            },
+        )
+        assert response.status_code == 200, response.text
 
 
 def test_consistent_database_backup(tmp_path: Path) -> None:

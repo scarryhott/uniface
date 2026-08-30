@@ -430,7 +430,11 @@ class ProductionSecurityMiddleware:
         body: bytes,
         content_type: str | None,
     ) -> str | None:
-        if principal.role == "operator" or principal.participant_id is None or not body:
+        if (
+            principal.role == "operator"
+            or principal.participant_id is None
+            or not body
+        ):
             return None
         if not content_type or "application/json" not in content_type.lower():
             return None

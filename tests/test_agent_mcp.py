@@ -44,7 +44,7 @@ def test_agent_mcp_is_mounted_on_the_completed_runtime(tmp_path: Path) -> None:
         assert "supernet_offer" in payload["tools"]
         routes = {getattr(route, "path", None) for route in app.routes}
         assert "/mcp" in routes
-        assert app.version == "3.11.0"
+    assert app.version == "3.17.0"
 
 
 def test_mcp_agent_discovers_tools_and_participates_in_live_sense(tmp_path: Path) -> None:

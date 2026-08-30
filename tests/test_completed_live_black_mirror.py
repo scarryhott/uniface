@@ -25,18 +25,31 @@ def test_primary_surface_contains_no_required_core_navigation(tmp_path: Path) ->
         page = client.get("/")
         assert page.status_code == 200
         text = page.text
-        assert "Live relational field" in text
+        static_body = text.split("<script>", 1)[0]
+        assert "data-closure-only-contract" in static_body
+        assert "validateContract" in text
+        assert "action_bindings" in text
+        assert "Live relational field" not in text
         assert "fieldKind" not in text
-        assert "drawUnifiedClosure" in text
-        assert "closureContinue" in text
-        assert "perspective" in text
-        assert "/supernet/interface/offer" in text
-        assert "/supernet/interface/selections" in text
-        assert "/supernet/interface/collective" in text
-        assert "async function relate" in text
-        assert "async function rigidify" in text
-        assert "async function returnReaction" in text
-        assert "async function collective" in text
+        assert "drawUnifiedClosure" not in text
+        assert "closureContinue" not in text
+        assert "/supernet/interface/offer" not in text
+        assert "/supernet/interface/intents" not in text
+        assert "/supernet/interface/commitments" not in text
+        assert "/supernet/interface/selections" not in text
+        assert "/supernet/interface/collective" not in text
+        for tag in ("<button", "<input", "<textarea", "<select", "<svg", "<h1"):
+            assert tag not in static_body
+
+        contract = client.get("/supernet/interface").json()[
+            "closure_ui_contract"
+        ]
+        assert contract["status"] == "OPEN_SOURCE_BOUNDARY"
+        assert [item["id"] for item in contract["action_bindings"]] == [
+            "offer-source"
+        ]
+        assert contract["execution"]["source_boundary_actions_only"] is True
+        assert contract["audit"]["closure_only_execution"] is True
 
         caps = client.get("/supernet/interface/capabilities").json()
         assert caps["single_complete_operational_surface"] is True
@@ -46,6 +59,9 @@ def test_primary_surface_contains_no_required_core_navigation(tmp_path: Path) ->
         assert caps["primary_surface_component_selector"] is False
         assert caps["slearn_black_mirror_ai_tokenomic_visual_closure"] is True
         assert caps["truth_issued_by_presentation"] is False
+        assert caps["closure_only_ui_contract"] is True
+        assert caps["hardcoded_visible_ui_instances"] is False
+        assert caps["primary_browser_client_authored_action_routes"] is False
 
 
 def test_offer_sense_selection_and_collective_share_one_event_field(tmp_path: Path) -> None:

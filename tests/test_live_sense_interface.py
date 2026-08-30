@@ -134,4 +134,4 @@ def test_live_sense_capabilities_are_exposed_on_the_primary_ui(tmp_path: Path) -
         assert payload["freedom_fibre_exposed"] is True
         assert payload["content_equality_preserves_actor_identity"] is True
         assert payload["partial_consent_natural_form"] == "COMMIT"
-        assert app.version == "3.11.0"
+        assert app.version == "3.17.0"

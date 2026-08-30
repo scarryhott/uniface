@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .embodied_models import SheafKind
 
@@ -189,3 +189,36 @@ class CompleteInterfaceCollective(BaseModel):
                 dict.fromkeys([*self.affected_perspectives, self.perspective_id])
             )
         return self
+
+
+class ClosureUIExecutionRequest(BaseModel):
+    """Raw values submitted to one server-revalidated closure UI action.
+
+    The browser is deliberately unable to submit an endpoint, HTTP method, or
+    resolved domain payload.  Those are selected only after the current
+    perspective-interaction contract has been re-derived on the server.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    action_id: str = Field(min_length=1, max_length=240)
+    perspective_id: str = Field(min_length=1, max_length=500)
+    focus_event_id: str | None = Field(default=None, max_length=500)
+    values: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("values")
+    @classmethod
+    def values_are_named_fields(cls, value: dict[str, Any]) -> dict[str, Any]:
+        if len(value) > 64:
+            raise ValueError("A closure UI action may submit at most 64 fields")
+        normalized: dict[str, Any] = {}
+        for key, item in value.items():
+            name = str(key).strip()
+            if not name:
+                raise ValueError("Closure UI field names may not be empty")
+            if isinstance(item, (dict, list, tuple, set)):
+                raise ValueError(
+                    f"Closure UI field {name!r} must be a scalar transport value"
+                )
+            normalized[name] = item
+        return normalized

@@ -564,7 +564,7 @@ def build_continuum_receipt(
                 "global_atom_id": global_id,
                 "global_content_key": form_key,
                 "authored_presentation_key": _explicit_form_key(event),
-                "semantic_equality_basis": "TRANSLATIONAL_TRUTH_CLOSURE",
+                "semantic_equality_basis": "NRRF840_VIS_CLOSURE_TRANSLATIONAL_TRUTHS",
                 "projection_reference_only": bool(
                     event.get("projection_reference_only", False)
                 ),
@@ -1100,7 +1100,7 @@ def build_continuum_receipt(
                     "WITNESSED" if event_form_id else "OPEN"
                 ),
                 "equality_basis": (
-                    "TRANSLATIONAL_TRUTH_CLOSURE"
+                    "NRRF840_VIS_CLOSURE_TRANSLATIONAL_TRUTHS"
                     if event_form_id
                     else "UNRESOLVED_TRANSLATIONAL_TRUTH"
                 ),
@@ -1147,7 +1147,7 @@ def build_continuum_receipt(
         )
         equality_status = "WITNESSED" if contributor_form_id else "OPEN"
         equality_basis = (
-            "TRANSLATIONAL_TRUTH_CLOSURE"
+            "NRRF840_VIS_CLOSURE_TRANSLATIONAL_TRUTHS"
             if contributor_form_id
             else "UNRESOLVED_TRANSLATIONAL_TRUTH"
         )

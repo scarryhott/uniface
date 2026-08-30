@@ -565,7 +565,11 @@ def test_nrrf837_equal_content_preserves_same_handle_distinct_internal_actors() 
     assert {
         (item["actor_id"], item["internal_actor_id"]) for item in records
     } == expected_identities
-    assert all(item["equality_basis"] == "TRANSLATIONAL_TRUTH_CLOSURE" for item in records)
+    assert all(
+        item["equality_basis"]
+        == "NRRF840_VIS_CLOSURE_TRANSLATIONAL_TRUTHS"
+        for item in records
+    )
     assert len({item["selected_natural_form_id"] for item in records}) == 2
     assert authorship["equal_global_content_identifies_actors"] is False
 
@@ -626,7 +630,9 @@ def test_nrrf837_contributor_redundancy_requires_witnessed_equal_readings() -> N
         if item["actor_id"] == "harry"
     )
     assert resolved_record["equality_status"] == "WITNESSED"
-    assert resolved_record["equality_basis"] == "TRANSLATIONAL_TRUTH_CLOSURE"
+    assert resolved_record["equality_basis"] == (
+        "NRRF840_VIS_CLOSURE_TRANSLATIONAL_TRUTHS"
+    )
 
 
 def test_nrrf837_ai_acceptance_cannot_settle_but_independent_humans_can() -> None:

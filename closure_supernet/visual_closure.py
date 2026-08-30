@@ -3,11 +3,16 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any
 
+from .closure_ui_contract import derive_closure_ui_contract
 from .coordination import build_coordination_receipt
+from .interaction_closure import derive_interaction_closure
+from .nrrf842_journey import derive_nrrf842_journey_receipt
+from .nrrf843_ui_mirror import derive_nrrf843_ui_receipt
 from .translational_truth_axiometry import (
     derive_closure,
     derive_interface_natural_form,
 )
+from .truth_constrained_runtime import derive_unified_truth_runtime
 
 
 def _unique(values: list[str]) -> list[str]:
@@ -163,6 +168,7 @@ def build_visual_closure_receipt(
     living_problems: list[dict[str, Any]],
     living_actions: list[dict[str, Any]],
     living_returns: list[dict[str, Any]],
+    field_event_seq: int | None = None,
 ) -> dict[str, Any]:
     """Derive one operational UI receipt from one interaction-time Sense.
 
@@ -243,6 +249,12 @@ def build_visual_closure_receipt(
                     owner.get("form_label") if owner else "exact occurrence"
                 ),
                 "authored_by": owner.get("authored_by") if owner else "source",
+                "perspective_id": (
+                    owner.get("perspective_id")
+                    or owner.get("metadata", {}).get("perspective_id")
+                    if owner
+                    else None
+                ),
                 "authorship_role": (
                     owner.get("metadata", {}).get("authorship_role", "HUMAN")
                     if owner
@@ -356,6 +368,10 @@ def build_visual_closure_receipt(
                 "occurrence_id": occurrence_id,
                 "form_label": visible_event.get("form_label"),
                 "authored_by": visible_event.get("authored_by"),
+                "perspective_id": (
+                    visible_event.get("perspective_id")
+                    or visible_event.get("metadata", {}).get("perspective_id")
+                ),
                 "authorship_role": visible_event.get("metadata", {}).get(
                     "authorship_role", "HUMAN"
                 ),
@@ -382,18 +398,48 @@ def build_visual_closure_receipt(
         "protocol": "closure.supernet/visual-translational-closure-v1",
         "source_event_id": str(event["id"]),
         "closure_relation": [
+            "SOURCE_JOURNEY_LEDGER",
             "VISUAL_EXISTENCE",
+            "CHOSEN_PERSPECTIVE",
+            "NRRF843_UI_FAMILY_READING",
+            "PERSPECTIVE_VISUAL_MIRROR",
+            "TRANSLATIONAL_MIRROR",
             "TRANSLATIONAL_TRUTH",
             "VISUAL_AXIOMETRY",
             "CLOSURE_EXPLICIT_MEETING",
+            "NRRF843_UI_PREIMAGE_IMAGE_CLOSURE",
+            "NRRF840_CLOSURE_CORRESPONDENCE",
+            "TRUTH_CONSTRAINT_LOCATED_IN_UI",
             "NATURAL_FORM_ADMISSION",
-            "INTERFACE_NATURAL_FORM",
+            "THOUGHT_RELATION_EQVGEN",
+            "UNITY_POTENTIAL_GATE",
+            "TRUTH_CURVED_LIGHT_CONE",
+            "BLACK_MIRROR_EVOLVING_PHYSICAL_TOPOLOGY",
+            "PERSPECTIVE_DIGITAL_POTENTIAL_GATE",
+            "AI_TOKEN_INTERACTION_CLOSURE",
+            "SUPERNET_UNIFICATION_CONSTRAINT",
+            "PERSPECTIVE_INTERACTION_UI_CONTRACT",
+            "ONE_TRUTH_CONSTRAINED_RUNTIME",
+            "FULL_UI_NATURAL_FORM_PROJECTION",
+            "CLOSURE_ONLY_UI_EXECUTION",
+            "INTERFACE_CLOSURE_RETURN",
         ],
         "operational_return_cycle": [
             "BLACK_MIRROR_SENSE",
+            "NRRF843_UI_FAMILY_PROJECTION",
+            "TRANSLATIONAL_MIRROR",
             "SLEARN_MEMORY",
             "AI_TRANSLATION",
-            "INTERFACE_RETURN",
+            "UI_TRUTH_CONSTRAINT",
+            "UI_PREIMAGE_IMAGE_CLOSURE",
+            "CLOSURE_TRANSFORMED_MIRROR",
+            "EVOLVING_PHYSICAL_TOPOLOGY",
+            "DIGITAL_POTENTIAL_GATE",
+            "AI_TOKEN_TRUTH_UNIFICATION",
+            "PERSPECTIVE_INTERACTION_UI_CONTRACT",
+            "FULL_UI_NATURAL_FORM_PROJECTION",
+            "CLOSURE_ONLY_UI_EXECUTION",
+            "INTERFACE_CLOSURE_RETURN",
             "BLACK_MIRROR_SENSE",
         ],
         "black_mirror": {
@@ -486,14 +532,30 @@ def build_visual_closure_receipt(
         "truth_issued": False,
     }
 
-    visual_forms = [
-        {
-            "id": state,
-            "state": {"source_occurrence_id": state},
-            "existence_provenance": [f"source-return:{state}"],
-        }
-        for state in closure_level.get("states", [])
-    ]
+    visual_forms = []
+    for state in closure_level.get("states", []):
+        occurrence = occurrences_by_id.get(str(state), {})
+        owner = event_by_occurrence.get(str(state), {})
+        owner_metadata = owner.get("metadata", {})
+        visual_forms.append(
+            {
+                "id": state,
+                "state": {
+                    "source_occurrence_id": state,
+                    "perspective_id": (
+                        owner.get("perspective_id")
+                        or owner_metadata.get("perspective_id")
+                        or owner.get("authored_by")
+                        or "OPEN"
+                    ),
+                    "exact_visual_form": occurrence.get("exact_text"),
+                    "form_label": owner.get("form_label"),
+                    "operator_path": occurrence.get("operator_path", []),
+                },
+                "existence_provenance": [f"source-return:{state}"],
+                "source_return_ids": [state],
+            }
+        )
     relative_truths = [
         {
             "id": relation.get("candidate_relation_id") or relation.get("id"),
@@ -603,6 +665,12 @@ def build_visual_closure_receipt(
             "source_return_ids": member_ids,
             "natural_form_ids": form_ids,
             "closure_derivation_id": truth_derivation.id,
+            "visual_closure_id": truth_derivation.visual_truth_closure.id,
+            "vis_closure_membership_witness_ids": [
+                witness.id
+                for witness in truth_derivation.visual_truth_closure.memberships
+                if witness.member_id in member_ids
+            ],
             "derived_inside_closure": bool(form_ids),
         }
 
@@ -664,13 +732,191 @@ def build_visual_closure_receipt(
             "changes_interface_without_new_receipt": False,
         }
     ]
+    truth_derivation_dict = truth_derivation.to_dict()
+    # The first coordination pass identifies which source-preserved events must
+    # enter visual existence.  Re-derive its continuum here from the resulting
+    # joint truth closure so coordination cannot retain a parallel closure id.
+    coordination = build_coordination_receipt(
+        event=event,
+        field_events=field_events,
+        field_occurrences=field_occurrences,
+        relation_receipts=relation_receipts,
+        commitment_proposals=commitment_proposals,
+        living_problems=living_problems,
+        living_actions=living_actions,
+        living_returns=living_returns,
+        closure_level_id=str(closure_level["level_id"]),
+        closure_derivation=truth_derivation_dict,
+    )
+    receipt["coordination"] = coordination
+    initial_nrrf843_ui = derive_nrrf843_ui_receipt(
+        truth_derivation=truth_derivation_dict,
+    )
+    base_readings = initial_nrrf843_ui.get("ui_family", {}).get(
+        "readings", {}
+    )
+    interface_perspectives = _unique(
+        [
+            *[
+                str(
+                    item.get("perspective_id")
+                    or item.get("metadata", {}).get("perspective_id")
+                    or item.get("authored_by")
+                    or ""
+                )
+                for item in field_events
+            ],
+            *[
+                str(item)
+                for item in (coordination.get("active_proposal") or {}).get(
+                    "required_participant_ids", []
+                )
+            ],
+        ]
+    )
+    if base_readings and interface_perspectives:
+        reference_reading = dict(next(iter(base_readings.values())))
+        nrrf843_ui = derive_nrrf843_ui_receipt(
+            truth_derivation=truth_derivation_dict,
+            perspective_readings={
+                perspective: reference_reading
+                for perspective in interface_perspectives
+            },
+        )
+    else:
+        nrrf843_ui = initial_nrrf843_ui
+    receipt["nrrf843_ui"] = nrrf843_ui
+    nrrf842_journey = derive_nrrf842_journey_receipt(
+        focus_event=event,
+        field_events=field_events,
+        perspective_visual_mirror=(
+            truth_derivation.perspective_visual_mirror.to_dict()
+        ),
+        visual_truth_closure=truth_derivation.visual_truth_closure.to_dict(),
+        natural_forms=closure_level.get("truth_closes_level_alone", {}).get(
+            "natural_forms", []
+        ),
+        coordination=coordination,
+    )
+    receipt["nrrf842_journey"] = nrrf842_journey
+    interaction_closure = derive_interaction_closure(
+        truth_derivation=truth_derivation_dict,
+        nrrf843_ui=nrrf843_ui,
+        nrrf842_journey=nrrf842_journey,
+        coordination=coordination,
+        ai_translation=receipt["ai_translation"],
+        tokenomic=receipt["tokenomic"],
+        visual_network=receipt["visual_network"],
+        black_mirror=receipt["black_mirror"],
+        network_return=receipt["network_return"],
+    )
+    receipt["interaction_closure"] = interaction_closure
+    closure_ui_contract = derive_closure_ui_contract(
+        truth_derivation=truth_derivation_dict,
+        nrrf843_ui=nrrf843_ui,
+        nrrf842_journey=nrrf842_journey,
+        interaction_closure=interaction_closure,
+        coordination=coordination,
+        visual_network=receipt["visual_network"],
+        source_occurrences=source_occurrences,
+        focus_event=event,
+        field_event_seq=field_event_seq,
+    )
+    receipt["closure_ui_contract"] = closure_ui_contract
+    unified_truth_runtime = derive_unified_truth_runtime(
+        truth_derivation=truth_derivation_dict,
+        nrrf843_ui=nrrf843_ui,
+        nrrf842_journey=nrrf842_journey,
+        interaction_closure=interaction_closure,
+        closure_ui_contract=closure_ui_contract,
+        coordination=coordination,
+        semantic_elements=semantic_elements,
+        interface_actions=interface_actions,
+        slearn=receipt["slearn"],
+        ai_translation=receipt["ai_translation"],
+        tokenomic=receipt["tokenomic"],
+    )
+    receipt["unified_truth_runtime"] = unified_truth_runtime
     receipt["operational_closure"].update(
         {
             "translational_truth_axiometry_derived": True,
             "open_edges_excluded_from_equality": True,
             "natural_forms_derived_before_admission": True,
+            "perspective_visual_mirror_is_truth_constraint_surface": True,
+            "interface_required_for_supernet_truth": True,
+            "supernet_without_interface_remains_open": True,
+            "interface_is_active_visual_closure_mechanism": True,
+            "metaphorical_forms_are_semantic": True,
+            "thought_closes_metaphor_into_relations": True,
+            "nrrf843_ui_family_reading_executed": True,
+            "nrrf843_translational_mirror_witnessed": (
+                nrrf843_ui["translational_mirror"]["witnessed"]
+            ),
+            "nrrf843_ui_projection_generates_closure": nrrf843_ui[
+                "ui_closure"
+            ]["closure_falls_out_from_ui_projection"],
+            "nrrf843_truth_constraint_located_in_ui": nrrf843_ui[
+                "truth_constraint_location"
+            ]["located"],
+            "nrrf843_thought_eqvgen_executed": nrrf843_ui["thought"][
+                "least_closed_relation_computed"
+            ],
+            "nrrf843_no_external_closure_or_truth": not (
+                nrrf843_ui["ui_family"]["external_closure_assumed"]
+                or nrrf843_ui["ui_family"]["external_truth_assumed"]
+            ),
+            "nrrf840_preimage_image_closure_executed": True,
+            "closure_free_of_external_limit": True,
+            "closure_free_of_unnatural_limit": True,
             "interface_natural_form_derived_inside_closure": True,
             "external_renderer_transport_only": True,
+            "journey_preserved_separately_from_closed_state": True,
+            "chosen_perspective_receipt_present": True,
+            "unity_gate_scoped_to_shared_trajectory": True,
+            "ordinary_interaction_remains_open": True,
+            "truth_curved_light_cone_derived": True,
+            "black_mirror_physical_topology_derived": interaction_closure[
+                "black_mirror_physical_topology"
+            ]["closure_is_generated_by_projection"],
+            "perspective_digital_potential_gate_derived": interaction_closure[
+                "perspective_digital_potential_gate"
+            ]["status"]
+            == "WITNESSED",
+            "ai_token_interaction_closed_by_truth_unification": (
+                interaction_closure["supernet_interaction_closed"]
+            ),
+            "closure_only_ui_contract_derived": (
+                closure_ui_contract["audit"]["closure_only_execution"]
+            ),
+            "all_visible_ui_nodes_contract_derived": (
+                closure_ui_contract["audit"][
+                    "all_nodes_and_topology_records_have_exact_derivation"
+                ]
+            ),
+            "all_ui_actions_contract_derived": (
+                closure_ui_contract["audit"][
+                    "controls_equal_actions_equal_execution_allowlist"
+                ]
+            ),
+            "no_hardcoded_visible_ui_instances": (
+                closure_ui_contract["renderer_contract"][
+                    "hardcoded_visible_instances"
+                ]
+                is False
+            ),
+            "open_digital_potential_remains_visible": interaction_closure[
+                "perspective_digital_potential_gate"
+            ]["open_potential_remains_visible"],
+            "closure_continues_living_history": True,
+            "one_semantic_truth_runtime_witnessed": (
+                unified_truth_runtime["status"] == "WITNESSED"
+            ),
+            "no_semantically_external_component": not unified_truth_runtime[
+                "semantic_external_component_ids"
+            ],
+            "no_semantically_isolated_component": not unified_truth_runtime[
+                "semantic_isolated_component_ids"
+            ],
         }
     )
     interface_render_state = {
@@ -693,9 +939,23 @@ def build_visual_closure_receipt(
         ],
         "derivation_order": receipt["closure_relation"],
         "truth_form_equals_visual_equality": True,
+        "perspective_visual_mirror": (
+            truth_derivation.perspective_visual_mirror.to_dict()
+        ),
+        "interface_mechanism_role": (
+            "VISUAL_TRUTH_CONSTRAINT_AND_CLOSURE_RETURN"
+        ),
+        "without_interface_status": "OPEN",
+        "static_external_network_map": False,
+        "nrrf840_vis_closure": truth_derivation.visual_truth_closure.to_dict(),
+        "nrrf843_ui": nrrf843_ui,
         "ui_factors_through_translational_truth": True,
         "ui_is_external_ontology": False,
         "renderer_role": "TRANSPORT_ONLY",
+        "nrrf842_journey": nrrf842_journey,
+        "interaction_closure": interaction_closure,
+        "closure_ui_contract": closure_ui_contract,
+        "unified_truth_runtime": unified_truth_runtime,
         "coordination": coordination,
         "visual_network": receipt["visual_network"],
         "closure_level": closure_level,
@@ -746,6 +1006,6 @@ def build_visual_closure_receipt(
             "render_state_factorized": True,
         }
     )
-    receipt["translational_truth_axiometry"] = truth_derivation.to_dict()
+    receipt["translational_truth_axiometry"] = truth_derivation_dict
     receipt["interface_natural_form"] = interface_form
     return receipt
