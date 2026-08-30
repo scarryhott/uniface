@@ -120,4 +120,12 @@ def test_live_sense_capabilities_are_exposed_on_the_primary_ui(tmp_path: Path) -
         assert payload["live_sense"]["background_autonomy_required"] is False
         assert payload["single_complete_operational_surface"] is True
         assert payload["core_action_requires_subsystem_page"] is False
-        assert app.version == "3.9.0"
+        assert payload["nrrf837_continuum_on_primary_surface"] is True
+        assert payload["versioned_unity_selector_is_extra_data"] is True
+        assert payload["unity_selector_network_derived"] is False
+        assert payload["modality_idempotence_checked"] is True
+        assert payload["global_equality_kernel_exposed"] is True
+        assert payload["freedom_fibre_exposed"] is True
+        assert payload["content_equality_preserves_actor_identity"] is True
+        assert payload["partial_consent_natural_form"] == "COMMIT"
+        assert app.version == "3.10.0"

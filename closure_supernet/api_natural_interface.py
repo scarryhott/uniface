@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 import hashlib
+from functools import wraps
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
@@ -29,6 +31,9 @@ from .living_models import (
     Visibility,
 )
 from .natural_interface_models import NaturalInterfaceAdmissionCreate
+from .nrrf837_continuum import SCHEMA as NRRF837_SCHEMA
+from .nrrf837_continuum import UNITY_SELECTOR_VERSION
+from .nrrf837_continuum import canonical_hash
 from .selection_models import SelectionReadingCreate
 from .supernet_models import IntegrationLens, ResourceEnvelope
 from .topology_models import CollectiveTraceCreate
@@ -39,11 +44,13 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
         return app
     runtime = app.state.runtime
     app.state.natural_interface_routes_attached = True
-    app.version = "3.9.0"
+    proposal_creation_lock = asyncio.Lock()
+    app.version = "3.10.0"
     app.description += (
         "; the public Black Mirror is the complete operational surface of the one "
         "Supernet field: exact source → interaction-time Sense → interpretation/admission "
         "→ TranslationField → NRRF790 selection/OPEN branching → NRRF825 equality level "
+        "→ NRRF837 local/global composition, versioned unity selection, modality and freedom fibre "
         "→ source-reversible 0↔∞ projective fold "
         "→ equality-class resource admission → visual network return → next Sense. "
         "The same persisted receipt is the SLEARN memory update, AI translation, "
@@ -119,6 +126,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
 
     def _proposal_view(proposal_id: str) -> dict[str, Any]:
         proposal = runtime.supernet_store.get_commitment_proposal(proposal_id)
+        consent_status = str(proposal.get("status") or "PROPOSED")
         def expose_decision(item: dict[str, Any]) -> dict[str, Any]:
             return {
                 **item,
@@ -139,9 +147,14 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                 expose_decision(item)
                 for item in proposal.get("decision_history", [])
             ],
+            "coordination_settled": consent_status == "ACCEPTED",
+            "monetary_settled": False,
+            "legally_binding": False,
             "settled": False,
+            "settled_deprecated": True,
             "non_transferable": True,
             "identity_assurance": "DEVELOPMENT_ATTESTATION",
+            "consent_status": consent_status,
         }
         action_id = proposal.get("action_id")
         returned = (
@@ -151,18 +164,74 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
             if action_id
             else []
         )
-        if returned:
+        latest_return_at = max(
+            (str(item.get("created_at") or "") for item in returned),
+            default=None,
+        )
+        unanimous_acceptance_at = proposal.get("unanimous_acceptance_at")
+        return_follows_current_acceptance = bool(
+            latest_return_at
+            and unanimous_acceptance_at
+            and latest_return_at >= str(unanimous_acceptance_at)
+        )
+        proposal = {
+            **proposal,
+            "latest_return_at": latest_return_at,
+            "return_follows_current_acceptance": return_follows_current_acceptance,
+        }
+        if (
+            returned
+            and consent_status == "ACCEPTED"
+            and return_follows_current_acceptance
+        ):
             proposal = {
                 **proposal,
-                "status_before_return": proposal["status"],
+                "status_before_return": consent_status,
                 "status": "RETURNED",
+                "closure_phase": "RETURN",
                 "return_ids": [item["id"] for item in returned],
+            }
+        elif returned:
+            if consent_status == "ACCEPTED":
+                closure_phase = "ACT"
+            elif consent_status == "PARTIAL":
+                closure_phase = "COMMIT"
+            elif consent_status in {"REJECTED", "WITHDRAWN"}:
+                closure_phase = "REOPENED"
+            else:
+                closure_phase = "AGREE"
+            proposal = {
+                **proposal,
+                "closure_phase": closure_phase,
+                "return_ids": [item["id"] for item in returned],
+                "historical_return_present": True,
             }
         return proposal
 
-    def _coordination_for_event(event_id: str) -> dict[str, Any] | None:
+    async def _coordination_for_event(event_id: str) -> dict[str, Any] | None:
         interface = runtime.natural_interface.select(focus_event_id=event_id)
-        return (interface.get("visual_closure") or {}).get("coordination")
+        visual = interface.get("visual_closure")
+        if visual is not None and not _is_current_nrrf837_visual(visual):
+            visual = await _upgrade_visual_if_stale(event_id, visual)
+        return (visual or {}).get("coordination")
+
+    def _is_current_nrrf837_visual(receipt: dict[str, Any] | None) -> bool:
+        coordination = (receipt or {}).get("coordination") or {}
+        continuum = coordination.get("nrrf837_continuum") or coordination.get(
+            "continuum"
+        ) or {}
+        return continuum.get("schema") == NRRF837_SCHEMA
+
+    async def _upgrade_visual_if_stale(
+        event_id: str,
+        receipt: dict[str, Any] | None,
+    ) -> dict[str, Any] | None:
+        """Append a current receipt while leaving historical receipts immutable."""
+
+        if receipt is None or _is_current_nrrf837_visual(receipt):
+            return receipt
+        await runtime.live_sense.sense_event(event_id)
+        return runtime.supernet_store.latest_visual_closure_receipt(event_id)
 
     async def _sense_commitment_lineage(
         proposal_id: str,
@@ -175,6 +244,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
         lineage_event_ids = [
             proposal.get("intent_event_id"),
             proposal.get("proposal_event_id"),
+            *proposal.get("target_event_ids", []),
             *[
                 item.get("decision_event_id")
                 for item in proposal.get("decision_history", [])
@@ -188,6 +258,14 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                 lineage_event_ids.append(
                     _event_for_occurrence(item["occurrence_id"])["id"]
                 )
+        lineage_event_ids.extend(
+            item["id"]
+            for item in runtime.supernet_store.list_events(limit=100_000)
+            if str(
+                item.get("metadata", {}).get("commitment_proposal_id") or ""
+            )
+            == proposal_id
+        )
         ordered = list(
             dict.fromkeys(
                 str(event_id)
@@ -253,6 +331,18 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
             "visual_network_drives_derived_next_operation": True,
             "intent_to_explainable_paths_on_primary_surface": True,
             "mutual_authorship_receipt_on_primary_surface": True,
+            "nrrf837_continuum_on_primary_surface": True,
+            "local_global_compose_homomorphism_checked": True,
+            "versioned_unity_selector_is_extra_data": True,
+            "unity_selector_network_derived": False,
+            "modality_idempotence_checked": True,
+            "global_equality_kernel_exposed": True,
+            "freedom_fibre_exposed": True,
+            "content_equality_preserves_actor_identity": True,
+            "suggestion_equivalence_separate_from_contextual_ranking": True,
+            "independent_product_gates_cannot_realise_correlated_commitment": True,
+            "correlated_commitment_requires_separate_consent_relation": True,
+            "partial_consent_natural_form": "COMMIT",
             "independent_human_commitment_decisions": True,
             "ai_can_suggest_but_cannot_bind": True,
             "commitment_tokens_gate_interactions": False,
@@ -274,10 +364,23 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
         perspective_id: str | None = None,
     ) -> dict[str, Any]:
         try:
-            return runtime.natural_interface.select(
+            interface = runtime.natural_interface.select(
                 focus_event_id=focus_event_id,
                 perspective_id=perspective_id,
             )
+            focus = interface.get("focus_event") or {}
+            event_id = str(focus.get("id") or "")
+            visual = interface.get("visual_closure")
+            if event_id and visual is not None and not _is_current_nrrf837_visual(
+                visual
+            ):
+                await _upgrade_visual_if_stale(event_id, visual)
+                interface = runtime.natural_interface.select(
+                    focus_event_id=event_id,
+                    perspective_id=perspective_id,
+                )
+                interface["visual_receipt_upgraded_to"] = NRRF837_SCHEMA
+            return interface
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except ValueError as exc:
@@ -305,7 +408,12 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                 raise KeyError(
                     f"Supernet integration event {event_id} has no visual closure receipt"
                 )
-            return receipt
+            upgraded = await _upgrade_visual_if_stale(event_id, receipt)
+            if upgraded is None:
+                raise KeyError(
+                    f"Supernet integration event {event_id} has no visual closure receipt"
+                )
+            return upgraded
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
@@ -511,7 +619,16 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
+    def serialize_proposal_creation(function: Any) -> Any:
+        @wraps(function)
+        async def serialized(*args: Any, **kwargs: Any) -> Any:
+            async with proposal_creation_lock:
+                return await function(*args, **kwargs)
+
+        return serialized
+
     @app.post("/supernet/interface/commitments")
+    @serialize_proposal_creation
     async def complete_interface_commitment_proposal(
         data: CompleteInterfaceCommitmentProposal,
     ) -> dict[str, Any]:
@@ -539,30 +656,94 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
             required = list(dict.fromkeys(item for item in required if item))
             if data.proposed_by not in required:
                 required.insert(0, data.proposed_by)
-            participant_rows = [_participant_for_handle(item) for item in required]
-            signature = hashlib.sha256(
-                "\x1f".join(
-                    [
-                        data.intent_event_id,
-                        *sorted(data.target_event_ids),
-                        data.proposed_by,
-                        data.exact_terms,
-                    ]
-                ).encode("utf-8")
-            ).hexdigest()
+            signature = canonical_hash(
+                {
+                    "protocol": "closure.supernet/coordination-proposal-key-v2",
+                    "intent_event_id": data.intent_event_id,
+                    "target_event_ids": data.target_event_ids,
+                    "proposed_by": data.proposed_by,
+                    "title": data.title,
+                    "exact_terms": data.exact_terms,
+                    "perspective_id": data.perspective_id,
+                    "required_participant_ids": required,
+                    "resource_conditions": data.resource_conditions,
+                    "open_assumptions": data.open_assumptions,
+                    "metadata": data.metadata,
+                    "unity_selector_version": UNITY_SELECTOR_VERSION,
+                }
+            )
             external_key = data.external_key or f"coordination-proposal:{signature}"
             existing = runtime.supernet_store.get_commitment_proposal_by_external_key(
                 external_key
             )
+
+            def same_proposal_payload(proposal: dict[str, Any] | None) -> bool:
+                proposal_metadata = (proposal or {}).get("metadata") or {}
+                persisted_request_metadata = proposal_metadata.get(
+                    "request_metadata"
+                )
+                if not isinstance(persisted_request_metadata, dict):
+                    persisted_request_metadata = {
+                        key: value
+                        for key, value in proposal_metadata.items()
+                        if key
+                        not in {
+                            "title",
+                            "proposed_by",
+                            "perspective_id",
+                            "identity_assurance",
+                        }
+                    }
+                return bool(
+                    proposal
+                    and proposal.get("intent_event_id") == data.intent_event_id
+                    and proposal.get("target_event_ids", [])
+                    == data.target_event_ids
+                    and proposal.get("proposed_by") == data.proposed_by
+                    and proposal.get("title") == data.title
+                    and proposal.get("exact_terms") == data.exact_terms
+                    and proposal_metadata.get("perspective_id")
+                    == data.perspective_id
+                    and proposal.get("required_participant_ids", []) == required
+                    and proposal.get("resource_conditions", [])
+                    == data.resource_conditions
+                    and proposal.get("open_assumptions", [])
+                    == data.open_assumptions
+                    and persisted_request_metadata == data.metadata
+                    and proposal.get("unity_selector_version")
+                    == UNITY_SELECTOR_VERSION
+                )
+
+            if existing is not None and not same_proposal_payload(existing):
+                raise ValueError(
+                    "The proposal external key is already bound to different exact terms or scope"
+                )
+            if existing is None and data.external_key is None:
+                legacy_signature = hashlib.sha256(
+                    "\x1f".join(
+                        [
+                            data.intent_event_id,
+                            *sorted(data.target_event_ids),
+                            data.proposed_by,
+                            data.exact_terms,
+                        ]
+                    ).encode("utf-8")
+                ).hexdigest()
+                legacy = runtime.supernet_store.get_commitment_proposal_by_external_key(
+                    f"coordination-proposal:{legacy_signature}"
+                )
+                if same_proposal_payload(legacy):
+                    existing = legacy
             if existing is not None:
                 proposal = _proposal_view(existing["id"])
                 event_id = proposal["proposal_event_id"]
                 return {
                     "proposal": proposal,
-                    "coordination": _coordination_for_event(event_id),
+                    "coordination": await _coordination_for_event(event_id),
                     "truth_issued": False,
                 }
 
+            participant_rows = [_participant_for_handle(item) for item in required]
             action = await runtime.living.create_action(
                 CollectiveActionCreate(
                     problem_id=problem["id"],
@@ -598,6 +779,8 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                         "target_event_ids": data.target_event_ids,
                         "required_participant_ids": required,
                         "resource_conditions": data.resource_conditions,
+                        "open_assumptions": data.open_assumptions,
+                        "unity_selector_version": UNITY_SELECTOR_VERSION,
                         "constraints": data.resource_conditions,
                         "relation_hints": [
                             "mutual authorship",
@@ -613,7 +796,13 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                             *data.target_event_ids,
                         ],
                         "supernet_external_key": (
-                            f"coordination-proposal-event:{signature}"
+                            "coordination-proposal-event:"
+                            + canonical_hash(
+                                {
+                                    "proposal_signature": signature,
+                                    "external_key": external_key,
+                                }
+                            )
                         ),
                         "token_transferable": False,
                         "currency_issued": False,
@@ -632,9 +821,15 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                     "target_event_ids": data.target_event_ids,
                     "required_participant_ids": required,
                     "resource_conditions": data.resource_conditions,
+                    "title": data.title,
+                    "proposed_by": data.proposed_by,
+                    "exact_terms": data.exact_terms,
+                    "open_assumptions": data.open_assumptions,
+                    "unity_selector_version": UNITY_SELECTOR_VERSION,
                     "external_key": external_key,
                     "metadata": {
                         **data.metadata,
+                        "request_metadata": data.metadata,
                         "title": data.title,
                         "proposed_by": data.proposed_by,
                         "perspective_id": data.perspective_id,
@@ -686,6 +881,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                     ]
                 ).encode("utf-8")
             ).hexdigest()
+            participant_actor = _participant_for_handle(data.participant_id)
             event_result = await runtime.interact_with_event(
                 proposal["proposal_event_id"],
                 ResourceEnvelope(
@@ -714,6 +910,8 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                         **data.metadata,
                         "coordination_kind": "commitment",
                         "authorship_role": AuthorshipRole.HUMAN.value,
+                        "authored_handle": data.authored_by,
+                        "internal_actor_id": participant_actor["id"],
                         "commitment_proposal_id": proposal_id,
                         "source_intent_event_id": proposal["intent_event_id"],
                         "participant_id": data.participant_id,
@@ -739,6 +937,8 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                         **data.metadata,
                         "authorship_role": AuthorshipRole.HUMAN.value,
                         "authored_by": data.authored_by,
+                        "authored_handle": data.authored_by,
+                        "internal_actor_id": participant_actor["id"],
                     },
                 },
             )
@@ -746,8 +946,8 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
             action_id = current.get("action_id")
             if action_id:
                 action = runtime.living_store.get_action(action_id)
-                actor = _participant_for_handle(data.participant_id)
-                if current["status"] == "ACCEPTED" and action[
+                actor = participant_actor
+                if current["consent_status"] == "ACCEPTED" and action[
                     "current_state"
                 ] != ActionState.COMMITTED:
                     runtime.living.transition_action(
@@ -760,7 +960,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                             actor_id=actor["id"],
                         ),
                     )
-                elif current["status"] in {"REJECTED", "WITHDRAWN"} and action[
+                elif current["consent_status"] in {"REJECTED", "WITHDRAWN"} and action[
                     "current_state"
                 ] == ActionState.COMMITTED:
                     runtime.living.transition_action(
@@ -795,7 +995,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
 
         try:
             proposal = _proposal_view(proposal_id)
-            if proposal["status"] != "ACCEPTED":
+            if proposal["consent_status"] != "ACCEPTED":
                 raise ValueError(
                     "ACT and RETURN remain token-gated until every required human accepts"
                 )
@@ -803,6 +1003,17 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
             if not action_id:
                 raise ValueError("The proposal has no collective action")
             participant = _participant_for_handle(data.authored_by)
+            enabling_decision_event_ids = [
+                str(item.get("decision_event_id"))
+                for item in proposal.get("decisions", [])
+                if str(item.get("decision") or "").upper() == "ACCEPT"
+                and item.get("decision_event_id")
+            ]
+            decision_history_event_ids = [
+                str(item.get("decision_event_id"))
+                for item in proposal.get("decision_history", [])
+                if item.get("decision_event_id")
+            ]
             returned = await runtime.living.add_action_return(
                 action_id,
                 ActionReturnCreate(
@@ -813,6 +1024,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                     source_location=data.location_label,
                     metadata={
                         **data.metadata,
+                        "authored_handle": data.authored_by,
                         "authored_by": data.authored_by,
                         "form_label": "living action return",
                         "coordination_kind": "living_return",
@@ -821,8 +1033,15 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                         "source_intent_event_id": proposal["intent_event_id"],
                         "action_id": action_id,
                         "location_label": data.location_label,
-                        "parent_event_ids": [proposal["proposal_event_id"]],
-                        "causal_predecessor_ids": [proposal["proposal_event_id"]],
+                        "parent_event_ids": [
+                            proposal["proposal_event_id"],
+                            *enabling_decision_event_ids,
+                        ],
+                        "causal_predecessor_ids": [
+                            proposal["proposal_event_id"],
+                            *enabling_decision_event_ids,
+                        ],
+                        "decision_history_event_ids": decision_history_event_ids,
                         "return_is_not_terminal": True,
                         "truth_issued": False,
                     },
@@ -869,7 +1088,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                 )["id"]
             return {
                 "proposal": proposal,
-                "coordination": _coordination_for_event(focus_event_id),
+                "coordination": await _coordination_for_event(focus_event_id),
                 "truth_issued": False,
             }
         except KeyError as exc:

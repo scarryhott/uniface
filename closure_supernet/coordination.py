@@ -4,6 +4,8 @@ import math
 import re
 from typing import Any
 
+from .nrrf837_continuum import UNITY_SELECTOR_VERSION, build_continuum_receipt
+
 
 _TOKEN = re.compile(r"[a-z0-9]+")
 _STOP = {
@@ -134,6 +136,30 @@ def _authorship_role(event: dict[str, Any]) -> str:
     return "HUMAN"
 
 
+def _authored_handle(event: dict[str, Any]) -> str:
+    """Expose the submitted public author while retaining the internal actor ID."""
+
+    metadata = event.get("metadata", {})
+    return str(
+        metadata.get("authored_handle")
+        or metadata.get("submitted_authored_by")
+        or metadata.get("authored_by")
+        or event.get("authored_by")
+        or "OPEN"
+    )
+
+
+def _internal_actor_id(event: dict[str, Any]) -> str:
+    metadata = event.get("metadata", {})
+    return str(
+        metadata.get("internal_actor_id")
+        or metadata.get("created_by")
+        or metadata.get("authored_by")
+        or event.get("authored_by")
+        or _authored_handle(event)
+    )
+
+
 def _location(event: dict[str, Any]) -> tuple[str | None, tuple[float, float] | None]:
     metadata = event.get("metadata", {})
     raw = metadata.get("location")
@@ -179,8 +205,11 @@ def _root_intent(
         return events[str(direct)]
     proposal_id = metadata.get("commitment_proposal_id")
     for proposal in proposals:
-        if proposal_id == proposal.get("id") or event.get("action_id") == proposal.get(
-            "action_id"
+        if (
+            proposal_id == proposal.get("id")
+            or event.get("action_id") == proposal.get("action_id")
+            or str(event.get("id"))
+            in {str(item) for item in proposal.get("target_event_ids", [])}
         ):
             return events.get(str(proposal["intent_event_id"]), event)
     if _coordination_kind(event) == "INTENT":
@@ -371,6 +400,7 @@ def build_coordination_receipt(
                 "binding": False,
                 "proposed_by": "AI",
                 "authorship_role": "AI",
+                "equality_level_id": closure_level_id,
                 "score": round(score, 6),
                 "why": {
                     "relation_id": (relation or {}).get("candidate_relation_id"),
@@ -391,6 +421,7 @@ def build_coordination_receipt(
                         ]
                     ),
                     "reverse_path": [target_id, intent_id],
+                    "shared_equality_level_id": closure_level_id,
                     "limitations": limitations,
                     "global_truth_claimed": False,
                     "global_optimum_claimed": False,
@@ -411,13 +442,34 @@ def build_coordination_receipt(
     active_proposal = None
     event_proposal_id = event.get("metadata", {}).get("commitment_proposal_id")
     for proposal in proposals:
-        if event_proposal_id == proposal.get("id") or event.get(
-            "action_id"
-        ) == proposal.get("action_id"):
+        if (
+            event_proposal_id == proposal.get("id")
+            or str(event.get("id")) == str(proposal.get("proposal_event_id"))
+            or (
+                event.get("action_id") is not None
+                and event.get("action_id") == proposal.get("action_id")
+            )
+        ):
             active_proposal = proposal
             break
+    if active_proposal is None:
+        target_proposals = [
+            proposal
+            for proposal in proposals
+            if str(event.get("id"))
+            in {str(item) for item in proposal.get("target_event_ids", [])}
+        ]
+        if target_proposals:
+            active_proposal = max(
+                target_proposals, key=lambda item: item.get("created_at", "")
+            )
     if active_proposal is None and proposals:
         active_proposal = max(proposals, key=lambda item: item.get("created_at", ""))
+    if active_proposal is not None:
+        active_proposal = {
+            **active_proposal,
+            "consent_status": str(active_proposal.get("status") or "PROPOSED"),
+        }
 
     actions = {str(item["id"]): item for item in living_actions}
     action = (
@@ -432,14 +484,43 @@ def build_coordination_receipt(
     ]
     latest_return = max(returns, key=lambda item: item.get("created_at", "")) if returns else None
     return_event = None
+    latest_return_at = (
+        str(latest_return.get("created_at") or "")
+        if latest_return is not None
+        else None
+    )
+    unanimous_acceptance_at = (
+        active_proposal.get("unanimous_acceptance_at")
+        if active_proposal is not None
+        else None
+    )
+    return_follows_current_acceptance = bool(
+        latest_return_at
+        and unanimous_acceptance_at
+        and latest_return_at >= str(unanimous_acceptance_at)
+    )
     if latest_return is not None:
         return_event = event_by_occurrence.get(str(latest_return.get("occurrence_id")))
-        if active_proposal is not None:
+        if (
+            active_proposal is not None
+            and active_proposal.get("consent_status") == "ACCEPTED"
+            and return_follows_current_acceptance
+        ):
             active_proposal = {
                 **active_proposal,
                 "status_before_return": active_proposal.get("status"),
                 "status": "RETURNED",
                 "return_ids": [item["id"] for item in returns],
+                "latest_return_at": latest_return_at,
+                "return_follows_current_acceptance": True,
+            }
+        elif active_proposal is not None:
+            active_proposal = {
+                **active_proposal,
+                "return_ids": [item["id"] for item in returns],
+                "historical_return_present": True,
+                "latest_return_at": latest_return_at,
+                "return_follows_current_acceptance": False,
             }
 
     draft_path = paths[0] if paths else None
@@ -470,10 +551,19 @@ def build_coordination_receipt(
         }
 
     status = str((active_proposal or {}).get("status") or "OPEN")
-    if latest_return is not None:
+    consent_status = str(
+        (active_proposal or {}).get("consent_status") or status
+    )
+    if (
+        latest_return is not None
+        and consent_status == "ACCEPTED"
+        and return_follows_current_acceptance
+    ):
         operator = "RETURN"
-    elif status == "ACCEPTED":
+    elif consent_status == "ACCEPTED":
         operator = "ACT"
+    elif consent_status == "PARTIAL":
+        operator = "COMMIT"
     elif active_proposal is not None:
         operator = "AGREE"
     elif paths:
@@ -481,26 +571,78 @@ def build_coordination_receipt(
     else:
         operator = "DISCOVER"
 
-    contributors: list[dict[str, Any]] = [
-        {
-            "role": "HUMAN",
-            "contribution": "exact intent and participant decisions",
-            "event_ids": _unique(
-                [
-                    intent_id,
-                    *[
-                        str(decision.get("decision_event_id"))
-                        for proposal in proposals
-                        for decision in proposal.get("decisions", [])
-                    ],
-                ]
-            ),
-            "source_reverse_path": list(reversed(intent.get("exact_source_ids", []))),
-            "can_bind_human_consent": True,
-            "identity_verified": False,
-        },
+    humans_by_actor: dict[tuple[str, str], dict[str, Any]] = {}
+
+    def add_human_contribution(
+        actor_id: str,
+        internal_actor_id: str,
+        event_id: str,
+        source_ids: list[str],
+        contribution_type: str,
+    ) -> None:
+        actor = actor_id or "participant"
+        internal_actor = internal_actor_id or actor
+        contributor = humans_by_actor.setdefault(
+            (actor, internal_actor),
+            {
+                "role": "HUMAN",
+                "actor_id": actor,
+                "internal_actor_ids": [],
+                "contribution_types": [],
+                "event_ids": [],
+                "source_reverse_path": [],
+                "can_bind_human_consent": True,
+                "identity_verified": False,
+            },
+        )
+        contributor["contribution_types"].append(contribution_type)
+        contributor["internal_actor_ids"].append(internal_actor)
+        contributor["event_ids"].append(event_id)
+        contributor["source_reverse_path"].extend(reversed(source_ids))
+
+    add_human_contribution(
+        str(intent.get("authored_by") or "participant"),
+        _internal_actor_id(intent),
+        intent_id,
+        [str(item) for item in intent.get("exact_source_ids", [])],
+        "INTENT",
+    )
+    for proposal in ([active_proposal] if active_proposal is not None else []):
+        for decision in proposal.get("decision_history", []):
+            decision_event_id = str(decision.get("decision_event_id") or "")
+            decision_event = events.get(decision_event_id, {})
+            add_human_contribution(
+                str(
+                    decision.get("metadata", {}).get("authored_by")
+                    or decision.get("participant_id")
+                    or "participant"
+                ),
+                _internal_actor_id(decision_event),
+                decision_event_id,
+                [str(item) for item in decision_event.get("exact_source_ids", [])],
+                "DECISION",
+            )
+    contributors: list[dict[str, Any]] = []
+    for contributor in humans_by_actor.values():
+        contributor["contribution_types"] = _unique(
+            contributor["contribution_types"]
+        )
+        contributor["internal_actor_ids"] = _unique(
+            contributor["internal_actor_ids"]
+        )
+        contributor["internal_actor_id"] = contributor["internal_actor_ids"][0]
+        contributor["contribution"] = " + ".join(
+            item.lower() for item in contributor["contribution_types"]
+        )
+        contributor["event_ids"] = _unique(contributor["event_ids"])
+        contributor["source_reverse_path"] = _unique(
+            contributor["source_reverse_path"]
+        )
+        contributors.append(contributor)
+    contributors.append(
         {
             "role": "AI",
+            "actor_id": "coordination-ai",
             "contribution": "explainable path translation and ordering",
             "event_ids": _unique(
                 [
@@ -517,19 +659,20 @@ def build_coordination_receipt(
             ),
             "can_bind_human_consent": False,
             "truth_issued": False,
-        },
-    ]
+        }
+    )
     if active_proposal is not None:
         contributors.append(
             {
                 "role": "TOKEN",
+                "actor_id": str(active_proposal.get("id") or "commitment-token"),
                 "contribution": "non-transferable receipt of exact scoped terms and decisions",
                 "event_ids": _unique(
                     [
                         str(active_proposal.get("proposal_event_id") or ""),
                         *[
                             str(item.get("decision_event_id") or "")
-                            for item in active_proposal.get("decisions", [])
+                            for item in active_proposal.get("decision_history", [])
                         ],
                     ]
                 ),
@@ -544,11 +687,33 @@ def build_coordination_receipt(
                 "currency_issued": False,
             }
         )
+    return_role: str | None = None
     if latest_return is not None:
+        return_role = (
+            _authorship_role(return_event)
+            if return_event is not None
+            else "LIVING_SYSTEM"
+        )
         contributors.append(
             {
-                "role": "LIVING",
-                "role_label": "LIVING_SYSTEM",
+                "role": return_role,
+                "role_label": return_role,
+                "actor_id": (
+                    _authored_handle(return_event)
+                    if return_event is not None
+                    else str(latest_return.get("authored_by") or "living-return")
+                ),
+                "internal_actor_id": str(
+                    return_event.get("authored_by")
+                    if return_event is not None
+                    else latest_return.get("authored_by") or "living-return"
+                ),
+                "authored_by": (
+                    _authored_handle(return_event)
+                    if return_event is not None
+                    else str(latest_return.get("authored_by") or "living-return")
+                ),
+                "contribution_type": "RETURN",
                 "contribution": "returned consequence that reopens the field",
                 "event_ids": _unique(
                     [str(return_event.get("id") if return_event else "")]
@@ -557,6 +722,11 @@ def build_coordination_receipt(
                     [
                         str(latest_return.get("occurrence_id") or ""),
                         str(active_proposal.get("proposal_event_id") if active_proposal else ""),
+                        *(
+                            return_event.get("causal_predecessor_ids", [])
+                            if return_event is not None
+                            else []
+                        ),
                         intent_id,
                     ]
                 ),
@@ -566,14 +736,30 @@ def build_coordination_receipt(
         )
 
     for contributor in contributors:
-        contributor["natural_form_id"] = closure_level_id
+        contributor["equality_level_id"] = closure_level_id
         contributor["source_event_ids"] = list(contributor.get("event_ids", []))
 
-    token_status = "SATISFIED" if status in {"ACCEPTED", "RETURNED"} else "OPEN"
-    if status in {"REJECTED", "WITHDRAWN"}:
+    token_status = (
+        "SATISFIED" if consent_status == "ACCEPTED" else "OPEN"
+    )
+    if consent_status in {"REJECTED", "WITHDRAWN"}:
         token_status = "REOPENED"
-    return {
-        "protocol": "closure.supernet/coordination-v1",
+    freedom_actions = ["inspect", "message", "ask", "decline", "revise"]
+    if consent_status == "ACCEPTED":
+        enabled_forms = [
+            "DISCOVER",
+            "CONNECT",
+            "AGREE",
+            "COMMIT",
+            "ACT",
+            "RETURN",
+        ]
+    elif active_proposal is not None:
+        enabled_forms = ["DISCOVER", "CONNECT", "AGREE", "COMMIT"]
+    else:
+        enabled_forms = ["DISCOVER", "CONNECT", "AGREE"]
+    receipt = {
+        "protocol": "closure.supernet/coordination-v2",
         "intent_event_id": intent_id,
         "optimization_scope": "visible source-preserved paths under the authored location and constraints",
         "global_optimum_claimed": False,
@@ -611,11 +797,21 @@ def build_coordination_receipt(
                     else ""
                 ),
                 "authored_by": (
+                    _authored_handle(return_event)
+                    if return_event is not None
+                    else None
+                ),
+                "actor_id": (
+                    _authored_handle(return_event)
+                    if return_event is not None
+                    else None
+                ),
+                "internal_actor_id": (
                     return_event.get("authored_by")
                     if return_event is not None
                     else None
                 ),
-                "authorship_role": "LIVING_SYSTEM",
+                "authorship_role": return_role,
                 "location_label": (
                     _location(return_event)[0]
                     if return_event is not None
@@ -635,22 +831,26 @@ def build_coordination_receipt(
             "all_sources_preserved": all(
                 bool(item.get("source_reverse_path")) for item in contributors
             ),
-            "one_natural_form_id": closure_level_id,
+            "one_equality_level_id": closure_level_id,
             "ai_may_suggest_but_not_bind": True,
             "token_may_record_conditions_but_not_consent": True,
+            "equal_content_identifies_actors": False,
+            "actor_identity_collapsed": False,
         },
         "natural_form_operator": {
             "natural_form": operator,
             "derived": True,
             "user_selected_phase": False,
-            "local_open": ["inspect", "message", "ask", "decline", "revise"],
+            "local_open": freedom_actions,
             "global_transition": "DISCOVER→CONNECT→AGREE→COMMIT→ACT→RETURN",
             "token_gated_forms": ["ACT", "RETURN"],
-            "enabled_forms": (
-                ["DISCOVER", "CONNECT", "AGREE", "COMMIT", "ACT", "RETURN"]
-                if status in {"ACCEPTED", "RETURNED"}
-                else ["DISCOVER", "CONNECT", "AGREE", "COMMIT"]
+            "enabled_forms": enabled_forms,
+            "selector_version": str(
+                (active_proposal or {}).get("unity_selector_version")
+                or UNITY_SELECTOR_VERSION
             ),
+            "selector_source": "versioned Supernet product policy",
+            "unity_is_extra_data": True,
             "gates_interactions": False,
             "interactions_gated": False,
         },
@@ -695,7 +895,7 @@ def build_coordination_receipt(
             "decision_event_ids": (
                 [
                     item.get("decision_event_id")
-                    for item in active_proposal.get("decisions", [])
+                    for item in active_proposal.get("decision_history", [])
                 ]
                 if active_proposal is not None
                 else []
@@ -708,3 +908,145 @@ def build_coordination_receipt(
         "truth_issued": False,
         "two_person_E2E": "OPEN",
     }
+    continuum_event_ids = _unique(
+        [
+            str(event.get("id") or ""),
+            intent_id,
+            *[str(path.get("target_event_id") or "") for path in paths],
+            *(
+                [
+                    str(active_proposal.get("proposal_event_id") or ""),
+                    *[
+                        str(item)
+                        for item in active_proposal.get("target_event_ids", [])
+                    ],
+                    *[
+                        str(item.get("decision_event_id") or "")
+                        for item in active_proposal.get("decision_history", [])
+                    ],
+                ]
+                if active_proposal is not None
+                else []
+            ),
+            str(return_event.get("id") if return_event is not None else ""),
+        ]
+    )
+    continuum_field_events = [
+        events[event_id]
+        for event_id in continuum_event_ids
+        if event_id in events
+    ]
+    continuum = build_continuum_receipt(
+        local_event=event,
+        intent=receipt["intent"],
+        field_events=continuum_field_events,
+        paths=paths,
+        active_proposal=active_proposal,
+        living_return=receipt["living_return"],
+        operator=receipt["natural_form_operator"],
+        enabled_forms=enabled_forms,
+        freedom_actions=freedom_actions,
+        closure_level_id=closure_level_id,
+        contributors=contributors,
+        token_status=receipt["token_gate"],
+    )
+    receipt["continuum"] = continuum
+    receipt["nrrf837_continuum"] = continuum
+    selected_form_id = str(continuum["selected_natural_form_id"])
+    ranked_edges = {
+        str(item.get("id")): item
+        for item in continuum.get("suggestions", {}).get(
+            "contextual_ranked_edges", []
+        )
+    }
+    for path in paths:
+        edge = ranked_edges.get(str(path.get("id")), {})
+        shared_natural_form = bool(edge.get("shared_natural_form"))
+        target_form_id = edge.get("target_natural_form_id") or edge.get(
+            "natural_form_id"
+        )
+        path["natural_form_id"] = (
+            str(target_form_id) if target_form_id else None
+        )
+        path["why"]["shared_natural_form_id"] = (
+            str(edge.get("shared_natural_form_id") or target_form_id)
+            if shared_natural_form
+            else None
+        )
+        path["why"]["natural_form_equality"] = (
+            "form(compose(intent)) = form(compose(target))"
+            if shared_natural_form
+            else "OPEN — contextual path; natural-form equality is not witnessed"
+        )
+        path["why"]["suggestion_equivalence"] = (
+            "SAME_NATURAL_FORM" if shared_natural_form else "OPEN"
+        )
+        path["why"]["formal_suggestion_status"] = (
+            "WITNESSED" if shared_natural_form else "OPEN"
+        )
+    authorship = continuum.get("authorship", {})
+    contributor_records = authorship.get("contributor_records", [])
+    for contributor, record in zip(contributors, contributor_records, strict=False):
+        contributor["global_content_id"] = record.get("global_content_id")
+        contributor["global_state_id"] = record.get("global_state_id")
+        contributor["natural_form_id"] = record.get(
+            "selected_natural_form_id"
+        )
+        contributor["equality_status"] = record.get("equality_status", "OPEN")
+        contributor["equality_basis"] = record.get("equality_basis", "UNRESOLVED")
+        contributor["unresolved_source_event_ids"] = record.get(
+            "unresolved_source_event_ids", []
+        )
+    premise = authorship.get("mutual_authorship_redundancy_premise", {})
+    witnessed_one_form = bool(
+        premise.get("all_contributors_witnessed")
+        and premise.get("same_witnessed_natural_form")
+    )
+    witnessed_one_global_reading = bool(
+        premise.get("all_contributors_witnessed")
+        and premise.get("same_witnessed_global_reading")
+    )
+    witnessed_form_ids = {
+        str(record["selected_natural_form_id"])
+        for record in contributor_records
+        if record.get("selected_natural_form_id")
+    }
+    witnessed_global_ids = {
+        str(record["global_content_id"])
+        for record in contributor_records
+        if record.get("global_content_id")
+    }
+    receipt["mutual_authorship"].update(
+        {
+            "one_natural_form_id": (
+                next(iter(witnessed_form_ids))
+                if witnessed_one_form and len(witnessed_form_ids) == 1
+                else None
+            ),
+            "one_global_content_id": (
+                next(iter(witnessed_global_ids))
+                if witnessed_one_global_reading and len(witnessed_global_ids) == 1
+                else None
+            ),
+            "natural_form_equality_status": (
+                "WITNESSED" if witnessed_one_form else "OPEN"
+            ),
+            "global_reading_equality_status": (
+                "WITNESSED" if witnessed_one_global_reading else "OPEN"
+            ),
+            "mutual_authorship_redundancy_applicable": authorship.get(
+                "mutual_authorship_redundancy_applicable", False
+            ),
+            "redundancy_is_content_equality_only": True,
+            "premise_injected": False,
+        }
+    )
+    receipt["local_global"].update(
+        {
+            "local_closure_level_id": continuum.get("local_closure_level_id"),
+            "global_content_id": continuum.get("global_content_id"),
+            "global_state_id": continuum.get("global_state_id"),
+            "selected_natural_form_id": selected_form_id,
+        }
+    )
+    return receipt

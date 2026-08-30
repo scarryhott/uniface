@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -43,7 +44,7 @@ def test_agent_mcp_is_mounted_on_the_completed_runtime(tmp_path: Path) -> None:
         assert "supernet_offer" in payload["tools"]
         routes = {getattr(route, "path", None) for route in app.routes}
         assert "/mcp" in routes
-        assert app.version == "3.7.0"
+        assert app.version == "3.10.0"
 
 
 def test_mcp_agent_discovers_tools_and_participates_in_live_sense(tmp_path: Path) -> None:
@@ -100,6 +101,30 @@ def test_mcp_agent_discovers_tools_and_participates_in_live_sense(tmp_path: Path
             assert second["interface"]["sense_depth"] is not None
             assert second["truth_issued"] is False
 
+            store = runtime.supernet_store
+            stale_row = store._conn.execute(  # noqa: SLF001 - upgrade fixture
+                """SELECT id,receipt FROM supernet_visual_closure_receipts
+                WHERE source_event_id=? ORDER BY seq DESC LIMIT 1""",
+                (second["event_id"],),
+            ).fetchone()
+            assert stale_row is not None
+            stale_payload = json.loads(str(stale_row["receipt"]))
+            stale_coordination = stale_payload.get("coordination") or {}
+            stale_coordination.pop("nrrf837_continuum", None)
+            stale_coordination.pop("continuum", None)
+            stale_payload["coordination"] = stale_coordination
+            with store._lock:  # noqa: SLF001 - upgrade fixture
+                store._conn.execute(  # noqa: SLF001 - upgrade fixture
+                    """UPDATE supernet_visual_closure_receipts
+                    SET input_signature=?,receipt=? WHERE id=?""",
+                    (
+                        f"pre-nrrf837:mcp:{second['event_id']}",
+                        json.dumps(stale_payload, sort_keys=True),
+                        str(stale_row["id"]),
+                    ),
+                )
+                store._conn.commit()  # noqa: SLF001 - upgrade fixture
+
             observed = _structured(
                 await client.call_tool(
                     "supernet_observe",
@@ -115,6 +140,12 @@ def test_mcp_agent_discovers_tools_and_participates_in_live_sense(tmp_path: Path
                 for source in observed["interface"]["source_fibre"]
             )
             assert observed["interface"]["sense_depth"] is not None
+            assert observed["interface"]["visual_closure"]["coordination"][
+                "nrrf837_continuum"
+            ]["schema"] == "closure.supernet/nrrf837-continuum-v1"
+            assert observed["interface"]["visual_closure"]["id"] != str(
+                stale_row["id"]
+            )
             assert observed["subsystems_are_lenses"] is True
             assert observed["truth_issued"] is False
 

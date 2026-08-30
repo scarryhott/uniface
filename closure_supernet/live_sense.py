@@ -9,6 +9,8 @@ from .models import Verdict
 from .natural_interface import NaturalInterfaceManager
 from .natural_interface_models import NaturalChartKind
 from .nrrf825 import closure_level_receipt
+from .nrrf837_continuum import SCHEMA as NRRF837_SCHEMA
+from .nrrf837_continuum import UNITY_SELECTOR_VERSION
 from .selection_models import SelectionReadingCreate
 from .supernet_models import ResourceEnvelope
 from .topology_models import TopologyMode
@@ -52,6 +54,7 @@ class LiveSenseManager:
             "uses_existing_translation_field": True,
             "uses_existing_nrrf790_selector": True,
             "derives_nrrf825_equality_level": True,
+            "derives_nrrf837_continuum": True,
             "unified_visual_translational_closure": True,
             "black_mirror_slearn_ai_tokenomic_one_receipt": True,
             "slearn_memory_changes_candidate_priority": True,
@@ -373,6 +376,8 @@ class LiveSenseManager:
         visual_signature = hashlib.sha256(
             _stable(
                 {
+                    "visual_closure_schema": NRRF837_SCHEMA,
+                    "unity_selector_version": UNITY_SELECTOR_VERSION,
                     "source_event_id": event_id,
                     "current_stage": current_event["current_stage"],
                     "current_verdict": current_event["current_verdict"],
@@ -386,6 +391,25 @@ class LiveSenseManager:
                         {
                             "id": proposal["id"],
                             "status": proposal["status"],
+                            "title": proposal.get("title"),
+                            "proposed_by": proposal.get("proposed_by"),
+                            "exact_terms": proposal.get("exact_terms"),
+                            "open_assumptions": proposal.get(
+                                "open_assumptions", []
+                            ),
+                            "target_event_ids": proposal.get(
+                                "target_event_ids", []
+                            ),
+                            "required_participant_ids": proposal.get(
+                                "required_participant_ids", []
+                            ),
+                            "resource_conditions": proposal.get(
+                                "resource_conditions", []
+                            ),
+                            "unity_selector_version": proposal.get(
+                                "unity_selector_version",
+                                UNITY_SELECTOR_VERSION,
+                            ),
                             "decision_event_ids": [
                                 item["decision_event_id"]
                                 for item in proposal.get("decision_history", [])

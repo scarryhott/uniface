@@ -237,6 +237,3 @@ def install_nrrf837_runtime() -> None:
     complete_interface_finish.FINAL_COMPLETE_SUPERNET_HTML = _inject_ui(
         complete_interface_finish.FINAL_COMPLETE_SUPERNET_HTML
     )
-
-
-install_nrrf837_runtime()

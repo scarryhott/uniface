@@ -36,20 +36,28 @@ def _unique(values: list[str]) -> list[str]:
     return list(dict.fromkeys(str(item) for item in values if str(item)))
 
 
-def _compact_interface(runtime: Any, event_id: str | None, perspective_id: str | None) -> dict[str, Any]:
+async def _compact_interface(
+    runtime: Any,
+    event_id: str | None,
+    perspective_id: str | None,
+) -> dict[str, Any]:
     receipt = runtime.natural_interface.select(
         focus_event_id=event_id,
         perspective_id=perspective_id,
     )
+    focused = receipt.get("focus_event") or {}
     return {
-        "focus_event_id": receipt.get("focus_event_id"),
+        "focus_event_id": receipt.get("focus_event_id") or focused.get("id") or event_id,
         "perspective_id": perspective_id,
         "natural_chart": receipt.get("natural_chart"),
         "sense_depth": receipt.get("sense_depth"),
+        "closure_level": receipt.get("closure_level"),
+        "visual_closure": receipt.get("visual_closure"),
         "proof_depth": receipt.get("proof_depth"),
         "continuation_depth": receipt.get("continuation_depth"),
         "turing_being_depth": receipt.get("turing_being_depth"),
         "source_fibre": receipt.get("source_fibre", []),
+        "two_person_E2E": "OPEN",
         "truth_issued": False,
     }
 
@@ -97,7 +105,6 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
 
     runtime = app.state.runtime
     app.state.supernet_agent_mcp_attached = True
-    app.version = "3.7.0"
     app.description += (
         "; a tool-only Streamable HTTP MCP surface lets external ChatGPT/Codex-style "
         "agents observe and participate in the same Supernet field. Agent calls have "
@@ -128,7 +135,7 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
             "field_stage": field.get("current_stage"),
             "stats": field.get("stats", {}),
             "recent_events": events,
-            "interface": _compact_interface(runtime, event_id, perspective_id),
+            "interface": await _compact_interface(runtime, event_id, perspective_id),
             "subsystems_are_lenses": True,
             "canonical_language": None,
             "truth_issued": False,
@@ -196,7 +203,7 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
             "event_id": event_id,
             "occurrence_ids": result.get("occurrence_ids", []),
             "sense_receipt": result.get("sense_receipt"),
-            "interface": _compact_interface(runtime, event_id, perspective),
+            "interface": await _compact_interface(runtime, event_id, perspective),
             "truth_issued": False,
         }
 
@@ -238,7 +245,7 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
             "relation_event_id": event_id,
             "relation_event": result["relation_event"],
             "sense_receipt": sense,
-            "interface": _compact_interface(runtime, event_id, perspective),
+            "interface": await _compact_interface(runtime, event_id, perspective),
             "truth_issued": False,
         }
 
@@ -294,7 +301,7 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
         )
         return {
             "selection": reading,
-            "interface": _compact_interface(runtime, source_event_id, perspective),
+            "interface": await _compact_interface(runtime, source_event_id, perspective),
             "truth_issued": False,
         }
 
@@ -334,7 +341,7 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
             "returned_event_id": returned_id,
             "source_transition": result["source_transition"],
             "sense_receipt": sense,
-            "interface": _compact_interface(runtime, returned_id, perspective),
+            "interface": await _compact_interface(runtime, returned_id, perspective),
             "truth_issued": False,
         }
 
@@ -373,7 +380,7 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
             "event_id": event_id,
             "transition": transition,
             "sense_receipt": sense,
-            "interface": _compact_interface(runtime, event_id, perspective),
+            "interface": await _compact_interface(runtime, event_id, perspective),
             "truth_issued": False,
         }
 
@@ -413,7 +420,7 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
         return {
             "collective_event_id": event_id,
             "sense_receipt": sense,
-            "interface": _compact_interface(runtime, event_id, perspective),
+            "interface": await _compact_interface(runtime, event_id, perspective),
             "truth_issued": False,
         }
 
