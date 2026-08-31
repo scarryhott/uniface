@@ -42,7 +42,7 @@ from .supernet_store import SupernetIntegrationStore
 from .translational_truth_axiometry import derive_closure
 
 
-VERSION = "3.19.0"
+VERSION = "3.20.0"
 PROJECTION_RECEIPT_PROTOCOL = (
     "closure.supernet/conscious-interactive-projection-v1"
 )
@@ -911,8 +911,16 @@ def create_app(config: Any | None = None) -> FastAPI:
             "parallel_ui_routes": False,
             "parallel_mutation_routes": False,
             "truth_source": "EXPLICIT_TRANSLATED_PERSPECTIVE_VISUALIZATION_KERNEL",
+            "visualization_acceptance": "EXACT_LOCAL_CLOSURE_REDERIVATION",
+            "interaction_proof": "VERIFIED_SUCCESSOR_CLOSURE_BEFORE_COMMIT",
             "canonical_store": "SUPERNET_INTEGRATION_EVENT_AND_VISUAL_RECEIPT_LINEAGE",
             "lean_bridge": "NRRF859ConsciousSupernetInteractiveProjectionBridge",
+            "declared_formal_continuation": (
+                "NRRF862InteractiveTranslationRelativeUnityOfNaturalForms"
+                "ArgumentFlowPolicePerspectiveTruthNoClosedExistence"
+                "DialecticContinuation"
+            ),
+            "declared_formal_source_verified_by_runtime": False,
             "runtime_reproves_lean": False,
             "truth_issued": False,
             "consciousness_claimed": False,

@@ -17,8 +17,8 @@ from typing import Any, Iterable, Mapping
 
 
 PROTOCOL = "SUPERNET-TRANSLATIONAL-VISUALIZATION"
-SCHEMA = "closure.supernet/translational-visualization-v3"
-BUILDER_VERSION = "translational-visualization-3"
+SCHEMA = "closure.supernet/translational-visualization-v4"
+BUILDER_VERSION = "translational-visualization-4"
 OPEN_STATUS = "OPEN_SOURCE_BOUNDARY"
 BLOCKED_STATUS = "OPEN_TRUTH_CONSTRAINT"
 WITNESSED_STATUS = "WITNESSED"
@@ -104,6 +104,9 @@ def _renderer_relation() -> dict[str, Any]:
         "visible_words_source": "SOURCE_RETURNS_ONLY",
         "geometry_source": "EQUALITY_FIBRES_AND_TRANSLATION_RELATIONS_ONLY",
         "interaction_source": "SOURCE_PRESERVING_RETURN_RELATION_ONLY",
+        "natural_form_constraint": "TRANSLATED_READING_KERNEL",
+        "geometry_acceptance": "EXACT_LOCAL_CLOSURE_REDERIVATION",
+        "successor_acceptance": "VERIFIED_CLOSURE_BEFORE_INTERFACE_COMMIT",
         "fixed_visible_controls": [],
         "authored_visible_vocabulary": [],
         "fallback_visuals": [],
@@ -589,6 +592,66 @@ def _closure_process(contract: Mapping[str, Any]) -> dict[str, Any]:
             "reopens_after_return": True,
             "terminal": False,
             "new_empirical_evidence_created_by_iteration": False,
+        },
+        "interactive_translation_dialectic": {
+            "formal_module": (
+                "NRRF862InteractiveTranslationRelativeUnityOfNaturalForms"
+                "ArgumentFlowPolicePerspectiveTruthNoClosedExistence"
+                "DialecticContinuation"
+            ),
+            "formal_module_source_verified_by_runtime": False,
+            "dialogue": {
+                "formal_theorems": [
+                    "replay_eq_hairAct_accum",
+                    "translationalTruth_eq_dialogues",
+                ],
+                "turn_ids": lineage_ids,
+                "accumulation_is_append_only": lineage_verified,
+                "runtime_hair_potential_composition_verified": False,
+            },
+            "natural_forms": {
+                "formal_theorem": "naturalForms_eq_iff_obsEquiv",
+                "translated_reading_family_verified": translated,
+                "one_geometry_kernel_verified": translated,
+                "complete_invariant_over_all_charts_verified_by_runtime": False,
+            },
+            "perspective_flow": {
+                "formal_theorem": "coherent_iff_single_chart",
+                "single_runtime_chart_family_verified": translated,
+                "all_stage_dialogue_reachability_verified_by_runtime": False,
+            },
+            "argument_truth": {
+                "formal_theorems": [
+                    "police_eq_truth",
+                    "police_and_perspective_translate_equally_into_truth",
+                    "isPolice_truthVerdict",
+                ],
+                "structured_route_and_value_supplied": False,
+                "round_argument_admission_verified_by_runtime": False,
+                "police_verdict_issued": False,
+            },
+            "open_existence": {
+                "formal_theorems": [
+                    "argument_never_closes_existence",
+                    "argument_compatible_with_existence",
+                    "chain_open",
+                    "interactive_translation_relative_unity_of_natural_forms",
+                    "exists_live_argument",
+                ],
+                "formal_two_distinct_tokens_required": True,
+                "runtime_distinct_perspectives": len(
+                    (perspective_closure.get("readings") or {})
+                    if isinstance(perspective_closure, Mapping)
+                    else {}
+                ),
+                "runtime_two_token_premise_verified": bool(
+                    isinstance(perspective_closure, Mapping)
+                    and len(perspective_closure.get("readings") or {}) >= 2
+                ),
+                "continuation_reopens": True,
+                "terminal": False,
+                "one_token_closure_limit_preserved": True,
+            },
         },
         "boundary": {
             "source_preserved": True,
@@ -1730,6 +1793,9 @@ def _audit_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
         ),
         "active_reading_determines_projection": not any(
             item.endswith(":not-active-reading") for item in ordered_errors
+        ),
+        "visualization_is_exact_relation_projection": (
+            "visualization:not-exact-projection" not in ordered_errors
         ),
         "open_relations_do_not_execute_as_equality": not any(
             item.endswith(":open-equality") for item in ordered_errors

@@ -299,6 +299,15 @@ reconcile pre-existing exact sources
 Individual sources may commit immediate stages as they arrive. A cycle stage
 then closes the current batch without replacing those historical transitions.
 
+## Supernet 3.20: closure-derived interactive projection
+
+The browser now re-derives the exact projective geometry before accepting or
+rendering a contract. The closure receipt also exposes the NRRF862 dialogue,
+natural-form, coherent-flow and open-continuation interpretation with its
+formal two-token premise. Structured argument totals and police verdicts stay
+unissued unless a later closure supplies and verifies those relations. See
+`FULLY_CLOSURE_DERIVED_INTERACTIVE_SUPERNET_INTERFACE_NRRF862.md`.
+
 ## Scope
 
 This implements the requested single-node semantic unification:
