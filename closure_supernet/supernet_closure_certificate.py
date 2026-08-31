@@ -10,6 +10,9 @@ structural invariant requested by the natural-form atlas:
 * no historical distinction is silently identified;
 * every asserted non-identity equality is return-witnessed;
 * every unwitnessed relation remains OPEN;
+* every retained natural-form family is locally admissible as an interaction
+  proposal without selection authoring truth;
+* fidelity is derived only from exact returned partition evidence;
 * the formal Lean corpus is indexed against the same atlas without being
   re-proved or promoted into visual resemblance;
 * the UI is the derived glue of the compatible sub-atlas.
@@ -26,6 +29,10 @@ from .closure_continuity import OPEN_STATUS, WITNESSED_STATUS
 from .formal_proof_index import (
     derive_formal_proof_index,
     validate_formal_proof_index,
+)
+from .local_natural_form_freedom import (
+    derive_local_natural_form_freedom,
+    validate_local_natural_form_freedom,
 )
 from .natural_form_atlas import (
     HAIR_VERSIONS,
@@ -131,6 +138,11 @@ def derive_supernet_closure_certificate(
         else derive_formal_proof_index(atlas)
     )
     proof_validation = validate_formal_proof_index(proof_index, atlas=atlas)
+    local_field = derive_local_natural_form_freedom(atlas)
+    local_field_validation = validate_local_natural_form_freedom(
+        local_field,
+        atlas=atlas,
+    )
 
     expected_historical = historical_charts()
     expected_ids = {str(chart["id"]) for chart in expected_historical}
@@ -164,6 +176,7 @@ def derive_supernet_closure_certificate(
             and ui_contract["natural_form_atlas"].get("id") == atlas.get("id")
         )
         ui_glue_matches = ui_contract.get("glued_ui_subatlas") == expected_glue
+        ui_local_field_matches = ui_contract.get("local_natural_form_freedom") == local_field
         ui_single_final_form = bool(
             (ui_contract.get("atlas_semantics") or {}).get(
                 "single_final_form_selected"
@@ -172,6 +185,7 @@ def derive_supernet_closure_certificate(
     else:
         ui_atlas_matches = True
         ui_glue_matches = True
+        ui_local_field_matches = True
         ui_single_final_form = False
 
     interaction_supplied = isinstance(interaction_closure, Mapping)
@@ -181,6 +195,9 @@ def derive_supernet_closure_certificate(
             and interaction_closure["natural_form_atlas"].get("id")
             == atlas.get("id")
         )
+        interaction_local_field_matches = (
+            interaction_closure.get("local_natural_form_freedom") == local_field
+        )
         continuity = interaction_closure.get("continuity_self_audit")
         continuity_clean = bool(
             not isinstance(continuity, Mapping)
@@ -188,7 +205,12 @@ def derive_supernet_closure_certificate(
         )
     else:
         interaction_atlas_matches = True
+        interaction_local_field_matches = True
         continuity_clean = True
+
+    local_constraint = local_field.get("local_constraint") or {}
+    selection_freedom = local_field.get("selection_freedom") or {}
+    fidelity = local_field.get("fidelity_profile") or {}
 
     checks = {
         "versioned_atlas_valid": atlas_validation.get("valid") is True,
@@ -219,12 +241,43 @@ def derive_supernet_closure_certificate(
             for item in proof_index.get("proofs", [])
             if isinstance(item, Mapping)
         ),
+        "local_natural_form_freedom_valid": local_field_validation.get("valid") is True,
+        "all_retained_families_locally_admissible_as_proposals": (
+            local_constraint.get(
+                "all_retained_families_locally_admissible_as_proposals"
+            )
+            is True
+        ),
+        "local_family_selection_does_not_author_truth": (
+            local_constraint.get("unwitnessed_family_selection_authors_truth")
+            is False
+        ),
+        "local_selection_freedom_is_set_valued": (
+            selection_freedom.get("selection_is_set_valued") is True
+        ),
+        "remaining_limits_are_open_selection_frontiers": (
+            selection_freedom.get("remaining_limits_are_open_selection_frontiers")
+            is True
+        ),
+        "future_resolution_is_not_guaranteed": (
+            selection_freedom.get("future_resolution_guaranteed") is False
+        ),
+        "fidelity_is_exact_return_partition_profile": (
+            fidelity.get("kind") == "EXACT_RETURN_PARTITION_PROFILE"
+            and fidelity.get("fidelity_authored_only_by_exact_returns") is True
+            and fidelity.get("configured_threshold") is None
+            and fidelity.get("similarity_epsilon") is None
+        ),
         "compatible_ui_glue_derivable": expected_glue.get("atlas_id")
         == atlas.get("id"),
         "ui_uses_same_atlas": ui_atlas_matches,
         "ui_is_exact_compatible_glue": ui_glue_matches,
+        "ui_uses_same_local_natural_form_freedom": ui_local_field_matches,
         "ui_does_not_select_single_final_form": not ui_single_final_form,
         "interaction_uses_same_atlas": interaction_atlas_matches,
+        "interaction_uses_same_local_natural_form_freedom": (
+            interaction_local_field_matches
+        ),
         "interaction_continuity_audit_clean": continuity_clean,
         "archive_audit_is_not_semantic_authority": True,
     }
@@ -237,12 +290,15 @@ def derive_supernet_closure_certificate(
         "supernet_closed": supernet_closed,
         "closure_equation": (
             "SupernetCompleteAt(t) = retained(versioned natural forms) AND "
+            "LocalConstraint(all retained families as interaction proposals) AND "
             "noSilentCollapse AND witnessed(asserted equalities) AND "
             "OPEN(unwitnessed relations) AND proofIndexed(formal core) AND "
+            "Fidelity=ExactReturnedPartitionProfile AND "
             "UI=Glue(compatible subatlas)"
         ),
         "atlas_id": atlas.get("id"),
         "formal_proof_index_id": proof_index.get("id"),
+        "local_natural_form_freedom_id": local_field.get("id"),
         "glued_subatlas_id": expected_glue.get("id"),
         "checks": checks,
         "missing_known_chart_ids": missing_known_chart_ids,
@@ -252,6 +308,8 @@ def derive_supernet_closure_certificate(
         "known_form_authority": "VERSIONED_REMEMBERED_NATURAL_FORM_ATLAS",
         "formal_authority": "INDEXED_MACHINE_CHECKED_LEAN_CORPUS",
         "runtime_equality_authority": "SOURCE_PRESERVING_RETURNED_TRANSLATION",
+        "local_selection_authority": "ALL_RETAINED_FAMILIES_AS_OPEN_OR_WITNESSED_PROPOSALS",
+        "fidelity_authority": "EXACT_RETURN_PARTITION_PROFILE",
         "unwitnessed_relation_authority": OPEN_STATUS,
         "archive_audit_required_for_supernet_closure": False,
         "archive_audit_is_diagnostic_only": True,
@@ -259,6 +317,8 @@ def derive_supernet_closure_certificate(
         "open_relation_breaks_supernet_closure": False,
         "open_relations_are_part_of_closure": True,
         "complete_does_not_mean_every_open_relation_resolved": True,
+        "selection_freedom_evolves_only_through_return": True,
+        "future_resolution_guaranteed": False,
         "formal_proof_source_verified_by_runtime": False,
         "runtime_reproves_lean": False,
         "existence_closed": False,
@@ -295,6 +355,10 @@ def validate_supernet_closure_certificate(
         "status": expected.get("status"),
         "archive_audit_required": False,
         "open_relations_are_part_of_closure": True,
+        "local_natural_form_freedom_id": expected.get(
+            "local_natural_form_freedom_id"
+        ),
+        "future_resolution_guaranteed": False,
     }
 
 
