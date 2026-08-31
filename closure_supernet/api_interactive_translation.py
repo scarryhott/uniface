@@ -7,11 +7,9 @@ adapter may be instantiated for research, tests or local inspection. Its extra
 routes are pure readings: they append no event, execute no trade, select no
 universal reopening mode and never alter the latent UI closure.
 
-The trading capability surface reports the NRRF870 semantics: the open sensor
-reads all returned closed itineraries; directed closure fibres and their cycle
-geometry determine truth; normalized running-P&L timing equals the negative
-curvature amplitude. Clock duration and graph traversal order are provenance
-only.
+The trading capability surface reports NRRF870 truth plus the natural-form OPEN
+selector. The selector can choose what interaction frontier to request next, but
+only a source-preserving returned interaction may reclose truth.
 """
 
 from typing import Any
@@ -42,13 +40,14 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
         return {
             "protocol": PROTOCOL,
             "equation": (
-                "Q_(t+1)=Close(Q_t + "
-                "Translate(observer_t, returned_interaction_t))"
+                "Q_(t+1)=Close(Q_t + Translate(observer_t, returned_interaction_t)); "
+                "NaturalSelect(Q_t)=ProfitNaturalForms(Q_t) or OPENBoundary(Q_t)"
             ),
             "subsystems": [
                 "reopening",
                 "participant_rule_charts",
                 "open_sensor_trading_closure",
+                "natural_form_interaction_selection",
                 "resource_reintegration",
                 "legacy_compatibility",
             ],
@@ -73,6 +72,15 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
             "amplitude_timing_one_translation": True,
             "signal_trade_one_translation": True,
             "signal_trade_same_round_trip_value": True,
+            "translational_truth_alone": True,
+            "natural_form_selects_interaction": True,
+            "selection_is_set_valued": True,
+            "selection_authors_truth": False,
+            "open_boundary_is_interaction_frontier": True,
+            "profit_selection_requires_returned_positive_amplitude": True,
+            "external_strategy_selector_present": False,
+            "predeclared_candidate_graph_present": False,
+            "automatic_order_submission": False,
             "queue_limit_authors_truth": False,
             "legacy_runtime_can_gate": False,
             "mutation": False,
