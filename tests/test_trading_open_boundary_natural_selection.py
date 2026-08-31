@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from closure_supernet.formal_proof_index import PROOF_BUNDLES
 from closure_supernet.interactive_translation_equations_current import resolve_trading_equation
 from closure_supernet.trading_natural_form_closure import resolve_open_sensor_trading_closure
 from closure_supernet.trading_open_boundary_natural_selection import (
@@ -217,3 +218,20 @@ def test_fairness_and_reachability_remain_explicit_hypotheses() -> None:
     assert selection["fairness_claimed"] is False
     assert selection["market_reachability_claimed"] is False
     assert selection["profit_prediction_used_by_selector"] is False
+
+
+def test_reported_nrrf874_theorem_family_is_proof_indexed() -> None:
+    bundle = next(
+        row
+        for row in PROOF_BUNDLES
+        if row["module"]
+        == "NRRF874OpenBoundaryNaturalSelectionSupportWideningDerivedFromTranslationalTruth"
+    )
+    theorem_names = set(bundle["theorem_names"])
+
+    assert "select_authors_no_truth" in theorem_names
+    assert "return_outside_support_extends" in theorem_names
+    assert "truthDerived_iff_factors" in theorem_names
+    assert "fair_selector_is_closure_complete" in theorem_names
+    assert "open_boundary_natural_selection_closes_the_support_gap" in theorem_names
+    assert bundle["proof_kind"] == "OPEN_BOUNDARY_TRUTH_DERIVED_SELECTION_SUPPORT_WIDENING"
