@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Published projection runtime with natural-form visual translation.
 
-The mutation/equality runtime is unchanged.  Only the HTML projection surface is
+The mutation/equality runtime is unchanged. Only the HTML projection surface is
 replaced with a renderer that derives all retained natural-form family layers
 from the already verified atlas/local-freedom contract.
 """
@@ -12,10 +12,9 @@ from .natural_form_visual_interface import NATURAL_FORM_SUPERNET_HTML
 
 # The base FastAPI route reads this module global at request time. Rebinding the
 # imported base module therefore changes presentation only; the return relation,
-# closure derivation, stores, validation, and source-preserving mutation path are
-# exactly the existing runtime.
+# closure derivation, stores, validation, versioned runtime contract, and
+# source-preserving mutation path are exactly the existing runtime.
 _base.CLOSURE_ONLY_SUPERNET_HTML = NATURAL_FORM_SUPERNET_HTML
-_base.VERSION = "3.23.0"
 
 TranslationalReturnRequest = _base.TranslationalReturnRequest
 MinimalProjectionRuntime = _base.MinimalProjectionRuntime
