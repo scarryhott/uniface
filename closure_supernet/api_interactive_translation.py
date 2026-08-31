@@ -10,7 +10,8 @@ mode and never alter the latent UI closure.
 The trading capability surface reports NRRF870 truth as one unified pre-action
 natural-form field. Recognition and selection are identical; returned and OPEN
 forms coexist; relative-hair fidelity derives horizon; the relative ball derives
-size; and only a later returned interaction may reclose truth.
+size; their joint returned region is selection freedom; and only a later
+returned interaction may expand, contract, transform, or reclose that freedom.
 """
 
 from typing import Any
@@ -43,6 +44,7 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
             "equation": (
                 "Recognize(Q_t)=Select(Q_t)=NaturalFormField(Q_t); "
                 "H=HairFidelity; Size=RelativeBall; "
+                "F_(t+1)=Close(F_t + ReturnedFidelity_t); "
                 "Q_(t+1)=Close(Q_t + Translate(observer_t, returned_interaction_t))"
             ),
             "subsystems": [
@@ -51,6 +53,7 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
                 "open_sensor_trading_closure",
                 "unified_natural_form_field",
                 "relative_hair_horizon_ball_size",
+                "returned_fidelity_selection_freedom",
                 "resource_reintegration",
                 "legacy_compatibility",
             ],
@@ -65,6 +68,14 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
             "size_is_relative_ball_bottleneck_capacity": True,
             "external_position_size_present": False,
             "horizon_and_size_derived_before_action": True,
+            "selection_freedom_from_returned_fidelity": True,
+            "selection_freedom_evolves_over_time_and_fidelity": True,
+            "remaining_limits_are_open_selection_frontiers": True,
+            "unwitnessed_boundary_remains_open": True,
+            "open_frontier_can_be_resolved_by_later_return": True,
+            "external_limit_authors_selection": False,
+            "configured_threshold_authors_selection": False,
+            "missing_evidence_widens_selection": False,
             "raw_quote_size_is_not_silently_relative_ball_size": True,
             "successor_quote_loop_authors_truth": False,
             "route_receipt_authors_truth": False,
