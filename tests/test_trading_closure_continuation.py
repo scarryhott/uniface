@@ -97,6 +97,7 @@ def test_exact_duplicate_sensor_state_adds_no_semantic_history() -> None:
 def test_current_runtime_demotes_historical_continuation_to_non_authoritative_code() -> None:
     receipt = resolve_trading_equation(
         observer_id="o",
+        source_truth_mode="FORMAL_FIXTURE",
         sensor_history=[
             _frame("f0", "-1"),
             _frame("f1", "-2"),

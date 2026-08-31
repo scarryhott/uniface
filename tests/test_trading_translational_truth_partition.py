@@ -26,18 +26,12 @@ def _returned(
 
 
 def test_hair_translations_are_one_ball_truth_class() -> None:
-    base = [
-        _returned("ab0", "A", "B", "-3"),
-        _returned("ba0", "B", "A", "2"),
-    ]
+    base = [_returned("ab0", "A", "B", "-3"), _returned("ba0", "B", "A", "2")]
     translated = [
         _returned("ab1", "A", "B", "2", hair_delta="5"),
         _returned("ba1", "B", "A", "-3", hair_delta="-5"),
     ]
-
-    result = derive_translational_truth_partition(
-        observer_id="o", sensor_history=[base, translated]
-    )
+    result = derive_translational_truth_partition(observer_id="o", sensor_history=[base, translated])
 
     assert result["status"] == "WITNESSED"
     assert result["translational_truth_alone"] is True
@@ -53,7 +47,6 @@ def test_hair_translations_are_one_ball_truth_class() -> None:
     assert truth["hair_differences_do_not_split_truth"] is True
     assert result["learned_profit"] is True
     assert result["profitable_truth_class_count"] == 1
-
     events = result["learning_events"]
     assert events[0]["event"] == "NEW_TRANSLATIONAL_TRUTH_WITNESSED"
     assert events[1]["event"] == "SAME_TRANSLATIONAL_TRUTH_RETURNED"
@@ -62,18 +55,9 @@ def test_hair_translations_are_one_ball_truth_class() -> None:
 
 
 def test_changed_curvature_refines_truth_partition_without_dynamics_law() -> None:
-    left = [
-        _returned("ab0", "A", "B", "-3"),
-        _returned("ba0", "B", "A", "2"),
-    ]
-    right = [
-        _returned("ab1", "A", "B", "-4"),
-        _returned("ba1", "B", "A", "2"),
-    ]
-
-    result = derive_translational_truth_partition(
-        observer_id="o", sensor_history=[left, right]
-    )
+    left = [_returned("ab0", "A", "B", "-3"), _returned("ba0", "B", "A", "2")]
+    right = [_returned("ab1", "A", "B", "-4"), _returned("ba1", "B", "A", "2")]
+    result = derive_translational_truth_partition(observer_id="o", sensor_history=[left, right])
 
     assert result["class_count"] == 2
     assert {row["unitary_curvature"] for row in result["classes"]} == {"-1", "-2"}
@@ -86,18 +70,9 @@ def test_changed_curvature_refines_truth_partition_without_dynamics_law() -> Non
 
 
 def test_costly_truths_do_not_learn_profit_from_motion() -> None:
-    costly0 = [
-        _returned("ab0", "A", "B", "2"),
-        _returned("ba0", "B", "A", "1"),
-    ]
-    costly1 = [
-        _returned("ab1", "A", "B", "1"),
-        _returned("ba1", "B", "A", "1"),
-    ]
-
-    result = derive_translational_truth_partition(
-        observer_id="o", sensor_history=[costly0, costly1]
-    )
+    costly0 = [_returned("ab0", "A", "B", "2"), _returned("ba0", "B", "A", "1")]
+    costly1 = [_returned("ab1", "A", "B", "1"), _returned("ba1", "B", "A", "1")]
+    result = derive_translational_truth_partition(observer_id="o", sensor_history=[costly0, costly1])
 
     assert result["class_count"] == 2
     assert result["learned_profit"] is False
@@ -108,15 +83,9 @@ def test_costly_truths_do_not_learn_profit_from_motion() -> None:
 
 
 def test_open_frame_does_not_invent_truth_class() -> None:
-    closed = [
-        _returned("ab", "A", "B", "-2"),
-        _returned("ba", "B", "A", "1"),
-    ]
+    closed = [_returned("ab", "A", "B", "-2"), _returned("ba", "B", "A", "1")]
     open_frame = [_returned("ab2", "A", "B", "-2")]
-
-    result = derive_translational_truth_partition(
-        observer_id="o", sensor_history=[closed, open_frame]
-    )
+    result = derive_translational_truth_partition(observer_id="o", sensor_history=[closed, open_frame])
 
     assert result["class_count"] == 1
     assert result["witnessed_frame_count"] == 1
@@ -127,17 +96,16 @@ def test_open_frame_does_not_invent_truth_class() -> None:
 
 
 def test_current_runtime_uses_translational_truth_alone() -> None:
-    base = [
-        _returned("ab0", "A", "B", "-3"),
-        _returned("ba0", "B", "A", "2"),
-    ]
+    base = [_returned("ab0", "A", "B", "-3"), _returned("ba0", "B", "A", "2")]
     translated = [
         _returned("ab1", "A", "B", "2", hair_delta="5"),
         _returned("ba1", "B", "A", "-3", hair_delta="-5"),
     ]
 
     receipt = resolve_trading_equation(
-        observer_id="o", sensor_history=[base, translated]
+        observer_id="o",
+        source_truth_mode="FORMAL_FIXTURE",
+        sensor_history=[base, translated],
     )
 
     assert receipt["translational_truth_alone"] is True
@@ -151,6 +119,7 @@ def test_current_runtime_uses_translational_truth_alone() -> None:
     assert receipt["forecast_model_present"] is False
     assert receipt["closure_continuation"] is None
     assert receipt["learned_profit"] is True
+    assert receipt["formal_fixture_mode_is_not_external_truth"] is True
 
     partition = receipt["translational_truth_partition"]
     assert partition["class_count"] == 1

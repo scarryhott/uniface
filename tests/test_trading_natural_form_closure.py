@@ -96,13 +96,10 @@ def test_cost_curvature_has_zero_available_amplitude_and_zero_closure_timing() -
     assert form["amplitude_timing_numerically_identical"] is True
     assert form["hair_sum"] == "0"
     assert form["hair_closes_on_return"] is True
-
-    # Clock duration is source provenance, not semantic timing.
     assert form["timing"]["duration_seconds"] == "8.0"
     assert form["timing"]["clock_duration_authors_timing"] is False
     assert form["clock_duration_is_timing"] is False
     assert form["timing"]["fixed_horizon"] is None
-
     assert form["amplitude_timing_translation_equal"] is True
     assert form["signal_trade_translation_equal"] is True
     assert form["signal_trade_value_equal"] is True
@@ -125,23 +122,16 @@ def test_raw_ball_timing_moves_under_hair_but_closure_timing_does_not() -> None:
     ]
 
     left = resolve_open_sensor_trading_closure(observer_id="o", sensor_feedback=base)
-    right = resolve_open_sensor_trading_closure(
-        observer_id="o", sensor_feedback=translated
-    )
-
+    right = resolve_open_sensor_trading_closure(observer_id="o", sensor_feedback=translated)
     left_form = left["natural_forms"][0]
     right_form = right["natural_forms"][0]
     assert left_form["unitary_curvature"] == right_form["unitary_curvature"] == "-1"
     assert left_form["natural_profit"] == right_form["natural_profit"] == "1"
     assert left_form["amplitude"] == right_form["amplitude"] == "1"
     assert left_form["closure_id"] == right_form["closure_id"]
-
-    # The raw running-P&L ball is chart/hair dependent.
     assert left_form["raw_ball_partition"]["max"] == "3"
     assert right_form["raw_ball_partition"]["max"] == "1"
     assert left_form["raw_ball_partition"]["hair_invariant"] is False
-
-    # The unique normalized closure makes the entry free and timing=amplitude.
     assert left_form["closure_ball_partition"]["max"] == "1"
     assert right_form["closure_ball_partition"]["max"] == "1"
     assert left_form["timing"]["value"] == right_form["timing"]["value"] == "1"
@@ -166,10 +156,7 @@ def test_open_sensor_exposes_all_simple_cycles_not_one_bfs_route() -> None:
     assert receipt["bfs_route_authors_truth"] is False
     assert len(receipt["natural_forms"]) == 2
     signatures = {
-        tuple(
-            (row["source_token"], row["target_token"])
-            for row in form["directed_relation_signature"]
-        )
+        tuple((row["source_token"], row["target_token"]) for row in form["directed_relation_signature"])
         for form in receipt["natural_forms"]
     }
     assert signatures == {
@@ -186,27 +173,18 @@ def test_ball_partition_is_directed_closure_fibre_not_undirected_component() -> 
             _returned("cb", "C", "B", "1"),
         ],
     )
-
     assert receipt["status"] == "OPEN"
     assert receipt["natural_forms"] == []
     assert receipt["undirected_connectivity_authors_ball"] is False
     assert receipt["ball_partition_is_directed_translation_fibre"] is True
-    assert sorted(ball["member_tokens"] for ball in receipt["ball_partition"]) == [
-        ["A"],
-        ["B"],
-        ["C"],
-    ]
+    assert sorted(ball["member_tokens"] for ball in receipt["ball_partition"]) == [["A"], ["B"], ["C"]]
 
 
 def test_profitable_closure_has_amplitude_equal_ball_partition_max() -> None:
     receipt = resolve_open_sensor_trading_closure(
         observer_id="o",
-        sensor_feedback=[
-            _returned("ab", "A", "B", "-2"),
-            _returned("ba", "B", "A", "1"),
-        ],
+        sensor_feedback=[_returned("ab", "A", "B", "-2"), _returned("ba", "B", "A", "1")],
     )
-
     form = receipt["natural_forms"][0]
     assert form["unitary_curvature"] == "-1"
     assert form["natural_profit"] == "1"
@@ -228,7 +206,6 @@ def test_trade_execution_remains_open_when_cost_return_is_incomplete() -> None:
             _returned("ba", "B", "A", "1", cost_complete=False),
         ],
     )
-
     form = receipt["natural_forms"][0]
     assert form["natural_profit"] == "1"
     assert form["amplitude"] == "1"
@@ -240,17 +217,14 @@ def test_trade_execution_remains_open_when_cost_return_is_incomplete() -> None:
 
 def test_route_receipt_compatibility_cannot_close_current_trading_runtime() -> None:
     receipt = resolve_trading_equation(
-        receipts=[
-            {
-                "relation": ["USD", "BTC", "USD"],
-                "id": "legacy-fill",
-                "authenticated": True,
-                "closed_relation": True,
-                "realized_profit": "100",
-            }
-        ]
+        receipts=[{
+            "relation": ["USD", "BTC", "USD"],
+            "id": "legacy-fill",
+            "authenticated": True,
+            "closed_relation": True,
+            "realized_profit": "100",
+        }]
     )
-
     assert receipt["status"] == "OPEN"
     assert receipt["natural_forms"] == []
     legacy = receipt["legacy_route_receipt_projection"]
@@ -264,26 +238,23 @@ def test_route_receipt_compatibility_cannot_close_current_trading_runtime() -> N
 def test_computation_limit_leaves_open_sensor_continuation_open() -> None:
     receipt = resolve_open_sensor_trading_closure(
         observer_id="o",
-        sensor_feedback=[
-            _returned("ab", "A", "B", "1"),
-            _returned("ba", "B", "A", "-1"),
-        ],
+        sensor_feedback=[_returned("ab", "A", "B", "1"), _returned("ba", "B", "A", "-1")],
         max_returns=1,
     )
-
     assert receipt["status"] == "OPEN"
     assert receipt["natural_forms"] == []
     assert receipt["boundary_receipt"]["status"] == "OPEN"
     assert receipt["boundary_receipt"]["limit_is_semantic"] is False
 
 
-def test_research_api_exposes_nrrf870_without_mutation(tmp_path) -> None:
+def test_research_api_exposes_verified_source_boundary_without_mutation(tmp_path) -> None:
     app = create_app(SimpleNamespace(database_path=tmp_path / "nrrf870.db"))
     with TestClient(app) as client:
         before = client.get("/supernet/interface").json()["closure_ui_contract"]
-        capabilities = client.get(
-            "/supernet/closure-equations/capabilities"
-        ).json()
+        capabilities = client.get("/supernet/closure-equations/capabilities").json()
+        assert capabilities["truth_requires_verified_source_witness"] is True
+        assert capabilities["unsigned_or_untrusted_return_remains_open"] is True
+        assert capabilities["caller_returned_flag_authors_truth"] is False
         assert capabilities["successor_quote_loop_authors_truth"] is False
         assert capabilities["open_sensor_all_closed_itineraries"] is True
         assert capabilities["bfs_route_authors_truth"] is False
@@ -307,12 +278,10 @@ def test_research_api_exposes_nrrf870_without_mutation(tmp_path) -> None:
         )
         assert response.status_code == 200
         trading = response.json()["trading"]
-        assert trading["status"] == "WITNESSED"
-        form = trading["natural_forms"][0]
-        assert form["natural_profit"] == "1"
-        assert form["amplitude"] == "1"
-        assert form["timing"]["value"] == "1"
-        assert form["signal_trade_translation_equal"] is True
+        assert trading["status"] == "OPEN"
+        assert trading["natural_forms"] == []
+        assert trading["source_truth_audit"]["feedback"]["verified_count"] == 0
+        assert trading["source_truth_audit"]["feedback"]["open_count"] == 2
 
         after = client.get("/supernet/interface").json()["closure_ui_contract"]
         assert after["id"] == before["id"]
