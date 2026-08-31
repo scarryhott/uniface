@@ -187,9 +187,15 @@ def attach_perspective_closure(
 
 def validate_ui_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
     legacy = dict(_legacy.validate_ui_contract(contract))
-    # The legacy verifier is the shape/type boundary. A malformed carrier must
-    # be rejected without being interpreted by any later natural-form solver.
-    if legacy.get("valid") is not True:
+    # The legacy verifier is the shape/type boundary. Malformed continuation
+    # metadata must be rejected before solver interpretation. A merely stale
+    # content hash, however, still proceeds through derived validators so the
+    # exact tampered natural-form relation remains diagnosable.
+    legacy_errors = set(legacy.get("errors", []))
+    malformed_carrier = bool(
+        {"continuation:index", "continuation:lineage-shape"} & legacy_errors
+    )
+    if malformed_carrier:
         legacy.update(
             {
                 "natural_form_atlas_valid": False,
