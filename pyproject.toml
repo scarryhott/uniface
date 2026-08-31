@@ -32,6 +32,7 @@ dev = [
 
 [project.scripts]
 closure-supernet = "closure_supernet.cli_supernet:main"
+closure-supernet-audit = "closure_supernet.archive_closure_audit:main"
 
 [tool.setuptools.packages.find]
 include = ["closure_supernet*"]
