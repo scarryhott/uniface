@@ -308,6 +308,15 @@ formal two-token premise. Structured argument totals and police verdicts stay
 unissued unless a later closure supplies and verifies those relations. See
 `FULLY_CLOSURE_DERIVED_INTERACTIVE_SUPERNET_INTERFACE_NRRF862.md`.
 
+## Supernet 3.21: latent closure navigation and commit
+
+The verified closure relation is now explicit as the latent UI state. Local
+perspective hair can be navigated without changing the equality kernel, and an
+exact draft appears as an uncommitted closure potential. Enter commits a digest
+binding the latent contract, perspective, focus, source, hair and kernel; the
+server rederives that digest before appending anything. See
+`LATENT_CLOSURE_PERSPECTIVE_NAVIGATION_COMMIT_PROTOCOL.md`.
+
 ## Scope
 
 This implements the requested single-node semantic unification:

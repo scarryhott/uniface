@@ -17,8 +17,8 @@ from typing import Any, Iterable, Mapping
 
 
 PROTOCOL = "SUPERNET-TRANSLATIONAL-VISUALIZATION"
-SCHEMA = "closure.supernet/translational-visualization-v4"
-BUILDER_VERSION = "translational-visualization-4"
+SCHEMA = "closure.supernet/translational-visualization-v5"
+BUILDER_VERSION = "translational-visualization-5"
 OPEN_STATUS = "OPEN_SOURCE_BOUNDARY"
 BLOCKED_STATUS = "OPEN_TRUTH_CONSTRAINT"
 WITNESSED_STATUS = "WITNESSED"
@@ -107,6 +107,10 @@ def _renderer_relation() -> dict[str, Any]:
         "natural_form_constraint": "TRANSLATED_READING_KERNEL",
         "geometry_acceptance": "EXACT_LOCAL_CLOSURE_REDERIVATION",
         "successor_acceptance": "VERIFIED_CLOSURE_BEFORE_INTERFACE_COMMIT",
+        "latent_structure": "VERIFIED_CLOSURE_RELATION",
+        "local_navigation": "PERSPECTIVE_HAIR_AND_FOCUS",
+        "local_modification": "UNCOMMITTED_CLOSURE_POTENTIAL",
+        "commit_protocol": "LOCAL_PROJECTION_COMMITMENT_THEN_REDERIVATION",
         "fixed_visible_controls": [],
         "authored_visible_vocabulary": [],
         "fallback_visuals": [],
@@ -661,6 +665,16 @@ def _closure_process(contract: Mapping[str, Any]) -> dict[str, Any]:
                 "terminal": False,
                 "one_token_closure_limit_preserved": True,
             },
+        },
+        "latent_interactive_interface": {
+            "latent_structure": "VERIFIED_CLOSURE_RELATION",
+            "visible_projection_is_derived": True,
+            "local_perspective_hair_is_mutable": True,
+            "local_modification_is_potential_until_commit": True,
+            "commit_binds_contract_perspective_source_and_kernel": True,
+            "server_rederives_commitment_before_append": True,
+            "committed_hair_defines_equality": False,
+            "commit_extends_latent_closure": True,
         },
         "boundary": {
             "source_preserved": True,

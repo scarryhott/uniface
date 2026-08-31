@@ -21,6 +21,9 @@ from closure_supernet.closure_ui_contract import (
     validate_ui_contract,
 )
 from closure_supernet.config import RuntimeConfig
+from closure_supernet.minimal_projection_runtime import (
+    derive_local_projection_commitment,
+)
 
 
 def make_config(tmp_path: Path) -> RuntimeConfig:
@@ -43,13 +46,21 @@ def actual_open_and_witnessed_contracts(
             "/supernet/interface",
             params={"perspective_id": "perspective:browser-check"},
         ).json()["closure_ui_contract"]
+        exact_source = "An exact source returned through the browser."
         response = client.post(
             RETURN_ENDPOINT_TEMPLATE.format(contract_id=opened["id"]),
             json={
                 "return_relation_id": opened["return_relation"]["id"],
                 "perspective_id": opened["perspective_id"],
                 "focus_event_id": opened["focus_event_id"],
-                "exact_source_return": "An exact source returned through the browser.",
+                "exact_source_return": exact_source,
+                "local_projection_commitment": derive_local_projection_commitment(
+                    opened,
+                    return_relation_id=opened["return_relation"]["id"],
+                    perspective_id=opened["perspective_id"],
+                    focus_event_id=opened["focus_event_id"],
+                    exact_source_return=exact_source,
+                ),
                 "source_stream": "browser-contract-test",
             },
         )
@@ -221,6 +232,14 @@ def test_browser_sha256_matches_python_and_both_rejection_gates(
     assert "if (!validate(contract)" in CLOSURE_ONLY_SUPERNET_HTML
     assert "!await visualizationMatches(contract)" in CLOSURE_ONLY_SUPERNET_HTML
     assert "!await contractIdMatchesContent(contract)" in CLOSURE_ONLY_SUPERNET_HTML
+    assert '"data-local-modification": "UNCOMMITTED_CLOSURE_POTENTIAL"' in (
+        CLOSURE_ONLY_SUPERNET_HTML
+    )
+    assert '"data-local-perspective-hair": localHairMillidegrees' in (
+        CLOSURE_ONLY_SUPERNET_HTML
+    )
+    assert 'await digest("local-projection"' in CLOSURE_ONLY_SUPERNET_HTML
+    assert "committed.closure_rederived !== true" in CLOSURE_ONLY_SUPERNET_HTML
 
 
 def test_browser_rederives_exact_geometry_before_rendering(tmp_path: Path) -> None:
