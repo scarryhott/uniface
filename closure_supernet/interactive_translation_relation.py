@@ -1,25 +1,20 @@
 from __future__ import annotations
 
-"""Primitive observer-observed interaction semantics for Supernet closure.
+"""Primitive observer-observed interactive translation for arbitrary feedback.
 
-Closure is not equality between detached observations and is not a fixed return.
-The primitive object is a relative interaction:
-
-    observer + observed + admissible interaction -> translation witness
-
-A return is only a source-preserving witness carried by that interaction.  The
-translation fibres induced by witnessed interactions are then compared with the
-natural-form fibres.  Chart/UI equality is therefore derived after interaction,
-not used to define interaction itself.
+The semantic primitive is a returned relative interaction, not equality between
+preselected observations, features, horizons, strategies, or fixed returns.
+Any source adapter may supply observed states and returned relations; the same
+kernel derives translation fibres from those witnessed relations.
 """
 
 import hashlib
 import json
 from typing import Any, Iterable, Mapping, Sequence
 
-from .closure_continuity import OPEN_STATUS, WITNESSED_STATUS, partition_signature, unique_strings
+from .closure_continuity import OPEN_STATUS, WITNESSED_STATUS, partition_signature
 
-PROTOCOL = "closure.supernet/observer-observed-interactive-translation-v1"
+PROTOCOL = "closure.supernet/observer-observed-interactive-translation-v2"
 
 
 def _stable(value: Any) -> str:
@@ -30,31 +25,119 @@ def _digest(prefix: str, value: Any) -> str:
     return f"{prefix}:{hashlib.sha256(_stable(value).encode('utf-8')).hexdigest()[:24]}"
 
 
-def derive_relative_interactions(
-    *,
-    observer_id: str | None,
-    projection_reading: Mapping[str, Any],
-    form_by_member: Mapping[str, str],
-    visual_nodes: Sequence[Mapping[str, Any]],
-    visual_edges: Sequence[Mapping[str, Any]],
-    truth_members: Iterable[str],
-    physical_sensor_attached: bool = False,
-) -> dict[str, Any]:
-    """Derive translation witnesses from observer-observed relations first.
+def _source_ids(value: Mapping[str, Any]) -> list[str]:
+    raw = value.get("source_return_ids") or value.get("source_ids") or value.get("exact_source_ids") or []
+    if isinstance(raw, str):
+        raw = [raw]
+    return list(dict.fromkeys(str(item) for item in raw if item is not None and str(item)))
 
-    The observer is the returned perspective.  The observed are source states.
-    An edge is an admissible interaction proposal.  It becomes a witnessed
-    translation only when both endpoint source states are preserved and the
-    observer reads them in one relative fibre.  Natural-form agreement is not
-    consulted when deciding whether the interaction itself exists; it is tested
-    afterward as a derived closure consequence.
-    """
 
+def _components(members: Sequence[str], pairs: Sequence[tuple[str, str]]) -> tuple[tuple[str, ...], ...]:
+    parent = {member: member for member in members}
+
+    def find(x: str) -> str:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(a: str, b: str) -> None:
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[rb] = ra
+
+    for left, right in pairs:
+        if left in parent and right in parent:
+            union(left, right)
+
+    groups: dict[str, list[str]] = {}
+    for member in members:
+        groups.setdefault(find(member), []).append(member)
+    return tuple(sorted((tuple(sorted(group)) for group in groups.values()), key=lambda group: group))
+
+
+def derive_feedback_translation(*, observer_id: str | None, returned_feedback: Sequence[Mapping[str, Any]], returned_interactions: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """Derive closure fibres from arbitrary source-preserving feedback returns."""
+    observer = str(observer_id or "")
+    observations: dict[str, dict[str, Any]] = {}
+    for index, raw in enumerate(returned_feedback):
+        item = dict(raw)
+        observed_id = str(item.get("observed_id") or item.get("state_id") or item.get("id") or f"observed-{index}")
+        source_ids = _source_ids(item)
+        payload = item.get("payload", item.get("observed", item.get("value", item)))
+        observations[observed_id] = {
+            "observed_id": observed_id,
+            "observer_id": observer or None,
+            "source_ids": source_ids,
+            "source_preserved": bool(source_ids),
+            "payload_digest": _digest("observed", payload),
+            "payload": payload,
+        }
+
+    interactions: list[dict[str, Any]] = []
+    witnessed_pairs: list[tuple[str, str]] = []
+    for index, raw in enumerate(returned_interactions):
+        item = dict(raw)
+        source = str(item.get("observed_source_id") or item.get("source_state_id") or item.get("source") or "")
+        target = str(item.get("observed_target_id") or item.get("target_state_id") or item.get("target") or "")
+        relation_id = str(item.get("relation_id") or item.get("id") or f"interaction-{index}")
+        source_ids = _source_ids(item)
+        endpoints_preserved = bool(source in observations and target in observations and observations[source]["source_preserved"] and observations[target]["source_preserved"])
+        return_witnessed = item.get("returned") is True or item.get("witnessed") is True or bool(source_ids)
+        witnessed = bool(observer and endpoints_preserved and return_witnessed)
+        if witnessed:
+            witnessed_pairs.append((source, target))
+        interactions.append({
+            "id": relation_id,
+            "observer_id": observer or None,
+            "observed_source_id": source or None,
+            "observed_target_id": target or None,
+            "interaction_status": WITNESSED_STATUS if witnessed else OPEN_STATUS,
+            "translation_relation_witnessed": witnessed,
+            "source_return_ids": source_ids,
+            "return_witness_id": _digest("translation-return", {"observer": observer, "source": source, "target": target, "relation": relation_id, "source_ids": source_ids}) if witnessed else None,
+            "return_is_semantic_primitive": False,
+            "return_is_interaction_witness": True,
+            "observation_equality_used_to_witness": False,
+            "fixed_feature_used_to_witness": False,
+            "fixed_horizon_required": False,
+            "continuation_status": OPEN_STATUS,
+        })
+
+    members = sorted(observations)
+    translation_partition = _components(members, witnessed_pairs)
+    all_feedback_source_preserved = bool(members) and all(row["source_preserved"] for row in observations.values())
+    body = {
+        "protocol": PROTOCOL,
+        "primitive": "OBSERVER_OBSERVED_INTERACTIVE_TRANSLATION",
+        "observer_id": observer or None,
+        "observed_ids": members,
+        "observations": [observations[member] for member in members],
+        "interactions": interactions,
+        "translation_partition": [list(group) for group in translation_partition],
+        "translation_reading_total": bool(observer and all_feedback_source_preserved),
+        "observer_observed_relation_is_primitive": True,
+        "observation_equality_is_primitive": False,
+        "chart_equivalence_is_primitive": False,
+        "feature_selection_is_semantic": False,
+        "horizon_selection_is_semantic": False,
+        "strategy_selection_is_semantic": False,
+        "return_is_primitive": False,
+        "fixed_return_required": False,
+        "continuation_status": OPEN_STATUS,
+        "existence_closed": False,
+    }
+    body["id"] = _digest("feedback-translation", body)
+    return body
+
+
+def derive_relative_interactions(*, observer_id: str | None, projection_reading: Mapping[str, Any], form_by_member: Mapping[str, str], visual_nodes: Sequence[Mapping[str, Any]], visual_edges: Sequence[Mapping[str, Any]], truth_members: Iterable[str], physical_sensor_attached: bool = False) -> dict[str, Any]:
+    """Adapt the current visual/source surface into the generic feedback kernel."""
     observer = str(observer_id or "")
     members = set(map(str, truth_members))
     reading = {str(k): v for k, v in projection_reading.items()}
-
     event_to_state: dict[str, str] = {}
+    feedback: list[dict[str, Any]] = []
     nodes: list[dict[str, Any]] = []
     for raw in visual_nodes:
         node = dict(raw)
@@ -63,109 +146,38 @@ def derive_relative_interactions(
         if not event_id or state_id not in members or state_id not in reading:
             continue
         event_to_state[event_id] = state_id
-        nodes.append(
-            {
-                "event_id": event_id,
-                "state_id": state_id,
-                "observer_id": observer or None,
-                "observed_id": state_id,
-                "relative_reading": reading[state_id],
-                "source_preserved": True,
-                "physical_world_return": bool(physical_sensor_attached),
-            }
-        )
+        feedback.append({"observed_id": state_id, "source_ids": [state_id], "payload": {"relative_reading": reading[state_id], "physical_world_return": bool(physical_sensor_attached)}})
+        nodes.append({"event_id": event_id, "state_id": state_id, "observer_id": observer or None, "observed_id": state_id, "relative_reading": reading[state_id], "source_preserved": True, "physical_world_return": bool(physical_sensor_attached)})
 
-    interactions: list[dict[str, Any]] = []
-    witnessed_pairs: list[tuple[str, str]] = []
+    returns: list[dict[str, Any]] = []
     for raw in visual_edges:
         edge = dict(raw)
-        source_event = str(edge.get("source") or "")
-        target_event = str(edge.get("target") or "")
-        source_state = event_to_state.get(source_event)
-        target_state = event_to_state.get(target_event)
+        source_state = event_to_state.get(str(edge.get("source") or ""))
+        target_state = event_to_state.get(str(edge.get("target") or ""))
         if not source_state or not target_state:
             continue
+        returns.append({"id": str(edge.get("id") or _digest("interaction", edge)), "source": source_state, "target": target_state, "source_ids": [source_state, target_state], "returned": True})
 
-        source_preserved = source_state in members
-        target_preserved = target_state in members
-        same_relative_reading = reading.get(source_state) == reading.get(target_state)
-        interaction_witnessed = bool(observer and source_preserved and target_preserved and same_relative_reading)
-        status = WITNESSED_STATUS if interaction_witnessed else OPEN_STATUS
-        relation_id = str(edge.get("id") or _digest("interaction", edge))
-        return_witness_id = _digest(
-            "translation-return",
-            {
-                "observer": observer,
-                "source": source_state,
-                "target": target_state,
-                "relation": relation_id,
-                "reading": reading.get(source_state) if same_relative_reading else None,
-            },
-        ) if interaction_witnessed else None
-
-        natural_form_equal = form_by_member.get(source_state) == form_by_member.get(target_state)
-        closure_preserved = bool(interaction_witnessed and natural_form_equal)
-        if interaction_witnessed:
-            witnessed_pairs.append((source_state, target_state))
-
-        interactions.append(
-            {
-                "id": relation_id,
-                "observer_id": observer or None,
-                "observed_source_id": source_state,
-                "observed_target_id": target_state,
-                "interaction_status": status,
-                "translation_relation_witnessed": interaction_witnessed,
-                "relative_reading_equal": same_relative_reading,
-                "return_witness_id": return_witness_id,
-                "return_is_semantic_primitive": False,
-                "return_is_interaction_witness": True,
-                "natural_form_equal_after_translation": natural_form_equal,
-                "closure_preserved_after_translation": closure_preserved,
-                "fixed_return_required": False,
-                "continuation_status": OPEN_STATUS,
-            }
-        )
-
-    # Translation fibres are induced by the observer's relative reading over
-    # preserved source members.  Their comparison with natural-form fibres is a
-    # theorem/check after the interaction carrier has been constructed.
-    translation_partition = partition_signature(
-        {member: reading[member] for member in sorted(members) if member in reading}
-    )
-    natural_form_partition = partition_signature(
-        {member: form_by_member[member] for member in sorted(members) if member in form_by_member}
-    )
-    total = bool(observer and members and set(reading) == members and set(form_by_member) == members)
+    generic = derive_feedback_translation(observer_id=observer, returned_feedback=feedback, returned_interactions=returns)
+    natural_form_partition = partition_signature({member: form_by_member[member] for member in sorted(members) if member in form_by_member})
+    translation_partition = tuple(tuple(group) for group in generic["translation_partition"])
+    total = bool(generic["translation_reading_total"] and members and set(reading) == members and set(form_by_member) == members)
     closure_equations_derived = bool(total and translation_partition == natural_form_partition)
 
-    body = {
-        "protocol": PROTOCOL,
-        "primitive": "OBSERVER_OBSERVED_INTERACTIVE_TRANSLATION",
-        "observer_id": observer or None,
-        "truth_member_ids": sorted(members),
-        "nodes": nodes,
-        "interactions": interactions,
-        "translation_partition": [list(group) for group in translation_partition],
-        "natural_form_partition": [list(group) for group in natural_form_partition],
-        "translation_reading_total": total,
-        "closure_equations_derived": closure_equations_derived,
-        "chart_equivalence_is_primitive": False,
-        "observation_equality_is_primitive": False,
-        "return_is_primitive": False,
-        "fixed_return_required": False,
-        "observer_observed_relation_is_primitive": True,
-        "continuation_status": OPEN_STATUS,
-        "existence_closed": False,
-    }
+    interactions: list[dict[str, Any]] = []
+    for row in generic["interactions"]:
+        source = str(row.get("observed_source_id") or "")
+        target = str(row.get("observed_target_id") or "")
+        natural_form_equal = form_by_member.get(source) == form_by_member.get(target)
+        interactions.append({**row, "relative_reading_equal": reading.get(source) == reading.get(target), "natural_form_equal_after_translation": natural_form_equal, "closure_preserved_after_translation": bool(row["translation_relation_witnessed"] and natural_form_equal)})
+
+    body = {**generic, "nodes": nodes, "truth_member_ids": sorted(members), "interactions": interactions, "natural_form_partition": [list(group) for group in natural_form_partition], "translation_reading_total": total, "closure_equations_derived": closure_equations_derived, "projection_reading_is_semantic_authority": False, "display_labels_define_translation_fibres": False}
     body["id"] = _digest("interactive-translation", body)
     return body
 
 
 def translation_equivalence(interactions: Mapping[str, Any]) -> bool:
-    """Derived chart/natural-form equality from one relative interaction carrier."""
-
     return bool(interactions.get("closure_equations_derived") is True)
 
 
-__all__ = ["PROTOCOL", "derive_relative_interactions", "translation_equivalence"]
+__all__ = ["PROTOCOL", "derive_feedback_translation", "derive_relative_interactions", "translation_equivalence"]
