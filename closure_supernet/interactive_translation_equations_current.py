@@ -1,12 +1,18 @@
 from __future__ import annotations
 
-"""Current closure-equation runtime with NRRF870 natural trading closure.
+"""Current closure-equation runtime using translational truth alone.
 
-Trading truth is the open-sensor feedback hair equation: returned interaction is
-read through complete closed-itinerary geometry, normalized to its unique
-closure, then read as unitary curvature. The relation space itself is refined
-from accumulated returned interaction by translational truth: equal normalized
-natural forms are one ball; differing presentations inside that ball are hair.
+Trading truth is the NRRF870 open-sensor feedback hair equation. Returned
+interaction is read through complete closed-itinerary geometry, normalized to
+its unique closure, and quotiented by translational truth. There is no second
+trajectory, trend, tolerance, forecast, or inter-class dynamics law.
+
+Accumulated interaction can only refine the truth partition:
+- equal normalized natural forms are one ball / hair orbit / truth class;
+- distinct normalized natural forms remain distinct truths;
+- OPEN interaction contributes no synthetic truth;
+- profit is discovered only when a currently returned natural form is itself
+  profitable.
 """
 
 import hashlib
@@ -25,7 +31,6 @@ from .interactive_translation_equations import (
     resolve_rule_chart_equation,
     resolve_trading_equation as resolve_legacy_trading_equation,
 )
-from .trading_closure_continuation import resolve_trading_closure_continuation
 from .trading_natural_form_closure import (
     PROTOCOL as TRADING_PROTOCOL,
     resolve_open_sensor_trading_closure,
@@ -34,7 +39,7 @@ from .trading_translational_truth_partition import (
     derive_translational_truth_partition,
 )
 
-PROTOCOL = "closure.supernet/interactive-translation-equations-natural-trading-v5-translational-truth"
+PROTOCOL = "closure.supernet/interactive-translation-equations-trading-translational-truth-alone-v6"
 
 
 def _stable(value: Any) -> str:
@@ -82,7 +87,7 @@ def resolve_trading_equation(
     minimum_receipts: int = 1,
     max_forms: int | None = None,
 ) -> dict[str, Any]:
-    """Resolve trading from returned translation, with truth-derived partition."""
+    """Resolve trading from returned interaction using translational truth alone."""
 
     feedback = _sensor_feedback(
         sensor_feedback=sensor_feedback,
@@ -103,15 +108,6 @@ def resolve_trading_equation(
         sensor_feedback=current_feedback,
         max_returns=max_returns,
     )
-    continuation = (
-        resolve_trading_closure_continuation(
-            observer_id=observer_id,
-            sensor_history=history,
-            max_returns_per_frame=max_returns,
-        )
-        if history
-        else None
-    )
     truth_partition = (
         derive_translational_truth_partition(
             observer_id=observer_id,
@@ -122,11 +118,26 @@ def resolve_trading_equation(
         else None
     )
 
+    current_profit_truth_witnessed = any(
+        form.get("orientation") == "PROFITABLE"
+        for form in natural.get("natural_forms", [])
+    )
+    learned_profit = (
+        truth_partition.get("learned_profit") is True
+        if truth_partition is not None
+        else current_profit_truth_witnessed
+    )
+
     body = dict(natural)
     body["protocol"] = PROTOCOL
     body["natural_trading_protocol"] = TRADING_PROTOCOL
-    body["closure_continuation"] = continuation
+    # Kept only as a compatibility field. The authoritative runtime no longer
+    # computes a separate continuation/trajectory object.
+    body["closure_continuation"] = None
     body["translational_truth_partition"] = truth_partition
+    body["translational_truth_learning"] = truth_partition
+    body["current_profit_truth_witnessed"] = current_profit_truth_witnessed
+    body["learned_profit"] = learned_profit
 
     if proposals or receipts:
         legacy = resolve_legacy_trading_equation(
@@ -165,6 +176,7 @@ def resolve_trading_equation(
     body.update(
         {
             "status": natural["status"],
+            "translational_truth_alone": True,
             "route_receipt_authors_truth": False,
             "completed_route_is_not_natural_form_primitive": True,
             "ask_to_immediately_succeeding_bid_is_definition": False,
@@ -183,9 +195,18 @@ def resolve_trading_equation(
             "hair_is_intra_truth_class_presentation": True,
             "predeclared_market_graph_authors_truth_partition": False,
             "relation_space_refines_from_returned_interaction": True,
-            "curvature_continuation_is_relative_projection": True,
+            "distinct_natural_forms_are_not_declared_translations": True,
+            "separate_dynamics_law_present": False,
+            "inter_class_transition_model_present": False,
+            "curvature_continuation_is_authoritative": False,
+            "trend_model_present": False,
+            "forecast_model_present": False,
+            "similarity_tolerance_present": False,
+            "profit_trajectory_present": False,
             "history_length_authors_truth": False,
             "profit_trajectory_authors_trade": False,
+            "profit_learning_is_discovery_not_prediction": True,
+            "positive_profit_requires_current_returned_truth": True,
             "positive_crossing_requires_current_execution_return": True,
             "configuration_authors_truth": False,
             "computation_bounds_author_truth": False,
@@ -193,20 +214,22 @@ def resolve_trading_equation(
             "dialectic_continuation_status": OPEN_STATUS,
         }
     )
-    body["id"] = _digest("natural-trading-equation-translational-truth", body)
+    body["id"] = _digest("natural-trading-equation-translational-truth-alone", body)
     return body
 
 
 def resolve_closure_equations(payload: Mapping[str, Any]) -> dict[str, Any]:
-    """Resolve supplied subsystems through one returned-translation law."""
+    """Resolve supplied subsystems through one returned translational truth law."""
 
     result: dict[str, Any] = {
         "protocol": PROTOCOL,
         "equation": (
             "Q_(t+1)=Close(Q_t + Translate(observer_t, returned_interaction_t))"
         ),
+        "translational_truth_alone": True,
         "proposal_status": OPEN_STATUS,
         "only_returned_interaction_recloses": True,
+        "separate_dynamics_law_present": False,
         "configuration_authors_truth": False,
         "computation_bounds_author_truth": False,
         "existence_closed": False,
@@ -244,7 +267,7 @@ def resolve_closure_equations(payload: Mapping[str, Any]) -> dict[str, Any]:
     audit_target = dict(result)
     audit_target.pop("continuity_audit", None)
     result["continuity_audit"] = audit_translational_continuity(audit_target)
-    result["id"] = _digest("closure-equations-translational-truth", result)
+    result["id"] = _digest("closure-equations-translational-truth-alone", result)
     return result
 
 
