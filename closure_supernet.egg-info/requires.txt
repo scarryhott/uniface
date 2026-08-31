@@ -1,0 +1,15 @@
+fastapi<1,>=0.115
+uvicorn[standard]<1,>=0.30
+pydantic<3,>=2.8
+
+[dev]
+pytest<9,>=8
+pytest-asyncio<1,>=0.24
+httpx<1,>=0.27
+PyJWT[crypto]<3,>=2.9
+mcp<3,>=2
+
+[legacy]
+httpx<1,>=0.27
+PyJWT[crypto]<3,>=2.9
+mcp<3,>=2

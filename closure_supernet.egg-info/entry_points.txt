@@ -1,0 +1,2 @@
+[console_scripts]
+closure-supernet = closure_supernet.cli_supernet:main
