@@ -108,10 +108,22 @@ gate it. CI now has two explicit lanes:
 This does not relabel legacy failures as passes. It prevents a historical
 parallel runtime from determining the status of the published closure runtime.
 
-## Published interface
+## Interface boundary
 
-The production projection retains its one source-return mutation. A pure
-closure-equation endpoint is added:
+Production retains exactly one mutation surface:
+
+```text
+source-preserving translational return -> successor re-closure
+```
+
+The closure-equation resolver is deliberately an opt-in research adapter, not a
+second production route set:
+
+```text
+closure_supernet.api_interactive_translation.create_app(...)
+```
+
+When instantiated locally it provides:
 
 ```text
 GET  /supernet/closure-equations/capabilities
@@ -120,7 +132,8 @@ POST /supernet/closure-equations/resolve
 
 The resolver does not append events, place trades, choose a universal mode or
 change the latent UI closure. It returns a relative certificate for the
-supplied interactions.
+supplied interactions. The production `api_agent` continues to publish only
+the minimal projection and its one return relation.
 
 ## Boundary
 
