@@ -2,23 +2,11 @@ from __future__ import annotations
 
 """Final non-collapse closure certificate for the executable Supernet.
 
-Supernet closure is not the claim that every OPEN relation has been resolved or
-that every historical chart has executable geometry.  It is the stronger
-structural invariant requested by the natural-form atlas:
-
-* every known/versioned natural form remains present;
-* no historical distinction is silently identified;
-* every asserted non-identity equality is return-witnessed;
-* every unwitnessed relation remains OPEN;
-* every retained natural-form family is locally admissible as an interaction
-  proposal without selection authoring truth;
-* fidelity is derived only from exact returned partition evidence;
-* the formal Lean corpus is indexed against the same atlas without being
-  re-proved or promoted into visual resemblance;
-* the UI is the derived glue of the compatible sub-atlas.
-
-The historical archive audit remains useful diagnostics but cannot gate this
-closure certificate.
+Supernet closure is not the claim that every OPEN relation has been resolved.
+It is the structural invariant that every known form is retained, every
+asserted equality is returned, every unresolved relation remains OPEN, and the
+interface natural forms are canonical solutions of the same interactive
+equality closure rather than post-hoc visual templates.
 """
 
 import hashlib
@@ -29,6 +17,10 @@ from .closure_continuity import OPEN_STATUS, WITNESSED_STATUS
 from .formal_proof_index import (
     derive_formal_proof_index,
     validate_formal_proof_index,
+)
+from .interactive_natural_form_solver import (
+    derive_interactive_natural_form_solver,
+    validate_interactive_natural_form_solver,
 )
 from .local_natural_form_freedom import (
     derive_local_natural_form_freedom,
@@ -182,11 +174,31 @@ def derive_supernet_closure_certificate(
                 "single_final_form_selected"
             )
         )
+        expected_solver = derive_interactive_natural_form_solver(
+            ui_contract,
+            atlas=atlas,
+            local_field=local_field,
+        )
+        supplied_solver = ui_contract.get("interactive_natural_form_solver")
+        solver_validation = (
+            validate_interactive_natural_form_solver(
+                supplied_solver,
+                contract=ui_contract,
+                atlas=atlas,
+                local_field=local_field,
+            )
+            if isinstance(supplied_solver, Mapping)
+            else {"valid": False, "errors": ["interactive-natural-form-solver:missing"]}
+        )
+        ui_solver_matches = supplied_solver == expected_solver
     else:
         ui_atlas_matches = True
         ui_glue_matches = True
         ui_local_field_matches = True
         ui_single_final_form = False
+        expected_solver = None
+        solver_validation = {"valid": True, "errors": []}
+        ui_solver_matches = True
 
     interaction_supplied = isinstance(interaction_closure, Mapping)
     if interaction_supplied:
@@ -274,6 +286,41 @@ def derive_supernet_closure_certificate(
         "ui_is_exact_compatible_glue": ui_glue_matches,
         "ui_uses_same_local_natural_form_freedom": ui_local_field_matches,
         "ui_does_not_select_single_final_form": not ui_single_final_form,
+        "interactive_natural_form_solver_valid": solver_validation.get("valid") is True,
+        "ui_uses_exact_equality_closure_solver": ui_solver_matches,
+        "natural_form_is_interactive_interface_equality_closure": bool(
+            not ui_supplied
+            or (
+                isinstance(expected_solver, Mapping)
+                and expected_solver.get(
+                    "natural_form_is_interactive_interface_equality_closure"
+                )
+                is True
+            )
+        ),
+        "natural_form_is_not_posthoc_visual_template": bool(
+            not ui_supplied
+            or (
+                isinstance(expected_solver, Mapping)
+                and expected_solver.get("natural_form_is_posthoc_visual_template")
+                is False
+            )
+        ),
+        "named_geometry_templates_are_absent": bool(
+            not ui_supplied
+            or (
+                isinstance(expected_solver, Mapping)
+                and expected_solver.get("named_geometry_templates_present") is False
+                and expected_solver.get("family_switch_present") is False
+            )
+        ),
+        "rendering_cannot_witness_equality": bool(
+            not ui_supplied
+            or (
+                isinstance(expected_solver, Mapping)
+                and expected_solver.get("rendering_can_witness_equality") is False
+            )
+        ),
         "interaction_uses_same_atlas": interaction_atlas_matches,
         "interaction_uses_same_local_natural_form_freedom": (
             interaction_local_field_matches
@@ -294,11 +341,15 @@ def derive_supernet_closure_certificate(
             "noSilentCollapse AND witnessed(asserted equalities) AND "
             "OPEN(unwitnessed relations) AND proofIndexed(formal core) AND "
             "Fidelity=ExactReturnedPartitionProfile AND "
-            "UI=Glue(compatible subatlas)"
+            "NaturalForm=Solve(InteractiveEqualityClosure,VersionedChartConstraints) "
+            "AND UI=Glue(compatible subatlas)"
         ),
         "atlas_id": atlas.get("id"),
         "formal_proof_index_id": proof_index.get("id"),
         "local_natural_form_freedom_id": local_field.get("id"),
+        "interactive_natural_form_solver_id": (
+            expected_solver.get("id") if isinstance(expected_solver, Mapping) else None
+        ),
         "glued_subatlas_id": expected_glue.get("id"),
         "checks": checks,
         "missing_known_chart_ids": missing_known_chart_ids,
@@ -308,6 +359,7 @@ def derive_supernet_closure_certificate(
         "known_form_authority": "VERSIONED_REMEMBERED_NATURAL_FORM_ATLAS",
         "formal_authority": "INDEXED_MACHINE_CHECKED_LEAN_CORPUS",
         "runtime_equality_authority": "SOURCE_PRESERVING_RETURNED_TRANSLATION",
+        "natural_form_authority": "CANONICAL_INTERACTIVE_EQUALITY_CLOSURE_SOLVER",
         "local_selection_authority": "ALL_RETAINED_FAMILIES_AS_OPEN_OR_WITNESSED_PROPOSALS",
         "fidelity_authority": "EXACT_RETURN_PARTITION_PROFILE",
         "unwitnessed_relation_authority": OPEN_STATUS,
@@ -318,6 +370,8 @@ def derive_supernet_closure_certificate(
         "open_relations_are_part_of_closure": True,
         "complete_does_not_mean_every_open_relation_resolved": True,
         "selection_freedom_evolves_only_through_return": True,
+        "natural_form_solver_changes_truth": False,
+        "rendering_can_witness_equality": False,
         "future_resolution_guaranteed": False,
         "formal_proof_source_verified_by_runtime": False,
         "runtime_reproves_lean": False,
@@ -358,6 +412,11 @@ def validate_supernet_closure_certificate(
         "local_natural_form_freedom_id": expected.get(
             "local_natural_form_freedom_id"
         ),
+        "interactive_natural_form_solver_id": expected.get(
+            "interactive_natural_form_solver_id"
+        ),
+        "natural_form_is_interactive_interface_equality_closure": True,
+        "rendering_can_witness_equality": False,
         "future_resolution_guaranteed": False,
     }
 
