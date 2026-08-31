@@ -3,16 +3,23 @@ from __future__ import annotations
 """Verified source-return boundary for current translational truth.
 
 A caller cannot create truth by setting ``returned=True``, inventing source ids,
-or supplying execution/size flags. Trusted source adapters sign exact returned
-semantic payloads with Ed25519; the current closure runtime verifies those
-signatures with configured public keys before any relation reaches closure.
+choosing edge ids, injecting hair, or supplying execution/size flags. Trusted
+source adapters sign exact returned semantic payloads with Ed25519; the current
+closure runtime verifies those signatures with configured public keys before any
+relation reaches closure.
 
-Hair is intentionally outside the signed semantic payload. It remains a
-presentation/gauge coordinate governed by the existing closed-hair equation.
+External hair is never accepted as semantic input. Verified returns enter the
+current closure in canonical zero-hair presentation; hair is then a derived/local
+presentation freedom governed by the closure equations. This prevents arbitrary
+caller hair from either manufacturing or suppressing returned truth.
+
+A signed source event may be consumed only once within a supplied history. A
+replayed event is forced OPEN, so replay cannot increase empirical hair fidelity,
+horizon, discovery counts, or actionability.
 
 Production public keys are supplied by ``CLOSURE_SOURCE_WITNESS_PUBLIC_KEYS`` as
 a JSON mapping of authority id to base64 raw Ed25519 public key. Private keys
-belong only in trusted adapters and are never required by closure verification.
+belong only in trusted source adapters and are never required by closure.
 """
 
 import base64
@@ -26,7 +33,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey,
 
 from .closure_continuity import OPEN_STATUS, WITNESSED_STATUS
 
-PROTOCOL = "closure.supernet/verified-source-return-truth-v1"
+PROTOCOL = "closure.supernet/verified-source-return-truth-v2-canonical-replay-safe"
 PUBLIC_KEYS_ENV = "CLOSURE_SOURCE_WITNESS_PUBLIC_KEYS"
 TRADING_KIND = "TRADING_RELATION_RETURN"
 ATLAS_KIND = "ATLAS_TRANSLATION_RETURN"
@@ -194,8 +201,10 @@ def _verify_witness(
     if dict(body) != dict(expected_body):
         return False, "SOURCE_WITNESS_SEMANTIC_MISMATCH", dict(body)
     try:
-        signature = _b64decode(str(witness.get("signature") or ""))
-        public_key.verify(signature, _stable(body).encode("utf-8"))
+        public_key.verify(
+            _b64decode(str(witness.get("signature") or "")),
+            _stable(body).encode("utf-8"),
+        )
     except (ValueError, InvalidSignature, TypeError):
         return False, "SOURCE_WITNESS_SIGNATURE_INVALID", dict(body)
     return True, "SOURCE_WITNESS_VERIFIED", dict(body)
@@ -210,6 +219,40 @@ def _witness_coordinates(witness: Any) -> tuple[Mapping[str, Any] | None, str, s
     return witness, authority, str(body_map.get("source_event_id") or ""), str(body_map.get("source_stream") or "")
 
 
+def _canonicalize_hair(row: dict[str, Any]) -> None:
+    for key in (
+        "hair_delta", "potential_delta", "hair_source", "hair_target",
+        "source_potential", "target_potential", "natural_form_value",
+    ):
+        row.pop(key, None)
+    row["hair_delta"] = "0"
+
+
+def _strip_action_capacity(row: dict[str, Any]) -> None:
+    for key in (
+        "relative_ball_size", "relative_size", "executable_relative_size", "relative_capacity",
+        "translated_size", "relative_size_unit", "capacity_unit",
+    ):
+        row.pop(key, None)
+
+
+def _force_trading_open(row: Mapping[str, Any], *, reason: str) -> dict[str, Any]:
+    sanitized = dict(row)
+    sanitized.update({
+        "returned": False,
+        "witnessed": False,
+        "source_ids": [],
+        "authenticated": False,
+        "cost_complete": False,
+        "source_witness_verified": False,
+        "source_witness_reason": reason,
+        "source_witness_protocol": PROTOCOL,
+    })
+    _strip_action_capacity(sanitized)
+    _canonicalize_hair(sanitized)
+    return sanitized
+
+
 def verify_trading_source_return(
     *, observer_id: str | None, row: Mapping[str, Any],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -220,12 +263,13 @@ def verify_trading_source_return(
         source_event_id=source_event_id, source_stream=source_stream, row=raw,
     )
     ok, reason, verified_body = _verify_witness(witness=witness, expected_body=expected)
-    sanitized = dict(raw)
-    sanitized["source_witness_verified"] = ok
-    sanitized["source_witness_reason"] = reason
-    sanitized["source_witness_protocol"] = PROTOCOL
     if ok and verified_body is not None:
+        sanitized = dict(raw)
+        # Semantic relation identity comes from the signed exact source event,
+        # never from a caller-selected edge id.
         sanitized.update({
+            "id": verified_body["source_event_id"],
+            "return_id": verified_body["source_event_id"],
             "source": verified_body["source_token"],
             "target": verified_body["target_token"],
             "value": verified_body["relation_value"],
@@ -235,30 +279,21 @@ def verify_trading_source_return(
             "source_ids": [verified_body["source_event_id"]],
             "authenticated": verified_body["authenticated"],
             "cost_complete": verified_body["cost_complete"],
+            "source_witness_verified": True,
+            "source_witness_reason": reason,
+            "source_witness_protocol": PROTOCOL,
+            "source_authority_id": verified_body["authority_id"],
+            "source_stream": verified_body["source_stream"],
         })
+        _strip_action_capacity(sanitized)
         if verified_body.get("relative_size") is not None and verified_body.get("relative_size_unit"):
             sanitized["relative_size"] = verified_body["relative_size"]
             sanitized["relative_size_unit"] = verified_body["relative_size_unit"]
-        else:
-            for key in (
-                "relative_ball_size", "relative_size", "executable_relative_size", "relative_capacity",
-                "translated_size", "relative_size_unit", "capacity_unit",
-            ):
-                sanitized.pop(key, None)
+        _canonicalize_hair(sanitized)
     else:
-        sanitized.update({
-            "returned": False,
-            "witnessed": False,
-            "source_ids": [],
-            "authenticated": False,
-            "cost_complete": False,
-        })
-        for key in (
-            "relative_ball_size", "relative_size", "executable_relative_size", "relative_capacity",
-            "translated_size", "relative_size_unit", "capacity_unit",
-        ):
-            sanitized.pop(key, None)
-    return sanitized, {
+        sanitized = _force_trading_open(raw, reason=reason)
+
+    audit = {
         "status": WITNESSED_STATUS if ok else OPEN_STATUS,
         "verified": ok,
         "reason": reason,
@@ -267,11 +302,14 @@ def verify_trading_source_return(
         "source_stream": source_stream or None,
         "caller_returned_flag_authors_truth": False,
         "caller_source_ids_author_truth": False,
+        "caller_return_id_authors_geometry": False,
         "caller_authenticated_flag_authors_execution": False,
         "caller_cost_complete_flag_authors_execution": False,
         "caller_size_authors_action": False,
-        "hair_is_not_source_witness_semantic_payload": True,
+        "caller_hair_authors_truth": False,
+        "verified_external_return_uses_canonical_hair_presentation": True,
     }
+    return sanitized, audit
 
 
 def verify_trading_feedback(
@@ -279,8 +317,15 @@ def verify_trading_feedback(
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     audits: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
     for raw in feedback:
         row, audit = verify_trading_source_return(observer_id=observer_id, row=raw)
+        key = (str(audit.get("authority_id") or ""), str(audit.get("source_event_id") or ""))
+        if audit["verified"] and key in seen:
+            row = _force_trading_open(row, reason="SOURCE_WITNESS_REPLAYED")
+            audit = {**audit, "status": OPEN_STATUS, "verified": False, "reason": "SOURCE_WITNESS_REPLAYED", "replay_rejected": True}
+        elif audit["verified"]:
+            seen.add(key)
         rows.append(row)
         audits.append(audit)
     verified = sum(1 for audit in audits if audit["verified"])
@@ -293,9 +338,44 @@ def verify_trading_feedback(
         "returns": audits,
         "truth_requires_verified_source_witness": True,
         "unsigned_or_untrusted_return_remains_open": True,
+        "duplicate_source_event_replay_remains_open": True,
         "source_witness_public_key_is_server_configuration": True,
         "private_key_required_by_closure_runtime": False,
     }
+
+
+def verify_trading_history(
+    *, observer_id: str | None, history: Sequence[Sequence[Mapping[str, Any]]],
+) -> tuple[list[list[dict[str, Any]]], list[dict[str, Any]]]:
+    """Verify a returned history while consuming each signed source event once."""
+    verified_history: list[list[dict[str, Any]]] = []
+    history_audits: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+    for frame in history:
+        frame_rows: list[dict[str, Any]] = []
+        frame_audits: list[dict[str, Any]] = []
+        for raw in frame:
+            row, audit = verify_trading_source_return(observer_id=observer_id, row=raw)
+            key = (str(audit.get("authority_id") or ""), str(audit.get("source_event_id") or ""))
+            if audit["verified"] and key in seen:
+                row = _force_trading_open(row, reason="SOURCE_WITNESS_REPLAYED")
+                audit = {**audit, "status": OPEN_STATUS, "verified": False, "reason": "SOURCE_WITNESS_REPLAYED", "replay_rejected": True}
+            elif audit["verified"]:
+                seen.add(key)
+            frame_rows.append(row)
+            frame_audits.append(audit)
+        count = sum(1 for audit in frame_audits if audit["verified"])
+        verified_history.append(frame_rows)
+        history_audits.append({
+            "protocol": PROTOCOL,
+            "status": WITNESSED_STATUS if frame_audits and count == len(frame_audits) else OPEN_STATUS,
+            "input_count": len(frame_audits),
+            "verified_count": count,
+            "open_count": len(frame_audits) - count,
+            "returns": frame_audits,
+            "duplicate_source_event_replay_remains_open": True,
+        })
+    return verified_history, history_audits
 
 
 def _verify_atlas_translation_row(
@@ -318,6 +398,8 @@ def _verify_atlas_translation_row(
             "closure_commutes": verified_body["closure_commutes"],
             "return_preserved": verified_body["return_preserved"],
             "source_return_ids": [verified_body["source_event_id"]],
+            "source_authority_id": verified_body["authority_id"],
+            "source_stream": verified_body["source_stream"],
         })
     else:
         sanitized.update({
@@ -341,14 +423,10 @@ def _verify_atlas_translation_row(
 def verify_atlas_translation_sources(
     *, observer_id: str | None, sources: Sequence[Mapping[str, Any]],
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Verify every explicit atlas translation, including nested source containers.
-
-    ``natural_form_atlas`` reads explicit translations from each source's
-    ``atlas_translations`` list. Therefore verification is applied to each member
-    of that list, never merely to the outer container.
-    """
+    """Verify every explicit atlas translation, including nested containers."""
     sanitized_sources: list[dict[str, Any]] = []
     audits: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
     for raw_source in sources:
         source = dict(raw_source)
         nested = source.get("atlas_translations")
@@ -357,17 +435,36 @@ def verify_atlas_translation_sources(
             for raw_translation in nested:
                 if not isinstance(raw_translation, Mapping):
                     continue
-                sanitized, audit = _verify_atlas_translation_row(
-                    observer_id=observer_id, row=raw_translation
-                )
+                sanitized, audit = _verify_atlas_translation_row(observer_id=observer_id, row=raw_translation)
+                key = (str(audit.get("authority_id") or ""), str(audit.get("source_event_id") or ""))
+                if audit["verified"] and key in seen:
+                    sanitized.update({
+                        "returned": False, "source_preserved": False,
+                        "closure_commutes": False, "return_preserved": False,
+                        "source_return_ids": [], "source_witness_verified": False,
+                        "source_witness_reason": "SOURCE_WITNESS_REPLAYED",
+                    })
+                    audit = {**audit, "status": OPEN_STATUS, "verified": False, "reason": "SOURCE_WITNESS_REPLAYED", "replay_rejected": True}
+                elif audit["verified"]:
+                    seen.add(key)
                 sanitized_nested.append(sanitized)
                 audits.append(audit)
             source["atlas_translations"] = sanitized_nested
-            # An outer caller claim cannot replace per-translation verification.
             source.pop("source_witness", None)
             sanitized_sources.append(source)
         else:
             sanitized, audit = _verify_atlas_translation_row(observer_id=observer_id, row=source)
+            key = (str(audit.get("authority_id") or ""), str(audit.get("source_event_id") or ""))
+            if audit["verified"] and key in seen:
+                sanitized.update({
+                    "returned": False, "source_preserved": False,
+                    "closure_commutes": False, "return_preserved": False,
+                    "source_return_ids": [], "source_witness_verified": False,
+                    "source_witness_reason": "SOURCE_WITNESS_REPLAYED",
+                })
+                audit = {**audit, "status": OPEN_STATUS, "verified": False, "reason": "SOURCE_WITNESS_REPLAYED", "replay_rejected": True}
+            elif audit["verified"]:
+                seen.add(key)
             sanitized_sources.append(sanitized)
             audits.append(audit)
     verified = sum(1 for audit in audits if audit["verified"])
@@ -381,20 +478,14 @@ def verify_atlas_translation_sources(
         "atlas_admissibility_requires_verified_source_witness": True,
         "nested_atlas_translations_verified_individually": True,
         "outer_container_witness_cannot_author_nested_translation": True,
+        "duplicate_source_event_replay_remains_open": True,
     }
 
 
 __all__ = [
-    "ATLAS_KIND",
-    "PROTOCOL",
-    "PUBLIC_KEYS_ENV",
-    "TRADING_KIND",
-    "encode_private_key",
-    "encode_public_key",
-    "issue_atlas_translation_witness",
-    "issue_trading_source_witness",
-    "private_key_from_base64",
-    "verify_atlas_translation_sources",
-    "verify_trading_feedback",
-    "verify_trading_source_return",
+    "ATLAS_KIND", "PROTOCOL", "PUBLIC_KEYS_ENV", "TRADING_KIND",
+    "encode_private_key", "encode_public_key", "issue_atlas_translation_witness",
+    "issue_trading_source_witness", "private_key_from_base64",
+    "verify_atlas_translation_sources", "verify_trading_feedback",
+    "verify_trading_history", "verify_trading_source_return",
 ]
