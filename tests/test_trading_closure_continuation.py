@@ -94,7 +94,7 @@ def test_exact_duplicate_sensor_state_adds_no_semantic_history() -> None:
     assert len(receipt["continua"][0]["readings"]) == 1
 
 
-def test_current_runtime_exposes_continuation_without_horizon() -> None:
+def test_current_runtime_demotes_historical_continuation_to_non_authoritative_code() -> None:
     receipt = resolve_trading_equation(
         observer_id="o",
         sensor_history=[
@@ -104,9 +104,12 @@ def test_current_runtime_exposes_continuation_without_horizon() -> None:
     )
 
     assert receipt["status"] == "WITNESSED"
-    continuation = receipt["closure_continuation"]
-    assert continuation["continua"][0]["latest_movement"] == "TOWARD_PROFIT"
-    assert receipt["curvature_continuation_is_relative_projection"] is True
+    assert receipt["closure_continuation"] is None
+    assert receipt["translational_truth_alone"] is True
+    assert receipt["separate_dynamics_law_present"] is False
+    assert receipt["inter_class_transition_model_present"] is False
+    assert receipt["curvature_continuation_is_authoritative"] is False
     assert receipt["history_length_authors_truth"] is False
+    assert receipt["profit_trajectory_present"] is False
     assert receipt["profit_trajectory_authors_trade"] is False
     assert receipt["fixed_horizon"] is None
