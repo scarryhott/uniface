@@ -47,24 +47,26 @@ def _sensor_feedback(*, sensor_feedback: Sequence[Mapping[str, Any]], returned_e
 
 
 def _atlas_boundary_adapter(relative_atlas: Mapping[str, Any]) -> dict[str, Any]:
-    """Present atlas OPEN family/action projections to NRRF874 without a new selector."""
+    """Present every atlas OPEN projection as a distinct NRRF874 boundary form."""
     forms: list[dict[str, Any]] = []
     for index, raw in enumerate(relative_atlas.get("action_projections", [])):
         action = dict(raw)
         if action.get("status") != OPEN_STATUS or action.get("requires_return") is not True:
             continue
+        family_id = action.get("family_id")
+        kind = (
+            f"OPEN_ATLAS_FAMILY_TRANSLATION:{family_id}"
+            if action.get("kind") == "RETURN_SOURCE_PRESERVING_ATLAS_TRANSLATION"
+            else f"OPEN_CURRENT_RELATIVE_ATLAS_FORM:{action.get('kind')}:{index}"
+        )
         forms.append({
             "form_id": action.get("projection_id") or action.get("boundary_id") or f"atlas-open-{index}",
-            "kind": (
-                "OPEN_ATLAS_FAMILY_TRANSLATION"
-                if action.get("kind") == "RETURN_SOURCE_PRESERVING_ATLAS_TRANSLATION"
-                else "OPEN_CURRENT_RELATIVE_ATLAS_FORM"
-            ),
+            "kind": kind,
             "status": OPEN_STATUS,
             "closure_id": action.get("closure_id") or action.get("current_tt_id"),
             "source_token": action.get("source_token"),
             "target_token": action.get("target_token"),
-            "family_id": action.get("family_id"),
+            "family_id": family_id,
             "action_projection": action,
         })
     return {"open_natural_forms": forms}
@@ -123,6 +125,18 @@ def resolve_trading_equation(
         preaction_relative_coordinates=coordinates,
         translational_truth_partition=truth_partition,
     )
+
+    # Historical callers may still inspect these trading readouts under the old
+    # field key. They are explicitly compatibility projections and do not define
+    # the carrier, family admissibility, or local/global role.
+    relative_atlas["returned_natural_forms"] = list(trading_projection.get("returned_natural_forms", []))
+    relative_atlas["returned_natural_form_count"] = trading_projection.get("returned_natural_form_count", 0)
+    relative_atlas["profitable_returned_natural_forms"] = list(trading_projection.get("profitable_returned_natural_forms", []))
+    relative_atlas["compatibility_trading_readouts_only"] = True
+    relative_atlas["open_boundary_natural_selection"] = open_boundary_selection
+    relative_atlas["learning_interactions"] = list(open_boundary_selection.get("boundary_interactions", []))
+    relative_atlas["learning_interaction_count"] = open_boundary_selection.get("boundary_interaction_count", 0)
+    relative_atlas["boundary_driven_learning"] = open_boundary_selection.get("boundary_driven") is True
 
     current_profit = any(f.get("orientation") == "PROFITABLE" for f in natural.get("natural_forms", []))
     learned_profit = truth_partition.get("learned_profit") is True if truth_partition is not None else current_profit
@@ -190,6 +204,7 @@ def resolve_trading_equation(
         "selector_is_hair_blind": True,
         "runtime_smuggled_tie_breaker_present": False,
         "absolute_quoted_number_used_by_selector": False,
+        "ball_selector_policy_present": False,
         "hair_resampling_can_widen_support": False,
         "new_truth_class_return_can_widen_support": True,
         "fairness_is_hypothesis_not_runtime_fact": True,
@@ -207,6 +222,7 @@ def resolve_trading_equation(
         "ball_partition_max_gives_timing": True,
         "clock_duration_authors_timing": False,
         "normalized_closure_timing_equals_amplitude": True,
+        "amplitude_timing_one_translation": True,
         "loop_timing_is_not_hold_horizon": True,
         "fixed_horizon_authors_truth": False,
         "fixed_horizon_present": False,
@@ -235,12 +251,15 @@ def resolve_trading_equation(
         "forecast_model_present": False,
         "similarity_tolerance_present": False,
         "profit_trajectory_present": False,
+        "profit_trajectory_authors_trade": False,
         "history_length_authors_truth": False,
         "profit_learning_is_discovery_not_prediction": True,
         "positive_profit_requires_current_returned_truth": True,
         "positive_crossing_requires_current_execution_return": True,
         "all_open_forms_coexist": True,
         "local_open_cannot_block_relation_space_extension": True,
+        "relation_space_extension_is_simultaneous_open_form": True,
+        "profit_selection_requires_returned_positive_amplitude": True,
         "profit_is_natural_form_property_not_selection_rule": True,
         "action_occurs_after_unified_natural_form_field": True,
         "action_projection_authors_truth": False,
