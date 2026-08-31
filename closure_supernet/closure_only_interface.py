@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-"""Browser transport for the versioned natural-form atlas.
+"""Browser transport for the proof-indexed versioned natural-form atlas.
 
-The legacy renderer remains the geometry evaluator. This wrapper adds an
-independent browser audit of the atlas/glue receipt and makes returned relation
-paths themselves navigable view transport. It does not invent historical
-cross-form equality or authored menu controls.
+The legacy renderer remains the geometry evaluator.  This wrapper independently
+checks atlas/glue identity, the indexed Lean witness registry, and the final
+Supernet closure certificate before any projection is rendered. Returned and
+OPEN paths remain navigable view transport without inventing cross-form truth.
 """
 
 from .closure_only_interface_legacy import CLOSURE_ONLY_SUPERNET_HTML as _BASE_HTML
@@ -16,7 +16,10 @@ _ATLAS_VALIDATOR = r'''
     const atlas = contract?.natural_form_atlas;
     const glue = contract?.glued_ui_subatlas;
     const semantics = contract?.atlas_semantics;
-    if (!isRecord(atlas) || !isRecord(glue) || !isRecord(semantics)) return false;
+    const proofIndex = contract?.formal_proof_index;
+    const closure = contract?.supernet_closure_certificate;
+    if (!isRecord(atlas) || !isRecord(glue) || !isRecord(semantics)
+        || !isRecord(proofIndex) || !isRecord(closure)) return false;
     if (atlas.protocol !== "SUPERNET-VERSIONED-NATURAL-FORM-ATLAS"
         || atlas.schema !== "closure.supernet/versioned-natural-form-atlas-v1") return false;
     if (atlas.closure_ball_is_master_container !== false
@@ -58,6 +61,8 @@ _ATLAS_VALIDATOR = r'''
         if (!sources || relation.source_preserved !== true
             || relation.closure_commutes !== true
             || relation.return_preserved !== true) return false;
+      } else if (relation.executes_as_equality === true) {
+        return false;
       }
     }
     if (identity.size !== chartSet.size || [...chartSet].some((id) => !identity.has(id))) return false;
@@ -94,7 +99,60 @@ _ATLAS_VALIDATOR = r'''
         || semantics.historical_form_meaning_may_be_replaced_without_return !== false
         || semantics.cross_form_equality_requires_source_preserving_return !== true
         || semantics.open_cross_form_relations_remain_navigable !== true
+        || semantics.formal_proof_index_required !== true
+        || semantics.archive_audit_gates_supernet_closure !== false
+        || semantics.open_relation_breaks_supernet_closure !== false
         || semantics.truth_issued !== false) return false;
+
+    if (proofIndex.protocol !== "SUPERNET-FORMAL-PROOF-INDEX"
+        || proofIndex.schema !== "closure.supernet/formal-proof-index-v1"
+        || proofIndex.atlas_id !== atlas.id
+        || proofIndex.proof_index_closed !== true
+        || proofIndex.required_core_modules_present !== true
+        || proofIndex.lean_source_verified_by_runtime !== false
+        || proofIndex.runtime_reproves_lean !== false
+        || !Array.isArray(proofIndex.proofs)
+        || !proofIndex.proofs.length
+        || !Array.isArray(proofIndex.unresolved_chart_names)
+        || proofIndex.unresolved_chart_names.length !== 0) return false;
+    for (const proof of proofIndex.proofs) {
+      if (!isRecord(proof)
+          || typeof proof.id !== "string" || !proof.id
+          || typeof proof.module !== "string" || !proof.module
+          || proof.machine_checked_reported !== true
+          || proof.source_verified_by_runtime !== false
+          || proof.runtime_reproves_lean !== false
+          || proof.cross_form_equality_authored !== false
+          || proof.formal_witness_is_not_visual_resemblance !== true
+          || !Array.isArray(proof.chart_ids)
+          || !proof.chart_ids.every((id) => chartSet.has(asText(id)))) return false;
+      const proofBody = Object.fromEntries(Object.entries(proof).filter(([key]) => key !== "id"));
+      if (proof.id !== await digest("formal-proof-witness", proofBody)) return false;
+    }
+    const proofBody = Object.fromEntries(Object.entries(proofIndex).filter(([key]) => key !== "id"));
+    if (proofIndex.id !== await digest("formal-proof-index", proofBody)) return false;
+
+    if (closure.protocol !== "SUPERNET-PROOF-INDEXED-CLOSURE"
+        || closure.schema !== "closure.supernet/proof-indexed-closure-certificate-v1"
+        || closure.status !== "WITNESSED"
+        || closure.supernet_closed !== true
+        || closure.atlas_id !== atlas.id
+        || closure.formal_proof_index_id !== proofIndex.id
+        || closure.glued_subatlas_id !== glue.id
+        || closure.archive_audit_required_for_supernet_closure !== false
+        || closure.archive_audit_is_diagnostic_only !== true
+        || closure.open_relation_breaks_supernet_closure !== false
+        || closure.open_relations_are_part_of_closure !== true
+        || closure.complete_does_not_mean_every_open_relation_resolved !== true
+        || closure.formal_proof_source_verified_by_runtime !== false
+        || closure.runtime_reproves_lean !== false
+        || closure.existence_closed !== false
+        || closure.dialectic_continuation_status !== "OPEN"
+        || closure.truth_issued !== false
+        || !isRecord(closure.checks)
+        || !Object.values(closure.checks).every((value) => value === true)) return false;
+    const closureBody = Object.fromEntries(Object.entries(closure).filter(([key]) => key !== "id"));
+    if (closure.id !== await digest("supernet-closure", closureBody)) return false;
     return true;
   }
 '''
@@ -202,6 +260,9 @@ def _inject(html: str) -> str:
             "    mount.dataset.closureNaturality = \"PULL_SQUARES_AND_ARENA_GROWTH\";\n"
             "    mount.dataset.naturalFormAtlasId = active.natural_form_atlas.id;\n"
             "    mount.dataset.gluedSubatlasId = active.glued_ui_subatlas.id;\n"
+            "    mount.dataset.formalProofIndexId = active.formal_proof_index.id;\n"
+            "    mount.dataset.supernetClosureCertificateId = active.supernet_closure_certificate.id;\n"
+            "    mount.dataset.supernetClosed = active.supernet_closure_certificate.supernet_closed;\n"
             "    mount.dataset.edgeSemantics = active.glued_ui_subatlas.edge_semantics;\n",
         ),
         (_OLD_TRANSLATION_BLOCK, _NEW_TRANSLATION_BLOCK),
@@ -210,7 +271,7 @@ def _inject(html: str) -> str:
     result = html
     for old, new in replacements:
         if old not in result:
-            raise RuntimeError("atlas browser integration target changed")
+            raise RuntimeError("proof-indexed atlas browser integration target changed")
         result = result.replace(old, new, 1)
     return result
 

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-"""Atlas-preserving Supernet interaction closure.
+"""Atlas-preserving, proof-indexed Supernet interaction closure.
 
-This module wraps the previous observer-observed translation kernel without
-changing its proved/runtime closure conditions.  The correction is ontological:
-the previously emitted ball/physical topology is one chart projection inside a
-versioned natural-form atlas, not the container or replacement for every
-historical natural form.
+The observer-observed translation kernel remains authoritative for runtime
+cross-form equality.  The versioned atlas preserves every known historical
+natural form without flattening it, while the formal proof index records the
+Lean-proved chart families and invariants that constrain the same translation.
+OPEN relations remain inside closure rather than counting as missing truth.
 """
 
 import hashlib
@@ -15,11 +15,13 @@ from typing import Any
 
 from . import interaction_closure_legacy as _legacy
 from .closure_continuity import audit_translational_continuity
+from .formal_proof_index import derive_formal_proof_index
 from .natural_form_atlas import (
     derive_glued_ui_subatlas,
     derive_versioned_natural_form_atlas,
     validate_versioned_natural_form_atlas,
 )
+from .supernet_closure_certificate import derive_supernet_closure_certificate
 
 PROTOCOL = _legacy.PROTOCOL
 SCHEMA = _legacy.SCHEMA
@@ -51,14 +53,7 @@ def derive_interaction_closure(
     black_mirror: dict[str, Any],
     network_return: dict[str, Any],
 ) -> dict[str, Any]:
-    """Derive one closure plus the versioned atlas it inhabits.
-
-    Equality remains authored only by the legacy source-preserving interactive
-    translation kernel.  The atlas never upgrades resemblance, shared names, or
-    historical lineage into equality.  Cross-form identification is WITNESSED
-    only when a returned translation explicitly preserves source, closure, and
-    return; otherwise the relation remains OPEN.
-    """
+    """Derive one runtime closure inside the complete proof-indexed atlas."""
 
     body = _legacy.derive_interaction_closure(
         truth_derivation=truth_derivation,
@@ -91,10 +86,12 @@ def derive_interaction_closure(
     )
     atlas_validation = validate_versioned_natural_form_atlas(atlas)
     glued = derive_glued_ui_subatlas(atlas)
+    proof_index = derive_formal_proof_index(atlas)
 
     body["natural_form_atlas"] = atlas
     body["natural_form_atlas_validation"] = atlas_validation
     body["glued_ui_subatlas"] = glued
+    body["formal_proof_index"] = proof_index
 
     physical_topology = dict(body.get("black_mirror_physical_topology") or {})
     physical_topology.update(
@@ -116,6 +113,8 @@ def derive_interaction_closure(
             "cross_form_equality_requires_returned_translation": True,
             "open_cross_form_relations_preserved": True,
             "closure_ball_is_master_container": False,
+            "formal_proof_index_closed": proof_index["proof_index_closed"],
+            "archive_audit_gates_supernet_closure": False,
         }
     )
     body["unification_constraint"] = constraint
@@ -128,11 +127,34 @@ def derive_interaction_closure(
             "visual_resemblance_witnesses_cross_form_equality": False,
             "shared_name_witnesses_cross_form_equality": False,
             "atlas_is_empirical_truth_claim": False,
+            "lean_source_verified_by_runtime": False,
+            "runtime_reproves_lean": False,
         }
     )
     body["claims"] = claims
 
+    # Audit first so the closure certificate can bind the current continuity
+    # status.  The certificate contains no forbidden external-authority flag, so
+    # the second audit below must remain the same status.
     body["continuity_self_audit"] = audit_translational_continuity(body)
+    certificate = derive_supernet_closure_certificate(
+        atlas=atlas,
+        formal_proof_index=proof_index,
+        interaction_closure=body,
+    )
+    body["supernet_closure_certificate"] = certificate
+
+    constraint["proof_indexed_supernet_closed"] = certificate["supernet_closed"]
+    body["unification_constraint"] = constraint
+    claims["supernet_closed_by_proof_indexed_translation"] = certificate[
+        "supernet_closed"
+    ]
+    body["claims"] = claims
+    final_audit = audit_translational_continuity(body)
+    if final_audit["status"] != body["continuity_self_audit"]["status"]:
+        raise RuntimeError("proof-indexed closure changed translational continuity")
+    body["continuity_self_audit"] = final_audit
+
     body["id"] = _digest(
         "interaction-closure-atlas",
         {
@@ -141,6 +163,8 @@ def derive_interaction_closure(
             "interactive_translation_id": interactive_translation.get("id"),
             "natural_form_atlas_id": atlas["id"],
             "glued_ui_subatlas_id": glued["id"],
+            "formal_proof_index_id": proof_index["id"],
+            "supernet_closure_certificate_id": certificate["id"],
             "continuity_self_audit": body["continuity_self_audit"]["status"],
         },
     )
