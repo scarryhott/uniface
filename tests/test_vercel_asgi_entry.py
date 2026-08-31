@@ -58,6 +58,7 @@ with TestClient(asgi.app) as client:
             "perspective_id": "p",
             "focus_event_id": None,
             "exact_source_return": "One exact visual return.",
+            "closure_equation_system_id": initial["closure_naturality_equations"]["id"],
             "local_projection_commitment": derive_local_projection_commitment(
                 initial,
                 return_relation_id=initial["return_relation"]["id"],

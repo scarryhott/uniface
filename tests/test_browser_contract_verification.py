@@ -54,6 +54,9 @@ def actual_open_and_witnessed_contracts(
                 "perspective_id": opened["perspective_id"],
                 "focus_event_id": opened["focus_event_id"],
                 "exact_source_return": exact_source,
+                "closure_equation_system_id": opened[
+                    "closure_naturality_equations"
+                ]["id"],
                 "local_projection_commitment": derive_local_projection_commitment(
                     opened,
                     return_relation_id=opened["return_relation"]["id"],
@@ -147,6 +150,7 @@ process.stdin.on("end", async () => {{
     results.push({{
       canonical: stable(body),
       id_matches: await contractIdMatchesContent(contract),
+      equations_match: await closureNaturalityEquationsMatch(contract),
       visualization_matches: await visualizationMatches(contract),
       boundary_and_structure_valid: validate(contract),
     }});
@@ -212,8 +216,10 @@ def test_browser_sha256_matches_python_and_both_rejection_gates(
         assert result["canonical"] == _stable(body)
 
     assert results[0]["id_matches"] is True
+    assert results[0]["equations_match"] is True
     assert results[0]["boundary_and_structure_valid"] is True
     assert results[1]["id_matches"] is True
+    assert results[1]["equations_match"] is True
     assert results[1]["visualization_matches"] is True
     assert results[1]["boundary_and_structure_valid"] is True
 
@@ -230,6 +236,9 @@ def test_browser_sha256_matches_python_and_both_rejection_gates(
     assert validate_ui_contract(boundary_tamper)["valid"] is False
 
     assert "if (!validate(contract)" in CLOSURE_ONLY_SUPERNET_HTML
+    assert "!await closureNaturalityEquationsMatch(contract)" in (
+        CLOSURE_ONLY_SUPERNET_HTML
+    )
     assert "!await visualizationMatches(contract)" in CLOSURE_ONLY_SUPERNET_HTML
     assert "!await contractIdMatchesContent(contract)" in CLOSURE_ONLY_SUPERNET_HTML
     assert '"data-local-modification": "UNCOMMITTED_CLOSURE_POTENTIAL"' in (
@@ -240,6 +249,29 @@ def test_browser_sha256_matches_python_and_both_rejection_gates(
     )
     assert 'await digest("local-projection"' in CLOSURE_ONLY_SUPERNET_HTML
     assert "committed.closure_rederived !== true" in CLOSURE_ONLY_SUPERNET_HTML
+
+
+def test_browser_rederives_exact_naturality_equations_before_rendering(
+    tmp_path: Path,
+) -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node is required to execute the published browser verifier")
+
+    _, witnessed = actual_open_and_witnessed_contracts(tmp_path)
+    tampered = deepcopy(witnessed)
+    tampered["closure_naturality_equations"]["finite_instance"][
+        "pull_growth_stages"
+    ][0]["naturality_square_commutes"] = False
+    tampered["closure_naturality_equations"]["checks"][
+        "all_pull_naturality_squares_commute"
+    ] = False
+    tampered = reseal_content_id(tampered)
+
+    [result] = browser_contract_checks(node, [tampered])
+    assert result["id_matches"] is True
+    assert result["equations_match"] is False
+    assert validate_ui_contract(tampered)["valid"] is False
 
 
 def test_browser_rederives_exact_geometry_before_rendering(tmp_path: Path) -> None:

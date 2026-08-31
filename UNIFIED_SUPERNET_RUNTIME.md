@@ -317,6 +317,21 @@ binding the latent contract, perspective, focus, source, hair and kernel; the
 server rederives that digest before appending anything. See
 `LATENT_CLOSURE_PERSPECTIVE_NAVIGATION_COMMIT_PROTOCOL.md`.
 
+## Supernet 3.22: interface derived from NRRF866 closure equations
+
+The observer–observed interaction now supplies an explicit interactive
+translation witness before any UI equality is considered. From that witness,
+the existing production contract derives one finite NRRF866 equation object:
+faithful hair maps, connected translation classes, the common closure kernel,
+its canonical section, exact naturality pull squares over continuation
+sub-arenas, monotone distinction growth, and saturation at full reach.
+
+Python, the contract audit, and the browser independently derive the same
+object. Rendering and local commit both fail closed if it differs. The durable
+commit receipt binds its exact equation-system ID. No route was added: the
+full-surface source-preserving return is still the only production mutation.
+See `INTERACTIVE_TRANSLATION_OF_CLOSURE_EQUATIONS_NRRF866_RUNTIME.md`.
+
 ## Scope
 
 This implements the requested single-node semantic unification:

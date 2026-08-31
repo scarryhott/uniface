@@ -46,6 +46,9 @@ def return_payload(contract: dict[str, Any], exact_source: str) -> dict[str, Any
         "perspective_id": contract["perspective_id"],
         "focus_event_id": contract["focus_event_id"],
         "exact_source_return": exact_source,
+        "closure_equation_system_id": contract[
+            "closure_naturality_equations"
+        ]["id"],
     }
     payload["local_projection_commitment"] = derive_local_projection_commitment(
         contract,
@@ -146,7 +149,7 @@ def test_open_projection_has_no_authored_page_or_substitute_content(
     assert contract["renderer_relation"]["authored_visible_vocabulary"] == []
     assert contract["renderer_relation"]["fallback_visuals"] == []
     assert contract["renderer_relation"]["natural_form_constraint"] == (
-        "TRANSLATED_READING_KERNEL"
+        "NRRF866_INTERACTIVE_CLOSURE_EQUATION_SYSTEM"
     )
     assert contract["renderer_relation"]["geometry_acceptance"] == (
         "EXACT_LOCAL_CLOSURE_REDERIVATION"
@@ -227,6 +230,21 @@ def test_universal_return_derives_the_only_visible_source_and_successor_closure(
     assert validation["equality_fibres_partition_visible_states"] is True
     assert validation["active_reading_determines_projection"] is True
     assert validation["visualization_is_exact_relation_projection"] is True
+    assert validation[
+        "closure_naturality_equations_match_recomputation"
+    ] is True
+    assert validation[
+        "interface_is_derived_from_interactive_closure_equations"
+    ] is True
+    equations = successor["closure_naturality_equations"]
+    assert equations["interactive_translation_id"] == successor[
+        "interactive_translation_id"
+    ]
+    assert equations["checks"]["finite_runtime_instance_checked"] is True
+    assert equations["checks"][
+        "all_pull_naturality_squares_commute"
+    ] is True
+    assert equations["checks"]["growth_saturates_at_reach"] is True
     dialectic = successor["closure_process"]["interactive_translation_dialectic"]
     assert dialectic["dialogue"]["turn_ids"] == successor[
         "continuation_lineage_ids"
@@ -244,6 +262,10 @@ def test_universal_return_derives_the_only_visible_source_and_successor_closure(
     assert latent["commit_binds_contract_perspective_source_and_kernel"] is True
     assert latent["server_rederives_commitment_before_append"] is True
     assert latent["committed_hair_defines_equality"] is False
+    assert latent["latent_equation_system_id"] == equations["id"]
+    assert latent[
+        "all_interface_relations_factor_through_closure_equations"
+    ] is True
 
 
 def test_local_projection_must_bind_latent_closure_before_commit(
@@ -262,6 +284,17 @@ def test_local_projection_must_bind_latent_closure_before_commit(
         rejected = client.post(
             RETURN_ENDPOINT_TEMPLATE.format(contract_id=opened["id"]),
             json=forged,
+        )
+        assert rejected.status_code == 400
+        assert app.state.runtime.ledger.list_returns() == []
+
+        wrong_equations = return_payload(opened, exact_source)
+        wrong_equations["closure_equation_system_id"] = (
+            "closure-naturality-equations:" + "0" * 24
+        )
+        rejected = client.post(
+            RETURN_ENDPOINT_TEMPLATE.format(contract_id=opened["id"]),
+            json=wrong_equations,
         )
         assert rejected.status_code == 400
         assert app.state.runtime.ledger.list_returns() == []
@@ -288,6 +321,9 @@ def test_local_projection_must_bind_latent_closure_before_commit(
     committed = response.json()["committed_local_projection"]
     assert committed["id"] == admitted["local_projection_commitment"]
     assert committed["latent_contract_id"] == opened["id"]
+    assert committed["closure_equation_system_id"] == opened[
+        "closure_naturality_equations"
+    ]["id"]
     assert committed["hair_millidegrees"] == hair
     assert committed["closure_rederived"] is True
 
@@ -471,6 +507,18 @@ def test_production_exposes_only_projection_return_and_runtime_health(
             "/supernet/interface",
             params={"perspective_id": "perspective:production"},
         ).status_code == 200
+        capabilities = client.get(
+            "/supernet/interface/capabilities"
+        ).json()
+        assert capabilities["interface_derivation"] == (
+            "INTERACTIVE_TRANSLATION_OF_CLOSURE_EQUATIONS"
+        )
+        assert capabilities["closure_equation_protocol"] == (
+            "closure.supernet/closure-naturality-equations-v1"
+        )
+        assert capabilities[
+            "browser_rederives_pull_and_growth_equations"
+        ] is True
         for removed_surface in (
             "/docs",
             "/openapi.json",

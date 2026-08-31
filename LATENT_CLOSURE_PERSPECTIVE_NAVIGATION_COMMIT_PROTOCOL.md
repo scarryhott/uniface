@@ -1,13 +1,13 @@
 # Latent closure perspective navigation and commit protocol
 
-Supernet 3.21 treats the verified closure relation as the browser's latent
+Supernet 3.22 treats the verified closure equation system as the browser's latent
 state. The SVG is only its current projection. It is not a second model and
 does not own independent semantics.
 
 The executable state is:
 
 ```text
-L = verified latent closure
+L = verified latent interactive-translation closure equations
 P = mutable local perspective hair and focus
 M = uncommitted local modification
 screen = project(L, P, M)
@@ -18,13 +18,15 @@ navigates to its closure focus. Typing constructs a dashed local potential
 derived from the exact draft; it does not mutate the durable closure or claim
 truth. Double-clicking returns the local hair to its normalised reading.
 
-Enter computes a content commitment over the active contract, return relation,
-perspective, focus, exact source, local hair and equality kernel. The server
+Enter computes a content commitment over the active contract, exact NRRF866
+equation-system ID, return relation, perspective, focus, exact source, local
+hair and equality kernel. The server
 reconstructs that commitment from its current closure before it appends an
-event. A forged or stale local commitment is rejected without creating a
+event. A forged or stale contract or equation-system commitment is rejected without creating a
 return. The successor is then rederived, audited, content-addressed and sent
 back with a receipt for the committed local projection. The browser adopts it
-only after independently verifying both the receipt and successor geometry.
+only after independently deriving the pull/growth equations and verifying both
+the receipt and successor geometry.
 
 Local hair is retained as provenance but never defines equality. Thus users
 may navigate and modify the interface perspectivally without being allowed to
