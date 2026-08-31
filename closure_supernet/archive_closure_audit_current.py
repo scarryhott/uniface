@@ -11,9 +11,6 @@ from typing import Sequence
 
 from . import archive_closure_audit as _base
 
-# Sentence punctuation is presentation hair. The base normalizer preserves a
-# period because equations may contain decimal points; for prose matching a
-# terminal period must not become part of a chart token such as `checker grid.`.
 _base_normalize = _base._normalize
 
 
@@ -23,24 +20,26 @@ def _current_normalize(value: str) -> str:
 
 _base._normalize = _current_normalize
 
-# Natural-language inflections are also presentation hair, not distinct
-# relation semantics. They resolve to the same cross-form translation test.
 for _term in ("translates", "translated", "translating"):
     _normalized = _base._normalize(_term)
     if _normalized not in _base.RELATION_MARKERS:
         _base.RELATION_MARKERS = (*_base.RELATION_MARKERS, _normalized)
 
-# PR #93 made natural-form OPEN interaction selection executable. Register it
-# without changing any historical chart identity or equality condition.
-_base.CAPABILITIES["natural-form-selector"] = (
+# Recognition and selection are one current executable natural-form field.
+# Historical selector wording remains an alias of this one capability; it does
+# not register a second semantic stage.
+_base.CAPABILITIES["unified-natural-form-field"] = (
     (
+        "unified natural form field",
+        "natural form field",
+        "recognition equals selection",
         "natural form selector",
         "natural-form selector",
         "natural form selects interaction",
         "natural-form interaction selection",
         "open boundary is interaction frontier",
     ),
-    ("trading_natural_form_selector.derive_natural_form_selection",),
+    ("trading_unified_natural_form_field.derive_unified_natural_form_field",),
 )
 _base.CAPABILITY_ALIASES = sorted(
     (

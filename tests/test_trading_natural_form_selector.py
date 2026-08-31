@@ -9,6 +9,9 @@ from closure_supernet.trading_natural_form_closure import (
 from closure_supernet.trading_natural_form_selector import (
     derive_natural_form_selection,
 )
+from closure_supernet.trading_unified_natural_form_field import (
+    derive_unified_natural_form_field,
+)
 
 
 def _returned(
@@ -35,157 +38,179 @@ def _returned(
     }
 
 
-def _select(feedback: list[dict[str, object]]) -> dict[str, object]:
+def _field(feedback: list[dict[str, object]]) -> dict[str, object]:
     natural = resolve_open_sensor_trading_closure(
         observer_id="o",
         sensor_feedback=feedback,
     )
-    return derive_natural_form_selection(natural_closure=natural)
+    return derive_unified_natural_form_field(natural_closure=natural)
 
 
-def test_open_relation_frontier_selects_missing_return_that_would_close_path() -> None:
-    selection = _select([_returned("ab", "A", "B", "1")])
-
-    assert selection["status"] == "OPEN"
-    assert selection["selection_mode"] == "OPEN_CLOSURE_FRONTIER"
-    assert selection["profitable_natural_form_count"] == 0
-    selected = selection["selected_interactions"]
-    assert len(selected) == 1
-    assert selected[0]["kind"] == "RETURN_CLOSURE_COMPLETING_RELATION"
-    assert selected[0]["source_token"] == "B"
-    assert selected[0]["target_token"] == "A"
-    assert selected[0]["would_close_witnessed_directed_path"] is True
-    assert selected[0]["predicted_profit"] is None
-    assert selected[0]["may_author_truth"] is False
+def _kinds(field: dict[str, object]) -> set[str]:
+    return {str(row["kind"]) for row in field["natural_form_field"]}
 
 
-def test_returned_profitable_natural_form_selects_itself() -> None:
-    selection = _select(
+def _projection_kinds(field: dict[str, object]) -> set[str]:
+    return {str(row["kind"]) for row in field["action_projections"]}
+
+
+def test_recognition_and_selection_are_one_pre_action_field() -> None:
+    field = _field([_returned("ab", "A", "B", "1")])
+
+    assert field["recognition_equals_selection"] is True
+    assert field["recognition_precedes_selection"] is False
+    assert field["selection_precedes_recognition"] is False
+    assert field["separate_selector_present"] is False
+    assert field["selector_mode_present"] is False
+    assert field["action_occurs_after_unified_natural_form_field"] is True
+    assert all(
+        row["recognized"] is True
+        and row["selected"] is True
+        and row["recognition_selection_same_form"] is True
+        for row in field["natural_form_field"]
+    )
+
+
+def test_open_closure_form_and_relation_space_extension_coexist() -> None:
+    field = _field([_returned("ab", "A", "B", "1")])
+
+    assert _kinds(field) == {
+        "OPEN_CLOSURE_COMPLETING_NATURAL_FORM",
+        "OPEN_RELATION_SPACE_EXTENSION_NATURAL_FORM",
+    }
+    assert _projection_kinds(field) == {
+        "RETURN_CLOSURE_COMPLETING_RELATION",
+        "RETURN_NEW_SOURCE_PRESERVING_RELATION",
+    }
+    boundary = next(
+        row
+        for row in field["natural_form_field"]
+        if row["kind"] == "OPEN_CLOSURE_COMPLETING_NATURAL_FORM"
+    )
+    assert boundary["source_token"] == "B"
+    assert boundary["target_token"] == "A"
+    assert boundary["action_projection"]["predicted_profit"] is None
+    assert field["all_open_forms_coexist"] is True
+    assert field["local_open_cannot_block_relation_space_extension"] is True
+
+
+def test_deadlock_regression_local_open_does_not_starve_support_widening() -> None:
+    # Costly U<->A plus A->B creates local missing returns B->A, B->U and U->B.
+    # The old exclusive selector stopped widening here. The unified field must
+    # retain the global relation-space extension form simultaneously.
+    field = _field(
+        [
+            _returned("ua", "U", "A", "1"),
+            _returned("au", "A", "U", "1"),
+            _returned("ab", "A", "B", "0.4"),
+        ]
+    )
+
+    kinds = _kinds(field)
+    assert "RETURNED_CLOSED_NATURAL_FORM" in kinds
+    assert "OPEN_CLOSURE_COMPLETING_NATURAL_FORM" in kinds
+    assert "OPEN_RELATION_SPACE_EXTENSION_NATURAL_FORM" in kinds
+    projections = _projection_kinds(field)
+    assert "RETURN_CLOSURE_COMPLETING_RELATION" in projections
+    assert "RETURN_NEW_SOURCE_PRESERVING_RELATION" in projections
+    assert field["relation_space_extension_is_simultaneous_open_form"] is True
+
+
+def test_profitable_returned_form_does_not_suppress_open_field() -> None:
+    field = _field(
         [
             _returned("ab", "A", "B", "1"),
             _returned("ba", "B", "A", "-2"),
         ]
     )
 
-    assert selection["status"] == "WITNESSED"
-    assert selection["selection_mode"] == "PROFIT_NATURAL_FORM_CLASS"
-    assert selection["profitable_natural_form_count"] == 1
-    chosen = selection["selected_interactions"][0]
-    assert chosen["kind"] == "WITNESSED_PROFIT_NATURAL_FORM"
-    assert chosen["natural_profit"] == "1"
-    assert chosen["amplitude"] == "1"
-    assert chosen["trade_admissible"] is True
-    assert chosen["automatic_order_submission"] is False
-    assert chosen["may_author_truth"] is False
+    assert field["profitable_returned_natural_form_count"] == 1
+    assert "RETURNED_CLOSED_NATURAL_FORM" in _kinds(field)
+    assert "OPEN_RELATION_SPACE_EXTENSION_NATURAL_FORM" in _kinds(field)
+    projections = _projection_kinds(field)
+    assert "PROJECT_RETURNED_PROFIT_NATURAL_FORM" in projections
+    assert "RETURN_NEW_SOURCE_PRESERVING_RELATION" in projections
+    assert field["profit_is_natural_form_property_not_selection_rule"] is True
+    assert field["selection_is_not_filtering"] is True
 
 
-def test_profitable_closure_with_open_execution_selects_execution_return_boundary() -> None:
-    selection = _select(
+def test_open_execution_is_an_open_form_projection_of_same_returned_natural_form() -> None:
+    field = _field(
         [
             _returned("ab", "A", "B", "1", cost_complete=False),
             _returned("ba", "B", "A", "-2", cost_complete=False),
         ]
     )
 
-    assert selection["selection_mode"] == "PROFIT_NATURAL_FORM_CLASS"
-    chosen = selection["selected_interactions"][0]
-    assert chosen["kind"] == "RETURN_PROFIT_EXECUTION_EVIDENCE"
-    assert chosen["status"] == "OPEN"
-    assert chosen["natural_profit"] == "1"
-    assert chosen["requires_return"] is True
-    assert chosen["trade_admissible"] is False
+    returned = next(
+        row
+        for row in field["returned_natural_forms"]
+        if row["orientation"] == "PROFITABLE"
+    )
+    projection = returned["action_projection"]
+    assert projection["kind"] == "RETURN_PROFIT_EXECUTION_EVIDENCE"
+    assert projection["status"] == "OPEN"
+    assert projection["requires_return"] is True
+    assert projection["may_author_truth"] is False
 
 
-def test_costly_saturated_known_space_opens_relation_space_extension() -> None:
-    selection = _select(
-        [
-            _returned("ab", "A", "B", "1"),
-            _returned("ba", "B", "A", "1"),
-        ]
+def test_invalid_source_return_and_global_open_form_coexist() -> None:
+    field = _field(
+        [_returned("ab", "A", "B", "1", source_ids=False)]
     )
 
-    assert selection["selection_mode"] == "OPEN_RELATION_SPACE_EXTENSION"
-    assert selection["profitable_natural_form_count"] == 0
-    assert selection["closure_completing_frontier"] == []
-    chosen = selection["selected_interactions"][0]
-    assert chosen["kind"] == "RETURN_NEW_SOURCE_PRESERVING_RELATION"
-    assert chosen["source_token"] is None
-    assert chosen["target_token"] is None
-    assert chosen["predicted_profit"] is None
-    assert chosen["predeclared_candidate_graph_required"] is False
+    assert "OPEN_SOURCE_RETURN_NATURAL_FORM" in _kinds(field)
+    assert "OPEN_RELATION_SPACE_EXTENSION_NATURAL_FORM" in _kinds(field)
+    assert "RETURN_SOURCE_PRESERVED_RELATION" in _projection_kinds(field)
+    assert "RETURN_NEW_SOURCE_PRESERVING_RELATION" in _projection_kinds(field)
 
 
-def test_invalid_return_is_selected_for_source_preserving_repair() -> None:
-    selection = _select(
-        [
-            _returned("ab", "A", "B", "1", source_ids=False),
-        ]
-    )
-
-    assert selection["selection_mode"] == "OPEN_CLOSURE_FRONTIER"
-    chosen = selection["selected_interactions"][0]
-    assert chosen["kind"] == "RETURN_SOURCE_PRESERVED_RELATION"
-    assert chosen["source_token"] == "A"
-    assert chosen["target_token"] == "B"
-    assert chosen["requires_source_preserving_return"] is True
-
-
-def test_hair_translations_select_same_profitable_closure_truth() -> None:
-    left = _select(
+def test_hair_translations_are_same_returned_natural_form_truth() -> None:
+    left = _field(
         [
             _returned("ab0", "A", "B", "-3"),
             _returned("ba0", "B", "A", "2"),
         ]
     )
-    right = _select(
+    right = _field(
         [
             _returned("ab1", "A", "B", "2", hair_delta="5"),
             _returned("ba1", "B", "A", "-3", hair_delta="-5"),
         ]
     )
 
-    left_choice = left["selected_interactions"][0]
-    right_choice = right["selected_interactions"][0]
-    assert left_choice["closure_id"] == right_choice["closure_id"]
-    assert left_choice["natural_profit"] == right_choice["natural_profit"] == "1"
-    assert left_choice["kind"] == right_choice["kind"] == "WITNESSED_PROFIT_NATURAL_FORM"
+    left_returned = left["returned_natural_forms"][0]
+    right_returned = right["returned_natural_forms"][0]
+    assert left_returned["closure_id"] == right_returned["closure_id"]
+    assert left_returned["natural_profit"] == right_returned["natural_profit"] == "1"
 
 
-def test_current_runtime_exposes_natural_form_selection_without_truth_authorship() -> None:
+def test_legacy_selector_import_is_only_alias_of_unified_field() -> None:
+    natural = resolve_open_sensor_trading_closure(
+        observer_id="o",
+        sensor_feedback=[_returned("ab", "A", "B", "1")],
+    )
+    field = derive_unified_natural_form_field(natural_closure=natural)
+    compatibility = derive_natural_form_selection(natural_closure=natural)
+
+    assert compatibility["natural_form_field"] == field["natural_form_field"]
+    assert compatibility["action_projections"] == field["action_projections"]
+    assert compatibility["compatibility_selector_name_only"] is True
+    assert compatibility["separate_selector_present"] is False
+
+
+def test_current_runtime_exposes_same_object_as_recognition_and_selection() -> None:
     receipt = resolve_trading_equation(
         observer_id="o",
         sensor_feedback=[_returned("ab", "A", "B", "1")],
     )
 
-    assert receipt["natural_form_selects_interaction"] is True
-    assert receipt["selection_is_set_valued"] is True
-    assert receipt["selection_authors_truth"] is False
-    assert receipt["external_strategy_selector_present"] is False
-    assert receipt["predeclared_candidate_graph_present"] is False
-    assert receipt["natural_form_selection"]["selection_mode"] == "OPEN_CLOSURE_FRONTIER"
-    assert receipt["selected_interactions"] == receipt["natural_form_selection"]["selected_interactions"]
-
-
-def test_selector_closes_interactively_when_selected_boundary_returns() -> None:
-    first = resolve_trading_equation(
-        observer_id="o",
-        sensor_feedback=[_returned("ab", "A", "B", "1")],
-    )
-    request = first["selected_interactions"][0]
-    assert request["source_token"] == "B"
-    assert request["target_token"] == "A"
-
-    second = resolve_trading_equation(
-        observer_id="o",
-        sensor_feedback=[
-            _returned("ab2", "A", "B", "1"),
-            _returned("ba2", "B", "A", "-2"),
-        ],
-    )
-
-    assert second["status"] == "WITNESSED"
-    assert second["current_profit_truth_witnessed"] is True
-    assert second["natural_form_selection"]["selection_mode"] == "PROFIT_NATURAL_FORM_CLASS"
-    chosen = second["selected_interactions"][0]
-    assert chosen["kind"] == "WITNESSED_PROFIT_NATURAL_FORM"
-    assert chosen["natural_profit"] == "1"
+    assert receipt["recognition_equals_selection"] is True
+    assert receipt["separate_selector_present"] is False
+    assert receipt["selector_mode_present"] is False
+    assert receipt["selection_is_not_filtering"] is True
+    assert receipt["natural_form_selection"] == receipt["natural_form_field"]
+    assert receipt["selected_interactions"] == receipt["natural_form_field"]["action_projections"]
+    assert "RETURN_NEW_SOURCE_PRESERVING_RELATION" in {
+        row["kind"] for row in receipt["selected_interactions"]
+    }

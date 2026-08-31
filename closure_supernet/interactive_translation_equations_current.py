@@ -7,11 +7,8 @@ interaction is read through complete closed-itinerary geometry, normalized to
 its unique closure, and quotiented by translational truth. There is no second
 trajectory, trend, tolerance, forecast, or inter-class dynamics law.
 
-The natural-form selector is also a pure reading of translational truth. It may
-select what interaction to OPEN next, but it cannot select what the return will
-mean. Profitable returned natural forms select themselves; otherwise OPEN exposes
-the minimal return-generated closure frontier, or a generic relation-space
-extension when the known returned space is saturated.
+Recognition and selection are one pre-action natural-form field. Returned forms
+and OPEN forms are assembled simultaneously before any later action projection.
 """
 
 import hashlib
@@ -34,12 +31,12 @@ from .trading_natural_form_closure import (
     PROTOCOL as TRADING_PROTOCOL,
     resolve_open_sensor_trading_closure,
 )
-from .trading_natural_form_selector import derive_natural_form_selection
 from .trading_translational_truth_partition import (
     derive_translational_truth_partition,
 )
+from .trading_unified_natural_form_field import derive_unified_natural_form_field
 
-PROTOCOL = "closure.supernet/interactive-translation-equations-trading-natural-form-selector-v7"
+PROTOCOL = "closure.supernet/interactive-translation-equations-trading-unified-natural-form-v8"
 
 
 def _stable(value: Any) -> str:
@@ -87,7 +84,7 @@ def resolve_trading_equation(
     minimum_receipts: int = 1,
     max_forms: int | None = None,
 ) -> dict[str, Any]:
-    """Resolve truth, then derive its natural-form interaction frontier."""
+    """Resolve trading into one unified pre-action natural-form field."""
 
     feedback = _sensor_feedback(
         sensor_feedback=sensor_feedback,
@@ -117,7 +114,7 @@ def resolve_trading_equation(
         if history
         else None
     )
-    natural_selection = derive_natural_form_selection(natural_closure=natural)
+    unified_field = derive_unified_natural_form_field(natural_closure=natural)
 
     current_profit_truth_witnessed = any(
         form.get("orientation") == "PROFITABLE"
@@ -132,15 +129,12 @@ def resolve_trading_equation(
     body = dict(natural)
     body["protocol"] = PROTOCOL
     body["natural_trading_protocol"] = TRADING_PROTOCOL
-    # Historical continuation remains compatibility-only. Current dynamics are
-    # returned interaction -> truth -> natural-form OPEN selection -> return.
     body["closure_continuation"] = None
     body["translational_truth_partition"] = truth_partition
     body["translational_truth_learning"] = truth_partition
-    body["natural_form_selection"] = natural_selection
-    body["selected_interactions"] = list(
-        natural_selection.get("selected_interactions", [])
-    )
+    body["natural_form_field"] = unified_field
+    body["natural_form_selection"] = unified_field
+    body["selected_interactions"] = list(unified_field.get("action_projections", []))
     body["current_profit_truth_witnessed"] = current_profit_truth_witnessed
     body["learned_profit"] = learned_profit
 
@@ -213,11 +207,23 @@ def resolve_trading_equation(
             "profit_learning_is_discovery_not_prediction": True,
             "positive_profit_requires_current_returned_truth": True,
             "positive_crossing_requires_current_execution_return": True,
+            "recognition_equals_selection": True,
+            "recognition_precedes_selection": False,
+            "selection_precedes_recognition": False,
+            "separate_selector_present": False,
+            "selector_mode_present": False,
             "natural_form_selects_interaction": True,
             "selection_is_set_valued": True,
+            "selection_is_not_filtering": True,
             "selection_authors_truth": False,
             "open_boundary_is_interaction_frontier": True,
+            "all_open_forms_coexist": True,
+            "local_open_cannot_block_relation_space_extension": True,
+            "relation_space_extension_is_simultaneous_open_form": True,
             "profit_selection_requires_returned_positive_amplitude": True,
+            "profit_is_natural_form_property_not_selection_rule": True,
+            "action_occurs_after_unified_natural_form_field": True,
+            "action_projection_authors_truth": False,
             "external_strategy_selector_present": False,
             "predeclared_candidate_graph_present": False,
             "configuration_authors_truth": False,
@@ -226,7 +232,7 @@ def resolve_trading_equation(
             "dialectic_continuation_status": OPEN_STATUS,
         }
     )
-    body["id"] = _digest("natural-trading-equation-natural-form-selector", body)
+    body["id"] = _digest("natural-trading-equation-unified-natural-form", body)
     return body
 
 
@@ -236,12 +242,15 @@ def resolve_closure_equations(payload: Mapping[str, Any]) -> dict[str, Any]:
     result: dict[str, Any] = {
         "protocol": PROTOCOL,
         "equation": (
-            "Q_(t+1)=Close(Q_t + Translate(observer_t, returned_interaction_t)); "
-            "NaturalSelect(Q_t)=ProfitNaturalForms(Q_t) or OPENBoundary(Q_t)"
+            "Recognize(Q_t)=Select(Q_t)=NaturalFormField(Q_t); "
+            "Q_(t+1)=Close(Q_t + Translate(observer_t, returned_interaction_t))"
         ),
         "translational_truth_alone": True,
+        "recognition_equals_selection": True,
+        "separate_selector_present": False,
         "natural_form_selects_interaction": True,
         "selection_authors_truth": False,
+        "action_occurs_after_unified_natural_form_field": True,
         "proposal_status": OPEN_STATUS,
         "only_returned_interaction_recloses": True,
         "separate_dynamics_law_present": False,
@@ -282,7 +291,7 @@ def resolve_closure_equations(payload: Mapping[str, Any]) -> dict[str, Any]:
     audit_target = dict(result)
     audit_target.pop("continuity_audit", None)
     result["continuity_audit"] = audit_translational_continuity(audit_target)
-    result["id"] = _digest("closure-equations-natural-form-selector", result)
+    result["id"] = _digest("closure-equations-unified-natural-form", result)
     return result
 
 

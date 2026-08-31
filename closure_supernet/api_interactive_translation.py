@@ -4,12 +4,12 @@ from __future__ import annotations
 
 Production continues to expose only the one projection/return relation. This
 adapter may be instantiated for research, tests or local inspection. Its extra
-routes are pure readings: they append no event, execute no trade, select no
-universal reopening mode and never alter the latent UI closure.
+routes are pure readings: they append no event, select no universal reopening
+mode and never alter the latent UI closure.
 
-The trading capability surface reports NRRF870 truth plus the natural-form OPEN
-selector. The selector can choose what interaction frontier to request next, but
-only a source-preserving returned interaction may reclose truth.
+The trading capability surface reports NRRF870 truth as one unified pre-action
+natural-form field: recognition and selection are identical, returned and OPEN
+forms coexist, and only a later returned interaction may reclose truth.
 """
 
 from typing import Any
@@ -40,14 +40,14 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
         return {
             "protocol": PROTOCOL,
             "equation": (
-                "Q_(t+1)=Close(Q_t + Translate(observer_t, returned_interaction_t)); "
-                "NaturalSelect(Q_t)=ProfitNaturalForms(Q_t) or OPENBoundary(Q_t)"
+                "Recognize(Q_t)=Select(Q_t)=NaturalFormField(Q_t); "
+                "Q_(t+1)=Close(Q_t + Translate(observer_t, returned_interaction_t))"
             ),
             "subsystems": [
                 "reopening",
                 "participant_rule_charts",
                 "open_sensor_trading_closure",
-                "natural_form_interaction_selection",
+                "unified_natural_form_field",
                 "resource_reintegration",
                 "legacy_compatibility",
             ],
@@ -73,11 +73,23 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
             "signal_trade_one_translation": True,
             "signal_trade_same_round_trip_value": True,
             "translational_truth_alone": True,
+            "recognition_equals_selection": True,
+            "recognition_precedes_selection": False,
+            "selection_precedes_recognition": False,
+            "separate_selector_present": False,
+            "selector_mode_present": False,
             "natural_form_selects_interaction": True,
             "selection_is_set_valued": True,
+            "selection_is_not_filtering": True,
             "selection_authors_truth": False,
             "open_boundary_is_interaction_frontier": True,
+            "all_open_forms_coexist": True,
+            "local_open_cannot_block_relation_space_extension": True,
+            "relation_space_extension_is_simultaneous_open_form": True,
             "profit_selection_requires_returned_positive_amplitude": True,
+            "profit_is_natural_form_property_not_selection_rule": True,
+            "action_occurs_after_unified_natural_form_field": True,
+            "action_projection_authors_truth": False,
             "external_strategy_selector_present": False,
             "predeclared_candidate_graph_present": False,
             "automatic_order_submission": False,
