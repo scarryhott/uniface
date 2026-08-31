@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 
@@ -15,6 +17,60 @@ LEGACY_NULLABLE_URL_ASSERTION = (
     'payload["music_as_path"]["suno"].startswith("https://suno.com/song/")'
 )
 CROSS_PROCESS_PATH_ASSERTION = 'assert payload["selected_path"] in served["body"]'
+
+
+# These modules exercise the historical manager-composition runtime rather than
+# the published projection-only closure runtime. They remain executable and
+# visible, but they are a nonblocking compatibility lane until each manager is
+# translated through the current closure equation.
+LEGACY_RUNTIME_TEST_FILES = {
+    "test_agent_mcp.py",
+    "test_community_garden_coordination.py",
+    "test_complete_supernet_interface.py",
+    "test_constructive_supernet.py",
+    "test_embodied_supernet.py",
+    "test_framework_supernet.py",
+    "test_handed_life_supernet.py",
+    "test_hardware_closure_loop.py",
+    "test_inversion_self_limit_supernet.py",
+    "test_iterated_reopening.py",
+    "test_live_resource_protocol.py",
+    "test_living_network.py",
+    "test_natural_supernet_interface.py",
+    "test_nrrf825_live_closure.py",
+    "test_nrrf837_continuum.py",
+    "test_production_integration.py",
+    "test_proof_completion_meta_abstraction.py",
+    "test_relative_equality.py",
+    "test_renormalization_supernet.py",
+    "test_resource_translation_bridge.py",
+    "test_rule_geometry_continuation.py",
+    "test_selection_audit_supernet.py",
+    "test_trading_supernet.py",
+    "test_translation_field.py",
+    "test_translational_completion_supernet.py",
+    "test_turing_being_translational_priority.py",
+    "test_unified_supernet_integrator.py",
+    "test_unify_closure_supernet.py",
+}
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    config.addinivalue_line(
+        "markers",
+        "legacy_runtime: historical manager-composition compatibility lane",
+    )
+
+
+def pytest_collection_modifyitems(
+    config: pytest.Config,
+    items: list[pytest.Item],
+) -> None:
+    del config
+    marker = pytest.mark.legacy_runtime
+    for item in items:
+        if Path(str(item.path)).name in LEGACY_RUNTIME_TEST_FILES:
+            item.add_marker(marker)
 
 
 @pytest.hookimpl(hookwrapper=True)
