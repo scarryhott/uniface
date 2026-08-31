@@ -37,4 +37,22 @@ jobs:
             pytest-core.log
             pytest-legacy.log
           if-no-files-found: error
-      - run: python -m closure_supernet --db /tmp/closure.db status
+      - name: Check one published closure surface
+        env:
+          CLOSURE_DB_PATH: /tmp/closure.db
+          CLOSURE_AUTONOMY_ENABLED: "false"
+        run: |
+          python - <<'PY'
+          from closure_supernet.api_agent import app
+
+          paths = {route.path for route in app.routes}
+          required = {
+              "/supernet/interface",
+              "/supernet/interface/capabilities",
+          }
+          missing = sorted(required - paths)
+          assert not missing, f"missing published closure routes: {missing}"
+          assert "/supernet/closure-equations/resolve" not in paths
+          assert "/supernet/closure-equations/capabilities" not in paths
+          print("published projection closure healthy; research resolver remains opt-in")
+          PY
