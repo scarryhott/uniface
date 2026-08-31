@@ -4,8 +4,9 @@ from __future__ import annotations
 
 The full versioned natural-form atlas is the carrier relative to current TT.
 Trading and NRRF873 coordinates are projections; NRRF874 learning selection is
-the set-valued OPEN boundary of that relative atlas. No route mutates truth and
-no automatic order submission is exposed.
+the set-valued OPEN boundary of that relative atlas. External trading and atlas
+returns must first satisfy the verified source-return truth condition. No route
+mutates truth and no automatic order submission is exposed.
 """
 
 from typing import Any
@@ -30,19 +31,31 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
         return {
             "protocol": PROTOCOL,
             "equation": (
-                "NaturalForm(Q,o)=Rel_(Q,o)(VersionedNaturalFormAtlas); "
+                "VerifySource(return); NaturalForm(Q,o)=Rel_(Q,o)(VersionedNaturalFormAtlas); "
                 "Recognize=Select; H=HairFidelity; Size=RelativeBall; "
                 "NaturalSelect(S)=OpenBoundary(Rel_Q(N_all)); "
-                "S_(t+1)=Close(S_t+ReturnedTruth); "
-                "Q_(t+1)=Close(Q_t+Translate(observer,returned_interaction))"
+                "S_(t+1)=Close(S_t+VerifiedReturnedTruth); "
+                "Q_(t+1)=Close(Q_t+Translate(observer,verified_returned_interaction))"
             ),
             "subsystems": [
+                "verified_source_return_truth_condition",
                 "reopening", "participant_rule_charts", "open_sensor_trading_closure",
                 "current_closure_relative_full_natural_form_atlas", "trading_projection_field",
                 "relative_hair_horizon_ball_size", "returned_fidelity_selection_freedom",
                 "open_boundary_natural_selection_nrrf874", "resource_reintegration", "legacy_compatibility",
             ],
             "proposal_status": "OPEN",
+            "truth_requires_verified_source_witness": True,
+            "source_witness_signature": "ED25519",
+            "unsigned_or_untrusted_return_remains_open": True,
+            "caller_returned_flag_authors_truth": False,
+            "caller_source_ids_author_truth": False,
+            "caller_authenticated_flag_authors_execution": False,
+            "caller_cost_complete_flag_authors_execution": False,
+            "caller_size_authors_action": False,
+            "atlas_translation_source_requires_verified_witness": True,
+            "hair_is_source_witness_semantic_payload": False,
+            "formal_fixture_mode_is_not_externally_admissible": True,
             "only_returned_interaction_recloses": True,
             "carrier_is_full_versioned_natural_form_atlas": True,
             "trading_specific_carrier": False,
@@ -122,7 +135,7 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
             "automatic_order_submission": False,
             "queue_limit_authors_truth": False,
             "legacy_runtime_can_gate": False,
-            "formal_correspondence": "NRRF874OpenBoundaryNaturalSelectionSupportWideningDerivedFromTranslationalTruth",
+            "formal_correspondence": "NRRF874OpenBoundaryNaturalSelectionSupportWideningDerivedFromTranslationalTruth+VerifiedSourceReturnTruthCondition",
             "mutation": False,
             "truth_issued": False,
             "existence_closed": False,
