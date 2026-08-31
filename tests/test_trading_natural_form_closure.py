@@ -135,7 +135,11 @@ def test_hair_translation_changes_local_values_not_natural_curvature() -> None:
 
     left_form = left["natural_forms"][0]
     right_form = right["natural_forms"][0]
-    assert left_form["relation_sum"] != right_form["relation_sum"]
+    assert (
+        left["sensor_returns"][0]["relation_value"]
+        != right["sensor_returns"][0]["relation_value"]
+    )
+    assert left_form["relation_sum"] == right_form["relation_sum"] == "2"
     assert left_form["unitary_curvature"] == right_form["unitary_curvature"] == "2"
     assert left_form["natural_profit"] == right_form["natural_profit"] == "-2"
     assert left_form["closure_id"] == right_form["closure_id"]
