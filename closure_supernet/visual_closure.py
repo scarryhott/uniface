@@ -397,6 +397,14 @@ def build_visual_closure_receipt(
     receipt = {
         "protocol": "closure.supernet/visual-translational-closure-v1",
         "source_event_id": str(event["id"]),
+        "source_provenance": {
+            "source_stream": str(event.get("source_stream") or "legacy"),
+            "exact_source_occurrence_ids": source_ids,
+            "evidence_status": str(event.get("evidence_status") or "OPEN"),
+            "adapter_label": event.get("adapter_label"),
+            "equality_authority": False,
+            "resource_admission_authority": False,
+        },
         "closure_relation": [
             "SOURCE_JOURNEY_LEDGER",
             "VISUAL_EXISTENCE",

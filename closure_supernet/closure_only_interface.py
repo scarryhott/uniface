@@ -107,7 +107,7 @@ svg {
   "use strict";
 
   const namespace = "http://www.w3.org/2000/svg";
-  const schema = "closure.supernet/translational-visualization-v2";
+  const schema = "closure.supernet/translational-visualization-v3";
   const protocol = "SUPERNET-TRANSLATIONAL-VISUALIZATION";
   const statuses = new Set([
     "OPEN_SOURCE_BOUNDARY",
@@ -126,6 +126,7 @@ svg {
   let active = null;
   let draft = "";
   let executing = false;
+  const verifiedContracts = new WeakSet();
 
   function svgElement(name, attributes = {}) {
     const node = document.createElementNS(namespace, name);
@@ -143,10 +144,46 @@ svg {
     return [...new Set((values || []).map(asText).filter(Boolean))];
   }
 
+  function compareUnicodeCodePoints(left, right) {
+    const a = Array.from(asText(left), (item) => item.codePointAt(0));
+    const b = Array.from(asText(right), (item) => item.codePointAt(0));
+    const length = Math.min(a.length, b.length);
+    for (let index = 0; index < length; index += 1) {
+      if (a[index] !== b[index]) return a[index] - b[index];
+    }
+    return a.length - b.length;
+  }
+
   function sameMembers(left, right) {
-    const a = unique(left).sort();
-    const b = unique(right).sort();
+    const a = unique(left).sort(compareUnicodeCodePoints);
+    const b = unique(right).sort(compareUnicodeCodePoints);
     return a.length === b.length && a.every((item, index) => item === b[index]);
+  }
+
+  function stable(value) {
+    if (Array.isArray(value)) return `[${value.map(stable).join(",")}]`;
+    if (value && typeof value === "object") {
+      return `{${Object.keys(value).sort(compareUnicodeCodePoints).map((key) =>
+        `${JSON.stringify(key)}:${stable(value[key])}`
+      ).join(",")}}`;
+    }
+    return JSON.stringify(value);
+  }
+
+  async function contractIdMatchesContent(contract) {
+    if (!contract || !crypto.subtle || typeof TextEncoder === "undefined") return false;
+    const body = Object.create(null);
+    for (const [key, value] of Object.entries(contract)) {
+      if (key !== "id") body[key] = value;
+    }
+    const digest = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(stable(body)),
+    );
+    const hexadecimal = [...new Uint8Array(digest)]
+      .map((value) => value.toString(16).padStart(2, "0"))
+      .join("");
+    return contract.id === `translational-visualization:${hexadecimal.slice(0, 24)}`;
   }
 
   function derivationMatches(contract, derivation, allowOpen = false) {
@@ -180,6 +217,284 @@ svg {
       && unique(derivation.source_return_ids).every((item) => contract.source_return_ids.includes(item));
   }
 
+  function isRecord(value) {
+    return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+  }
+
+  function owns(value, key) {
+    return isRecord(value) && Object.prototype.hasOwnProperty.call(value, key);
+  }
+
+  function exactStringList(value, allowEmpty = false) {
+    if (!Array.isArray(value)) return null;
+    if (value.some((item) => typeof item !== "string" || !item)) return null;
+    if (!allowEmpty && value.length === 0) return null;
+    if (new Set(value).size !== value.length) return null;
+    return [...value];
+  }
+
+  function compareStringArrays(left, right) {
+    const length = Math.min(left.length, right.length);
+    for (let index = 0; index < length; index += 1) {
+      const order = compareUnicodeCodePoints(left[index], right[index]);
+      if (order !== 0) return order;
+    }
+    return left.length - right.length;
+  }
+
+  function normalizeKernel(value) {
+    if (!Array.isArray(value)) return null;
+    const seen = new Set();
+    const groups = [];
+    for (const rawMembers of value) {
+      if (!Array.isArray(rawMembers) || rawMembers.length === 0) return null;
+      if (rawMembers.some((item) => typeof item !== "string" || !item)) return null;
+      const members = [...rawMembers].sort(compareUnicodeCodePoints);
+      for (const stateId of members) {
+        if (seen.has(stateId)) return null;
+        seen.add(stateId);
+      }
+      groups.push(members);
+    }
+    return groups.sort(compareStringArrays);
+  }
+
+  function readingKernel(reading) {
+    if (!isRecord(reading)) return null;
+    const fibres = new Map();
+    for (const stateId of Object.keys(reading).sort(compareUnicodeCodePoints)) {
+      const display = reading[stateId];
+      if (typeof display !== "string" || !display) return null;
+      if (!fibres.has(display)) fibres.set(display, []);
+      fibres.get(display).push(stateId);
+    }
+    return [...fibres.values()]
+      .map((members) => members.sort(compareUnicodeCodePoints))
+      .sort(compareStringArrays);
+  }
+
+  function perspectiveClosureMatches(contract, projection) {
+    const closure = contract.perspective_closure;
+    if (!isRecord(closure)) return false;
+    if (closure.status !== contract.status) return false;
+    if (closure.active_perspective_id !== contract.perspective_id) return false;
+    if (closure.equality_basis !== "EXPLICIT_TRANSLATED_PERSPECTIVE_READINGS") return false;
+    if (closure.source_provenance_defines_equality !== false) return false;
+    if (!isRecord(closure.readings) || !Array.isArray(closure.translations)) return false;
+    if (!isRecord(projection.reading)
+        || !Array.isArray(projection.states)
+        || !Array.isArray(projection.equality_fibres)) return false;
+
+    const perspectiveIds = Object.keys(closure.readings).sort(compareUnicodeCodePoints);
+    if (contract.status !== "WITNESSED") {
+      const kernels = closure.kernels;
+      return perspectiveIds.length === 0
+        && closure.translations.length === 0
+        && Array.isArray(closure.kernel)
+        && closure.kernel.length === 0
+        && (kernels === undefined || (isRecord(kernels) && Object.keys(kernels).length === 0))
+        && Object.keys(projection.reading).length === 0
+        && projection.states.length === 0
+        && projection.equality_fibres.length === 0;
+    }
+
+    if (perspectiveIds.length === 0 || !owns(closure.readings, contract.perspective_id)) return false;
+    const stateIds = [];
+    const stateById = new Map();
+    const eventIds = new Set();
+    for (const state of projection.states) {
+      if (!isRecord(state) || typeof state.id !== "string" || !state.id) return false;
+      if (stateById.has(state.id)) return false;
+      if (typeof state.event_id !== "string" || !state.event_id || eventIds.has(state.event_id)) return false;
+      stateIds.push(state.id);
+      stateById.set(state.id, state);
+      eventIds.add(state.event_id);
+    }
+    if (stateIds.length === 0) return false;
+
+    const computedKernels = Object.create(null);
+    let commonKernel = null;
+    for (const perspectiveId of perspectiveIds) {
+      const reading = closure.readings[perspectiveId];
+      if (!isRecord(reading) || !sameMembers(Object.keys(reading), stateIds)) return false;
+      const kernel = readingKernel(reading);
+      if (!kernel) return false;
+      computedKernels[perspectiveId] = kernel;
+      if (commonKernel === null) commonKernel = kernel;
+      else if (stable(kernel) !== stable(commonKernel)) return false;
+    }
+    if (!isRecord(closure.kernels)
+        || !sameMembers(Object.keys(closure.kernels), perspectiveIds)) return false;
+    for (const perspectiveId of perspectiveIds) {
+      const supplied = normalizeKernel(closure.kernels[perspectiveId]);
+      if (!supplied || stable(supplied) !== stable(computedKernels[perspectiveId])) return false;
+    }
+    const suppliedKernel = normalizeKernel(closure.kernel);
+    if (!suppliedKernel || stable(suppliedKernel) !== stable(commonKernel)) return false;
+
+    const activeReading = closure.readings[contract.perspective_id];
+    if (!sameMembers(Object.keys(projection.reading), stateIds)
+        || stable(activeReading) !== stable(projection.reading)) return false;
+    const projectionKernel = normalizeKernel(
+      projection.equality_fibres.map((fibre) =>
+        isRecord(fibre) ? fibre.member_state_ids : null
+      ),
+    );
+    if (!projectionKernel || stable(projectionKernel) !== stable(commonKernel)) return false;
+
+    const contractSources = exactStringList(contract.source_return_ids);
+    if (!contractSources) return false;
+    const witnessedSources = [];
+    const fibreIds = new Set();
+    for (const state of projection.states) {
+      const stateSources = exactStringList(state.source_return_ids);
+      if (!stateSources || !stateSources.every((item) => contractSources.includes(item))) return false;
+      witnessedSources.push(...stateSources);
+    }
+    if (!sameMembers(witnessedSources, contractSources)) return false;
+    for (const fibre of projection.equality_fibres) {
+      if (!isRecord(fibre) || typeof fibre.id !== "string" || !fibre.id || fibreIds.has(fibre.id)) return false;
+      fibreIds.add(fibre.id);
+      const members = exactStringList(fibre.member_state_ids);
+      const fibreSources = exactStringList(fibre.source_return_ids);
+      if (!members || !fibreSources) return false;
+      const expectedDisplays = unique(members.map((stateId) => activeReading[stateId]));
+      const expectedSources = unique(members.flatMap((stateId) => stateById.get(stateId).source_return_ids));
+      if (!sameMembers(fibre.display_fibre_ids, expectedDisplays)
+          || !sameMembers(fibreSources, expectedSources)
+          || !fibreSources.every((item) => contractSources.includes(item))) return false;
+    }
+
+    const graph = new Map(perspectiveIds.map((item) => [item, new Set()]));
+    const translationIds = new Set();
+    for (const translation of closure.translations) {
+      if (!isRecord(translation)
+          || typeof translation.id !== "string"
+          || !translation.id
+          || translationIds.has(translation.id)) return false;
+      translationIds.add(translation.id);
+      const source = translation.source_perspective_id;
+      const target = translation.target_perspective_id;
+      const mapping = translation.display_translation;
+      if (typeof source !== "string"
+          || typeof target !== "string"
+          || source === target
+          || !owns(closure.readings, source)
+          || !owns(closure.readings, target)
+          || !isRecord(mapping)) return false;
+      const expected = Object.create(null);
+      for (const stateId of stateIds) {
+        const sourceDisplay = closure.readings[source][stateId];
+        const targetDisplay = closure.readings[target][stateId];
+        if (owns(expected, sourceDisplay) && expected[sourceDisplay] !== targetDisplay) return false;
+        expected[sourceDisplay] = targetDisplay;
+      }
+      const expectedKeys = Object.keys(expected);
+      if (!sameMembers(Object.keys(mapping), expectedKeys)) return false;
+      if (!expectedKeys.every((key) => mapping[key] === expected[key])) return false;
+      if (new Set(expectedKeys.map((key) => expected[key])).size !== expectedKeys.length) return false;
+      const sourceIds = exactStringList(translation.source_return_ids);
+      if (!sourceIds || !sourceIds.every((item) => contractSources.includes(item))) return false;
+      if (translation.witnessed !== true
+          || translation.well_defined !== true
+          || translation.faithful !== true
+          || translation.same_kernel !== true
+          || stable(computedKernels[source]) !== stable(computedKernels[target])) return false;
+      graph.get(source).add(target);
+      graph.get(target).add(source);
+    }
+    if (perspectiveIds.length === 1 && closure.translations.length !== 0) return false;
+    const reached = new Set([perspectiveIds[0]]);
+    const frontier = [perspectiveIds[0]];
+    while (frontier.length) {
+      const current = frontier.pop();
+      for (const neighbour of graph.get(current)) {
+        if (!reached.has(neighbour)) {
+          reached.add(neighbour);
+          frontier.push(neighbour);
+        }
+      }
+    }
+    return reached.size === perspectiveIds.length;
+  }
+
+  function closureProcessMatches(contract) {
+    const closure = contract.perspective_closure;
+    const translated = contract.status === "WITNESSED"
+      && isRecord(closure)
+      && closure.status === "WITNESSED";
+    const sourceReturnIds = exactStringList(
+      contract.source_return_ids,
+      contract.status !== "WITNESSED",
+    );
+    const lineageIds = exactStringList(contract.continuation_lineage_ids, true);
+    if (!sourceReturnIds || !lineageIds) return false;
+    if (contract.continuation_index !== lineageIds.length) return false;
+    if (!lineageIds.every((item) => sourceReturnIds.includes(item))) return false;
+    if (contract.status === "WITNESSED"
+        && lineageIds.length
+        && sourceReturnIds.includes(contract.focus_event_id)
+        && lineageIds.at(-1) !== contract.focus_event_id) return false;
+    const witnessedStatus = translated ? "WITNESSED" : contract.status;
+    const expected = {
+      formal_interpretation: {
+        module: "NRRF858ConsciousNatureRelativeAxiomsProofsUnderstandingClosuresTranslationalTruthContinuingExistence",
+        runtime_bridge: "NRRF859ConsciousSupernetInteractiveProjectionBridge",
+        lean_theorems_reproved_by_python: false,
+        finite_runtime_instance_checked: true,
+        conscious_hypothesis_verified_by_runtime: false,
+      },
+      relative_axioms: {
+        status: witnessedStatus,
+        formal_implication_under_conscious_hypothesis: true,
+        formal_theorems: ["no_absolute_axioms", "axiomsOf_eq_iff_translational"],
+        runtime_translated_chart_family_verified: translated,
+        runtime_claim_body_soundness_verified: false,
+        runtime_closure_registration_verified: false,
+        external_absolute_step_claims_admitted: false,
+      },
+      relative_proofs: {
+        status: witnessedStatus,
+        formal_implication_under_conscious_hypothesis: true,
+        formal_theorem: "conscious_proves_composite",
+        runtime_composite_closure_witness_verified: false,
+        runtime_additive_content_verified: false,
+        source_returns_preserved: translated,
+      },
+      understanding: {
+        status: witnessedStatus,
+        formal_implication_under_conscious_hypothesis: true,
+        formal_theorems: ["mem_understanding_iff", "understanding_eq_iff_translational"],
+        runtime_translated_chart_family_verified: translated,
+        active_perspective_id: contract.perspective_id,
+      },
+      continuing_existence: {
+        status: witnessedStatus,
+        formal_implication_under_conscious_hypothesis: true,
+        formal_theorem: "conscious_continues_existence",
+        continuation_index: contract.continuation_index,
+        continuation_lineage_ids: lineageIds,
+        runtime_continuation_is_append_only_lineage: true,
+        formal_n_fold_defect_verified_by_runtime: false,
+        reopens_after_return: true,
+        terminal: false,
+        new_empirical_evidence_created_by_iteration: false,
+      },
+      boundary: {
+        source_preserved: true,
+        truth_issued: false,
+        physical_law_claimed: false,
+        consciousness_claimed: false,
+        nature_consciousness_proved: false,
+        universal_language_for_all_nature_proved: false,
+        external_resource_admitted: false,
+        empirical_verification_replaced: false,
+        authenticated_external_effect_receipt_required: true,
+      },
+    };
+    return stable(contract.closure_process) === stable(expected);
+  }
+
   function validate(contract) {
     if (!contract || typeof contract !== "object") return false;
     if (contract.schema !== schema || contract.protocol !== protocol) return false;
@@ -192,11 +507,30 @@ svg {
     if (!Array.isArray(renderer.authored_visible_vocabulary) || renderer.authored_visible_vocabulary.length) return false;
     if (!Array.isArray(renderer.fallback_visuals) || renderer.fallback_visuals.length) return false;
     if (renderer.can_define_semantics !== false || renderer.can_admit_forms !== false || renderer.can_issue_truth !== false) return false;
+    const claims = contract.claims || {};
+    if (claims.truth_issued !== false
+        || claims.physical_law_claimed !== false
+        || claims.consciousness_claimed !== false
+        || claims.external_resource_admitted !== false) return false;
+    if (!Number.isInteger(contract.continuation_index) || contract.continuation_index < 0) return false;
+    const process = contract.closure_process || {};
+    const boundary = process.boundary || {};
+    if (boundary.source_preserved !== true
+        || boundary.truth_issued !== false
+        || boundary.physical_law_claimed !== false
+        || boundary.consciousness_claimed !== false
+        || boundary.nature_consciousness_proved !== false
+        || boundary.universal_language_for_all_nature_proved !== false
+        || boundary.external_resource_admitted !== false
+        || boundary.empirical_verification_replaced !== false
+        || boundary.authenticated_external_effect_receipt_required !== true) return false;
     const projection = contract.projection || {};
     if (projection.active_perspective_id !== contract.perspective_id) return false;
     if (!Array.isArray(projection.states) || !Array.isArray(projection.equality_fibres)) return false;
     if (!Array.isArray(projection.translations) || !Array.isArray(projection.potentials)) return false;
     if (!projection.reading || typeof projection.reading !== "object") return false;
+    if (!perspectiveClosureMatches(contract, projection)) return false;
+    if (!closureProcessMatches(contract)) return false;
     if (!derivationMatches(contract, (projection.visualization || {}).derivation, contract.status === "OPEN_SOURCE_BOUNDARY")) return false;
     const states = new Map();
     for (const state of projection.states) {
@@ -260,16 +594,19 @@ svg {
       && derivationMatches(contract, primitive.derivation)
     )) return false;
     const relation = contract.return_relation;
-    if (contract.status === "OPEN_TRUTH_CONSTRAINT") return relation === null;
+    const execution = contract.execution || {};
+    if (execution.endpoint_template !== "/supernet/interface/projections/{contract_id}/return") return false;
+    if (execution.contract_revalidation_required !== true
+        || execution.only_relation_extension !== true
+        || execution.closure_only !== true) return false;
+    if (contract.status === "OPEN_TRUTH_CONSTRAINT") {
+      return relation === null && execution.return_relation_id === null;
+    }
     if (!relation || relation.kind !== "SOURCE_PRESERVING_TRANSLATIONAL_RETURN") return false;
     if (relation.full_surface_aperture !== true || relation.visible_control !== false) return false;
     if (relation.creates_truth_directly !== false || relation.reclose_after_return !== true) return false;
     if (!derivationMatches(contract, relation.derivation, contract.status === "OPEN_SOURCE_BOUNDARY")) return false;
-    const execution = contract.execution || {};
-    return execution.return_relation_id === relation.id
-      && execution.only_relation_extension === true
-      && execution.contract_revalidation_required === true
-      && execution.closure_only === true;
+    return execution.return_relation_id === relation.id;
   }
 
   function sourceBlock(svg, x, y, width, height, text, className) {
@@ -287,7 +624,7 @@ svg {
   }
 
   function render(contract) {
-    active = validate(contract) ? contract : null;
+    active = validate(contract) && verifiedContracts.has(contract) ? contract : null;
     mount.replaceChildren();
     mount.dataset.state = active ? active.status : "OPEN_TRUTH_CONSTRAINT";
     if (!active) return;
@@ -339,11 +676,18 @@ svg {
         group.style.cursor = "pointer";
         group.addEventListener("pointerdown", (event) => {
           event.stopPropagation();
-          const current = new URL(window.location.href);
-          current.searchParams.set("focus_event_id", firstEvent);
-          current.searchParams.set("perspective_id", active.perspective_id);
-          history.replaceState(null, "", current);
-          load(firstEvent, active.perspective_id).finally(() => sensor.focus());
+          const origin = active;
+          const perspectiveId = origin.perspective_id;
+          load(firstEvent, perspectiveId, {
+            preserveOnFailure: true,
+            expectedActive: origin,
+          }).then((loaded) => {
+            if (!loaded) return;
+            const current = new URL(window.location.href);
+            current.searchParams.set("focus_event_id", firstEvent);
+            current.searchParams.set("perspective_id", perspectiveId);
+            history.replaceState(null, "", current);
+          }).finally(() => sensor.focus());
         });
       }
       svg.append(group);
@@ -359,6 +703,25 @@ svg {
       );
     }
     renderDraft(svg, focusPrimitive);
+  }
+
+  async function verifyContract(contract) {
+    try {
+      if (!validate(contract) || !await contractIdMatchesContent(contract)) return false;
+      verifiedContracts.add(contract);
+      return true;
+    } catch (_error) {
+      return false;
+    }
+  }
+
+  async function renderVerified(contract) {
+    if (await verifyContract(contract)) {
+      render(contract);
+      return true;
+    }
+    render(null);
+    return false;
   }
 
   function renderDraft(svg, focusPrimitive) {
@@ -390,23 +753,35 @@ svg {
     return perspective;
   }
 
-  async function load(focusEventId, perspectiveId) {
+  async function load(
+    focusEventId,
+    perspectiveId,
+    {preserveOnFailure = false, expectedActive = null} = {},
+  ) {
     const params = new URLSearchParams({perspective_id: perspectiveId});
     if (focusEventId) params.set("focus_event_id", focusEventId);
     const response = await fetch(`/supernet/interface?${params}`, {credentials: "same-origin"});
-    if (!response.ok) return render(null);
+    if (!response.ok) {
+      if (!preserveOnFailure) render(null);
+      return false;
+    }
     const payload = await response.json();
-    render(payload.closure_ui_contract || null);
+    const candidate = payload.closure_ui_contract || null;
+    if (!await verifyContract(candidate)) {
+      if (!preserveOnFailure) render(null);
+      return false;
+    }
+    if (expectedActive && active !== expectedActive) return false;
+    render(candidate);
+    return true;
   }
 
   async function returnSource() {
     if (executing || !active || !active.return_relation || !draft.trim()) return;
     executing = true;
-    const relation = active.return_relation;
-    const endpoint = active.execution.endpoint_template.replace(
-      "{contract_id}",
-      encodeURIComponent(active.id),
-    );
+    const submittedContract = active;
+    const relation = submittedContract.return_relation;
+    const endpoint = `/supernet/interface/projections/${encodeURIComponent(submittedContract.id)}/return`;
     const exactSourceReturn = draft;
     try {
       const response = await fetch(endpoint, {
@@ -415,22 +790,33 @@ svg {
         headers: {"content-type": "application/json"},
         body: JSON.stringify({
           return_relation_id: relation.id,
-          perspective_id: active.perspective_id,
-          focus_event_id: active.focus_event_id,
+          perspective_id: submittedContract.perspective_id,
+          focus_event_id: submittedContract.focus_event_id,
           exact_source_return: exactSourceReturn,
+          source_stream: "full-surface-interaction",
         }),
       });
       const payload = await response.json();
       if (response.status === 409) {
-        await load(active.focus_event_id, active.perspective_id);
+        if (active === submittedContract) {
+          await load(submittedContract.focus_event_id, submittedContract.perspective_id, {
+            preserveOnFailure: true,
+            expectedActive: submittedContract,
+          });
+        }
         return;
       }
       const next = payload.closure_ui_contract
         || payload.interface?.closure_ui_contract
         || payload.detail?.closure_ui_contract;
       if (!response.ok || !next) return;
-      draft = "";
-      sensor.value = "";
+      if (!await verifyContract(next)) return;
+      if (active !== submittedContract
+          || next.perspective_id !== submittedContract.perspective_id) return;
+      if (draft === exactSourceReturn) {
+        draft = "";
+        sensor.value = "";
+      }
       const current = new URL(window.location.href);
       if (next.focus_event_id) current.searchParams.set("focus_event_id", next.focus_event_id);
       current.searchParams.set("perspective_id", next.perspective_id);

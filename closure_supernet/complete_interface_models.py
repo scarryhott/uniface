@@ -205,8 +205,13 @@ class ClosureUIExecutionRequest(BaseModel):
     perspective_id: str = Field(min_length=1, max_length=500)
     focus_event_id: str | None = Field(default=None, max_length=500)
     exact_source_return: str = Field(min_length=1, max_length=20_000)
+    source_stream: str = Field(
+        default="full-surface-interaction",
+        min_length=1,
+        max_length=240,
+    )
 
-    @field_validator("exact_source_return")
+    @field_validator("exact_source_return", "source_stream")
     @classmethod
     def source_return_is_not_blank(cls, value: str) -> str:
         if not value.strip():

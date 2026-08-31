@@ -42,4 +42,4 @@ def test_railway_publishes_only_the_translational_projection(tmp_path: Path) -> 
         "/livez",
         "/readyz",
     }
-    assert app.version == "3.18.0"
+    assert app.version == "3.19.0"

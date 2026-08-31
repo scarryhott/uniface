@@ -1239,6 +1239,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
         perspective_id: str,
         focus_event_id: str | None,
         exact_source_return: str,
+        source_stream: str,
     ) -> str:
         return "closure-ui-execution:" + canonical_hash(
             {
@@ -1247,6 +1248,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                 "perspective_id": perspective_id,
                 "focus_event_id": focus_event_id,
                 "exact_source_return": exact_source_return,
+                "source_stream": source_stream,
             }
         )
 
@@ -1327,6 +1329,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                     perspective_id=data.perspective_id,
                     focus_event_id=data.focus_event_id,
                     exact_source_return=data.exact_source_return,
+                    source_stream=data.source_stream,
                 )
                 prior_execution = (
                     runtime.supernet_store.get_closure_ui_execution(
@@ -1347,7 +1350,8 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                         != data.focus_event_id
                         or prior_execution["request_values"]
                         != {
-                            "exact_source_return": data.exact_source_return
+                            "exact_source_return": data.exact_source_return,
+                            "source_stream": data.source_stream,
                         }
                     ):
                         raise ValueError(
@@ -1426,7 +1430,8 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                     principal_id=principal_id,
                 )
                 request_values = {
-                    "exact_source_return": data.exact_source_return
+                    "exact_source_return": data.exact_source_return,
+                    "source_stream": data.source_stream,
                 }
                 prior, claimed = (
                     runtime.supernet_store.claim_closure_ui_execution(
@@ -1479,6 +1484,7 @@ def attach_natural_interface_routes(app: FastAPI) -> FastAPI:
                     authored_by=data.perspective_id,
                     form_label=exact_label,
                     source_id="translational-visualization-return",
+                    source_stream=data.source_stream,
                     perspective_id=data.perspective_id,
                     affected_perspectives=[data.perspective_id],
                     parent_event_ids=[parent_event_id] if parent_event_id else [],

@@ -130,6 +130,7 @@ def install_unified_supernet_runtime() -> None:
             ),
             language_label=metadata.get("language_label"),
             source_id=data.source_id,
+            source_stream=data.source_stream,
             source_location=data.source_location,
             source_context=data.source_context,
             perspective_id=metadata.get("perspective_id"),
