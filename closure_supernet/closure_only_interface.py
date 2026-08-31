@@ -74,6 +74,19 @@ svg {
   vector-effect: non-scaling-stroke;
   opacity: .46;
 }
+.local-potential-shell {
+  fill: rgba(255,255,255,.01);
+  stroke-width: 1.4;
+  stroke-dasharray: 3 8;
+  vector-effect: non-scaling-stroke;
+}
+.local-potential-path {
+  fill: none;
+  stroke-width: 1.3;
+  stroke-dasharray: 3 8;
+  vector-effect: non-scaling-stroke;
+  opacity: .72;
+}
 .source-trace {
   color: rgba(249,251,255,.92);
   font: 430 clamp(13px, 1.45vw, 18px)/1.38 ui-sans-serif, system-ui, sans-serif;
@@ -107,7 +120,7 @@ svg {
   "use strict";
 
   const namespace = "http://www.w3.org/2000/svg";
-  const schema = "closure.supernet/translational-visualization-v4";
+  const schema = "closure.supernet/translational-visualization-v5";
   const protocol = "SUPERNET-TRANSLATIONAL-VISUALIZATION";
   const statuses = new Set([
     "OPEN_SOURCE_BOUNDARY",
@@ -126,6 +139,7 @@ svg {
   let active = null;
   let draft = "";
   let executing = false;
+  let localHairMillidegrees = 0;
   const verifiedContracts = new WeakSet();
   const locallyDerivedVisualizations = new WeakMap();
 
@@ -710,6 +724,16 @@ svg {
           one_token_closure_limit_preserved: true,
         },
       },
+      latent_interactive_interface: {
+        latent_structure: "VERIFIED_CLOSURE_RELATION",
+        visible_projection_is_derived: true,
+        local_perspective_hair_is_mutable: true,
+        local_modification_is_potential_until_commit: true,
+        commit_binds_contract_perspective_source_and_kernel: true,
+        server_rederives_commitment_before_append: true,
+        committed_hair_defines_equality: false,
+        commit_extends_latent_closure: true,
+      },
       boundary: {
         source_preserved: true,
         truth_issued: false,
@@ -736,6 +760,10 @@ svg {
     if (renderer.natural_form_constraint !== "TRANSLATED_READING_KERNEL") return false;
     if (renderer.geometry_acceptance !== "EXACT_LOCAL_CLOSURE_REDERIVATION") return false;
     if (renderer.successor_acceptance !== "VERIFIED_CLOSURE_BEFORE_INTERFACE_COMMIT") return false;
+    if (renderer.latent_structure !== "VERIFIED_CLOSURE_RELATION") return false;
+    if (renderer.local_navigation !== "PERSPECTIVE_HAIR_AND_FOCUS") return false;
+    if (renderer.local_modification !== "UNCOMMITTED_CLOSURE_POTENTIAL") return false;
+    if (renderer.commit_protocol !== "LOCAL_PROJECTION_COMMITMENT_THEN_REDERIVATION") return false;
     if (!Array.isArray(renderer.fixed_visible_controls) || renderer.fixed_visible_controls.length) return false;
     if (!Array.isArray(renderer.authored_visible_vocabulary) || renderer.authored_visible_vocabulary.length) return false;
     if (!Array.isArray(renderer.fallback_visuals) || renderer.fallback_visuals.length) return false;
@@ -856,6 +884,59 @@ svg {
     return `M ${points[0][0]} ${points[0][1]} Q ${points[1][0]} ${points[1][1]} ${points[2][0]} ${points[2][1]}`;
   }
 
+  function localDraftScalar(source) {
+    let value = 2166136261;
+    for (const symbol of Array.from(source)) {
+      value ^= symbol.codePointAt(0);
+      value = Math.imul(value, 16777619) >>> 0;
+    }
+    return value;
+  }
+
+  function renderLocalModification(layer, focusPrimitive) {
+    if (!draft) return;
+    const [sourceX, sourceY] = focusPrimitive?.centre || [500, 500];
+    const scalar = localDraftScalar(draft);
+    const phase = 2 * Math.PI * ((scalar % 360) / 360);
+    const distance = Math.min(350, (focusPrimitive?.radius || 54) + 150);
+    const x = 500 + distance * Math.cos(phase);
+    const y = 500 + distance * Math.sin(phase);
+    const radius = Math.min(150, 54 + Math.sqrt(Array.from(draft).length) * 6);
+    const hueValue = scalar % 360;
+    const dx = x - sourceX;
+    const dy = y - sourceY;
+    const length = Math.max(1, Math.hypot(dx, dy));
+    const bend = Math.min(86, length * .18);
+    const points = [[sourceX, sourceY], [
+      (sourceX + x) / 2 - dy / length * bend,
+      (sourceY + y) / 2 + dx / length * bend,
+    ], [x, y]];
+    layer.append(svgElement("path", {
+      d: projectedPath(points),
+      class: "local-potential-path",
+      stroke: `hsl(${hueValue} 72% 68%)`,
+      "data-local-modification": "UNCOMMITTED_CLOSURE_POTENTIAL",
+    }));
+    layer.append(svgElement("circle", {
+      cx: x,
+      cy: y,
+      r: radius,
+      class: "local-potential-shell",
+      stroke: `hsl(${hueValue} 72% 68%)`,
+      "data-local-modification": "UNCOMMITTED_CLOSURE_POTENTIAL",
+    }));
+    const width = Math.max(180, radius * 2.8);
+    sourceBlock(
+      layer,
+      x - width / 2,
+      y - radius * .8,
+      width,
+      radius * 1.6,
+      draft,
+      "draft-trace",
+    );
+  }
+
   function render(contract) {
     active = validate(contract) && verifiedContracts.has(contract) ? contract : null;
     mount.replaceChildren();
@@ -866,6 +947,11 @@ svg {
     if (!visualization) { active = null; return; }
     const svg = svgElement("svg", {viewBox: visualization.view_box.join(" ")});
     mount.append(svg);
+    const chartLayer = svgElement("g", {
+      transform: `rotate(${localHairMillidegrees / 1000} 500 500)`,
+      "data-local-perspective-hair": localHairMillidegrees,
+    });
+    svg.append(chartLayer);
     const fibreById = new Map(projection.equality_fibres.map((fibre) => [fibre.id, fibre]));
     const primitiveByForm = new Map(visualization.fibre_primitives.map((primitive) => [primitive.natural_form_id, primitive]));
     for (const relation of visualization.translation_primitives) {
@@ -875,12 +961,12 @@ svg {
         stroke: `hsl(${relation.hue} 72% 66%)`,
         "data-equality": relation.executes_as_equality === true,
       });
-      svg.append(path);
+      chartLayer.append(path);
     }
     const focusForm = active.return_relation?.parent_natural_form_id || null;
     const focusPrimitive = primitiveByForm.get(focusForm) || {centre: [500, 500], radius: 54};
     visualization.potential_primitives.forEach((relation) => {
-      svg.append(svgElement("path", {
+      chartLayer.append(svgElement("path", {
         d: projectedPath(relation.quadratic_path),
         class: "potential",
         stroke: `hsl(${relation.hue} 68% 65%)`,
@@ -924,10 +1010,10 @@ svg {
           }).finally(() => sensor.focus());
         });
       }
-      svg.append(group);
+      chartLayer.append(group);
       const traceWidth = Math.max(120, primitive.radius * 2.8);
       sourceBlock(
-        svg,
+        chartLayer,
         x - traceWidth / 2,
         y - primitive.radius * .8,
         traceWidth,
@@ -936,7 +1022,7 @@ svg {
         "source-trace",
       );
     }
-    renderDraft(svg, focusPrimitive);
+    renderLocalModification(chartLayer, focusPrimitive);
   }
 
   async function verifyContract(contract) {
@@ -958,21 +1044,6 @@ svg {
     }
     render(null);
     return false;
-  }
-
-  function renderDraft(svg, focusPrimitive) {
-    if (!draft) return;
-    const [x, y] = focusPrimitive?.centre || [500, 500];
-    const blockWidth = 720;
-    sourceBlock(
-      svg,
-      x - blockWidth / 2,
-      y - 180,
-      blockWidth,
-      360,
-      draft,
-      "draft-trace",
-    );
   }
 
   function perspectiveFromLocation() {
@@ -1019,7 +1090,17 @@ svg {
     const relation = submittedContract.return_relation;
     const endpoint = `/supernet/interface/projections/${encodeURIComponent(submittedContract.id)}/return`;
     const exactSourceReturn = draft;
+    const submittedHair = localHairMillidegrees;
     try {
+      const localProjectionCommitment = await digest("local-projection", {
+        contract_id: submittedContract.id,
+        return_relation_id: relation.id,
+        perspective_id: submittedContract.perspective_id,
+        focus_event_id: submittedContract.focus_event_id,
+        exact_source_return: exactSourceReturn,
+        local_perspective_hair_millidegrees: submittedHair,
+        reading_kernel: submittedContract.perspective_closure.kernel,
+      });
       const response = await fetch(endpoint, {
         method: "POST",
         credentials: "same-origin",
@@ -1029,6 +1110,8 @@ svg {
           perspective_id: submittedContract.perspective_id,
           focus_event_id: submittedContract.focus_event_id,
           exact_source_return: exactSourceReturn,
+          local_projection_commitment: localProjectionCommitment,
+          local_perspective_hair_millidegrees: submittedHair,
           source_stream: "full-surface-interaction",
         }),
       });
@@ -1046,6 +1129,13 @@ svg {
         || payload.interface?.closure_ui_contract
         || payload.detail?.closure_ui_contract;
       if (!response.ok || !next) return;
+      const committed = payload.committed_local_projection || {};
+      if (committed.id !== localProjectionCommitment
+          || committed.latent_contract_id !== submittedContract.id
+          || committed.perspective_id !== submittedContract.perspective_id
+          || committed.focus_event_id !== submittedContract.focus_event_id
+          || committed.hair_millidegrees !== submittedHair
+          || committed.closure_rederived !== true) return;
       if (!await verifyContract(next)) return;
       if (active !== submittedContract
           || next.perspective_id !== submittedContract.perspective_id) return;
@@ -1077,6 +1167,20 @@ svg {
       sensor.value = "";
       if (active) render(active);
     }
+  });
+  mount.addEventListener("pointermove", (event) => {
+    if (!active || event.buttons !== 1) return;
+    const bounds = mount.getBoundingClientRect();
+    const x = event.clientX - bounds.left - bounds.width / 2;
+    const y = event.clientY - bounds.top - bounds.height / 2;
+    localHairMillidegrees = Math.round(
+      Math.atan2(y, x) * 180 / Math.PI * 1000,
+    );
+    render(active);
+  });
+  mount.addEventListener("dblclick", () => {
+    localHairMillidegrees = 0;
+    if (active) render(active);
   });
   mount.addEventListener("pointerdown", () => sensor.focus());
   window.addEventListener("resize", () => {

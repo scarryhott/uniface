@@ -42,7 +42,7 @@ from .supernet_store import SupernetIntegrationStore
 from .translational_truth_axiometry import derive_closure
 
 
-VERSION = "3.20.0"
+VERSION = "3.21.0"
 PROJECTION_RECEIPT_PROTOCOL = (
     "closure.supernet/conscious-interactive-projection-v1"
 )
@@ -57,6 +57,12 @@ class TranslationalReturnRequest(BaseModel):
     perspective_id: str = Field(min_length=1, max_length=500)
     focus_event_id: str | None = Field(default=None, max_length=500)
     exact_source_return: str = Field(min_length=1, max_length=20_000)
+    local_projection_commitment: str = Field(min_length=25, max_length=128)
+    local_perspective_hair_millidegrees: int = Field(
+        default=0,
+        ge=-180_000,
+        le=180_000,
+    )
     source_stream: str = Field(
         default="full-surface-interaction",
         min_length=1,
@@ -83,6 +89,51 @@ def _stable(value: Any) -> str:
 def _digest(prefix: str, value: Any) -> str:
     content = hashlib.sha256(_stable(value).encode("utf-8")).hexdigest()
     return f"{prefix}:{content}"
+
+
+def derive_local_projection_commitment(
+    contract: Mapping[str, Any],
+    *,
+    return_relation_id: str,
+    perspective_id: str,
+    focus_event_id: str | None,
+    exact_source_return: str,
+    local_perspective_hair_millidegrees: int = 0,
+) -> str:
+    """Commit a browser-local amendment to its exact latent closure base."""
+
+    body = {
+        "contract_id": contract.get("id"),
+        "return_relation_id": return_relation_id,
+        "perspective_id": perspective_id,
+        "focus_event_id": focus_event_id,
+        "exact_source_return": exact_source_return,
+        "local_perspective_hair_millidegrees": (
+            local_perspective_hair_millidegrees
+        ),
+        "reading_kernel": (contract.get("perspective_closure") or {}).get(
+            "kernel", []
+        ),
+    }
+    return "local-projection:" + hashlib.sha256(
+        _stable(body).encode("utf-8")
+    ).hexdigest()[:24]
+
+
+def local_projection_commitment(
+    contract: Mapping[str, Any],
+    request: TranslationalReturnRequest,
+) -> str:
+    return derive_local_projection_commitment(
+        contract,
+        return_relation_id=request.return_relation_id,
+        perspective_id=request.perspective_id,
+        focus_event_id=request.focus_event_id,
+        exact_source_return=request.exact_source_return,
+        local_perspective_hair_millidegrees=(
+            request.local_perspective_hair_millidegrees
+        ),
+    )
 
 
 class TranslationalReturnLedger:
@@ -312,6 +363,8 @@ class TranslationalReturnLedger:
         parent_return_id: str | None,
         prior_projection_id: str,
         return_relation_id: str,
+        local_projection_commitment: str,
+        local_perspective_hair_millidegrees: int,
     ) -> bool:
         metadata = event.get("metadata") or {}
         parent_ids = [str(item) for item in event.get("parent_event_ids", [])]
@@ -321,6 +374,10 @@ class TranslationalReturnLedger:
             and metadata.get("execution_fingerprint") == fingerprint
             and metadata.get("prior_projection_id") == prior_projection_id
             and metadata.get("return_relation_id") == return_relation_id
+            and metadata.get("local_projection_commitment")
+            == local_projection_commitment
+            and metadata.get("local_perspective_hair_millidegrees")
+            == local_perspective_hair_millidegrees
             and metadata.get("canonical_visual_value")
             == canonical_visual_value
             and str(event.get("perspective_id") or "") == perspective_id
@@ -375,6 +432,8 @@ class TranslationalReturnLedger:
         parent_return_id: str | None,
         prior_projection_id: str,
         return_relation_id: str,
+        local_projection_commitment: str,
+        local_perspective_hair_millidegrees: int,
     ) -> dict[str, Any]:
         external_key = f"projection-return:{fingerprint}"
         existing = self.supernet.get_by_external_key(external_key)
@@ -388,6 +447,10 @@ class TranslationalReturnLedger:
                 parent_return_id=parent_return_id,
                 prior_projection_id=prior_projection_id,
                 return_relation_id=return_relation_id,
+                local_projection_commitment=local_projection_commitment,
+                local_perspective_hair_millidegrees=(
+                    local_perspective_hair_millidegrees
+                ),
             ):
                 raise RuntimeError(
                     "the durable execution event does not match the exact "
@@ -437,6 +500,10 @@ class TranslationalReturnLedger:
                     "canonical_visual_value": canonical_visual_value,
                     "prior_projection_id": prior_projection_id,
                     "return_relation_id": return_relation_id,
+                    "local_projection_commitment": local_projection_commitment,
+                    "local_perspective_hair_millidegrees": (
+                        local_perspective_hair_millidegrees
+                    ),
                     "execution_fingerprint": fingerprint,
                     "source_stream_is_equality_authority": False,
                 },
@@ -451,6 +518,10 @@ class TranslationalReturnLedger:
             parent_return_id=parent_return_id,
             prior_projection_id=prior_projection_id,
             return_relation_id=return_relation_id,
+            local_projection_commitment=local_projection_commitment,
+            local_perspective_hair_millidegrees=(
+                local_perspective_hair_millidegrees
+            ),
         ):
             raise RuntimeError(
                 "the recovered execution event does not match the exact request"
@@ -742,6 +813,12 @@ class MinimalProjectionRuntime:
                 "focus": request.focus_event_id,
                 "source": request.exact_source_return,
                 "source_stream": request.source_stream,
+                "local_projection_commitment": (
+                    request.local_projection_commitment
+                ),
+                "local_perspective_hair_millidegrees": (
+                    request.local_perspective_hair_millidegrees
+                ),
             },
         )
 
@@ -799,6 +876,10 @@ class MinimalProjectionRuntime:
             parent_return_id=(focus_state_id or None),
             prior_projection_id=contract["id"],
             return_relation_id=request.return_relation_id,
+            local_projection_commitment=request.local_projection_commitment,
+            local_perspective_hair_millidegrees=(
+                request.local_perspective_hair_millidegrees
+            ),
         )
         successor = self.project(
             perspective_id=request.perspective_id,
@@ -828,12 +909,29 @@ class MinimalProjectionRuntime:
                 "exact_source_ids": returned["exact_source_ids"],
                 "source_stream_defines_equality": False,
                 "source_stream_authorizes_external_effect": False,
+                "local_projection_commitment": (
+                    request.local_projection_commitment
+                ),
+                "local_perspective_hair_millidegrees": (
+                    request.local_perspective_hair_millidegrees
+                ),
+                "local_hair_defines_equality": False,
             },
             "closure_ui_contract": successor,
             "perspective_closure": successor["perspective_closure"],
             "closure_process": successor["closure_process"],
             "truth_issued": False,
             "external_resource_admitted": False,
+            "committed_local_projection": {
+                "id": request.local_projection_commitment,
+                "latent_contract_id": contract["id"],
+                "perspective_id": request.perspective_id,
+                "focus_event_id": request.focus_event_id,
+                "hair_millidegrees": (
+                    request.local_perspective_hair_millidegrees
+                ),
+                "closure_rederived": True,
+            },
         }
         receipt, _ = self.ledger.supernet.append_visual_closure_receipt(
             source_event_id=str(returned["id"]),
@@ -860,6 +958,9 @@ class MinimalProjectionRuntime:
             "focus_event_id": returned["id"],
             "visual_closure_receipt_id": receipt["id"],
             "closure_ui_contract": successor,
+            "committed_local_projection": receipt_body[
+                "committed_local_projection"
+            ],
             "truth_issued": False,
             "external_resource_admitted": False,
         }
@@ -913,6 +1014,10 @@ def create_app(config: Any | None = None) -> FastAPI:
             "truth_source": "EXPLICIT_TRANSLATED_PERSPECTIVE_VISUALIZATION_KERNEL",
             "visualization_acceptance": "EXACT_LOCAL_CLOSURE_REDERIVATION",
             "interaction_proof": "VERIFIED_SUCCESSOR_CLOSURE_BEFORE_COMMIT",
+            "latent_ui_state": "VERIFIED_CLOSURE_RELATION",
+            "local_perspective": "MUTABLE_HAIR_AND_FOCUS",
+            "local_modification": "UNCOMMITTED_CLOSURE_POTENTIAL",
+            "commit_protocol": "LOCAL_PROJECTION_COMMITMENT_THEN_REDERIVATION",
             "canonical_store": "SUPERNET_INTEGRATION_EVENT_AND_VISUAL_RECEIPT_LINEAGE",
             "lean_bridge": "NRRF859ConsciousSupernetInteractiveProjectionBridge",
             "declared_formal_continuation": (
@@ -1010,6 +1115,15 @@ def create_app(config: Any | None = None) -> FastAPI:
                     400,
                     "The return is not at the active closure focus",
                 )
+            expected_local_commitment = local_projection_commitment(
+                current,
+                data,
+            )
+            if data.local_projection_commitment != expected_local_commitment:
+                raise HTTPException(
+                    400,
+                    "The local projection is not derived from the active closure",
+                )
             response, replayed = runtime.append_return(
                 contract=current,
                 request=data,
@@ -1036,6 +1150,8 @@ app = create_app()
 __all__ = [
     "MinimalProjectionRuntime",
     "TranslationalReturnLedger",
+    "derive_local_projection_commitment",
+    "local_projection_commitment",
     "app",
     "create_app",
 ]

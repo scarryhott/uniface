@@ -17,6 +17,9 @@ from closure_supernet.closure_ui_contract import (
     validate_ui_contract,
 )
 from closure_supernet.config import RuntimeConfig
+from closure_supernet.minimal_projection_runtime import (
+    derive_local_projection_commitment,
+)
 
 
 def make_config(
@@ -38,12 +41,20 @@ def make_config(
 
 def return_payload(contract: dict[str, Any], exact_source: str) -> dict[str, Any]:
     relation = contract["return_relation"]
-    return {
+    payload = {
         "return_relation_id": relation["id"],
         "perspective_id": contract["perspective_id"],
         "focus_event_id": contract["focus_event_id"],
         "exact_source_return": exact_source,
     }
+    payload["local_projection_commitment"] = derive_local_projection_commitment(
+        contract,
+        return_relation_id=payload["return_relation_id"],
+        perspective_id=payload["perspective_id"],
+        focus_event_id=payload["focus_event_id"],
+        exact_source_return=payload["exact_source_return"],
+    )
+    return payload
 
 
 def execute_return(
@@ -140,6 +151,12 @@ def test_open_projection_has_no_authored_page_or_substitute_content(
     assert contract["renderer_relation"]["geometry_acceptance"] == (
         "EXACT_LOCAL_CLOSURE_REDERIVATION"
     )
+    assert contract["renderer_relation"]["latent_structure"] == (
+        "VERIFIED_CLOSURE_RELATION"
+    )
+    assert contract["renderer_relation"]["local_modification"] == (
+        "UNCOMMITTED_CLOSURE_POTENTIAL"
+    )
     for removed_app_layer in (
         "root",
         "scene",
@@ -221,6 +238,58 @@ def test_universal_return_derives_the_only_visible_source_and_successor_closure(
     assert dialectic["argument_truth"]["police_verdict_issued"] is False
     assert dialectic["open_existence"]["continuation_reopens"] is True
     assert dialectic["open_existence"]["one_token_closure_limit_preserved"] is True
+    latent = successor["closure_process"]["latent_interactive_interface"]
+    assert latent["visible_projection_is_derived"] is True
+    assert latent["local_perspective_hair_is_mutable"] is True
+    assert latent["commit_binds_contract_perspective_source_and_kernel"] is True
+    assert latent["server_rederives_commitment_before_append"] is True
+    assert latent["committed_hair_defines_equality"] is False
+
+
+def test_local_projection_must_bind_latent_closure_before_commit(
+    tmp_path: Path,
+) -> None:
+    app = create_projection_app(make_config(tmp_path))
+    exact_source = "A local potential committed through its latent closure."
+
+    with TestClient(app) as client:
+        opened = client.get(
+            "/supernet/interface",
+            params={"perspective_id": "perspective:local-commit"},
+        ).json()["closure_ui_contract"]
+        forged = return_payload(opened, exact_source)
+        forged["local_projection_commitment"] = "local-projection:" + "0" * 24
+        rejected = client.post(
+            RETURN_ENDPOINT_TEMPLATE.format(contract_id=opened["id"]),
+            json=forged,
+        )
+        assert rejected.status_code == 400
+        assert app.state.runtime.ledger.list_returns() == []
+
+        hair = 45_000
+        admitted = return_payload(opened, exact_source)
+        admitted["local_perspective_hair_millidegrees"] = hair
+        admitted["local_projection_commitment"] = (
+            derive_local_projection_commitment(
+                opened,
+                return_relation_id=admitted["return_relation_id"],
+                perspective_id=admitted["perspective_id"],
+                focus_event_id=admitted["focus_event_id"],
+                exact_source_return=admitted["exact_source_return"],
+                local_perspective_hair_millidegrees=hair,
+            )
+        )
+        response = client.post(
+            RETURN_ENDPOINT_TEMPLATE.format(contract_id=opened["id"]),
+            json=admitted,
+        )
+
+    assert response.status_code == 200, response.text
+    committed = response.json()["committed_local_projection"]
+    assert committed["id"] == admitted["local_projection_commitment"]
+    assert committed["latent_contract_id"] == opened["id"]
+    assert committed["hair_millidegrees"] == hair
+    assert committed["closure_rederived"] is True
 
 
 def test_each_return_recloses_one_carrier_and_preserves_exact_source_traces(

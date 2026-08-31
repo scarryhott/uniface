@@ -11,7 +11,10 @@ from fastapi.testclient import TestClient
 from closure_supernet.api_agent import create_app
 from closure_supernet.closure_ui_contract import RETURN_ENDPOINT_TEMPLATE
 from closure_supernet.config import RuntimeConfig
-from closure_supernet.minimal_projection_runtime import TranslationalReturnLedger
+from closure_supernet.minimal_projection_runtime import (
+    TranslationalReturnLedger,
+    derive_local_projection_commitment,
+)
 from closure_supernet.supernet_store import SupernetIntegrationStore
 from closure_supernet.translational_truth_axiometry import derive_closure
 
@@ -63,13 +66,21 @@ def return_request(
     *,
     source_stream: str,
 ) -> dict[str, Any]:
-    return {
+    payload = {
         "return_relation_id": contract["return_relation"]["id"],
         "perspective_id": contract["perspective_id"],
         "focus_event_id": contract["focus_event_id"],
         "exact_source_return": exact_source,
         "source_stream": source_stream,
     }
+    payload["local_projection_commitment"] = derive_local_projection_commitment(
+        contract,
+        return_relation_id=payload["return_relation_id"],
+        perspective_id=payload["perspective_id"],
+        focus_event_id=payload["focus_event_id"],
+        exact_source_return=payload["exact_source_return"],
+    )
+    return payload
 
 
 def execute_return(
