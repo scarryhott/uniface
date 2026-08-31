@@ -47,6 +47,7 @@ for forbidden in (
 ):
     assert forbidden not in sys.modules, forbidden
 from fastapi.testclient import TestClient
+from closure_supernet.minimal_projection_runtime import derive_local_projection_commitment
 with TestClient(asgi.app) as client:
     root = client.get("/")
     initial = client.get("/supernet/interface", params={{"perspective_id": "p"}}).json()["closure_ui_contract"]
@@ -57,6 +58,13 @@ with TestClient(asgi.app) as client:
             "perspective_id": "p",
             "focus_event_id": None,
             "exact_source_return": "One exact visual return.",
+            "local_projection_commitment": derive_local_projection_commitment(
+                initial,
+                return_relation_id=initial["return_relation"]["id"],
+                perspective_id="p",
+                focus_event_id=None,
+                exact_source_return="One exact visual return.",
+            ),
         }},
     )
     assert root.status_code == 200
