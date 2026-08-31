@@ -187,6 +187,33 @@ def attach_perspective_closure(
 
 def validate_ui_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
     legacy = dict(_legacy.validate_ui_contract(contract))
+    # The legacy verifier is the shape/type boundary. A malformed carrier must
+    # be rejected without being interpreted by any later natural-form solver.
+    if legacy.get("valid") is not True:
+        legacy.update(
+            {
+                "natural_form_atlas_valid": False,
+                "glued_ui_subatlas_matches_atlas": False,
+                "formal_proof_index_valid": False,
+                "local_natural_form_freedom_valid": False,
+                "interactive_natural_form_solver_valid": False,
+                "natural_form_is_interactive_interface_equality_closure": False,
+                "rendering_can_witness_equality": False,
+                "all_retained_families_locally_admissible_as_proposals": False,
+                "future_resolution_guaranteed": False,
+                "supernet_closure_certificate_valid": False,
+                "supernet_closed": False,
+                "interface_is_glued_versioned_subatlas": False,
+                "closure_ball_is_master_container": False,
+                "cross_form_equality_requires_source_preserving_return": True,
+                "archive_audit_gates_supernet_closure": False,
+                "open_relations_are_part_of_closure": True,
+                "atlas_errors": [],
+                "valid": False,
+            }
+        )
+        return legacy
+
     atlas = contract.get("natural_form_atlas")
     atlas_validation = (
         validate_versioned_natural_form_atlas(atlas)
