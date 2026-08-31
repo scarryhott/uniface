@@ -7,6 +7,11 @@ cross-form equality.  The versioned atlas preserves every known historical
 natural form without flattening it, while the formal proof index records the
 Lean-proved chart families and invariants that constrain the same translation.
 OPEN relations remain inside closure rather than counting as missing truth.
+
+The local natural-form field is derived from this same atlas: every retained
+family is admissible as an interaction proposal, only the returned compatible
+sub-atlas is witnessed, and fidelity is read only from exact returned partition
+evidence.  Selection freedom therefore cannot author truth.
 """
 
 import hashlib
@@ -16,6 +21,7 @@ from typing import Any
 from . import interaction_closure_legacy as _legacy
 from .closure_continuity import audit_translational_continuity
 from .formal_proof_index import derive_formal_proof_index
+from .local_natural_form_freedom import derive_local_natural_form_freedom
 from .natural_form_atlas import (
     derive_glued_ui_subatlas,
     derive_versioned_natural_form_atlas,
@@ -87,11 +93,13 @@ def derive_interaction_closure(
     atlas_validation = validate_versioned_natural_form_atlas(atlas)
     glued = derive_glued_ui_subatlas(atlas)
     proof_index = derive_formal_proof_index(atlas)
+    local_field = derive_local_natural_form_freedom(atlas)
 
     body["natural_form_atlas"] = atlas
     body["natural_form_atlas_validation"] = atlas_validation
     body["glued_ui_subatlas"] = glued
     body["formal_proof_index"] = proof_index
+    body["local_natural_form_freedom"] = local_field
 
     physical_topology = dict(body.get("black_mirror_physical_topology") or {})
     physical_topology.update(
@@ -115,6 +123,15 @@ def derive_interaction_closure(
             "closure_ball_is_master_container": False,
             "formal_proof_index_closed": proof_index["proof_index_closed"],
             "archive_audit_gates_supernet_closure": False,
+            "all_retained_families_are_local_interaction_proposals": local_field[
+                "local_constraint"
+            ]["all_retained_families_locally_admissible_as_proposals"],
+            "local_selection_freedom_is_set_valued": local_field[
+                "selection_freedom"
+            ]["selection_is_set_valued"],
+            "selection_authors_truth": False,
+            "fidelity_authored_only_by_exact_returns": True,
+            "future_resolution_guaranteed": False,
         }
     )
     body["unification_constraint"] = constraint
@@ -129,6 +146,10 @@ def derive_interaction_closure(
             "atlas_is_empirical_truth_claim": False,
             "lean_source_verified_by_runtime": False,
             "runtime_reproves_lean": False,
+            "all_family_selection_is_proposal_not_truth": True,
+            "remaining_limits_are_open_selection_frontiers": True,
+            "later_return_may_resolve_open_frontier": True,
+            "future_resolution_guaranteed": False,
         }
     )
     body["claims"] = claims
@@ -164,6 +185,7 @@ def derive_interaction_closure(
             "natural_form_atlas_id": atlas["id"],
             "glued_ui_subatlas_id": glued["id"],
             "formal_proof_index_id": proof_index["id"],
+            "local_natural_form_freedom_id": local_field["id"],
             "supernet_closure_certificate_id": certificate["id"],
             "continuity_self_audit": body["continuity_self_audit"]["status"],
         },
