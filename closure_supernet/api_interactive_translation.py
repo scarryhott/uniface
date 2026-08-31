@@ -17,7 +17,7 @@ from typing import Any
 from fastapi import FastAPI
 from pydantic import BaseModel, ConfigDict
 
-from .interactive_translation_equations import (
+from .interactive_translation_equations_current import (
     PROTOCOL,
     resolve_closure_equations,
 )
@@ -39,11 +39,14 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
     async def closure_equation_capabilities() -> dict[str, Any]:
         return {
             "protocol": PROTOCOL,
-            "equation": "Q_(t+1)=Close(Q_t + returned_interaction_t)",
+            "equation": (
+                "Q_(t+1)=Close(Q_t + "
+                "Translate(observer_t, returned_interaction_t))"
+            ),
             "subsystems": [
                 "reopening",
                 "participant_rule_charts",
-                "trading_forms",
+                "open_sensor_trading_closure",
                 "resource_reintegration",
                 "legacy_compatibility",
             ],
@@ -51,6 +54,12 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
             "only_returned_interaction_recloses": True,
             "mode_enum_authors_truth": False,
             "fixed_horizon_authors_truth": False,
+            "successor_quote_loop_authors_truth": False,
+            "route_receipt_authors_truth": False,
+            "unitary_curvature_gives_amplitude": True,
+            "ball_partition_maze_gives_timing": True,
+            "amplitude_timing_one_translation": True,
+            "signal_trade_one_translation": True,
             "queue_limit_authors_truth": False,
             "legacy_runtime_can_gate": False,
             "mutation": False,
