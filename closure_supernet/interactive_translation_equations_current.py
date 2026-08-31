@@ -8,7 +8,9 @@ its unique closure, and quotiented by translational truth. There is no second
 trajectory, trend, tolerance, forecast, or inter-class dynamics law.
 
 Recognition and selection are one pre-action natural-form field. Returned forms
-and OPEN forms are assembled simultaneously before any later action projection.
+and OPEN forms are assembled simultaneously. Each returned form derives its
+hold/action horizon from relative-hair fidelity and its action size from the
+relative ball before any action projection can become ready.
 """
 
 import hashlib
@@ -31,12 +33,15 @@ from .trading_natural_form_closure import (
     PROTOCOL as TRADING_PROTOCOL,
     resolve_open_sensor_trading_closure,
 )
+from .trading_relative_hair_horizon_ball_size import (
+    derive_preaction_relative_coordinates,
+)
 from .trading_translational_truth_partition import (
     derive_translational_truth_partition,
 )
 from .trading_unified_natural_form_field import derive_unified_natural_form_field
 
-PROTOCOL = "closure.supernet/interactive-translation-equations-trading-unified-natural-form-v8"
+PROTOCOL = "closure.supernet/interactive-translation-equations-relative-hair-horizon-ball-size-v9"
 
 
 def _stable(value: Any) -> str:
@@ -114,7 +119,17 @@ def resolve_trading_equation(
         if history
         else None
     )
-    unified_field = derive_unified_natural_form_field(natural_closure=natural)
+    preaction_coordinates = derive_preaction_relative_coordinates(
+        observer_id=observer_id,
+        natural_closure=natural,
+        current_feedback=current_feedback,
+        sensor_history=history,
+        max_returns=max_returns,
+    )
+    unified_field = derive_unified_natural_form_field(
+        natural_closure=natural,
+        preaction_coordinates=preaction_coordinates.get("by_closure_id", {}),
+    )
 
     current_profit_truth_witnessed = any(
         form.get("orientation") == "PROFITABLE"
@@ -132,6 +147,7 @@ def resolve_trading_equation(
     body["closure_continuation"] = None
     body["translational_truth_partition"] = truth_partition
     body["translational_truth_learning"] = truth_partition
+    body["preaction_relative_coordinates"] = preaction_coordinates
     body["natural_form_field"] = unified_field
     body["natural_form_selection"] = unified_field
     body["selected_interactions"] = list(unified_field.get("action_projections", []))
@@ -188,6 +204,17 @@ def resolve_trading_equation(
             "ball_partition_max_gives_timing": True,
             "clock_duration_authors_timing": False,
             "normalized_closure_timing_equals_amplitude": True,
+            "loop_timing_is_not_hold_horizon": True,
+            "fixed_horizon_authors_truth": False,
+            "fixed_horizon_present": False,
+            "horizon_from_relative_hair_fidelity": True,
+            "horizon_is_return_step_coordinate_not_wall_clock": True,
+            "relative_ball_is_size": True,
+            "size_is_relative_ball_bottleneck_capacity": True,
+            "external_position_size_present": False,
+            "external_position_size_authors_action": False,
+            "horizon_and_size_derived_before_action": True,
+            "raw_quote_size_is_not_silently_relative_ball_size": True,
             "signal_trade_equal_relative_to_translation": True,
             "translational_truth_authors_relation_partition": True,
             "ball_equals_natural_form_truth_class": True,
@@ -232,7 +259,7 @@ def resolve_trading_equation(
             "dialectic_continuation_status": OPEN_STATUS,
         }
     )
-    body["id"] = _digest("natural-trading-equation-unified-natural-form", body)
+    body["id"] = _digest("natural-trading-equation-relative-horizon-size", body)
     return body
 
 
@@ -243,6 +270,7 @@ def resolve_closure_equations(payload: Mapping[str, Any]) -> dict[str, Any]:
         "protocol": PROTOCOL,
         "equation": (
             "Recognize(Q_t)=Select(Q_t)=NaturalFormField(Q_t); "
+            "H=HairFidelity; Size=RelativeBall; "
             "Q_(t+1)=Close(Q_t + Translate(observer_t, returned_interaction_t))"
         ),
         "translational_truth_alone": True,
@@ -250,6 +278,11 @@ def resolve_closure_equations(payload: Mapping[str, Any]) -> dict[str, Any]:
         "separate_selector_present": False,
         "natural_form_selects_interaction": True,
         "selection_authors_truth": False,
+        "horizon_from_relative_hair_fidelity": True,
+        "relative_ball_is_size": True,
+        "horizon_and_size_derived_before_action": True,
+        "fixed_horizon_present": False,
+        "external_position_size_present": False,
         "action_occurs_after_unified_natural_form_field": True,
         "proposal_status": OPEN_STATUS,
         "only_returned_interaction_recloses": True,
@@ -291,7 +324,7 @@ def resolve_closure_equations(payload: Mapping[str, Any]) -> dict[str, Any]:
     audit_target = dict(result)
     audit_target.pop("continuity_audit", None)
     result["continuity_audit"] = audit_translational_continuity(audit_target)
-    result["id"] = _digest("closure-equations-unified-natural-form", result)
+    result["id"] = _digest("closure-equations-relative-horizon-size", result)
     return result
 
 
