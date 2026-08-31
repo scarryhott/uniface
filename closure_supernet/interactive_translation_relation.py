@@ -6,6 +6,10 @@ The semantic primitive is a returned relative interaction, not equality between
 preselected observations, features, horizons, strategies, or fixed returns.
 Any source adapter may supply observed states and returned relations; the same
 kernel derives translation fibres from those witnessed relations.
+
+NRRF868 tightens the runtime contract further: positive agreement is carried by
+one normalized translation witness, negative agreement by an explicit returned
+closed-loop refutation, and absence of either certificate remains OPEN.
 """
 
 import hashlib
@@ -13,8 +17,9 @@ import json
 from typing import Any, Iterable, Mapping, Sequence
 
 from .closure_continuity import OPEN_STATUS, WITNESSED_STATUS, partition_signature
+from .interactive_derivation_calculus import REFUTED_STATUS, classify_returned_relation
 
-PROTOCOL = "closure.supernet/observer-observed-interactive-translation-v2"
+PROTOCOL = "closure.supernet/observer-observed-interactive-translation-v3-nrrf868"
 
 
 def _stable(value: Any) -> str:
@@ -57,7 +62,7 @@ def _components(members: Sequence[str], pairs: Sequence[tuple[str, str]]) -> tup
 
 
 def derive_feedback_translation(*, observer_id: str | None, returned_feedback: Sequence[Mapping[str, Any]], returned_interactions: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-    """Derive relative fibres only from source-preserving returned interactions."""
+    """Derive relative fibres only from certificates returned by interaction."""
     observer = str(observer_id or "")
     observations: dict[str, dict[str, Any]] = {}
     for index, raw in enumerate(returned_feedback):
@@ -76,6 +81,7 @@ def derive_feedback_translation(*, observer_id: str | None, returned_feedback: S
 
     interactions: list[dict[str, Any]] = []
     witnessed_pairs: list[tuple[str, str]] = []
+    refuted_pairs: list[tuple[str, str]] = []
     for index, raw in enumerate(returned_interactions):
         item = dict(raw)
         source = str(item.get("observed_source_id") or item.get("source_state_id") or item.get("source") or "")
@@ -83,25 +89,47 @@ def derive_feedback_translation(*, observer_id: str | None, returned_feedback: S
         relation_id = str(item.get("relation_id") or item.get("id") or f"interaction-{index}")
         source_ids = _source_ids(item)
         endpoints_preserved = bool(source in observations and target in observations and observations[source]["source_preserved"] and observations[target]["source_preserved"])
-        return_witnessed = item.get("returned") is True or item.get("witnessed") is True or bool(source_ids)
-        witnessed = bool(observer and endpoints_preserved and return_witnessed)
+        returned = item.get("returned") is True or item.get("witnessed") is True or bool(source_ids)
+        loop_refutation = item.get("loop_refutation") or item.get("closed_loop_refutation") or item.get("refutation_loop")
+        calculus = classify_returned_relation(
+            observer_id=observer,
+            source_id=source,
+            target_id=target,
+            relation_id=relation_id,
+            source_return_ids=source_ids,
+            endpoints_source_preserved=endpoints_preserved,
+            returned=returned,
+            loop_refutation=dict(loop_refutation) if isinstance(loop_refutation, Mapping) else None,
+        )
+        witnessed = calculus["status"] == WITNESSED_STATUS
+        refuted = calculus["status"] == REFUTED_STATUS
         if witnessed:
             witnessed_pairs.append((source, target))
+        if refuted:
+            refuted_pairs.append((source, target))
+        translation_witness = calculus.get("translation_witness")
         interactions.append({
             "id": relation_id,
             "observer_id": observer or None,
             "observed_source_id": source or None,
             "observed_target_id": target or None,
-            "interaction_status": WITNESSED_STATUS if witnessed else OPEN_STATUS,
+            "interaction_status": calculus["status"],
             "translation_relation_witnessed": witnessed,
+            "translation_witness": translation_witness,
+            "loop_refutation": calculus.get("loop_refutation"),
+            "derivable": calculus.get("derivable"),
+            "closure_equal": calculus.get("closure_equal"),
             "source_return_ids": source_ids,
-            "return_witness_id": _digest("translation-return", {"observer": observer, "source": source, "target": target, "relation": relation_id, "source_ids": source_ids}) if witnessed else None,
+            "return_witness_id": translation_witness.get("id") if isinstance(translation_witness, Mapping) else None,
             "return_is_semantic_primitive": False,
             "return_is_interaction_witness": True,
             "fixed_return_required": False,
             "observation_equality_used_to_witness": False,
             "fixed_feature_used_to_witness": False,
             "fixed_horizon_required": False,
+            "derivation_history_is_semantic": False,
+            "one_step_normal_form": bool(witnessed),
+            "negative_truth_requires_loop_witness": True,
             "continuation_status": OPEN_STATUS,
         })
 
@@ -111,11 +139,13 @@ def derive_feedback_translation(*, observer_id: str | None, returned_feedback: S
     body = {
         "protocol": PROTOCOL,
         "primitive": "OBSERVER_OBSERVED_INTERACTIVE_TRANSLATION",
+        "internal_calculus": "NRRF868_DERIVE",
         "observer_id": observer or None,
         "observed_ids": members,
         "observations": [observations[member] for member in members],
         "interactions": interactions,
         "translation_partition": [list(group) for group in translation_partition],
+        "refuted_pairs": [list(pair) for pair in refuted_pairs],
         "translation_reading_total": bool(observer and all_feedback_source_preserved),
         "observer_observed_relation_is_primitive": True,
         "observation_equality_is_primitive": False,
@@ -125,6 +155,12 @@ def derive_feedback_translation(*, observer_id: str | None, returned_feedback: S
         "strategy_selection_is_semantic": False,
         "return_is_primitive": False,
         "fixed_return_required": False,
+        "positive_truth_certificate": "TRANSLATION_WITNESS",
+        "negative_truth_certificate": "LOOP_REFUTATION",
+        "absence_of_certificate_means": OPEN_STATUS,
+        "derivation_normal_form": "ONE_TRANSLATION",
+        "derivation_depth_semantic": False,
+        "closure_is_derivation_normal_form": True,
         "continuation_status": OPEN_STATUS,
         "existence_closed": False,
     }
