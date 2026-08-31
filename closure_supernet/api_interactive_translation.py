@@ -6,6 +6,10 @@ Production continues to expose only the one projection/return relation. This
 adapter may be instantiated for research, tests or local inspection. Its extra
 routes are pure readings: they append no event, execute no trade, select no
 universal reopening mode and never alter the latent UI closure.
+
+The module-level research app is a separately constructed projection runtime.
+Importing this module therefore cannot widen an already-imported production app
+object through FastAPI route aliasing.
 """
 
 from typing import Any
@@ -17,10 +21,7 @@ from .interactive_translation_equations import (
     PROTOCOL,
     resolve_closure_equations,
 )
-from .minimal_projection_runtime import (
-    app as projection_app,
-    create_app as create_projection_app,
-)
+from .minimal_projection_runtime import create_app as create_projection_app
 
 
 class ClosureEquationRequest(BaseModel):
@@ -70,7 +71,9 @@ def create_app(config: Any | None = None) -> FastAPI:
     return attach_closure_equations(create_projection_app(config))
 
 
-app = attach_closure_equations(projection_app)
+# This is intentionally not minimal_projection_runtime.app. It is an isolated
+# opt-in application object with its own projection runtime and route table.
+app = create_app()
 
 
 __all__ = [
