@@ -63,6 +63,8 @@ def test_recognition_and_selection_are_one_pre_action_field() -> None:
     assert field["separate_selector_present"] is False
     assert field["selector_mode_present"] is False
     assert field["action_occurs_after_unified_natural_form_field"] is True
+    assert field["horizon_from_relative_hair_fidelity"] is True
+    assert field["relative_ball_is_size"] is True
     assert all(
         row["recognized"] is True
         and row["selected"] is True
@@ -95,9 +97,6 @@ def test_open_closure_form_and_relation_space_extension_coexist() -> None:
 
 
 def test_deadlock_regression_local_open_does_not_starve_support_widening() -> None:
-    # Costly U<->A plus A->B creates local missing returns B->A, B->U and U->B.
-    # The old exclusive selector stopped widening here. The unified field must
-    # retain the global relation-space extension form simultaneously.
     field = _field(
         [
             _returned("ua", "U", "A", "1"),
@@ -116,7 +115,7 @@ def test_deadlock_regression_local_open_does_not_starve_support_widening() -> No
     assert field["relation_space_extension_is_simultaneous_open_form"] is True
 
 
-def test_profitable_returned_form_does_not_suppress_open_field() -> None:
+def test_profitable_truth_is_recognized_but_action_waits_for_relative_coordinates() -> None:
     field = _field(
         [
             _returned("ab", "A", "B", "1"),
@@ -128,8 +127,12 @@ def test_profitable_returned_form_does_not_suppress_open_field() -> None:
     assert "RETURNED_CLOSED_NATURAL_FORM" in _kinds(field)
     assert "OPEN_RELATION_SPACE_EXTENSION_NATURAL_FORM" in _kinds(field)
     projections = _projection_kinds(field)
-    assert "PROJECT_RETURNED_PROFIT_NATURAL_FORM" in projections
+    assert "RETURN_RELATIVE_HAIR_FIDELITY" in projections
     assert "RETURN_NEW_SOURCE_PRESERVING_RELATION" in projections
+    returned = next(
+        row for row in field["returned_natural_forms"] if row["orientation"] == "PROFITABLE"
+    )
+    assert returned["preaction_ready"] is False
     assert field["profit_is_natural_form_property_not_selection_rule"] is True
     assert field["selection_is_not_filtering"] is True
 
@@ -209,6 +212,8 @@ def test_current_runtime_exposes_same_object_as_recognition_and_selection() -> N
     assert receipt["separate_selector_present"] is False
     assert receipt["selector_mode_present"] is False
     assert receipt["selection_is_not_filtering"] is True
+    assert receipt["horizon_from_relative_hair_fidelity"] is True
+    assert receipt["relative_ball_is_size"] is True
     assert receipt["natural_form_selection"] == receipt["natural_form_field"]
     assert receipt["selected_interactions"] == receipt["natural_form_field"]["action_projections"]
     assert "RETURN_NEW_SOURCE_PRESERVING_RELATION" in {
