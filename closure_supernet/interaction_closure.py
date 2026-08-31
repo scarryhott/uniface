@@ -2,18 +2,30 @@ from __future__ import annotations
 
 """The Supernet interaction is the active UI reading, not a product workflow.
 
-AI, token, human, sensor, contract, and physical returns are states in the same
-source-preserving carrier. Their only executable interaction is extension of
-the active perspective relation followed by re-closure.
+AI, token, human, sensor, contract, and physical returns are relative readings
+of one source-preserving carrier. Only an explicit perspective return and a
+recomputed equality of UI and natural-form fibres can witness interaction
+closure. Stored status booleans and compatibility products never author it.
 """
 
 import hashlib
 import json
 from typing import Any, Iterable, Mapping
 
+from .closure_continuity import (
+    OPEN_STATUS,
+    WITNESSED_STATUS,
+    ClosureWitness,
+    audit_translational_continuity,
+    combine_witnesses,
+    compatibility_reading_receipt,
+    derive_perspective_reading,
+    derive_projection_equivalence,
+)
+
 
 PROTOCOL = "SUPERNET-INTERACTION-CLOSURE"
-SCHEMA = "closure.supernet/perspective-interaction-relation-v2"
+SCHEMA = "closure.supernet/perspective-interaction-relation-v3"
 
 
 def _stable(value: Any) -> str:
@@ -29,22 +41,12 @@ def _unique(values: Iterable[Any]) -> list[str]:
     return list(dict.fromkeys(str(value) for value in values if value is not None and str(value)))
 
 
-def _active_perspective(
-    nrrf843_ui: Mapping[str, Any],
-    nrrf842_journey: Mapping[str, Any],
-) -> str | None:
-    perspectives = _unique(nrrf843_ui.get("ui_family", {}).get("perspective_ids", []))
-    chosen = str(nrrf842_journey.get("chosen_perspective", {}).get("perspective_id") or "")
-    if chosen in perspectives:
-        return chosen
-    return perspectives[0] if len(perspectives) == 1 else None
-
-
 def _natural_form_indexes(
     truth_derivation: Mapping[str, Any],
-) -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
+) -> tuple[dict[str, dict[str, Any]], dict[str, str], list[str]]:
     forms: dict[str, dict[str, Any]] = {}
     form_by_member: dict[str, str] = {}
+    conflicts: set[str] = set()
     for raw in truth_derivation.get("natural_forms", []):
         form = dict(raw)
         form_id = str(form.get("id") or "")
@@ -52,8 +54,12 @@ def _natural_form_indexes(
             continue
         forms[form_id] = form
         for member in _unique(form.get("members", [])):
-            form_by_member[member] = form_id
-    return forms, form_by_member
+            previous = form_by_member.get(member)
+            if previous is not None and previous != form_id:
+                conflicts.add(member)
+            else:
+                form_by_member[member] = form_id
+    return forms, form_by_member, sorted(conflicts)
 
 
 def derive_interaction_closure(
@@ -70,40 +76,76 @@ def derive_interaction_closure(
 ) -> dict[str, Any]:
     """Return the one source-derived interactive relation.
 
-    The historical materialized readings are accepted for receipt compatibility
-    but cannot gate, widen, label, or otherwise author this relation.
+    Historical materialized readings remain visible for receipt compatibility,
+    but they cannot gate, widen, select, or label the translational truth.
     """
 
-    del coordination, ai_translation, tokenomic, network_return
     truth_id = str(truth_derivation.get("id") or "")
-    visual_closure_id = str(truth_derivation.get("visual_truth_closure", {}).get("id") or "")
+    visual_closure_id = str(
+        truth_derivation.get("visual_truth_closure", {}).get("id") or ""
+    )
     ui_id = str(nrrf843_ui.get("id") or "")
-    active_perspective = _active_perspective(nrrf843_ui, nrrf842_journey)
-    readings = nrrf843_ui.get("ui_family", {}).get("readings", {})
-    reading = dict(readings.get(active_perspective, {})) if active_perspective else {}
-    forms, form_by_member = _natural_form_indexes(truth_derivation)
+    forms, form_by_member, conflicting_form_members = _natural_form_indexes(
+        truth_derivation
+    )
     truth_members = set(form_by_member)
 
+    perspective = derive_perspective_reading(
+        nrrf843_ui=nrrf843_ui,
+        nrrf842_journey=nrrf842_journey,
+        truth_members=truth_members,
+    )
+    active_perspective = perspective["active_perspective_id"]
+    reading = perspective["projection_reading"]
+    projection = derive_projection_equivalence(
+        reading=reading,
+        form_by_member=form_by_member,
+        conflicting_form_members=conflicting_form_members,
+    )
+
+    witnesses = [
+        ClosureWitness(
+            "truth_source_present",
+            bool(truth_id and visual_closure_id and forms and not conflicting_form_members),
+            "A source-derived closure, visual closure and conflict-free natural forms are required.",
+            tuple(item for item in (truth_id, visual_closure_id) if item),
+        ),
+        ClosureWitness(
+            "ui_links_to_truth_source",
+            bool(
+                truth_id
+                and visual_closure_id
+                and nrrf843_ui.get("closure_derivation_id") == truth_id
+                and nrrf843_ui.get("visual_closure_id") == visual_closure_id
+            ),
+            "The UI must point to the same source closure; a stored WITNESSED flag is insufficient.",
+            tuple(item for item in (ui_id, truth_id, visual_closure_id) if item),
+        ),
+        ClosureWitness(
+            "perspective_return_witnessed",
+            bool(perspective["selection_witnessed"]),
+            "Perspective must arrive through an explicit source-authored return; no singleton fallback is allowed.",
+            tuple(item for item in (str(active_perspective or ""),) if item),
+        ),
+        ClosureWitness(
+            "active_reading_total",
+            bool(projection["reading_total"]),
+            "The active perspective must read every and only source members in the closure.",
+            tuple(projection["truth_member_ids"]),
+        ),
+        ClosureWitness(
+            "ui_kernel_equals_natural_form_partition",
+            bool(projection["partition_equal"]),
+            "UI fibres and natural-form fibres must be extensionally the same partition.",
+            tuple(projection["truth_member_ids"]),
+        ),
+    ]
+    continuity = combine_witnesses(witnesses)
+    unified = continuity["status"] == WITNESSED_STATUS
     checks = {
-        "perspective_visualization_witnessed": bool(
-            truth_derivation.get("status") == "WITNESSED"
-            and truth_derivation.get("supernet_open") is False
-        ),
-        "ui_is_same_visualization": bool(
-            nrrf843_ui.get("status") == "WITNESSED"
-            and nrrf843_ui.get("closure_derivation_id") == truth_id
-            and nrrf843_ui.get("visual_closure_id") == visual_closure_id
-        ),
-        "truth_constraint_is_ui_kernel": bool(
-            nrrf843_ui.get("truth_constraint_location", {}).get("located") is True
-            and nrrf843_ui.get("ui_closure", {}).get("closure_falls_out_from_ui_projection") is True
-        ),
-        "active_perspective_reading_present": bool(
-            active_perspective and reading and set(reading) == truth_members
-        ),
-        "natural_forms_are_visual_fibres": bool(forms),
+        name: bool(receipt["holds"])
+        for name, receipt in continuity["witnesses"].items()
     }
-    unified = all(checks.values())
 
     basis_by_display: dict[str, list[str]] = {}
     for state, display in reading.items():
@@ -112,7 +154,7 @@ def derive_interaction_closure(
         {
             "display_fibre_id": display,
             "member_state_ids": sorted(members),
-            "natural_form_id": form_by_member[members[0]] if members else None,
+            "natural_form_id": form_by_member.get(members[0]) if members else None,
             "closure_fixed": bool(
                 members and len({form_by_member.get(member) for member in members}) == 1
             ),
@@ -136,11 +178,14 @@ def derive_interaction_closure(
                 "display_fibre_id": reading[state_id],
                 "natural_form_id": form_by_member.get(state_id),
                 "source_preserved": state_id in truth_members,
-                "physical_world_return": bool(black_mirror.get("physical_sensor_attached") is True),
+                "physical_world_return": bool(
+                    black_mirror.get("physical_sensor_attached") is True
+                ),
             }
         )
 
     topology_relations: list[dict[str, Any]] = []
+    semantic_relations: list[dict[str, Any]] = []
     for edge in visual_network.get("edges", []):
         source_event = str(edge.get("source") or "")
         target_event = str(edge.get("target") or "")
@@ -150,19 +195,29 @@ def derive_interaction_closure(
             continue
         same_fibre = reading[source_state] == reading[target_state]
         witnessed = bool(
-            same_fibre and form_by_member.get(source_state) == form_by_member.get(target_state)
+            same_fibre
+            and form_by_member.get(source_state) == form_by_member.get(target_state)
         )
+        status = WITNESSED_STATUS if witnessed else OPEN_STATUS
+        relation_id = str(edge.get("id") or _digest("relation", edge))
         topology_relations.append(
             {
-                "id": str(edge.get("id") or _digest("relation", edge)),
+                "id": relation_id,
                 "source_event_id": source_event,
                 "target_event_id": target_event,
                 "source_state_id": source_state,
                 "target_state_id": target_state,
-                "truth_constraint_status": "WITNESSED" if witnessed else "OPEN",
+                "truth_constraint_status": status,
                 "same_display_fibre": same_fibre,
                 "generates_topological_identification": witnessed,
                 "visible_potential": not witnessed,
+            }
+        )
+        semantic_relations.append(
+            {
+                "source_state_id": source_state,
+                "target_state_id": target_state,
+                "truth_constraint_status": status,
             }
         )
 
@@ -183,23 +238,58 @@ def derive_interaction_closure(
         if relation["visible_potential"]
     ]
 
+    relative_readings = {
+        name: compatibility_reading_receipt(
+            name,
+            value,
+            closure_derivation_id=truth_id,
+        )
+        for name, value in {
+            "coordination": coordination,
+            "ai_translation": ai_translation,
+            "tokenomic": tokenomic,
+            "network_return": network_return,
+        }.items()
+    }
+
+    truth_core = {
+        "closure_derivation_id": truth_id,
+        "visual_closure_id": visual_closure_id,
+        "active_perspective_id": active_perspective,
+        "natural_form_partition": projection["natural_form_partition"],
+        "ui_partition": projection["reading_partition"],
+        "witnesses": checks,
+        "relations": semantic_relations,
+    }
+    translational_truth_id = _digest("translational-truth", truth_core)
+
     body = {
         "protocol": PROTOCOL,
         "schema": SCHEMA,
         "closure_derivation_id": truth_id,
         "visual_closure_id": visual_closure_id,
         "nrrf843_ui_id": ui_id,
-        "status": "WITNESSED" if unified else "OPEN",
+        "translational_truth_id": translational_truth_id,
+        "status": WITNESSED_STATUS if unified else OPEN_STATUS,
         "supernet_interaction_closed": unified,
+        "closed_relation_not_closed_existence": unified,
+        "existence_closed": False,
+        "dialectic_continuation_status": OPEN_STATUS,
         "one_interaction_surface": unified,
+        "translational_continuity": continuity,
         "unification_constraint": {
-            "status": "WITNESSED" if unified else "OPEN",
+            "status": WITNESSED_STATUS if unified else OPEN_STATUS,
             "checks": checks,
             "all_components_share_one_translational_truth": unified,
             "parallel_truth_runtime_present": False,
+            "stored_status_flags_used_as_evidence": False,
+            "configuration_authors_truth": False,
         },
+        "projection_equivalence": projection,
+        "perspective_selection": perspective,
+        "relative_readings": relative_readings,
         "black_mirror_physical_topology": {
-            "status": "WITNESSED" if unified else "OPEN",
+            "status": WITNESSED_STATUS if unified else OPEN_STATUS,
             "active_perspective_id": active_perspective,
             "projection_reading": reading,
             "closure_formula": "uiClosure(r,A)=r^-1(r(A))",
@@ -211,7 +301,7 @@ def derive_interaction_closure(
             "physical_law_claimed": False,
         },
         "perspective_digital_potential_gate": {
-            "status": "WITNESSED" if unified else "OPEN",
+            "status": WITNESSED_STATUS if unified else OPEN_STATUS,
             "active_perspective_id": active_perspective,
             "potentials": potentials,
             "open_potential_remains_visible": True,
@@ -223,15 +313,26 @@ def derive_interaction_closure(
             "full_surface": True,
             "reclose_after_return": True,
             "operation_enum": None,
+            "continuation_status": OPEN_STATUS,
+            "closed_argument_closes_existence": False,
         },
         "claims": {
             "truth_is_visualization_kernel": unified,
             "currency_issued": False,
             "legal_binding_claimed": False,
             "physical_law_claimed": False,
+            "absolute_truth_issued": False,
         },
     }
-    body["id"] = _digest("interaction-closure", body)
+    body["continuity_self_audit"] = audit_translational_continuity(body)
+    body["id"] = _digest(
+        "interaction-closure",
+        {
+            "translational_truth_id": translational_truth_id,
+            "continuation_status": OPEN_STATUS,
+            "continuity_self_audit": body["continuity_self_audit"]["status"],
+        },
+    )
     return body
 
 
