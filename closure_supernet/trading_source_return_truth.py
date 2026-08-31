@@ -1,23 +1,18 @@
 from __future__ import annotations
 
-"""Verified source-return boundary for current trading truth.
+"""Verified source-return boundary for current translational truth.
 
-External return claims do not become semantic witnesses merely because a caller
-sets ``returned=True`` or supplies arbitrary ``source_ids``. A trusted source
-adapter signs the exact returned relation with Ed25519. The current closure
-runtime verifies that signature against configured trusted public keys and then
-reconstructs the semantic row from the signed witness.
+A caller cannot create truth by setting ``returned=True``, inventing source ids,
+or supplying execution/size flags. Trusted source adapters sign exact returned
+semantic payloads with Ed25519; the current closure runtime verifies those
+signatures with configured public keys before any relation reaches closure.
 
-Hair is intentionally not witness-bound: it is presentation/gauge data and may
-vary only subject to the existing closed-hair equation. Relation value,
-observer, source event, timestamp, execution authentication, cost completeness,
-and translated relative capacity are witness-bound because they affect truth or
-actionability.
+Hair is intentionally outside the signed semantic payload. It remains a
+presentation/gauge coordinate governed by the existing closed-hair equation.
 
-Production verification keys are supplied as JSON in
-``CLOSURE_SOURCE_WITNESS_PUBLIC_KEYS`` mapping authority id -> base64 raw
-Ed25519 public key. Private keys belong only in trusted source adapters and are
-never needed by the closure runtime.
+Production public keys are supplied by ``CLOSURE_SOURCE_WITNESS_PUBLIC_KEYS`` as
+a JSON mapping of authority id to base64 raw Ed25519 public key. Private keys
+belong only in trusted adapters and are never required by closure verification.
 """
 
 import base64
@@ -27,10 +22,7 @@ import os
 from typing import Any, Mapping, Sequence
 
 from cryptography.exceptions import InvalidSignature
-from cryptography.hazmat.primitives.asymmetric.ed25519 import (
-    Ed25519PrivateKey,
-    Ed25519PublicKey,
-)
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 
 from .closure_continuity import OPEN_STATUS, WITNESSED_STATUS
 
@@ -41,13 +33,7 @@ ATLAS_KIND = "ATLAS_TRANSLATION_RETURN"
 
 
 def _stable(value: Any) -> str:
-    return json.dumps(
-        value,
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-        default=str,
-    )
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), default=str)
 
 
 def _first(value: Mapping[str, Any], *keys: str) -> Any:
@@ -92,10 +78,9 @@ def _trusted_public_keys() -> dict[str, Ed25519PublicKey]:
     result: dict[str, Ed25519PublicKey] = {}
     for authority, encoded in payload.items():
         try:
-            key = Ed25519PublicKey.from_public_bytes(_b64decode(str(encoded)))
+            result[str(authority)] = Ed25519PublicKey.from_public_bytes(_b64decode(str(encoded)))
         except Exception:
             continue
-        result[str(authority)] = key
     return result
 
 
@@ -112,21 +97,17 @@ def private_key_from_base64(value: str) -> Ed25519PrivateKey:
 
 
 def _trading_body(
-    *,
-    observer_id: str | None,
-    authority_id: str,
-    source_event_id: str,
-    source_stream: str,
-    row: Mapping[str, Any],
+    *, observer_id: str | None, authority_id: str, source_event_id: str,
+    source_stream: str, row: Mapping[str, Any],
 ) -> dict[str, Any]:
     source = str(_first(row, "source_token", "source_node", "from_token", "from", "source") or "")
     target = str(_first(row, "target_token", "target_node", "to_token", "to", "target") or "")
-    relation_value = _decimal_text(
-        _first(row, "relation_value", "relative_value", "observed_value", "total_cost", "cost", "value")
-    )
-    relative_size = _decimal_text(
-        _first(row, "relative_ball_size", "relative_size", "executable_relative_size", "relative_capacity", "translated_size")
-    )
+    relation_value = _decimal_text(_first(
+        row, "relation_value", "relative_value", "observed_value", "total_cost", "cost", "value"
+    ))
+    relative_size = _decimal_text(_first(
+        row, "relative_ball_size", "relative_size", "executable_relative_size", "relative_capacity", "translated_size"
+    ))
     relative_unit = str(_first(row, "relative_size_unit", "capacity_unit") or "") or None
     return {
         "protocol": PROTOCOL,
@@ -147,12 +128,8 @@ def _trading_body(
 
 
 def _atlas_body(
-    *,
-    observer_id: str | None,
-    authority_id: str,
-    source_event_id: str,
-    source_stream: str,
-    row: Mapping[str, Any],
+    *, observer_id: str | None, authority_id: str, source_event_id: str,
+    source_stream: str, row: Mapping[str, Any],
 ) -> dict[str, Any]:
     return {
         "protocol": PROTOCOL,
@@ -170,61 +147,36 @@ def _atlas_body(
 
 
 def _issue(body: Mapping[str, Any], private_key: Ed25519PrivateKey) -> dict[str, Any]:
-    signature = private_key.sign(_stable(body).encode("utf-8"))
     return {
         "protocol": PROTOCOL,
         "authority_id": body["authority_id"],
         "body": dict(body),
-        "signature": _b64encode(signature),
+        "signature": _b64encode(private_key.sign(_stable(body).encode("utf-8"))),
     }
 
 
 def issue_trading_source_witness(
-    *,
-    private_key: Ed25519PrivateKey,
-    authority_id: str,
-    observer_id: str | None,
-    source_event_id: str,
-    source_stream: str,
-    row: Mapping[str, Any],
+    *, private_key: Ed25519PrivateKey, authority_id: str, observer_id: str | None,
+    source_event_id: str, source_stream: str, row: Mapping[str, Any],
 ) -> dict[str, Any]:
-    return _issue(
-        _trading_body(
-            observer_id=observer_id,
-            authority_id=authority_id,
-            source_event_id=source_event_id,
-            source_stream=source_stream,
-            row=row,
-        ),
-        private_key,
-    )
+    return _issue(_trading_body(
+        observer_id=observer_id, authority_id=authority_id,
+        source_event_id=source_event_id, source_stream=source_stream, row=row,
+    ), private_key)
 
 
 def issue_atlas_translation_witness(
-    *,
-    private_key: Ed25519PrivateKey,
-    authority_id: str,
-    observer_id: str | None,
-    source_event_id: str,
-    source_stream: str,
-    row: Mapping[str, Any],
+    *, private_key: Ed25519PrivateKey, authority_id: str, observer_id: str | None,
+    source_event_id: str, source_stream: str, row: Mapping[str, Any],
 ) -> dict[str, Any]:
-    return _issue(
-        _atlas_body(
-            observer_id=observer_id,
-            authority_id=authority_id,
-            source_event_id=source_event_id,
-            source_stream=source_stream,
-            row=row,
-        ),
-        private_key,
-    )
+    return _issue(_atlas_body(
+        observer_id=observer_id, authority_id=authority_id,
+        source_event_id=source_event_id, source_stream=source_stream, row=row,
+    ), private_key)
 
 
 def _verify_witness(
-    *,
-    witness: Mapping[str, Any] | None,
-    expected_body: Mapping[str, Any],
+    *, witness: Mapping[str, Any] | None, expected_body: Mapping[str, Any],
 ) -> tuple[bool, str, dict[str, Any] | None]:
     if not isinstance(witness, Mapping):
         return False, "SOURCE_WITNESS_MISSING", None
@@ -236,8 +188,7 @@ def _verify_witness(
     authority = str(witness.get("authority_id") or body.get("authority_id") or "")
     if not authority:
         return False, "SOURCE_WITNESS_AUTHORITY_MISSING", None
-    trusted = _trusted_public_keys()
-    public_key = trusted.get(authority)
+    public_key = _trusted_public_keys().get(authority)
     if public_key is None:
         return False, "SOURCE_WITNESS_AUTHORITY_UNTRUSTED", dict(body)
     if dict(body) != dict(expected_body):
@@ -250,26 +201,25 @@ def _verify_witness(
     return True, "SOURCE_WITNESS_VERIFIED", dict(body)
 
 
+def _witness_coordinates(witness: Any) -> tuple[Mapping[str, Any] | None, str, str, str]:
+    if not isinstance(witness, Mapping):
+        return None, "", "", ""
+    body = witness.get("body")
+    body_map = body if isinstance(body, Mapping) else {}
+    authority = str(body_map.get("authority_id") or witness.get("authority_id") or "")
+    return witness, authority, str(body_map.get("source_event_id") or ""), str(body_map.get("source_stream") or "")
+
+
 def verify_trading_source_return(
-    *,
-    observer_id: str | None,
-    row: Mapping[str, Any],
+    *, observer_id: str | None, row: Mapping[str, Any],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     raw = dict(row)
-    witness = raw.get("source_witness")
-    body = witness.get("body") if isinstance(witness, Mapping) and isinstance(witness.get("body"), Mapping) else {}
-    authority = str(body.get("authority_id") or (witness.get("authority_id") if isinstance(witness, Mapping) else "") or "")
-    source_event_id = str(body.get("source_event_id") or "")
-    source_stream = str(body.get("source_stream") or "")
+    witness, authority, source_event_id, source_stream = _witness_coordinates(raw.get("source_witness"))
     expected = _trading_body(
-        observer_id=observer_id,
-        authority_id=authority,
-        source_event_id=source_event_id,
-        source_stream=source_stream,
-        row=raw,
+        observer_id=observer_id, authority_id=authority,
+        source_event_id=source_event_id, source_stream=source_stream, row=raw,
     )
-    ok, reason, verified_body = _verify_witness(witness=witness if isinstance(witness, Mapping) else None, expected_body=expected)
-
+    ok, reason, verified_body = _verify_witness(witness=witness, expected_body=expected)
     sanitized = dict(raw)
     sanitized["source_witness_verified"] = ok
     sanitized["source_witness_reason"] = reason
@@ -291,23 +241,24 @@ def verify_trading_source_return(
             sanitized["relative_size_unit"] = verified_body["relative_size_unit"]
         else:
             for key in (
-                "relative_ball_size", "relative_size", "executable_relative_size",
-                "relative_capacity", "translated_size", "relative_size_unit", "capacity_unit",
+                "relative_ball_size", "relative_size", "executable_relative_size", "relative_capacity",
+                "translated_size", "relative_size_unit", "capacity_unit",
             ):
                 sanitized.pop(key, None)
     else:
-        sanitized["returned"] = False
-        sanitized["witnessed"] = False
-        sanitized["source_ids"] = []
-        sanitized["authenticated"] = False
-        sanitized["cost_complete"] = False
+        sanitized.update({
+            "returned": False,
+            "witnessed": False,
+            "source_ids": [],
+            "authenticated": False,
+            "cost_complete": False,
+        })
         for key in (
-            "relative_ball_size", "relative_size", "executable_relative_size",
-            "relative_capacity", "translated_size", "relative_size_unit", "capacity_unit",
+            "relative_ball_size", "relative_size", "executable_relative_size", "relative_capacity",
+            "translated_size", "relative_size_unit", "capacity_unit",
         ):
             sanitized.pop(key, None)
-
-    audit = {
+    return sanitized, {
         "status": WITNESSED_STATUS if ok else OPEN_STATUS,
         "verified": ok,
         "reason": reason,
@@ -321,13 +272,10 @@ def verify_trading_source_return(
         "caller_size_authors_action": False,
         "hair_is_not_source_witness_semantic_payload": True,
     }
-    return sanitized, audit
 
 
 def verify_trading_feedback(
-    *,
-    observer_id: str | None,
-    feedback: Sequence[Mapping[str, Any]],
+    *, observer_id: str | None, feedback: Sequence[Mapping[str, Any]],
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     audits: list[dict[str, Any]] = []
@@ -336,7 +284,7 @@ def verify_trading_feedback(
         rows.append(row)
         audits.append(audit)
     verified = sum(1 for audit in audits if audit["verified"])
-    body = {
+    return rows, {
         "protocol": PROTOCOL,
         "status": WITNESSED_STATUS if audits and verified == len(audits) else OPEN_STATUS,
         "input_count": len(audits),
@@ -348,65 +296,82 @@ def verify_trading_feedback(
         "source_witness_public_key_is_server_configuration": True,
         "private_key_required_by_closure_runtime": False,
     }
-    return rows, body
+
+
+def _verify_atlas_translation_row(
+    *, observer_id: str | None, row: Mapping[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    raw = dict(row)
+    witness, authority, source_event_id, source_stream = _witness_coordinates(raw.get("source_witness"))
+    expected = _atlas_body(
+        observer_id=observer_id, authority_id=authority,
+        source_event_id=source_event_id, source_stream=source_stream, row=raw,
+    )
+    ok, reason, verified_body = _verify_witness(witness=witness, expected_body=expected)
+    sanitized = dict(raw)
+    if ok and verified_body is not None:
+        sanitized.update({
+            "source_chart_id": verified_body["source_chart_id"],
+            "target_chart_id": verified_body["target_chart_id"],
+            "returned": True,
+            "source_preserved": True,
+            "closure_commutes": verified_body["closure_commutes"],
+            "return_preserved": verified_body["return_preserved"],
+            "source_return_ids": [verified_body["source_event_id"]],
+        })
+    else:
+        sanitized.update({
+            "returned": False,
+            "source_preserved": False,
+            "closure_commutes": False,
+            "return_preserved": False,
+            "source_return_ids": [],
+        })
+    sanitized["source_witness_verified"] = ok
+    sanitized["source_witness_reason"] = reason
+    return sanitized, {
+        "status": WITNESSED_STATUS if ok else OPEN_STATUS,
+        "verified": ok,
+        "reason": reason,
+        "authority_id": authority or None,
+        "source_event_id": source_event_id or None,
+    }
 
 
 def verify_atlas_translation_sources(
-    *,
-    observer_id: str | None,
-    sources: Sequence[Mapping[str, Any]],
+    *, observer_id: str | None, sources: Sequence[Mapping[str, Any]],
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    rows: list[dict[str, Any]] = []
+    """Verify every explicit atlas translation, including nested source containers.
+
+    ``natural_form_atlas`` reads explicit translations from each source's
+    ``atlas_translations`` list. Therefore verification is applied to each member
+    of that list, never merely to the outer container.
+    """
+    sanitized_sources: list[dict[str, Any]] = []
     audits: list[dict[str, Any]] = []
     for raw_source in sources:
-        raw = dict(raw_source)
-        witness = raw.get("source_witness")
-        body = witness.get("body") if isinstance(witness, Mapping) and isinstance(witness.get("body"), Mapping) else {}
-        authority = str(body.get("authority_id") or (witness.get("authority_id") if isinstance(witness, Mapping) else "") or "")
-        source_event_id = str(body.get("source_event_id") or "")
-        source_stream = str(body.get("source_stream") or "")
-        expected = _atlas_body(
-            observer_id=observer_id,
-            authority_id=authority,
-            source_event_id=source_event_id,
-            source_stream=source_stream,
-            row=raw,
-        )
-        ok, reason, verified_body = _verify_witness(
-            witness=witness if isinstance(witness, Mapping) else None,
-            expected_body=expected,
-        )
-        sanitized = dict(raw)
-        if ok and verified_body is not None:
-            sanitized.update({
-                "source_chart_id": verified_body["source_chart_id"],
-                "target_chart_id": verified_body["target_chart_id"],
-                "returned": True,
-                "source_preserved": True,
-                "closure_commutes": verified_body["closure_commutes"],
-                "return_preserved": verified_body["return_preserved"],
-                "source_return_ids": [verified_body["source_event_id"]],
-            })
+        source = dict(raw_source)
+        nested = source.get("atlas_translations")
+        if isinstance(nested, Sequence) and not isinstance(nested, (str, bytes)):
+            sanitized_nested: list[dict[str, Any]] = []
+            for raw_translation in nested:
+                if not isinstance(raw_translation, Mapping):
+                    continue
+                sanitized, audit = _verify_atlas_translation_row(
+                    observer_id=observer_id, row=raw_translation
+                )
+                sanitized_nested.append(sanitized)
+                audits.append(audit)
+            source["atlas_translations"] = sanitized_nested
+            # An outer caller claim cannot replace per-translation verification.
+            source.pop("source_witness", None)
+            sanitized_sources.append(source)
         else:
-            sanitized.update({
-                "returned": False,
-                "source_preserved": False,
-                "closure_commutes": False,
-                "return_preserved": False,
-                "source_return_ids": [],
-            })
-        sanitized["source_witness_verified"] = ok
-        sanitized["source_witness_reason"] = reason
-        rows.append(sanitized)
-        audits.append({
-            "status": WITNESSED_STATUS if ok else OPEN_STATUS,
-            "verified": ok,
-            "reason": reason,
-            "authority_id": authority or None,
-            "source_event_id": source_event_id or None,
-        })
+            sanitized, audit = _verify_atlas_translation_row(observer_id=observer_id, row=source)
+            sanitized_sources.append(sanitized)
+            audits.append(audit)
     verified = sum(1 for audit in audits if audit["verified"])
-    return rows, {
+    return sanitized_sources, {
         "protocol": PROTOCOL,
         "status": WITNESSED_STATUS if audits and verified == len(audits) else OPEN_STATUS,
         "input_count": len(audits),
@@ -414,6 +379,8 @@ def verify_atlas_translation_sources(
         "open_count": len(audits) - verified,
         "translations": audits,
         "atlas_admissibility_requires_verified_source_witness": True,
+        "nested_atlas_translations_verified_individually": True,
+        "outer_container_witness_cannot_author_nested_translation": True,
     }
 
 
