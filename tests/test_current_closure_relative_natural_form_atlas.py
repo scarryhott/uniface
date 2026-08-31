@@ -18,13 +18,17 @@ def frame() -> list[dict[str, object]]:
     return [returned("ab", "A", "B", "-3"), returned("ba", "B", "A", "2")]
 
 
+def formal_resolve(**kwargs: object) -> dict[str, object]:
+    return resolve_trading_equation(source_truth_mode="FORMAL_FIXTURE", **kwargs)
+
+
 def anchor_id(family: str) -> str:
     name = FAMILY_ANCHOR_NAMES[family]
     return next(str(c["id"]) for c in historical_charts() if c["family"] == family and c["name"] == name)
 
 
 def test_full_historical_family_atlas_is_carrier_not_trading() -> None:
-    receipt = resolve_trading_equation(observer_id="o", sensor_feedback=frame())
+    receipt = formal_resolve(observer_id="o", sensor_feedback=frame())
     atlas = receipt["current_closure_relative_atlas"]
     assert receipt["natural_form_field"] == atlas
     assert atlas["carrier_is_full_versioned_natural_form_atlas"] is True
@@ -34,7 +38,7 @@ def test_full_historical_family_atlas_is_carrier_not_trading() -> None:
 
 
 def test_returned_trading_closure_has_local_and_open_family_readings() -> None:
-    receipt = resolve_trading_equation(observer_id="o", sensor_feedback=frame())
+    receipt = formal_resolve(observer_id="o", sensor_feedback=frame())
     truth = receipt["current_closure_relative_atlas"]["truth_classes"][0]
     expected_local = {
         "REFINEMENT_PATH_HIDDEN_TRAJECTORY", "BALL_HAIR",
@@ -54,7 +58,7 @@ def test_returned_cross_family_translation_makes_family_global() -> None:
         "returned": True, "source_preserved": True, "closure_commutes": True,
         "return_preserved": True, "source_return_ids": ["return:curvature-dimensional"],
     }]}
-    receipt = resolve_trading_equation(observer_id="o", sensor_feedback=frame(), atlas_translation_sources=[extra])
+    receipt = formal_resolve(observer_id="o", sensor_feedback=frame(), atlas_translation_sources=[extra])
     truth = receipt["current_closure_relative_atlas"]["truth_classes"][0]
     row = next(r for r in truth["family_field"] if r["family_id"] == "DIMENSIONAL_POINT_LINE_TRIANGLE")
     assert row["relative_role"] == "GLOBAL"
@@ -63,7 +67,7 @@ def test_returned_cross_family_translation_makes_family_global() -> None:
 
 
 def test_direct_returned_family_translation_is_local() -> None:
-    base = resolve_trading_equation(observer_id="o", sensor_feedback=frame())
+    base = formal_resolve(observer_id="o", sensor_feedback=frame())
     tt = base["current_closure_relative_atlas"]["truth_classes"][0]["current_tt_id"]
     target = anchor_id("DIMENSIONAL_POINT_LINE_TRIANGLE")
     extra = {"atlas_translations": [{
@@ -71,7 +75,7 @@ def test_direct_returned_family_translation_is_local() -> None:
         "returned": True, "source_preserved": True, "closure_commutes": True,
         "return_preserved": True, "source_return_ids": ["return:direct-dimensional"],
     }]}
-    receipt = resolve_trading_equation(observer_id="o", sensor_feedback=frame(), atlas_translation_sources=[extra])
+    receipt = formal_resolve(observer_id="o", sensor_feedback=frame(), atlas_translation_sources=[extra])
     truth = receipt["current_closure_relative_atlas"]["truth_classes"][0]
     row = next(r for r in truth["family_field"] if r["family_id"] == "DIMENSIONAL_POINT_LINE_TRIANGLE")
     assert row["relative_role"] == "LOCAL"
@@ -79,7 +83,7 @@ def test_direct_returned_family_translation_is_local() -> None:
 
 
 def test_open_family_remains_in_carrier_and_enters_nrrf874_boundary() -> None:
-    receipt = resolve_trading_equation(observer_id="o", sensor_feedback=frame())
+    receipt = formal_resolve(observer_id="o", sensor_feedback=frame())
     truth = receipt["current_closure_relative_atlas"]["truth_classes"][0]
     physical = next(r for r in truth["family_field"] if r["family_id"] == "PHYSICAL_COSMOLOGICAL_COLOR")
     assert physical["status"] == "OPEN"
@@ -93,8 +97,8 @@ def test_open_family_remains_in_carrier_and_enters_nrrf874_boundary() -> None:
 def test_hair_equivalent_presentations_preserve_relative_roles() -> None:
     left = [returned("ab0", "A", "B", "-3"), returned("ba0", "B", "A", "2")]
     right = [returned("ab1", "A", "B", "2", hair_delta="5"), returned("ba1", "B", "A", "-3", hair_delta="-5")]
-    a = resolve_trading_equation(observer_id="o", sensor_feedback=left)["current_closure_relative_atlas"]["truth_classes"][0]
-    b = resolve_trading_equation(observer_id="o", sensor_feedback=right)["current_closure_relative_atlas"]["truth_classes"][0]
+    a = formal_resolve(observer_id="o", sensor_feedback=left)["current_closure_relative_atlas"]["truth_classes"][0]
+    b = formal_resolve(observer_id="o", sensor_feedback=right)["current_closure_relative_atlas"]["truth_classes"][0]
     assert a["current_tt_id"] == b["current_tt_id"]
     assert a["local_family_ids"] == b["local_family_ids"]
     assert a["global_family_ids"] == b["global_family_ids"]
