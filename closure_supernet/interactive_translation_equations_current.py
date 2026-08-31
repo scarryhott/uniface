@@ -2,17 +2,17 @@ from __future__ import annotations
 
 """Current closure runtime: full atlas relative to current translational truth.
 
-The existing versioned natural-form atlas is the semantic carrier. Trading is a
-projection of that carrier. NRRF874 natural selection is the set-valued OPEN
-boundary of the current-relative atlas plus the returned hair/ball freedom
-frontiers. Selection itself is support-inert; only returned truth recloses and
-can widen support.
+The versioned natural-form atlas is the semantic carrier; trading is a
+projection. NRRF874 natural selection is the set-valued OPEN boundary of the
+current-relative atlas plus returned hair/ball freedom frontiers. Selection is
+support-inert; only returned truth recloses and can widen support.
 
-Current external truth has one additional boundary: before any returned market
-relation or external atlas translation may enter closure, its exact semantic
-source payload must carry a verified Ed25519 source witness. Caller booleans,
-source-id strings, sizes, authentication flags, and cost-completeness claims do
-not by themselves author truth or actionability.
+External truth enters through one verified source-return boundary. Before any
+market relation or external atlas translation reaches closure, its exact
+semantic source payload must carry a trusted Ed25519 witness. Caller booleans,
+ids, hair, size, authentication, and cost-completeness claims have no semantic
+authority. Signed source events are consumed once across supplied history so
+replay cannot increase fidelity, horizon, discovery, or actionability.
 """
 
 import hashlib
@@ -35,11 +35,12 @@ from .trading_source_return_truth import (
     PROTOCOL as SOURCE_WITNESS_PROTOCOL,
     verify_atlas_translation_sources,
     verify_trading_feedback,
+    verify_trading_history,
 )
 from .trading_translational_truth_partition import derive_translational_truth_partition
 from .trading_unified_natural_form_field import derive_unified_natural_form_field
 
-PROTOCOL = "closure.supernet/interactive-translation-equations-current-relative-full-atlas-verified-source-nrrf874-v12"
+PROTOCOL = "closure.supernet/interactive-translation-equations-current-relative-full-atlas-verified-source-nrrf874-v13"
 
 
 def _stable(value: Any) -> str:
@@ -63,7 +64,6 @@ def _sensor_feedback(
 
 
 def _atlas_boundary_adapter(relative_atlas: Mapping[str, Any]) -> dict[str, Any]:
-    """Present every atlas OPEN projection as a distinct NRRF874 boundary form."""
     forms: list[dict[str, Any]] = []
     for index, raw in enumerate(relative_atlas.get("action_projections", [])):
         action = dict(raw)
@@ -89,7 +89,6 @@ def _atlas_boundary_adapter(relative_atlas: Mapping[str, Any]) -> dict[str, Any]
 
 
 def _formal_fixture_audit(count: int, *, kind: str) -> dict[str, Any]:
-    """Explicit non-external compatibility mode for theorem/synthetic fixtures."""
     return {
         "protocol": SOURCE_WITNESS_PROTOCOL,
         "status": WITNESSED_STATUS if count else OPEN_STATUS,
@@ -134,13 +133,10 @@ def _verify_current_inputs(
             "formal_fixture_mode_is_not_externally_admissible": True,
         }
 
-    verified_history: list[list[dict[str, Any]]] = []
-    history_audits: list[dict[str, Any]] = []
-    for frame in history:
-        verified_frame, audit = verify_trading_feedback(observer_id=observer_id, feedback=frame)
-        verified_history.append(verified_frame)
-        history_audits.append(audit)
-
+    verified_history, history_audits = verify_trading_history(
+        observer_id=observer_id,
+        history=history,
+    )
     if verified_history:
         verified_feedback = list(verified_history[-1])
         feedback_audit = history_audits[-1]
@@ -162,12 +158,15 @@ def _verify_current_inputs(
         "atlas_translations": atlas_audit,
         "truth_requires_verified_source_witness_for_external_inputs": True,
         "unsigned_or_untrusted_return_remains_open": True,
+        "duplicate_source_event_replay_remains_open": True,
         "caller_returned_flag_authors_truth": False,
         "caller_source_ids_author_truth": False,
+        "caller_return_id_authors_geometry": False,
         "caller_authenticated_flag_authors_execution": False,
         "caller_cost_complete_flag_authors_execution": False,
         "caller_size_authors_action": False,
-        "hair_remains_nonsemantic_presentation_coordinate": True,
+        "caller_hair_authors_truth": False,
+        "verified_external_return_uses_canonical_hair_presentation": True,
     }
 
 
@@ -186,7 +185,6 @@ def resolve_trading_equation(
     minimum_receipts: int = 1,
     max_forms: int | None = None,
 ) -> dict[str, Any]:
-    """Resolve one current TT closure and its full relative natural-form atlas."""
     feedback = _sensor_feedback(
         sensor_feedback=sensor_feedback,
         returned_equations=returned_equations,
@@ -224,7 +222,6 @@ def resolve_trading_equation(
         sensor_history=history,
         max_returns=max_returns,
     )
-
     trading_projection = derive_unified_natural_form_field(
         natural_closure=natural,
         preaction_coordinates=coordinates.get("by_closure_id", {}),
@@ -236,7 +233,6 @@ def resolve_trading_equation(
         trading_projection_field=trading_projection,
         additional_translation_sources=verified_atlas_sources,
     )
-
     open_boundary_selection = derive_open_boundary_natural_selection(
         natural_form_field=_atlas_boundary_adapter(relative_atlas),
         preaction_relative_coordinates=coordinates,
@@ -311,12 +307,17 @@ def resolve_trading_equation(
         "source_return_truth_condition_enforced": str(source_truth_mode).upper() == "VERIFIED",
         "truth_requires_verified_source_witness": True,
         "unsigned_or_untrusted_return_remains_open": True,
+        "duplicate_source_event_replay_remains_open": True,
         "caller_returned_flag_authors_truth": False,
         "caller_source_ids_author_truth": False,
+        "caller_return_id_authors_geometry": False,
+        "caller_hair_authors_truth": False,
         "caller_authenticated_flag_authors_execution": False,
         "caller_cost_complete_flag_authors_execution": False,
         "caller_size_authors_action": False,
+        "verified_external_return_uses_canonical_hair_presentation": True,
         "atlas_translation_source_requires_verified_witness": True,
+        "nested_atlas_translations_verified_individually": True,
         "formal_fixture_mode_is_not_external_truth": True,
         "carrier_is_full_versioned_natural_form_atlas": True,
         "trading_specific_carrier": False,
@@ -424,13 +425,16 @@ def resolve_closure_equations(payload: Mapping[str, Any]) -> dict[str, Any]:
             "VerifySource(return); NaturalForm(Q,o)=Rel_(Q,o)(VersionedNaturalFormAtlas); "
             "Recognize=Select; H=HairFidelity; Size=RelativeBall; "
             "NaturalSelect(S)=OpenBoundary(Rel_Q(N_all)); "
-            "S_(t+1)=Close(S_t + VerifiedReturnedTruth); "
-            "Q_(t+1)=Close(Q_t + Translate(observer, verified_returned_interaction))"
+            "S_(t+1)=Close(S_t+VerifiedReturnedTruth); "
+            "Q_(t+1)=Close(Q_t+Translate(observer,verified_returned_interaction))"
         ),
         "translational_truth_alone": True,
         "truth_requires_verified_source_witness": True,
+        "duplicate_source_event_replay_remains_open": True,
         "caller_returned_flag_authors_truth": False,
         "caller_source_ids_author_truth": False,
+        "caller_return_id_authors_geometry": False,
+        "caller_hair_authors_truth": False,
         "formal_fixture_mode_is_not_externally_admissible": True,
         "carrier_is_full_versioned_natural_form_atlas": True,
         "trading_specific_carrier": False,
