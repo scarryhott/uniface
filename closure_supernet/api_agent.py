@@ -1,9 +1,9 @@
 """Published Supernet entrypoint.
 
-The former entrypoint assembled every historical dashboard, manager, mutation
-API and MCP tool before hiding most routes.  Publication now imports only the
-minimal closure projection runtime, so there is no parallel application behind
-the translational visualization.
+The production app exposes only the minimal closure projection and its one
+source-preserving return relation. Interactive closure-equation evaluation is
+available as a pure opt-in adapter, never as a second production operation
+surface.
 """
 
 from .minimal_projection_runtime import app, create_app
