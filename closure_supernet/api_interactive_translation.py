@@ -7,11 +7,11 @@ adapter may be instantiated for research, tests or local inspection. Its extra
 routes are pure readings: they append no event, select no universal reopening
 mode and never alter the latent UI closure.
 
-The trading capability surface reports NRRF870 truth as one unified pre-action
-natural-form field. Recognition and selection are identical; returned and OPEN
-forms coexist; relative-hair fidelity derives horizon; the relative ball derives
-size; their joint returned region is selection freedom; and only a later
-returned interaction may expand, contract, transform, or reclose that freedom.
+The trading capability surface reports one unified pre-action natural-form
+field. Relative-hair fidelity derives horizon, the relative ball derives size,
+NRRF873 gives the joint selection-freedom frontier, and NRRF874 derives learning
+selection from that OPEN boundary plus unresolved relation-space forms. Only a
+returned interaction can change truth support.
 """
 
 from typing import Any
@@ -45,6 +45,8 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
                 "Recognize(Q_t)=Select(Q_t)=NaturalFormField(Q_t); "
                 "H=HairFidelity; Size=RelativeBall; "
                 "F_(t+1)=Close(F_t + ReturnedFidelity_t); "
+                "NaturalSelect(S_t)=OpenBoundary(S_t); "
+                "S_(t+1)=Close(S_t + ReturnedTruth_(t+1)); "
                 "Q_(t+1)=Close(Q_t + Translate(observer_t, returned_interaction_t))"
             ),
             "subsystems": [
@@ -54,6 +56,7 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
                 "unified_natural_form_field",
                 "relative_hair_horizon_ball_size",
                 "returned_fidelity_selection_freedom",
+                "open_boundary_natural_selection_nrrf874",
                 "resource_reintegration",
                 "legacy_compatibility",
             ],
@@ -76,6 +79,23 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
             "external_limit_authors_selection": False,
             "configured_threshold_authors_selection": False,
             "missing_evidence_widens_selection": False,
+            "open_boundary_drives_learning_selection": True,
+            "open_boundary_includes_hair_ball_freedom_frontiers": True,
+            "open_boundary_includes_relation_space_frontiers": True,
+            "selection_moves_support": False,
+            "only_return_can_change_support": True,
+            "return_state_eq_close": True,
+            "truth_derived_selector": True,
+            "selector_factors_through_translational_truth_classes": True,
+            "selector_is_hair_blind": True,
+            "runtime_smuggled_tie_breaker_present": False,
+            "absolute_quoted_number_used_by_selector": False,
+            "ball_selector_policy_present": False,
+            "hair_resampling_can_widen_support": False,
+            "new_truth_class_return_can_widen_support": True,
+            "eventual_learning_is_conditional": True,
+            "fairness_is_hypothesis_not_runtime_fact": True,
+            "reachability_is_hypothesis_not_runtime_fact": True,
             "raw_quote_size_is_not_silently_relative_ball_size": True,
             "successor_quote_loop_authors_truth": False,
             "route_receipt_authors_truth": False,
@@ -118,6 +138,9 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
             "automatic_order_submission": False,
             "queue_limit_authors_truth": False,
             "legacy_runtime_can_gate": False,
+            "formal_correspondence": (
+                "NRRF874OpenBoundaryNaturalSelectionSupportWideningDerivedFromTranslationalTruth"
+            ),
             "mutation": False,
             "truth_issued": False,
             "existence_closed": False,

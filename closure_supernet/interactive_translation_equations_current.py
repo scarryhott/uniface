@@ -11,6 +11,12 @@ Recognition and selection are one pre-action natural-form field. Returned forms
 and OPEN forms are assembled simultaneously. Each returned form derives its
 hold/action horizon from relative-hair fidelity and its action size from the
 relative ball before any action projection can become ready.
+
+NRRF874 closes the learning-selector side: every unresolved relation-space or
+NRRF873 hair/ball frontier is one OPEN boundary support. Natural selection is the
+set of those truth-derived boundary interactions. Naming a boundary changes no
+support; only an actually returned translational-truth class can leave support
+fixed through hair or strictly widen it.
 """
 
 import hashlib
@@ -33,6 +39,9 @@ from .trading_natural_form_closure import (
     PROTOCOL as TRADING_PROTOCOL,
     resolve_open_sensor_trading_closure,
 )
+from .trading_open_boundary_natural_selection import (
+    derive_open_boundary_natural_selection,
+)
 from .trading_relative_hair_horizon_ball_size import (
     derive_preaction_relative_coordinates,
 )
@@ -41,7 +50,7 @@ from .trading_translational_truth_partition import (
 )
 from .trading_unified_natural_form_field import derive_unified_natural_form_field
 
-PROTOCOL = "closure.supernet/interactive-translation-equations-relative-hair-horizon-ball-size-v9"
+PROTOCOL = "closure.supernet/interactive-translation-equations-open-boundary-natural-selection-v10"
 
 
 def _stable(value: Any) -> str:
@@ -126,10 +135,26 @@ def resolve_trading_equation(
         sensor_history=history,
         max_returns=max_returns,
     )
-    unified_field = derive_unified_natural_form_field(
+    base_unified_field = derive_unified_natural_form_field(
         natural_closure=natural,
         preaction_coordinates=preaction_coordinates.get("by_closure_id", {}),
     )
+    open_boundary_selection = derive_open_boundary_natural_selection(
+        natural_form_field=base_unified_field,
+        preaction_relative_coordinates=preaction_coordinates,
+        translational_truth_partition=truth_partition,
+    )
+    unified_field = {
+        **base_unified_field,
+        "open_boundary_natural_selection": open_boundary_selection,
+        "learning_interactions": list(
+            open_boundary_selection.get("boundary_interactions", [])
+        ),
+        "learning_interaction_count": open_boundary_selection.get(
+            "boundary_interaction_count", 0
+        ),
+        "boundary_driven_learning": open_boundary_selection.get("boundary_driven") is True,
+    }
 
     current_profit_truth_witnessed = any(
         form.get("orientation") == "PROFITABLE"
@@ -150,7 +175,13 @@ def resolve_trading_equation(
     body["preaction_relative_coordinates"] = preaction_coordinates
     body["natural_form_field"] = unified_field
     body["natural_form_selection"] = unified_field
+    body["open_boundary_natural_selection"] = open_boundary_selection
+    # Compatibility: this remains the complete field projection surface.
     body["selected_interactions"] = list(unified_field.get("action_projections", []))
+    # NRRF874 learning selection is specifically the OPEN boundary support.
+    body["learning_interactions"] = list(
+        open_boundary_selection.get("boundary_interactions", [])
+    )
     body["current_profit_truth_witnessed"] = current_profit_truth_witnessed
     body["learned_profit"] = learned_profit
 
@@ -214,6 +245,9 @@ def resolve_trading_equation(
             "external_position_size_present": False,
             "external_position_size_authors_action": False,
             "horizon_and_size_derived_before_action": True,
+            "selection_freedom_from_returned_fidelity": True,
+            "selection_freedom_evolves_over_time_and_fidelity": True,
+            "remaining_limits_are_open_selection_frontiers": True,
             "raw_quote_size_is_not_silently_relative_ball_size": True,
             "signal_trade_equal_relative_to_translation": True,
             "translational_truth_authors_relation_partition": True,
@@ -243,7 +277,24 @@ def resolve_trading_equation(
             "selection_is_set_valued": True,
             "selection_is_not_filtering": True,
             "selection_authors_truth": False,
+            "selection_moves_support": False,
+            "only_return_can_change_support": True,
+            "return_state_eq_close": True,
             "open_boundary_is_interaction_frontier": True,
+            "open_boundary_drives_learning_selection": True,
+            "open_boundary_includes_hair_ball_freedom_frontiers": True,
+            "open_boundary_includes_relation_space_frontiers": True,
+            "truth_derived_selector": True,
+            "selector_factors_through_translational_truth_classes": True,
+            "selector_is_hair_blind": True,
+            "absolute_quoted_number_used_by_selector": False,
+            "ball_selector_policy_present": False,
+            "runtime_smuggled_tie_breaker_present": False,
+            "hair_resampling_can_widen_support": False,
+            "new_truth_class_return_can_widen_support": True,
+            "fairness_is_hypothesis_not_runtime_fact": True,
+            "reachability_is_hypothesis_not_runtime_fact": True,
+            "eventual_learning_is_conditional": True,
             "all_open_forms_coexist": True,
             "local_open_cannot_block_relation_space_extension": True,
             "relation_space_extension_is_simultaneous_open_form": True,
@@ -257,9 +308,12 @@ def resolve_trading_equation(
             "computation_bounds_author_truth": False,
             "existence_closed": False,
             "dialectic_continuation_status": OPEN_STATUS,
+            "formal_correspondence": (
+                "NRRF874OpenBoundaryNaturalSelectionSupportWideningDerivedFromTranslationalTruth"
+            ),
         }
     )
-    body["id"] = _digest("natural-trading-equation-relative-horizon-size", body)
+    body["id"] = _digest("natural-trading-equation-open-boundary-selection", body)
     return body
 
 
@@ -271,6 +325,8 @@ def resolve_closure_equations(payload: Mapping[str, Any]) -> dict[str, Any]:
         "equation": (
             "Recognize(Q_t)=Select(Q_t)=NaturalFormField(Q_t); "
             "H=HairFidelity; Size=RelativeBall; "
+            "NaturalSelect(S_t)=OpenBoundary(S_t); "
+            "S_(t+1)=Close(S_t + ReturnedTruth_(t+1)); "
             "Q_(t+1)=Close(Q_t + Translate(observer_t, returned_interaction_t))"
         ),
         "translational_truth_alone": True,
@@ -278,9 +334,15 @@ def resolve_closure_equations(payload: Mapping[str, Any]) -> dict[str, Any]:
         "separate_selector_present": False,
         "natural_form_selects_interaction": True,
         "selection_authors_truth": False,
+        "selection_moves_support": False,
+        "only_return_can_change_support": True,
+        "open_boundary_drives_learning_selection": True,
+        "truth_derived_selector": True,
+        "selector_is_hair_blind": True,
         "horizon_from_relative_hair_fidelity": True,
         "relative_ball_is_size": True,
         "horizon_and_size_derived_before_action": True,
+        "selection_freedom_from_returned_fidelity": True,
         "fixed_horizon_present": False,
         "external_position_size_present": False,
         "action_occurs_after_unified_natural_form_field": True,
@@ -289,6 +351,8 @@ def resolve_closure_equations(payload: Mapping[str, Any]) -> dict[str, Any]:
         "separate_dynamics_law_present": False,
         "configuration_authors_truth": False,
         "computation_bounds_author_truth": False,
+        "fairness_is_hypothesis_not_runtime_fact": True,
+        "reachability_is_hypothesis_not_runtime_fact": True,
         "existence_closed": False,
         "dialectic_continuation_status": OPEN_STATUS,
     }
@@ -324,7 +388,7 @@ def resolve_closure_equations(payload: Mapping[str, Any]) -> dict[str, Any]:
     audit_target = dict(result)
     audit_target.pop("continuity_audit", None)
     result["continuity_audit"] = audit_translational_continuity(audit_target)
-    result["id"] = _digest("closure-equations-relative-horizon-size", result)
+    result["id"] = _digest("closure-equations-open-boundary-natural-selection", result)
     return result
 
 
