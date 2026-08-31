@@ -134,10 +134,23 @@ def test_return_refines_the_closure_and_resolves_a_new_natural_form_solution(
     assert opened_solver["equality_closure_signature"]["state_count"] == 0
     assert successor_solver["equality_closure_signature"]["state_count"] == 1
     assert successor_solver["equality_closure_signature"]["source_return_ids"]
-    assert successor_solver["solution_count"] == opened_solver["solution_count"]
-    assert successor_solver["solutions"][0]["coefficients"] != opened_solver[
-        "solutions"
-    ][0]["coefficients"]
+
+    opened_by_family = {
+        row["family_id"]: row for row in opened_solver["solutions"]
+    }
+    successor_by_family = {
+        row["family_id"]: row for row in successor_solver["solutions"]
+    }
+    # The first return may instantiate the runtime-relative family itself. That
+    # is a truthful expansion of the local atlas, not a loss of old families.
+    assert set(opened_by_family).issubset(successor_by_family)
+    assert successor_solver["solution_count"] >= opened_solver["solution_count"]
+    assert any(
+        successor_by_family[family]["coefficients"]
+        != opened_by_family[family]["coefficients"]
+        for family in opened_by_family
+    )
+
     assert successor["supernet_closure_certificate"][
         "interactive_natural_form_solver_id"
     ] == successor_solver["id"]
