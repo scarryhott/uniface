@@ -7,9 +7,11 @@ adapter may be instantiated for research, tests or local inspection. Its extra
 routes are pure readings: they append no event, execute no trade, select no
 universal reopening mode and never alter the latent UI closure.
 
-The module-level research app is a separately constructed projection runtime.
-Importing this module therefore cannot widen an already-imported production app
-object through FastAPI route aliasing.
+The trading capability surface reports the NRRF870 semantics: the open sensor
+reads all returned closed itineraries; directed closure fibres and their cycle
+geometry determine truth; normalized running-P&L timing equals the negative
+curvature amplitude. Clock duration and graph traversal order are provenance
+only.
 """
 
 from typing import Any
@@ -56,10 +58,21 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
             "fixed_horizon_authors_truth": False,
             "successor_quote_loop_authors_truth": False,
             "route_receipt_authors_truth": False,
+            "open_sensor_all_closed_itineraries": True,
+            "simple_cycles_determine_finite_geometry": True,
+            "bfs_route_authors_truth": False,
+            "undirected_connectivity_authors_ball": False,
+            "directed_translation_fibres": True,
+            "feedback_hair_equation_unique_normalized_closure": True,
             "unitary_curvature_gives_amplitude": True,
+            "amplitude_is_negative_curvature_part": True,
             "ball_partition_maze_gives_timing": True,
+            "ball_partition_max_gives_timing": True,
+            "clock_duration_authors_timing": False,
+            "normalized_closure_timing_equals_amplitude": True,
             "amplitude_timing_one_translation": True,
             "signal_trade_one_translation": True,
+            "signal_trade_same_round_trip_value": True,
             "queue_limit_authors_truth": False,
             "legacy_runtime_can_gate": False,
             "mutation": False,
@@ -80,8 +93,6 @@ def create_app(config: Any | None = None) -> FastAPI:
     return attach_closure_equations(create_projection_app(config))
 
 
-# This is intentionally not minimal_projection_runtime.app. It is an isolated
-# opt-in application object with its own projection runtime and route table.
 app = create_app()
 
 
