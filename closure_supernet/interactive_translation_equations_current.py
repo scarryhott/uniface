@@ -7,6 +7,11 @@ This module is the current runtime surface. Trading is authoritative only when
 an open sensor-feedback hair continuum itself derives a returned ball closure.
 Route proposals and post-hoc profit receipts are retained as non-authoritative
 compatibility material and cannot close the current trading state.
+
+Successive returned sensor states may additionally be read as continuation of
+the same directed relational continuum. Curvature motion is a relative reading
+of that continuum, never a trend selector, forecast, holding period, or trade
+gate.
 """
 
 import hashlib
@@ -25,12 +30,13 @@ from .interactive_translation_equations import (
     resolve_rule_chart_equation,
     resolve_trading_equation as resolve_legacy_trading_equation,
 )
+from .trading_closure_continuation import resolve_trading_closure_continuation
 from .trading_natural_form_closure import (
     PROTOCOL as TRADING_PROTOCOL,
     resolve_open_sensor_trading_closure,
 )
 
-PROTOCOL = "closure.supernet/interactive-translation-equations-natural-trading-v2"
+PROTOCOL = "closure.supernet/interactive-translation-equations-natural-trading-v3"
 
 
 def _stable(value: Any) -> str:
@@ -71,6 +77,7 @@ def resolve_trading_equation(
     sensor_feedback: Sequence[Mapping[str, Any]] = (),
     returned_equations: Sequence[Mapping[str, Any]] = (),
     hair_equations: Sequence[Mapping[str, Any]] = (),
+    sensor_history: Sequence[Sequence[Mapping[str, Any]]] = (),
     max_returns: int | None = None,
     proposals: Sequence[Mapping[str, Any]] = (),
     receipts: Sequence[Mapping[str, Any]] = (),
@@ -78,6 +85,11 @@ def resolve_trading_equation(
     max_forms: int | None = None,
 ) -> dict[str, Any]:
     """Resolve trading from one open sensor closure, never from a fixed route.
+
+    ``sensor_history`` is optional returned evidence for reading continuation of
+    a relation continuum. It cannot select a horizon or create a form. When
+    supplied, its latest frame is the current sensor state and all frames are
+    closed independently before any curvature motion is read.
 
     ``proposals`` and ``receipts`` are accepted only so older callers can be
     inspected without becoming a second truth runtime. They are evaluated by
@@ -91,14 +103,34 @@ def resolve_trading_equation(
         returned_equations=returned_equations,
         hair_equations=hair_equations,
     )
+    if sensor_history and feedback:
+        raise ValueError(
+            "Supply sensor_history or one current sensor feedback surface, not both"
+        )
+
+    history = [[dict(row) for row in frame] for frame in sensor_history]
+    current_feedback: list[Mapping[str, Any]] = (
+        list(history[-1]) if history else list(feedback)
+    )
     natural = resolve_open_sensor_trading_closure(
         observer_id=observer_id,
-        sensor_feedback=feedback,
+        sensor_feedback=current_feedback,
         max_returns=max_returns,
     )
+    continuation = (
+        resolve_trading_closure_continuation(
+            observer_id=observer_id,
+            sensor_history=history,
+            max_returns_per_frame=max_returns,
+        )
+        if history
+        else None
+    )
+
     body = dict(natural)
     body["protocol"] = PROTOCOL
     body["natural_trading_protocol"] = TRADING_PROTOCOL
+    body["closure_continuation"] = continuation
 
     if proposals or receipts:
         legacy = resolve_legacy_trading_equation(
@@ -116,8 +148,6 @@ def resolve_trading_equation(
             "compatibility_status": legacy.get("status"),
         }
         body["legacy_route_receipt_projection"] = compatibility
-        # Preserve the historical response shape for non-authoritative readers.
-        # These aliases never affect the current subsystem status.
         body["forms"] = [
             {
                 **dict(row),
@@ -143,6 +173,10 @@ def resolve_trading_equation(
             "completed_route_is_not_natural_form_primitive": True,
             "ask_to_immediately_succeeding_bid_is_definition": False,
             "only_open_sensor_return_recloses_trading": True,
+            "curvature_continuation_is_relative_projection": True,
+            "history_length_authors_truth": False,
+            "profit_trajectory_authors_trade": False,
+            "positive_crossing_requires_current_execution_return": True,
             "configuration_authors_truth": False,
             "computation_bounds_author_truth": False,
             "existence_closed": False,
