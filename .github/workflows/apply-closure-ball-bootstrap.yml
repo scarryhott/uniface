@@ -1,0 +1,60 @@
+name: Apply closure ball translational integration
+
+on:
+  push:
+    branches:
+      - codex/closure-ball-translational-ui
+    paths:
+      - '.closure-ball-payload/**'
+      - '.github/workflows/apply-closure-ball-bootstrap.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/closure-ball-translational-ui
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Materialize exact closure-ball source
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .closure-ball-payload/part-* > /tmp/closure-ball-payload.b64
+          echo '087fe6daed9cb3929b25afd2ff61c2907dc14c19b0f3029dddd9fabd5b72bc09  /tmp/closure-ball-payload.b64' | sha256sum -c -
+          base64 -d /tmp/closure-ball-payload.b64 > /tmp/closure-ball-payload.tar.gz
+          echo '84abbaa1e5146d9dcf5b4b1984d3789fe9a42a88b7c7d067e28d2f8050b74868  /tmp/closure-ball-payload.tar.gz' | sha256sum -c -
+          tar -xzf /tmp/closure-ball-payload.tar.gz
+
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e '.[dev]'
+
+      - name: Verify one-ball equality closure
+        run: |
+          pytest -q \
+            tests/test_closure_ball_projection.py \
+            tests/test_closure_ball_runtime.py
+
+      - name: Commit materialized integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .closure-ball-payload
+          rm -f .github/workflows/apply-closure-ball-bootstrap.yml
+          find . -type d -name __pycache__ -prune -exec rm -rf {} +
+          find . -type d -name .pytest_cache -prune -exec rm -rf {} +
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'Derive Supernet UI and interaction from one closure ball'
+          git push origin HEAD:codex/closure-ball-translational-ui
