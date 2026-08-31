@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-"""Published projection with one closure-equation translation endpoint.
+"""Opt-in projection adapter for pure closure-equation translation.
 
-The endpoint is a pure relative reading. It does not append events, execute a
-trade, select a universal reopening mode, or alter the latent UI closure.
+Production continues to expose only the one projection/return relation. This
+adapter may be instantiated for research, tests or local inspection. Its extra
+routes are pure readings: they append no event, execute no trade, select no
+universal reopening mode and never alter the latent UI closure.
 """
 
 from typing import Any
@@ -15,7 +17,10 @@ from .interactive_translation_equations import (
     PROTOCOL,
     resolve_closure_equations,
 )
-from .minimal_projection_runtime import create_app as create_projection_app
+from .minimal_projection_runtime import (
+    app as projection_app,
+    create_app as create_projection_app,
+)
 
 
 class ClosureEquationRequest(BaseModel):
@@ -28,9 +33,7 @@ class ClosureEquationRequest(BaseModel):
     legacy: dict[str, Any] | None = None
 
 
-def create_app(config: Any | None = None) -> FastAPI:
-    app = create_projection_app(config)
-
+def attach_closure_equations(app: FastAPI) -> FastAPI:
     @app.get("/supernet/closure-equations/capabilities")
     async def closure_equation_capabilities() -> dict[str, Any]:
         return {
@@ -53,6 +56,7 @@ def create_app(config: Any | None = None) -> FastAPI:
             "truth_issued": False,
             "existence_closed": False,
             "dialectic_continuation": "OPEN",
+            "published_production_surface": False,
         }
 
     @app.post("/supernet/closure-equations/resolve")
@@ -62,7 +66,16 @@ def create_app(config: Any | None = None) -> FastAPI:
     return app
 
 
-app = create_app()
+def create_app(config: Any | None = None) -> FastAPI:
+    return attach_closure_equations(create_projection_app(config))
 
 
-__all__ = ["ClosureEquationRequest", "app", "create_app"]
+app = attach_closure_equations(projection_app)
+
+
+__all__ = [
+    "ClosureEquationRequest",
+    "app",
+    "attach_closure_equations",
+    "create_app",
+]
