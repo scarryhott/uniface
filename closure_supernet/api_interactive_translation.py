@@ -4,9 +4,8 @@ from __future__ import annotations
 
 The full versioned natural-form atlas is the carrier relative to current TT.
 Trading and NRRF873 coordinates are projections; NRRF874 learning selection is
-the set-valued OPEN boundary of that relative atlas. External trading and atlas
-returns must first satisfy the verified source-return truth condition. No route
-mutates truth and no automatic order submission is exposed.
+the set-valued OPEN boundary. External trading and atlas returns must satisfy
+the verified, canonical, replay-safe source-return truth condition.
 """
 
 from typing import Any
@@ -31,7 +30,8 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
         return {
             "protocol": PROTOCOL,
             "equation": (
-                "VerifySource(return); NaturalForm(Q,o)=Rel_(Q,o)(VersionedNaturalFormAtlas); "
+                "VerifySource(return); CanonicalizeVerifiedReturn; RejectReplay; "
+                "NaturalForm(Q,o)=Rel_(Q,o)(VersionedNaturalFormAtlas); "
                 "Recognize=Select; H=HairFidelity; Size=RelativeBall; "
                 "NaturalSelect(S)=OpenBoundary(Rel_Q(N_all)); "
                 "S_(t+1)=Close(S_t+VerifiedReturnedTruth); "
@@ -48,12 +48,19 @@ def attach_closure_equations(app: FastAPI) -> FastAPI:
             "truth_requires_verified_source_witness": True,
             "source_witness_signature": "ED25519",
             "unsigned_or_untrusted_return_remains_open": True,
+            "duplicate_source_event_replay_remains_open": True,
+            "verified_return_id_is_signed_source_event_id": True,
+            "verified_external_return_uses_canonical_hair_presentation": True,
             "caller_returned_flag_authors_truth": False,
             "caller_source_ids_author_truth": False,
+            "caller_return_id_authors_geometry": False,
+            "caller_hair_authors_truth": False,
             "caller_authenticated_flag_authors_execution": False,
             "caller_cost_complete_flag_authors_execution": False,
             "caller_size_authors_action": False,
             "atlas_translation_source_requires_verified_witness": True,
+            "nested_atlas_translations_verified_individually": True,
+            "outer_atlas_container_witness_authors_nested_translation": False,
             "hair_is_source_witness_semantic_payload": False,
             "formal_fixture_mode_is_not_externally_admissible": True,
             "only_returned_interaction_recloses": True,
