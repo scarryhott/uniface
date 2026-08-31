@@ -154,7 +154,11 @@ def test_missing_fidelity_never_gets_replaced_by_configured_limit() -> None:
 
 def test_runtime_preaction_bundle_carries_closed_selection_freedom() -> None:
     history = hair_equivalent_frames()
-    receipt = resolve_trading_equation(observer_id="o", sensor_history=history)
+    receipt = resolve_trading_equation(
+        observer_id="o",
+        source_truth_mode="FORMAL_FIXTURE",
+        sensor_history=history,
+    )
     profitable = next(
         row
         for row in receipt["natural_form_field"]["returned_natural_forms"]
