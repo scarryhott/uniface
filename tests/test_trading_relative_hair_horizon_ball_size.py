@@ -66,6 +66,10 @@ def current_profitable_form(history: list[list[dict[str, object]]]) -> dict[str,
     )
 
 
+def formal_runtime(**kwargs: object) -> dict[str, object]:
+    return resolve_trading_equation(source_truth_mode="FORMAL_FIXTURE", **kwargs)
+
+
 def test_exact_hair_fidelity_derives_return_step_horizon() -> None:
     history = hair_equivalent_frames()
     form = current_profitable_form(history)
@@ -90,8 +94,6 @@ def test_hair_break_collapses_derived_horizon_without_tolerance() -> None:
         returned("ab2", "A", "B", "-1", relative_size="5", relative_size_unit="risk-unit"),
         returned("ba2", "B", "A", "2", relative_size="3", relative_size_unit="risk-unit"),
     ]
-    # Use the truth class from the first two frames: its one-step persistence is
-    # broken by the third frame, so its exact-fidelity horizon is zero.
     prior_closure = resolve_open_sensor_trading_closure(
         observer_id="o",
         sensor_feedback=history[1],
@@ -128,14 +130,8 @@ def test_relative_ball_size_is_bottleneck_translated_capacity() -> None:
 
 def test_raw_quote_sizes_are_not_silently_position_size() -> None:
     frame = [
-        {
-            **returned("ab", "A", "B", "-3"),
-            "bid_size": "5",
-        },
-        {
-            **returned("ba", "B", "A", "2"),
-            "ask_size": "3",
-        },
+        {**returned("ab", "A", "B", "-3"), "bid_size": "5"},
+        {**returned("ba", "B", "A", "2"), "ask_size": "3"},
     ]
     closure = resolve_open_sensor_trading_closure(observer_id="o", sensor_feedback=frame)
     form = next(item for item in closure["natural_forms"] if item["orientation"] == "PROFITABLE")
@@ -148,7 +144,7 @@ def test_raw_quote_sizes_are_not_silently_position_size() -> None:
 
 def test_full_runtime_derives_horizon_and_size_before_profit_action() -> None:
     history = hair_equivalent_frames()
-    receipt = resolve_trading_equation(observer_id="o", sensor_history=history)
+    receipt = formal_runtime(observer_id="o", sensor_history=history)
 
     assert receipt["fixed_horizon_present"] is False
     assert receipt["horizon_from_relative_hair_fidelity"] is True
@@ -168,7 +164,7 @@ def test_full_runtime_derives_horizon_and_size_before_profit_action() -> None:
 
 def test_profit_truth_with_size_but_no_fidelity_history_stays_open_before_action() -> None:
     frame = hair_equivalent_frames()[0]
-    receipt = resolve_trading_equation(observer_id="o", sensor_feedback=frame)
+    receipt = formal_runtime(observer_id="o", sensor_feedback=frame)
     profitable = next(
         row
         for row in receipt["natural_form_field"]["returned_natural_forms"]
@@ -183,7 +179,7 @@ def test_profit_truth_with_size_but_no_fidelity_history_stays_open_before_action
 
 def test_profit_truth_with_fidelity_but_missing_ball_size_stays_open_before_action() -> None:
     history = hair_equivalent_frames(include_size=False)
-    receipt = resolve_trading_equation(observer_id="o", sensor_history=history)
+    receipt = formal_runtime(observer_id="o", sensor_history=history)
     profitable = next(
         row
         for row in receipt["natural_form_field"]["returned_natural_forms"]
