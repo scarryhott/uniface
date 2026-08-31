@@ -2,12 +2,13 @@ from __future__ import annotations
 
 """Proof-indexed atlas-aware closure UI contract.
 
-The finite renderer remains the existing closure/naturality evaluator.  This
+The finite renderer remains the existing closure/naturality evaluator. This
 wrapper changes the semantic carrier to the complete versioned natural-form
 atlas and seals every projection with the formal Lean proof index, the local
-natural-form freedom field, plus the final Supernet closure certificate.  OPEN
-remains a valid unresolved relation inside closure; it is not a missing
-subsystem or a reason to invent a final form.
+natural-form freedom field, the canonical interactive equality-closure
+natural-form solver, and the final Supernet closure certificate. OPEN remains a
+valid unresolved relation inside closure; it is not a missing subsystem or a
+reason to invent a final form.
 """
 
 from typing import Any, Mapping
@@ -16,6 +17,10 @@ from . import closure_ui_contract_legacy as _legacy
 from .formal_proof_index import (
     derive_formal_proof_index,
     validate_formal_proof_index,
+)
+from .interactive_natural_form_solver import (
+    derive_interactive_natural_form_solver,
+    validate_interactive_natural_form_solver,
 )
 from .local_natural_form_freedom import (
     derive_local_natural_form_freedom,
@@ -61,6 +66,7 @@ def _seal_with_atlas(
         "id",
         "formal_proof_index",
         "local_natural_form_freedom",
+        "interactive_natural_form_solver",
         "supernet_closure_certificate",
     ):
         body.pop(key, None)
@@ -70,6 +76,12 @@ def _seal_with_atlas(
     local_field = derive_local_natural_form_freedom(atlas)
     body["formal_proof_index"] = proof_index
     body["local_natural_form_freedom"] = local_field
+    solver = derive_interactive_natural_form_solver(
+        body,
+        atlas=atlas,
+        local_field=local_field,
+    )
+    body["interactive_natural_form_solver"] = solver
     body["atlas_semantics"] = {
         "ui_is_locally_glued_atlas": True,
         "edge_is_ongoing_view_transport": True,
@@ -81,6 +93,12 @@ def _seal_with_atlas(
         "open_cross_form_relations_remain_navigable": True,
         "formal_proof_index_required": True,
         "local_natural_form_freedom_required": True,
+        "interactive_natural_form_solver_required": True,
+        "natural_forms_derived_from_interactive_equality_closure": True,
+        "natural_form_is_posthoc_visual_template": False,
+        "named_geometry_templates_present": False,
+        "family_name_authors_geometry": False,
+        "rendering_can_witness_equality": False,
         "all_retained_families_are_local_interaction_proposals": True,
         "selection_authors_truth": False,
         "fidelity_is_exact_return_partition_profile": True,
@@ -169,6 +187,39 @@ def attach_perspective_closure(
 
 def validate_ui_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
     legacy = dict(_legacy.validate_ui_contract(contract))
+    # The legacy verifier is the shape/type boundary. Malformed continuation
+    # metadata must be rejected before solver interpretation. A merely stale
+    # content hash, however, still proceeds through derived validators so the
+    # exact tampered natural-form relation remains diagnosable.
+    legacy_errors = set(legacy.get("errors", []))
+    malformed_carrier = bool(
+        {"continuation:index", "continuation:lineage-shape"} & legacy_errors
+    )
+    if malformed_carrier:
+        legacy.update(
+            {
+                "natural_form_atlas_valid": False,
+                "glued_ui_subatlas_matches_atlas": False,
+                "formal_proof_index_valid": False,
+                "local_natural_form_freedom_valid": False,
+                "interactive_natural_form_solver_valid": False,
+                "natural_form_is_interactive_interface_equality_closure": False,
+                "rendering_can_witness_equality": False,
+                "all_retained_families_locally_admissible_as_proposals": False,
+                "future_resolution_guaranteed": False,
+                "supernet_closure_certificate_valid": False,
+                "supernet_closed": False,
+                "interface_is_glued_versioned_subatlas": False,
+                "closure_ball_is_master_container": False,
+                "cross_form_equality_requires_source_preserving_return": True,
+                "archive_audit_gates_supernet_closure": False,
+                "open_relations_are_part_of_closure": True,
+                "atlas_errors": [],
+                "valid": False,
+            }
+        )
+        return legacy
+
     atlas = contract.get("natural_form_atlas")
     atlas_validation = (
         validate_versioned_natural_form_atlas(atlas)
@@ -196,6 +247,13 @@ def validate_ui_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
         and semantics.get("open_cross_form_relations_remain_navigable") is True
         and semantics.get("formal_proof_index_required") is True
         and semantics.get("local_natural_form_freedom_required") is True
+        and semantics.get("interactive_natural_form_solver_required") is True
+        and semantics.get("natural_forms_derived_from_interactive_equality_closure")
+        is True
+        and semantics.get("natural_form_is_posthoc_visual_template") is False
+        and semantics.get("named_geometry_templates_present") is False
+        and semantics.get("family_name_authors_geometry") is False
+        and semantics.get("rendering_can_witness_equality") is False
         and semantics.get("all_retained_families_are_local_interaction_proposals")
         is True
         and semantics.get("selection_authors_truth") is False
@@ -218,6 +276,19 @@ def validate_ui_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
         if isinstance(local_field, Mapping) and isinstance(atlas, Mapping)
         else {"valid": False, "errors": ["local-natural-form-freedom:missing"]}
     )
+    solver = contract.get("interactive_natural_form_solver")
+    solver_validation = (
+        validate_interactive_natural_form_solver(
+            solver,
+            contract=contract,
+            atlas=atlas,
+            local_field=local_field,
+        )
+        if isinstance(solver, Mapping)
+        and isinstance(atlas, Mapping)
+        and isinstance(local_field, Mapping)
+        else {"valid": False, "errors": ["interactive-natural-form-solver:missing"]}
+    )
     certificate = contract.get("supernet_closure_certificate")
     certificate_validation = (
         validate_supernet_closure_certificate(
@@ -230,6 +301,7 @@ def validate_ui_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
         and isinstance(atlas, Mapping)
         and isinstance(proof_index, Mapping)
         and isinstance(local_field, Mapping)
+        and isinstance(solver, Mapping)
         else {"valid": False, "errors": ["supernet-closure:missing"]}
     )
 
@@ -240,6 +312,7 @@ def validate_ui_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
         atlas_errors.append("atlas-ui:semantics")
     atlas_errors.extend(proof_validation.get("errors", []))
     atlas_errors.extend(local_field_validation.get("errors", []))
+    atlas_errors.extend(solver_validation.get("errors", []))
     atlas_errors.extend(certificate_validation.get("errors", []))
 
     legacy["natural_form_atlas_valid"] = bool(atlas_validation.get("valid"))
@@ -248,6 +321,15 @@ def validate_ui_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
     legacy["local_natural_form_freedom_valid"] = bool(
         local_field_validation.get("valid")
     )
+    legacy["interactive_natural_form_solver_valid"] = bool(
+        solver_validation.get("valid")
+    )
+    legacy["natural_form_is_interactive_interface_equality_closure"] = bool(
+        solver_validation.get(
+            "natural_form_is_interactive_interface_equality_closure"
+        )
+    )
+    legacy["rendering_can_witness_equality"] = False
     legacy["all_retained_families_locally_admissible_as_proposals"] = bool(
         local_field_validation.get(
             "all_retained_families_locally_admissible_as_proposals"
@@ -266,6 +348,7 @@ def validate_ui_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
         and semantics_valid
         and proof_validation.get("valid")
         and local_field_validation.get("valid")
+        and solver_validation.get("valid")
         and certificate_validation.get("valid")
     )
     legacy["closure_ball_is_master_container"] = False
@@ -280,6 +363,7 @@ def validate_ui_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
         and semantics_valid
         and proof_validation.get("valid")
         and local_field_validation.get("valid")
+        and solver_validation.get("valid")
         and certificate_validation.get("valid")
     )
     return legacy
