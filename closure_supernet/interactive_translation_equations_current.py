@@ -3,14 +3,10 @@ from __future__ import annotations
 """Current closure-equation runtime with NRRF870 natural trading closure.
 
 Trading truth is the open-sensor feedback hair equation: returned interaction is
-read through the complete finite closed-itinerary geometry, normalized to its
-unique closure, then read as unitary curvature. Available amplitude is the
-negative curvature part; semantic timing is the normalized ball-partition max
-and therefore equals amplitude. Signal and trade are equal relative readings of
-the same completed-route translation.
-
-Historical route proposals, successor-quote rules, graph traversal order, clock
-duration, and continuation trends remain non-authoritative projections.
+read through complete closed-itinerary geometry, normalized to its unique
+closure, then read as unitary curvature. The relation space itself is refined
+from accumulated returned interaction by translational truth: equal normalized
+natural forms are one ball; differing presentations inside that ball are hair.
 """
 
 import hashlib
@@ -34,8 +30,11 @@ from .trading_natural_form_closure import (
     PROTOCOL as TRADING_PROTOCOL,
     resolve_open_sensor_trading_closure,
 )
+from .trading_translational_truth_partition import (
+    derive_translational_truth_partition,
+)
 
-PROTOCOL = "closure.supernet/interactive-translation-equations-natural-trading-v4-nrrf870"
+PROTOCOL = "closure.supernet/interactive-translation-equations-natural-trading-v5-translational-truth"
 
 
 def _stable(value: Any) -> str:
@@ -83,7 +82,7 @@ def resolve_trading_equation(
     minimum_receipts: int = 1,
     max_forms: int | None = None,
 ) -> dict[str, Any]:
-    """Resolve trading only from returned open-sensor translation closure."""
+    """Resolve trading from returned translation, with truth-derived partition."""
 
     feedback = _sensor_feedback(
         sensor_feedback=sensor_feedback,
@@ -113,11 +112,21 @@ def resolve_trading_equation(
         if history
         else None
     )
+    truth_partition = (
+        derive_translational_truth_partition(
+            observer_id=observer_id,
+            sensor_history=history,
+            max_returns_per_frame=max_returns,
+        )
+        if history
+        else None
+    )
 
     body = dict(natural)
     body["protocol"] = PROTOCOL
     body["natural_trading_protocol"] = TRADING_PROTOCOL
     body["closure_continuation"] = continuation
+    body["translational_truth_partition"] = truth_partition
 
     if proposals or receipts:
         legacy = resolve_legacy_trading_equation(
@@ -169,6 +178,11 @@ def resolve_trading_equation(
             "clock_duration_authors_timing": False,
             "normalized_closure_timing_equals_amplitude": True,
             "signal_trade_equal_relative_to_translation": True,
+            "translational_truth_authors_relation_partition": True,
+            "ball_equals_natural_form_truth_class": True,
+            "hair_is_intra_truth_class_presentation": True,
+            "predeclared_market_graph_authors_truth_partition": False,
+            "relation_space_refines_from_returned_interaction": True,
             "curvature_continuation_is_relative_projection": True,
             "history_length_authors_truth": False,
             "profit_trajectory_authors_trade": False,
@@ -179,7 +193,7 @@ def resolve_trading_equation(
             "dialectic_continuation_status": OPEN_STATUS,
         }
     )
-    body["id"] = _digest("natural-trading-equation-nrrf870", body)
+    body["id"] = _digest("natural-trading-equation-translational-truth", body)
     return body
 
 
@@ -230,7 +244,7 @@ def resolve_closure_equations(payload: Mapping[str, Any]) -> dict[str, Any]:
     audit_target = dict(result)
     audit_target.pop("continuity_audit", None)
     result["continuity_audit"] = audit_translational_continuity(audit_target)
-    result["id"] = _digest("closure-equations-natural-trading-nrrf870", result)
+    result["id"] = _digest("closure-equations-translational-truth", result)
     return result
 
 
