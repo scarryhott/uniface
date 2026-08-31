@@ -49,6 +49,7 @@ class SupernetIntegrationStore:
             id TEXT NOT NULL UNIQUE,
             external_key TEXT UNIQUE,
             exact_source_ids TEXT NOT NULL,
+            source_stream TEXT NOT NULL DEFAULT 'legacy',
             authored_by TEXT NOT NULL,
             perspective_id TEXT,
             problem_id TEXT,
@@ -224,6 +225,17 @@ class SupernetIntegrationStore:
             for column, statement in proposal_migrations.items():
                 if column not in proposal_columns:
                     self._conn.execute(statement)
+            event_columns = {
+                str(row["name"])
+                for row in self._conn.execute(
+                    "PRAGMA table_info(supernet_integration_events)"
+                ).fetchall()
+            }
+            if "source_stream" not in event_columns:
+                self._conn.execute(
+                    "ALTER TABLE supernet_integration_events ADD COLUMN "
+                    "source_stream TEXT NOT NULL DEFAULT 'legacy'"
+                )
             tables = {
                 str(row["name"])
                 for row in self._conn.execute(
@@ -305,58 +317,135 @@ class SupernetIntegrationStore:
             self._conn.commit()
 
     def create_event(self, data: dict[str, Any]) -> tuple[dict[str, Any], bool]:
-        external_key = data.get("external_key")
-        if external_key:
-            existing = self.get_by_external_key(str(external_key))
-            if existing is not None:
-                return existing, False
+        external_key_value = data.get("external_key")
+        external_key = (
+            None if not external_key_value else str(external_key_value)
+        )
         event_id = str(uuid.uuid4())
         created_at = utcnow()
-        with self._lock:
-            cursor = self._conn.execute(
-                """INSERT INTO supernet_integration_events(
-                    id,external_key,exact_source_ids,authored_by,perspective_id,
-                    problem_id,action_id,form_label,language_label,visibility,
-                    capabilities,constraints,relation_hints,causal_predecessor_ids,
-                    parent_event_ids,affected_perspectives,evidence_status,
-                    adapter_label,metadata,created_at
-                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                (
-                    event_id,
-                    external_key,
-                    _json(data.get("exact_source_ids", [])),
-                    data.get("authored_by", "participant"),
-                    data.get("perspective_id"),
-                    data.get("problem_id"),
-                    data.get("action_id"),
-                    data.get("form_label", "resource"),
-                    data.get("language_label"),
-                    data.get("visibility", "PUBLIC"),
-                    _json(data.get("capabilities", [])),
-                    _json(data.get("constraints", [])),
-                    _json(data.get("relation_hints", [])),
-                    _json(data.get("causal_predecessor_ids", [])),
-                    _json(data.get("parent_event_ids", [])),
-                    _json(data.get("affected_perspectives", [])),
-                    data.get("evidence_status", "ORIGINAL_NOTE"),
-                    data.get("adapter_label"),
-                    _json(data.get("metadata", {})),
-                    created_at,
-                ),
-            )
-            self._conn.commit()
-            seq = int(cursor.lastrowid)
-        self.append_state(
-            event_id,
-            IntegrationStateCreate(
-                stage=IntegrationStage.SOURCE_PRESERVED,
-                verdict=Verdict.OPEN,
-                reason="Exact source entered the one continuous Supernet field",
-                actor_id=str(data.get("authored_by", "participant")),
-                metadata={"initial": True, "event_seq": seq},
+        created = False
+        try:
+            with self._lock, self._conn:
+                # Acquire the database write reservation before the
+                # external-key lookup so separate store connections cannot
+                # both observe an absent key and strand a losing write.
+                self._conn.execute("BEGIN IMMEDIATE")
+                existing_row = None
+                if external_key is not None:
+                    existing_row = self._conn.execute(
+                        """SELECT * FROM supernet_integration_events
+                        WHERE external_key=?""",
+                        (external_key,),
+                    ).fetchone()
+                if existing_row is not None:
+                    event_id = str(existing_row["id"])
+                    self._ensure_initial_source_state(existing_row)
+                else:
+                    cursor = self._conn.execute(
+                        """INSERT INTO supernet_integration_events(
+                            id,external_key,exact_source_ids,source_stream,authored_by,
+                            perspective_id,problem_id,action_id,form_label,
+                            language_label,visibility,capabilities,constraints,
+                            relation_hints,causal_predecessor_ids,parent_event_ids,
+                            affected_perspectives,evidence_status,adapter_label,
+                            metadata,created_at
+                        ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                        (
+                            event_id,
+                            external_key,
+                            _json(data.get("exact_source_ids", [])),
+                            data.get("source_stream", "unspecified"),
+                            data.get("authored_by", "participant"),
+                            data.get("perspective_id"),
+                            data.get("problem_id"),
+                            data.get("action_id"),
+                            data.get("form_label", "resource"),
+                            data.get("language_label"),
+                            data.get("visibility", "PUBLIC"),
+                            _json(data.get("capabilities", [])),
+                            _json(data.get("constraints", [])),
+                            _json(data.get("relation_hints", [])),
+                            _json(data.get("causal_predecessor_ids", [])),
+                            _json(data.get("parent_event_ids", [])),
+                            _json(data.get("affected_perspectives", [])),
+                            data.get("evidence_status", "ORIGINAL_NOTE"),
+                            data.get("adapter_label"),
+                            _json(data.get("metadata", {})),
+                            created_at,
+                        ),
+                    )
+                    seq = int(cursor.lastrowid)
+                    inserted_row = self._conn.execute(
+                        """SELECT * FROM supernet_integration_events
+                        WHERE id=?""",
+                        (event_id,),
+                    ).fetchone()
+                    assert inserted_row is not None
+                    self._ensure_initial_source_state(
+                        inserted_row, event_seq=seq
+                    )
+                    created = True
+        except sqlite3.IntegrityError:
+            # Another connection may win the external-key race after this
+            # connection's initial lookup.  The winning event is the same
+            # idempotent result; also repair historical rows written before
+            # event creation and initial-state creation were atomic.
+            if external_key is None:
+                raise
+            with self._lock, self._conn:
+                self._conn.execute("BEGIN IMMEDIATE")
+                existing_row = self._conn.execute(
+                    """SELECT * FROM supernet_integration_events
+                    WHERE external_key=?""",
+                    (external_key,),
+                ).fetchone()
+                if existing_row is None:
+                    raise
+                event_id = str(existing_row["id"])
+                self._ensure_initial_source_state(existing_row)
+            created = False
+        return self.get_event(event_id), created
+
+    def _ensure_initial_source_state(
+        self,
+        event_row: sqlite3.Row,
+        *,
+        event_seq: int | None = None,
+    ) -> None:
+        """Insert the required first state inside the caller's transaction."""
+
+        event_id = str(event_row["id"])
+        existing = self._conn.execute(
+            """SELECT id FROM supernet_integration_states
+            WHERE event_id=? AND stage=? LIMIT 1""",
+            (event_id, str(IntegrationStage.SOURCE_PRESERVED)),
+        ).fetchone()
+        if existing is not None:
+            return
+        seq = int(event_row["seq"]) if event_seq is None else event_seq
+        self._conn.execute(
+            """INSERT INTO supernet_integration_states(
+                id,event_id,stage,verdict,reason,actor_id,rigidity_scope,
+                rigidity_receipt,determined_form,unitary_path_partition,
+                returned_resource_ids,successor_potential,metadata,created_at
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (
+                str(uuid.uuid4()),
+                event_id,
+                str(IntegrationStage.SOURCE_PRESERVED),
+                str(Verdict.OPEN),
+                "Exact source entered the one continuous Supernet field",
+                str(event_row["authored_by"]),
+                _json([]),
+                None,
+                None,
+                None,
+                _json([]),
+                _json([]),
+                _json({"initial": True, "event_seq": seq}),
+                str(event_row["created_at"]),
             ),
         )
-        return self.get_event(event_id), True
 
     def get_by_external_key(self, external_key: str) -> dict[str, Any] | None:
         row = self._conn.execute(
@@ -792,14 +881,37 @@ class SupernetIntegrationStore:
         """
 
         self._event_row(source_event_id)
-        with self._lock:
+        normalized_parents = [str(item) for item in parent_receipt_ids]
+        if len(normalized_parents) != len(set(normalized_parents)):
+            raise ValueError("Visual closure receipt parents must be unique")
+        with self._lock, self._conn:
+            self._conn.execute("BEGIN IMMEDIATE")
+            for parent_id in normalized_parents:
+                parent = self._conn.execute(
+                    "SELECT id FROM supernet_visual_closure_receipts WHERE id=?",
+                    (parent_id,),
+                ).fetchone()
+                if parent is None:
+                    raise ValueError(
+                        f"Visual closure receipt parent {parent_id} does not exist"
+                    )
             existing = self._conn.execute(
                 """SELECT * FROM supernet_visual_closure_receipts
                 WHERE input_signature=?""",
                 (input_signature,),
             ).fetchone()
             if existing is not None:
-                return self._decode_visual_closure_receipt(existing), False
+                decoded = self._decode_visual_closure_receipt(existing)
+                if (
+                    decoded.get("source_event_id") != source_event_id
+                    or decoded.get("parent_receipt_ids") != normalized_parents
+                    or any(decoded.get(key) != value for key, value in receipt.items())
+                ):
+                    raise ValueError(
+                        "Visual closure receipt signature was already used "
+                        "for different content"
+                    )
+                return decoded, False
 
             receipt_id = str(uuid.uuid4())
             created_at = utcnow()
@@ -812,7 +924,7 @@ class SupernetIntegrationStore:
                     receipt_id,
                     source_event_id,
                     input_signature,
-                    _json(parent_receipt_ids),
+                    _json(normalized_parents),
                     _json(receipt),
                     created_at,
                 ),
@@ -823,7 +935,7 @@ class SupernetIntegrationStore:
             completed["seq"] = seq
             completed["created_at"] = created_at
             completed["input_signature"] = input_signature
-            completed["parent_receipt_ids"] = list(parent_receipt_ids)
+            completed["parent_receipt_ids"] = normalized_parents
             operational = dict(completed.get("operational_closure", {}))
             operational["receipt_persisted"] = True
             operational["all_desired_functions_in_this_occurrence"] = all(
@@ -844,7 +956,6 @@ class SupernetIntegrationStore:
                 SET receipt=? WHERE id=?""",
                 (_json(completed), receipt_id),
             )
-            self._conn.commit()
         return self.get_visual_closure_receipt(receipt_id), True
 
     def get_visual_closure_receipt(self, receipt_id: str) -> dict[str, Any]:
@@ -869,6 +980,12 @@ class SupernetIntegrationStore:
         """Persist a one-shot claim before a closure UI mutation begins."""
 
         with self._lock, self._conn:
+            # Serialize the read/consume/insert decision across every process
+            # connected to this SQLite field.  The contract relation is
+            # one-shot: a different payload cannot consume the same
+            # (contract, action) while a matching fingerprint remains safely
+            # replayable or resumable.
+            self._conn.execute("BEGIN IMMEDIATE")
             existing = self._conn.execute(
                 """SELECT * FROM supernet_closure_ui_executions
                    WHERE fingerprint=?""",
@@ -876,6 +993,14 @@ class SupernetIntegrationStore:
             ).fetchone()
             if existing is not None:
                 return self._decode_closure_ui_execution(existing), False
+            consumed = self._conn.execute(
+                """SELECT * FROM supernet_closure_ui_executions
+                   WHERE contract_id=? AND action_id=?
+                   ORDER BY created_at, fingerprint LIMIT 1""",
+                (contract_id, action_id),
+            ).fetchone()
+            if consumed is not None:
+                return self._decode_closure_ui_execution(consumed), False
             now = utcnow()
             self._conn.execute(
                 """INSERT INTO supernet_closure_ui_executions(
@@ -923,12 +1048,13 @@ class SupernetIntegrationStore:
         fingerprint: str,
         response: dict[str, Any],
     ) -> dict[str, Any]:
+        encoded_response = _json(response)
         with self._lock, self._conn:
-            self._conn.execute(
+            cursor = self._conn.execute(
                 """UPDATE supernet_closure_ui_executions
                    SET status='COMPLETED',response=?,completed_at=?
                    WHERE fingerprint=? AND status='EXECUTING'""",
-                (_json(response), utcnow(), fingerprint),
+                (encoded_response, utcnow(), fingerprint),
             )
             row = self._conn.execute(
                 """SELECT * FROM supernet_closure_ui_executions
@@ -937,6 +1063,28 @@ class SupernetIntegrationStore:
             ).fetchone()
         if row is None:
             raise KeyError(f"Closure UI execution {fingerprint} not found")
+        status = str(row["status"])
+        stored_response = row["response"]
+        if cursor.rowcount == 1:
+            if status != "COMPLETED" or stored_response != encoded_response:
+                raise RuntimeError(
+                    f"Closure UI execution {fingerprint} did not complete exactly"
+                )
+        elif status == "COMPLETED":
+            if stored_response != encoded_response:
+                raise ValueError(
+                    f"Closure UI execution {fingerprint} was already completed "
+                    "with a different response"
+                )
+        elif status == "FAILED":
+            raise RuntimeError(
+                f"Closure UI execution {fingerprint} is failed and cannot complete"
+            )
+        else:
+            raise RuntimeError(
+                f"Closure UI execution {fingerprint} is not completable from "
+                f"status {status}"
+            )
         return self._decode_closure_ui_execution(row)
 
     def fail_closure_ui_execution(

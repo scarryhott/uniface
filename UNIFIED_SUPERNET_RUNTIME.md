@@ -15,6 +15,49 @@ The implementation identity is:
 Supernet runtime = continuous integration of every offered and returned form
 ```
 
+## Translated perspective closure (3.19)
+
+The projection-only runtime now writes through the same canonical occurrence,
+integration-event, visual-receipt, and durable-execution lineage. It no longer
+creates a second `translational_returns` truth store. A full-surface return is:
+
+```text
+exact source + source_stream provenance
+→ immutable occurrence
+→ OPEN SupernetIntegrationEvent
+→ perspective chart family + explicit faithful translations
+→ common reading kernel
+→ audited closure UI contract
+→ visual closure receipt
+→ reopened return aperture
+```
+
+Perspective charts deliberately have different display tokens. Their equality
+is the equality of their closure kernels under explicit translation witnesses,
+not byte equality of screens. `source_stream` is retained in source and receipt
+provenance and in replay fingerprints, but is excluded from the display kernel
+and from external-resource admission.
+
+The contract reports a finite executable interpretation of the NRRF858 clauses
+under `closure_process`: relative axioms, relative proofs, understanding, and
+continuing existence. It also carries a non-negotiable boundary:
+
+```text
+truth_issued = false
+physical_law_claimed = false
+consciousness_claimed = false
+nature_consciousness_proved = false
+universal_language_for_all_nature_proved = false
+external_resource_admitted = false
+empirical_verification_replaced = false
+```
+
+Thus Lean establishes consequences inside the stated formal model, while the
+runtime checks a finite translated-chart instance. Neither step proves that a
+natural system is conscious or replaces authenticated effects and measured
+world evidence. Browser-side SHA-256 checking detects content substitution;
+TLS/authentication remains responsible for who issued the content.
+
 The living network, TranslationEvents, relative equality, resources, reopening,
 collective action, agents, Black Mirror and bounded hardware loop remain useful
 code modules and API views. They are now **lenses** over one canonical field
@@ -86,6 +129,7 @@ ResourceEnvelope
   authored_by
   form_label
   language_label
+  source_stream
   perspective / problem / action references
   capabilities
   constraints
@@ -105,6 +149,7 @@ all enter through this envelope.
 ```text
 SupernetIntegrationEvent
   exact source IDs
+  source stream provenance
   authorship and perspective
   open form and language labels
   capabilities and constraints

@@ -498,6 +498,7 @@ class LiveSenseManager:
                     "field_event_seq": field_event_seq,
                     "unity_selector_version": UNITY_SELECTOR_VERSION,
                     "source_event_id": event_id,
+                    "source_stream": current_event.get("source_stream", "legacy"),
                     "current_stage": current_event["current_stage"],
                     "current_verdict": current_event["current_verdict"],
                     "relations": relation_receipts,

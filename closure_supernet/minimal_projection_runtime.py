@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-"""Minimal executable Supernet: return ledger -> UI reading -> closure -> UI.
+"""Executable closure field: canonical returns -> translated charts -> UI.
 
-No domain manager, classifier, product ontology, action enum, recommendation
-layer, token gate, or alternate interface is instantiated here.  The active
-perspective visualization is the only reading from which equality and natural
-forms are derived.  Returning a new source through a focused fibre gives it
-that fibre's visual value; otherwise its exact source is its initial value.
+The published surface remains projection-only, but it no longer owns a private
+return ledger. Exact returns enter the existing occurrence and integration
+event stores, translated perspective readings are derived from one canonical
+visual value, and the existing visual-receipt/execution tables carry lineage
+and idempotency. Provenance is audited but never defines display equality.
 """
 
 import asyncio
@@ -14,35 +14,42 @@ import hashlib
 import json
 import os
 import sqlite3
-import uuid
-from contextlib import closing
-from datetime import UTC, datetime
+from contextlib import asynccontextmanager, closing
 from pathlib import Path
-from typing import Any
+from typing import Any, AsyncIterator, Mapping
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from .axiometry import extract_exact_symbols, extract_operator_path
 from .closure_only_interface import CLOSURE_ONLY_SUPERNET_HTML
 from .closure_ui_contract import (
     OPEN_STATUS,
-    RETURN_ENDPOINT_TEMPLATE,
+    SCHEMA as CLOSURE_UI_SCHEMA,
     WITNESSED_STATUS,
+    attach_perspective_closure,
     derive_closure_ui_contract,
     derive_open_ui_contract,
     validate_ui_contract,
 )
 from .interaction_closure import derive_interaction_closure
+from .models import OccurrenceCreate, Verdict
 from .nrrf843_ui_mirror import derive_nrrf843_ui_receipt
+from .store import EventStore
+from .supernet_models import IntegrationStage, IntegrationStateCreate
+from .supernet_store import SupernetIntegrationStore
 from .translational_truth_axiometry import derive_closure
 
 
-VERSION = "3.18.0"
+VERSION = "3.19.0"
+PROJECTION_RECEIPT_PROTOCOL = (
+    "closure.supernet/conscious-interactive-projection-v1"
+)
 
 
 class TranslationalReturnRequest(BaseModel):
-    """The sole network mutation; it contains no domain or action selector."""
+    """The sole mutation; client-authored truth and effect claims are forbidden."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -50,132 +57,560 @@ class TranslationalReturnRequest(BaseModel):
     perspective_id: str = Field(min_length=1, max_length=500)
     focus_event_id: str | None = Field(default=None, max_length=500)
     exact_source_return: str = Field(min_length=1, max_length=20_000)
+    source_stream: str = Field(
+        default="full-surface-interaction",
+        min_length=1,
+        max_length=240,
+    )
 
-    @field_validator("exact_source_return")
+    @field_validator("exact_source_return", "source_stream")
     @classmethod
     def source_is_not_blank(cls, value: str) -> str:
         if not value.strip():
-            raise ValueError("A translational return may not be blank")
+            raise ValueError("A translational return field may not be blank")
         return value
 
 
 def _stable(value: Any) -> str:
-    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
 
 
 def _digest(prefix: str, value: Any) -> str:
-    return f"{prefix}:{hashlib.sha256(_stable(value).encode('utf-8')).hexdigest()}"
-
-
-def _utcnow() -> str:
-    return datetime.now(UTC).isoformat()
+    content = hashlib.sha256(_stable(value).encode("utf-8")).hexdigest()
+    return f"{prefix}:{content}"
 
 
 class TranslationalReturnLedger:
-    """Append-only physical/source boundary for the minimal runtime."""
+    """Compatibility facade over the canonical Supernet stores.
+
+    The historical class name remains for callers, but no
+    ``translational_returns`` or ``translational_executions`` table is created.
+    """
 
     def __init__(self, path: Path):
-        self.path = path
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with closing(sqlite3.connect(path)) as connection:
-            connection.executescript(
-                """
-                PRAGMA journal_mode=WAL;
-                CREATE TABLE IF NOT EXISTS translational_returns (
-                    seq INTEGER PRIMARY KEY AUTOINCREMENT,
-                    id TEXT NOT NULL UNIQUE,
-                    perspective_id TEXT NOT NULL,
-                    exact_source TEXT NOT NULL,
-                    visual_value TEXT NOT NULL,
-                    parent_return_id TEXT,
-                    prior_projection_id TEXT NOT NULL,
-                    return_relation_id TEXT NOT NULL,
-                    created_at TEXT NOT NULL
-                );
-                CREATE TABLE IF NOT EXISTS translational_executions (
-                    fingerprint TEXT PRIMARY KEY,
-                    response_json TEXT NOT NULL,
-                    created_at TEXT NOT NULL
-                );
-                """
-            )
-            connection.commit()
+        self.path = Path(path)
+        self.events = EventStore(self.path)
+        self.supernet = SupernetIntegrationStore(self.path)
+        self._migrate_legacy_returns()
 
-    def list_returns(self) -> list[dict[str, Any]]:
+    def close(self) -> None:
+        self.supernet.close()
+        self.events.close()
+
+    def _migrate_legacy_returns(self) -> None:
+        """Import a prior projection ledger once without deleting user data."""
+
         with closing(sqlite3.connect(self.path)) as connection:
             connection.row_factory = sqlite3.Row
-            rows = connection.execute(
+            present = connection.execute(
+                """SELECT 1 FROM sqlite_master
+                WHERE type='table' AND name='translational_returns'"""
+            ).fetchone()
+            if present is None:
+                return
+            legacy_rows = connection.execute(
                 "SELECT * FROM translational_returns ORDER BY seq"
             ).fetchall()
-        return [dict(row) for row in rows]
+
+        translated_ids: dict[str, str] = {}
+        for row in legacy_rows:
+            legacy = dict(row)
+            external_key = f"legacy-projection-return:{legacy['id']}"
+            existing = self.supernet.get_by_external_key(external_key)
+            if existing is not None:
+                translated_ids[str(legacy["id"])] = str(existing["id"])
+                continue
+            occurrence = self._create_occurrence(
+                exact_source=str(legacy["exact_source"]),
+                source_stream="legacy",
+                perspective_id=str(legacy["perspective_id"]),
+                metadata={"legacy_projection_return_id": legacy["id"]},
+            )
+            legacy_parent = str(legacy.get("parent_return_id") or "")
+            event, _ = self.supernet.create_event(
+                {
+                    "external_key": external_key,
+                    "exact_source_ids": [occurrence["id"]],
+                    "source_stream": "legacy",
+                    "authored_by": str(legacy["perspective_id"]),
+                    "perspective_id": str(legacy["perspective_id"]),
+                    "form_label": "translational source return",
+                    "visibility": "PUBLIC",
+                    "parent_event_ids": (
+                        [translated_ids[legacy_parent]]
+                        if legacy_parent in translated_ids
+                        else []
+                    ),
+                    "affected_perspectives": [str(legacy["perspective_id"])],
+                    "metadata": {
+                        "minimal_projection_return": True,
+                        "legacy_projection_return_id": legacy["id"],
+                        "canonical_visual_value": str(legacy["visual_value"]),
+                        "prior_projection_id": legacy["prior_projection_id"],
+                        "return_relation_id": legacy["return_relation_id"],
+                    },
+                }
+            )
+            self._register_closure(event["id"], source_stream="legacy")
+            translated_ids[str(legacy["id"])] = str(event["id"])
+
+    def _create_occurrence(
+        self,
+        *,
+        exact_source: str,
+        source_stream: str,
+        perspective_id: str,
+        metadata: dict[str, Any],
+    ) -> dict[str, Any]:
+        operator_path = extract_operator_path(exact_source)
+        return self.events.create_occurrence(
+            OccurrenceCreate(
+                exact_text=exact_source,
+                source_id="closure-supernet-projection",
+                source_stream=source_stream,
+                source_location="full-surface-aperture",
+                source_context=perspective_id,
+                metadata=metadata,
+            ),
+            exact_symbols=extract_exact_symbols(exact_source, operator_path),
+            operator_path=operator_path,
+        )
+
+    def _register_closure(self, event_id: str, *, source_stream: str) -> None:
+        self.supernet.append_state(
+            event_id,
+            IntegrationStateCreate(
+                stage=IntegrationStage.RELATION_SENSED,
+                verdict=Verdict.OPEN,
+                reason=(
+                    "The exact return is registered in the translated closure "
+                    "without issuing absolute truth"
+                ),
+                actor_id="closure-supernet-projection",
+                metadata={
+                    "closure_registering": True,
+                    "source_stream": source_stream,
+                    "truth_issued": False,
+                },
+            ),
+        )
+
+    def _exact_source(self, event: Mapping[str, Any]) -> str:
+        exact_ids = [str(item) for item in event.get("exact_source_ids", [])]
+        if not exact_ids:
+            raise RuntimeError(
+                f"event {event.get('id')} has no exact source occurrence"
+            )
+        exact_parts: list[str] = []
+        missing: list[str] = []
+        for occurrence_id in exact_ids:
+            try:
+                exact_parts.append(
+                    str(self.events.get_occurrence(occurrence_id)["exact_text"])
+                )
+            except KeyError:
+                missing.append(occurrence_id)
+        if missing:
+            raise RuntimeError(
+                f"event {event.get('id')} lost exact source occurrences: "
+                + ", ".join(missing)
+            )
+        return "\n".join(exact_parts)
+
+    @staticmethod
+    def _canonical_value(event: Mapping[str, Any]) -> str:
+        metadata = event.get("metadata", {})
+        if isinstance(metadata, Mapping) and metadata.get("canonical_visual_value"):
+            return str(metadata["canonical_visual_value"])
+        return _digest(
+            "canonical-visual-value",
+            {
+                "event": event.get("id"),
+                "exact_source_ids": event.get("exact_source_ids", []),
+            },
+        )
+
+    def _return_from_event(self, event: Mapping[str, Any]) -> dict[str, Any]:
+        """Decode one canonical integration event as a projection return."""
+
+        parent_ids = [str(item) for item in event.get("parent_event_ids", [])]
+        return {
+            "seq": int(event["seq"]),
+            "id": str(event["id"]),
+            "perspective_id": str(
+                event.get("perspective_id")
+                or event.get("authored_by")
+                or "participant"
+            ),
+            "exact_source": self._exact_source(event),
+            "canonical_visual_value": self._canonical_value(event),
+            "parent_return_id": parent_ids[-1] if parent_ids else None,
+            "source_stream": str(event.get("source_stream") or "legacy"),
+            "exact_source_ids": [
+                str(item) for item in event.get("exact_source_ids", [])
+            ],
+            "metadata": dict(event.get("metadata") or {}),
+            "created_at": event.get("created_at"),
+        }
+
+    def _existing_execution_occurrence(
+        self,
+        *,
+        fingerprint: str,
+        exact_source: str,
+        source_stream: str,
+        perspective_id: str,
+    ) -> dict[str, Any] | None:
+        """Find the occurrence written before a retried event append.
+
+        Occurrence creation and integration-event creation live in existing,
+        independently durable stores.  The execution fingerprint in occurrence
+        metadata is therefore the recovery join when a fault lands between
+        those two commits.
+        """
+
+        offset = 0
+        page_size = 500
+        while True:
+            page = self.events.list_occurrences(
+                limit=page_size,
+                offset=offset,
+            )
+            for occurrence in page:
+                metadata = occurrence.get("metadata") or {}
+                if (
+                    isinstance(metadata, Mapping)
+                    and metadata.get("execution_fingerprint") == fingerprint
+                ):
+                    if (
+                        occurrence.get("exact_text") != exact_source
+                        or occurrence.get("source_stream") != source_stream
+                        or occurrence.get("source_context") != perspective_id
+                    ):
+                        raise RuntimeError(
+                            "the durable execution occurrence does not match "
+                            "the exact retried request"
+                        )
+                    return occurrence
+            if len(page) < page_size:
+                return None
+            offset += len(page)
+
+    @staticmethod
+    def _event_matches_execution(
+        event: Mapping[str, Any],
+        *,
+        fingerprint: str,
+        perspective_id: str,
+        source_stream: str,
+        canonical_visual_value: str,
+        parent_return_id: str | None,
+        prior_projection_id: str,
+        return_relation_id: str,
+    ) -> bool:
+        metadata = event.get("metadata") or {}
+        parent_ids = [str(item) for item in event.get("parent_event_ids", [])]
+        expected_parents = [parent_return_id] if parent_return_id else []
+        return bool(
+            isinstance(metadata, Mapping)
+            and metadata.get("execution_fingerprint") == fingerprint
+            and metadata.get("prior_projection_id") == prior_projection_id
+            and metadata.get("return_relation_id") == return_relation_id
+            and metadata.get("canonical_visual_value")
+            == canonical_visual_value
+            and str(event.get("perspective_id") or "") == perspective_id
+            and str(event.get("source_stream") or "") == source_stream
+            and parent_ids == expected_parents
+        )
+
+    def _ensure_closure_registered(
+        self,
+        event: Mapping[str, Any],
+        *,
+        source_stream: str,
+    ) -> dict[str, Any]:
+        history = event.get("state_history", [])
+        registered = any(
+            isinstance(state, Mapping)
+            and state.get("stage") == str(IntegrationStage.RELATION_SENSED)
+            and isinstance(state.get("metadata"), Mapping)
+            and state["metadata"].get("closure_registering") is True
+            for state in history
+        )
+        if not registered:
+            self._register_closure(str(event["id"]), source_stream=source_stream)
+            return self.supernet.get_event(str(event["id"]))
+        return dict(event)
+
+    def list_returns(self) -> list[dict[str, Any]]:
+        returns: list[dict[str, Any]] = []
+        offset = 0
+        page_size = 1_000
+        while True:
+            page = self.supernet.list_events(
+                limit=page_size,
+                offset=offset,
+            )
+            for event in page:
+                if str(event.get("visibility") or "PUBLIC") == "PUBLIC":
+                    returns.append(self._return_from_event(event))
+            if len(page) < page_size:
+                break
+            offset += len(page)
+        return returns
 
     def append(
         self,
         *,
+        fingerprint: str,
         perspective_id: str,
         exact_source: str,
-        visual_value: str,
+        source_stream: str,
+        canonical_visual_value: str,
         parent_return_id: str | None,
         prior_projection_id: str,
         return_relation_id: str,
     ) -> dict[str, Any]:
-        return_id = f"return:{uuid.uuid4()}"
-        created_at = _utcnow()
-        with closing(sqlite3.connect(self.path)) as connection:
-            connection.execute(
-                """
-                INSERT INTO translational_returns (
-                    id, perspective_id, exact_source, visual_value,
-                    parent_return_id, prior_projection_id,
-                    return_relation_id, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    return_id,
-                    perspective_id,
-                    exact_source,
-                    visual_value,
-                    parent_return_id,
-                    prior_projection_id,
-                    return_relation_id,
-                    created_at,
-                ),
+        external_key = f"projection-return:{fingerprint}"
+        existing = self.supernet.get_by_external_key(external_key)
+        if existing is not None:
+            if not self._event_matches_execution(
+                existing,
+                fingerprint=fingerprint,
+                perspective_id=perspective_id,
+                source_stream=source_stream,
+                canonical_visual_value=canonical_visual_value,
+                parent_return_id=parent_return_id,
+                prior_projection_id=prior_projection_id,
+                return_relation_id=return_relation_id,
+            ):
+                raise RuntimeError(
+                    "the durable execution event does not match the exact "
+                    "retried request"
+                )
+            event = self._ensure_closure_registered(
+                existing,
+                source_stream=source_stream,
             )
-            connection.commit()
-            connection.row_factory = sqlite3.Row
-            row = connection.execute(
-                "SELECT * FROM translational_returns WHERE id = ?",
-                (return_id,),
-            ).fetchone()
-        if row is None:  # pragma: no cover - sqlite insert invariant
-            raise RuntimeError("return append lost its row")
-        return dict(row)
+            returned = self._return_from_event(event)
+            if returned["exact_source"] != exact_source:
+                raise RuntimeError(
+                    "the durable execution event lost the exact retried source"
+                )
+            return returned
+        occurrence = self._existing_execution_occurrence(
+            fingerprint=fingerprint,
+            exact_source=exact_source,
+            source_stream=source_stream,
+            perspective_id=perspective_id,
+        )
+        if occurrence is None:
+            occurrence = self._create_occurrence(
+                exact_source=exact_source,
+                source_stream=source_stream,
+                perspective_id=perspective_id,
+                metadata={
+                    "execution_fingerprint": fingerprint,
+                    "prior_projection_id": prior_projection_id,
+                },
+            )
+        event, _ = self.supernet.create_event(
+            {
+                "external_key": external_key,
+                "exact_source_ids": [occurrence["id"]],
+                "source_stream": source_stream,
+                "authored_by": perspective_id,
+                "perspective_id": perspective_id,
+                "form_label": "translational source return",
+                "visibility": "PUBLIC",
+                "parent_event_ids": (
+                    [parent_return_id] if parent_return_id else []
+                ),
+                "affected_perspectives": [perspective_id],
+                "metadata": {
+                    "minimal_projection_return": True,
+                    "canonical_visual_value": canonical_visual_value,
+                    "prior_projection_id": prior_projection_id,
+                    "return_relation_id": return_relation_id,
+                    "execution_fingerprint": fingerprint,
+                    "source_stream_is_equality_authority": False,
+                },
+            }
+        )
+        if not self._event_matches_execution(
+            event,
+            fingerprint=fingerprint,
+            perspective_id=perspective_id,
+            source_stream=source_stream,
+            canonical_visual_value=canonical_visual_value,
+            parent_return_id=parent_return_id,
+            prior_projection_id=prior_projection_id,
+            return_relation_id=return_relation_id,
+        ):
+            raise RuntimeError(
+                "the recovered execution event does not match the exact request"
+            )
+        event = self._ensure_closure_registered(
+            event,
+            source_stream=source_stream,
+        )
+        return self._return_from_event(event)
 
     def replay(self, fingerprint: str) -> dict[str, Any] | None:
-        with closing(sqlite3.connect(self.path)) as connection:
-            row = connection.execute(
-                "SELECT response_json FROM translational_executions WHERE fingerprint = ?",
-                (fingerprint,),
-            ).fetchone()
-        return json.loads(row[0]) if row else None
+        execution = self.supernet.get_closure_ui_execution(fingerprint)
+        if execution is None or execution.get("status") != "COMPLETED":
+            return None
+        response = execution.get("response")
+        return dict(response) if isinstance(response, Mapping) else None
+
+    def claim(
+        self,
+        *,
+        fingerprint: str,
+        contract_id: str,
+        request: TranslationalReturnRequest,
+    ) -> tuple[dict[str, Any], bool]:
+        return self.supernet.claim_closure_ui_execution(
+            fingerprint=fingerprint,
+            contract_id=contract_id,
+            action_id=request.return_relation_id,
+            perspective_id=request.perspective_id,
+            focus_event_id=request.focus_event_id,
+            request_values=request.model_dump(),
+        )
 
     def complete(self, fingerprint: str, response: dict[str, Any]) -> None:
-        with closing(sqlite3.connect(self.path)) as connection:
-            connection.execute(
-                """
-                INSERT INTO translational_executions (
-                    fingerprint, response_json, created_at
-                ) VALUES (?, ?, ?)
-                """,
-                (fingerprint, _stable(response), _utcnow()),
-            )
-            connection.commit()
+        self.supernet.complete_closure_ui_execution(fingerprint, response)
+        completed = self.supernet.get_closure_ui_execution(fingerprint)
+        if (
+            completed is None
+            or completed.get("status") != "COMPLETED"
+            or completed.get("response") != response
+        ):
+            raise RuntimeError("the closure return execution did not complete")
 
 
 class MinimalProjectionRuntime:
     def __init__(self, database_path: Path):
         self.ledger = TranslationalReturnLedger(database_path)
         self.lock = asyncio.Lock()
+
+    def close(self) -> None:
+        self.ledger.close()
+
+    @staticmethod
+    def _chart_token(perspective_id: str, canonical_value: str) -> str:
+        return _digest(
+            "perspective-visual-value",
+            {
+                "perspective": perspective_id,
+                "canonical": canonical_value,
+            },
+        )
+
+    @classmethod
+    def _perspective_family(
+        cls,
+        returns: list[dict[str, Any]],
+        active_perspective: str,
+    ) -> tuple[dict[str, dict[str, str]], list[dict[str, Any]]]:
+        perspectives = sorted(
+            {
+                active_perspective,
+                *(str(item["perspective_id"]) for item in returns),
+            }
+        )
+        readings = {
+            perspective: {
+                str(item["id"]): cls._chart_token(
+                    perspective,
+                    str(item["canonical_visual_value"]),
+                )
+                for item in returns
+            }
+            for perspective in perspectives
+        }
+        translations: list[dict[str, Any]] = []
+        if len(perspectives) > 1:
+            anchor = perspectives[0]
+            source_return_ids = [str(item["id"]) for item in returns]
+            for target in perspectives[1:]:
+                mapping = {
+                    readings[anchor][str(item["id"])]: readings[target][
+                        str(item["id"])
+                    ]
+                    for item in returns
+                }
+                translations.append(
+                    {
+                        "id": _digest(
+                            "perspective-translation-witness",
+                            {
+                                "source": anchor,
+                                "target": target,
+                                "mapping": mapping,
+                                "source_returns": source_return_ids,
+                            },
+                        ),
+                        "source_perspective_id": anchor,
+                        "target_perspective_id": target,
+                        "display_translation": mapping,
+                        "witnessed": True,
+                        "source_return_ids": source_return_ids,
+                    }
+                )
+        return readings, translations
+
+    @staticmethod
+    def _continuation_lineage(
+        returns: list[dict[str, Any]],
+        focus_event_id: str,
+    ) -> list[str]:
+        """Return the focused root-to-focus parent chain, rejecting breaks."""
+
+        by_id = {str(item["id"]): item for item in returns}
+        lineage: list[str] = []
+        seen: set[str] = set()
+        current_id: str | None = focus_event_id
+        while current_id:
+            if current_id in seen:
+                raise RuntimeError(
+                    "the focused continuation lineage contains a cycle"
+                )
+            current = by_id.get(current_id)
+            if current is None:
+                raise RuntimeError(
+                    "the focused continuation lineage lost parent event "
+                    f"{current_id}"
+                )
+            seen.add(current_id)
+            lineage.append(current_id)
+            parent = current.get("parent_return_id")
+            current_id = str(parent) if parent else None
+        lineage.reverse()
+        return lineage
+
+    @staticmethod
+    def _execution_matches_request(
+        execution: Mapping[str, Any],
+        *,
+        fingerprint: str,
+        contract_id: str,
+        request: TranslationalReturnRequest,
+    ) -> bool:
+        return bool(
+            execution.get("fingerprint") == fingerprint
+            and execution.get("contract_id") == contract_id
+            and execution.get("action_id") == request.return_relation_id
+            and execution.get("perspective_id") == request.perspective_id
+            and execution.get("focus_event_id") == request.focus_event_id
+            and execution.get("request_values") == request.model_dump()
+        )
 
     def project(
         self,
@@ -188,24 +623,28 @@ class MinimalProjectionRuntime:
             return derive_open_ui_contract(perspective_id=perspective_id)
         by_id = {str(item["id"]): item for item in returns}
         focus = by_id.get(str(focus_event_id or "")) or returns[-1]
-        reading = {str(item["id"]): str(item["visual_value"]) for item in returns}
+        readings, translation_inputs = self._perspective_family(
+            returns,
+            perspective_id,
+        )
         visual_forms = [
             {
                 "id": item["id"],
                 "state": {
-                    "perspective_id": perspective_id,
                     "source_perspective_id": item["perspective_id"],
                     "exact_visual_form": item["exact_source"],
-                    "active_perspective_visual_value": reading[item["id"]],
+                    "source_stream": item["source_stream"],
+                    "canonical_visual_value": item["canonical_visual_value"],
                 },
-                "existence_provenance": [item["id"]],
+                "existence_provenance": item["exact_source_ids"] or [item["id"]],
                 "source_return_ids": [item["id"]],
             }
             for item in returns
         ]
         truth = derive_closure(
             visual_forms,
-            perspective_readings={perspective_id: reading},
+            perspective_readings=readings,
+            perspective_translations=translation_inputs,
         )
         truth_dict = truth.to_dict()
         ui = derive_nrrf843_ui_receipt(truth_derivation=truth_dict)
@@ -224,6 +663,7 @@ class MinimalProjectionRuntime:
                 "occurrence_id": item["id"],
                 "perspective_id": item["perspective_id"],
                 "exact_text": item["exact_source"],
+                "source_stream": item["source_stream"],
             }
             for item in returns
         ]
@@ -234,7 +674,7 @@ class MinimalProjectionRuntime:
                     {
                         "source": item["parent_return_id"],
                         "target": item["id"],
-                        "visual_value": item["visual_value"],
+                        "canonical_visual_value": item["canonical_visual_value"],
                     },
                 ),
                 "source": item["parent_return_id"],
@@ -270,8 +710,22 @@ class MinimalProjectionRuntime:
             },
             field_event_seq=int(returns[-1]["seq"]),
         )
-        if not validate_ui_contract(contract)["valid"]:
-            raise RuntimeError("derived projection failed its own exact relation audit")
+        continuation_lineage_ids = self._continuation_lineage(
+            returns,
+            str(focus["id"]),
+        )
+        contract = attach_perspective_closure(
+            contract,
+            perspective_closure=contract["perspective_closure"],
+            continuation_index=len(continuation_lineage_ids),
+            continuation_lineage_ids=continuation_lineage_ids,
+        )
+        validation = validate_ui_contract(contract)
+        if not validation["valid"]:
+            raise RuntimeError(
+                "derived projection failed its exact relation audit: "
+                + ", ".join(validation["errors"])
+            )
         return contract
 
     @staticmethod
@@ -287,6 +741,7 @@ class MinimalProjectionRuntime:
                 "perspective": request.perspective_id,
                 "focus": request.focus_event_id,
                 "source": request.exact_source_return,
+                "source_stream": request.source_stream,
             },
         )
 
@@ -300,16 +755,47 @@ class MinimalProjectionRuntime:
         replay = self.ledger.replay(fingerprint)
         if replay is not None:
             return replay, True
+        execution, claimed = self.ledger.claim(
+            fingerprint=fingerprint,
+            contract_id=contract["id"],
+            request=request,
+        )
+        resuming = not claimed
+        if not claimed:
+            if execution.get("status") == "COMPLETED" and isinstance(
+                execution.get("response"), Mapping
+            ):
+                return dict(execution["response"]), True
+            if execution.get("status") != "EXECUTING" or not (
+                self._execution_matches_request(
+                    execution,
+                    fingerprint=fingerprint,
+                    contract_id=str(contract["id"]),
+                    request=request,
+                )
+            ):
+                raise RuntimeError(
+                    "the durable return execution does not match the retry"
+                )
+
         relation = contract.get("return_relation") or {}
         focus_state_id = str(relation.get("focus_state_id") or "")
-        visual_value = str(
-            contract.get("projection", {}).get("reading", {}).get(focus_state_id)
-            or request.exact_source_return
+        by_id = {item["id"]: item for item in self.ledger.list_returns()}
+        focus = by_id.get(focus_state_id)
+        canonical_visual_value = (
+            str(focus["canonical_visual_value"])
+            if focus is not None
+            else _digest(
+                "canonical-visual-value",
+                {"exact_source": request.exact_source_return},
+            )
         )
         returned = self.ledger.append(
+            fingerprint=fingerprint,
             perspective_id=request.perspective_id,
             exact_source=request.exact_source_return,
-            visual_value=visual_value,
+            source_stream=request.source_stream,
+            canonical_visual_value=canonical_visual_value,
             parent_return_id=(focus_state_id or None),
             prior_projection_id=contract["id"],
             return_relation_id=request.return_relation_id,
@@ -318,6 +804,52 @@ class MinimalProjectionRuntime:
             perspective_id=request.perspective_id,
             focus_event_id=returned["id"],
         )
+        parent_receipt = (
+            self.ledger.supernet.latest_visual_closure_receipt(focus_state_id)
+            if focus_state_id
+            else None
+        )
+        parent_receipt_ids = (
+            [str(parent_receipt["id"])] if parent_receipt is not None else []
+        )
+        receipt_signature = _digest(
+            "projection-receipt-input",
+            {
+                "execution": fingerprint,
+                "contract": successor["id"],
+                "source_stream": request.source_stream,
+            },
+        )
+        receipt_body = {
+            "protocol": PROJECTION_RECEIPT_PROTOCOL,
+            "source_event_id": returned["id"],
+            "source_provenance": {
+                "source_stream": request.source_stream,
+                "exact_source_ids": returned["exact_source_ids"],
+                "source_stream_defines_equality": False,
+                "source_stream_authorizes_external_effect": False,
+            },
+            "closure_ui_contract": successor,
+            "perspective_closure": successor["perspective_closure"],
+            "closure_process": successor["closure_process"],
+            "truth_issued": False,
+            "external_resource_admitted": False,
+        }
+        receipt, _ = self.ledger.supernet.append_visual_closure_receipt(
+            source_event_id=str(returned["id"]),
+            input_signature=receipt_signature,
+            parent_receipt_ids=parent_receipt_ids,
+            receipt=receipt_body,
+        )
+        if (
+            receipt.get("input_signature") != receipt_signature
+            or receipt.get("source_event_id") != returned["id"]
+            or receipt.get("parent_receipt_ids") != parent_receipt_ids
+            or any(receipt.get(key) != value for key, value in receipt_body.items())
+        ):
+            raise RuntimeError(
+                "the durable visual receipt does not match the exact retry"
+            )
         response = {
             "status": "RETURNED",
             "returned": True,
@@ -326,27 +858,41 @@ class MinimalProjectionRuntime:
             "prior_contract_id": contract["id"],
             "return_relation_id": request.return_relation_id,
             "focus_event_id": returned["id"],
+            "visual_closure_receipt_id": receipt["id"],
             "closure_ui_contract": successor,
             "truth_issued": False,
+            "external_resource_admitted": False,
         }
         self.ledger.complete(fingerprint, response)
-        return response, False
+        return response, resuming
 
 
 def _database_path(config: Any | None) -> Path:
     configured = getattr(config, "database_path", None)
-    return Path(configured or os.getenv("CLOSURE_DB_PATH", "runtime_data/closure_supernet.db"))
+    return Path(
+        configured
+        or os.getenv("CLOSURE_DB_PATH", "runtime_data/closure_supernet.db")
+    )
 
 
 def create_app(config: Any | None = None) -> FastAPI:
+    runtime = MinimalProjectionRuntime(_database_path(config))
+
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+        try:
+            yield
+        finally:
+            runtime.close()
+
     app = FastAPI(
         title="Closure Supernet",
         version=VERSION,
         docs_url=None,
         redoc_url=None,
         openapi_url=None,
+        lifespan=lifespan,
     )
-    runtime = MinimalProjectionRuntime(_database_path(config))
     app.state.runtime = runtime
 
     @app.get("/", response_class=HTMLResponse)
@@ -358,13 +904,19 @@ def create_app(config: Any | None = None) -> FastAPI:
     @app.get("/supernet/interface/capabilities")
     async def capabilities() -> dict[str, Any]:
         return {
-            "protocol": "closure.supernet/translational-visualization-v2",
+            "protocol": CLOSURE_UI_SCHEMA,
             "surface": "ACTIVE_PERSPECTIVE_TRANSLATIONAL_VISUALIZATION",
             "input": "FULL_SURFACE_SOURCE_RETURN",
             "mutation_relations": ["SOURCE_PRESERVING_TRANSLATIONAL_RETURN"],
             "parallel_ui_routes": False,
             "parallel_mutation_routes": False,
-            "truth_source": "PERSPECTIVE_VISUALIZATION_KERNEL",
+            "truth_source": "EXPLICIT_TRANSLATED_PERSPECTIVE_VISUALIZATION_KERNEL",
+            "canonical_store": "SUPERNET_INTEGRATION_EVENT_AND_VISUAL_RECEIPT_LINEAGE",
+            "lean_bridge": "NRRF859ConsciousSupernetInteractiveProjectionBridge",
+            "runtime_reproves_lean": False,
+            "truth_issued": False,
+            "consciousness_claimed": False,
+            "external_resource_admitted": False,
         }
 
     @app.get("/supernet/interface")
@@ -389,6 +941,30 @@ def create_app(config: Any | None = None) -> FastAPI:
             replay = runtime.ledger.replay(fingerprint)
             if replay is not None:
                 return {**replay, "replayed": True}
+            execution = runtime.ledger.supernet.get_closure_ui_execution(
+                fingerprint
+            )
+            if execution is not None and execution.get("status") == "EXECUTING":
+                if not runtime._execution_matches_request(
+                    execution,
+                    fingerprint=fingerprint,
+                    contract_id=contract_id,
+                    request=data,
+                ):
+                    raise HTTPException(
+                        409,
+                        "The durable execution does not match this exact retry",
+                    )
+                response, _resumed = runtime.append_return(
+                    contract={
+                        "id": contract_id,
+                        "return_relation": {
+                            "focus_state_id": data.focus_event_id,
+                        },
+                    },
+                    request=data,
+                )
+                return {**response, "replayed": True}
             current = runtime.project(
                 perspective_id=data.perspective_id,
                 focus_event_id=data.focus_event_id,
@@ -407,14 +983,29 @@ def create_app(config: Any | None = None) -> FastAPI:
             if not validation["valid"]:
                 raise HTTPException(400, "The active projection is invalid")
             if current["status"] not in {OPEN_STATUS, WITNESSED_STATUS}:
-                raise HTTPException(400, "The active truth constraint admits no return")
+                raise HTTPException(
+                    400,
+                    "The active truth constraint admits no return",
+                )
             if relation.get("id") != data.return_relation_id:
-                raise HTTPException(400, "The return is not the active projection relation")
+                raise HTTPException(
+                    400,
+                    "The return is not the active projection relation",
+                )
             if current.get("perspective_id") != data.perspective_id:
-                raise HTTPException(400, "The return is not in the active perspective")
+                raise HTTPException(
+                    400,
+                    "The return is not in the active perspective",
+                )
             if current.get("focus_event_id") != data.focus_event_id:
-                raise HTTPException(400, "The return is not at the active closure focus")
-            response, replayed = runtime.append_return(contract=current, request=data)
+                raise HTTPException(
+                    400,
+                    "The return is not at the active closure focus",
+                )
+            response, replayed = runtime.append_return(
+                contract=current,
+                request=data,
+            )
             if replayed:
                 response = {**response, "replayed": True}
             return response
@@ -434,4 +1025,9 @@ def create_app(config: Any | None = None) -> FastAPI:
 app = create_app()
 
 
-__all__ = ["MinimalProjectionRuntime", "TranslationalReturnLedger", "app", "create_app"]
+__all__ = [
+    "MinimalProjectionRuntime",
+    "TranslationalReturnLedger",
+    "app",
+    "create_app",
+]

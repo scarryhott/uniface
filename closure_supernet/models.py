@@ -64,6 +64,7 @@ class RuleState(StrEnum):
 class OccurrenceCreate(BaseModel):
     exact_text: str = Field(min_length=1)
     source_id: str = Field(default="manual")
+    source_stream: str = Field(default="unspecified", min_length=1, max_length=240)
     source_location: str | None = None
     source_context: str | None = None
     status: OccurrenceStatus = OccurrenceStatus.ORIGINAL_NOTE
@@ -74,6 +75,7 @@ class OccurrenceCreate(BaseModel):
 class Occurrence(BaseModel):
     id: str
     source_id: str
+    source_stream: str
     exact_text: str
     exact_symbols: list[str]
     operator_path: list[dict[str, Any]]

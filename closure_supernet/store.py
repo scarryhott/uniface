@@ -50,6 +50,7 @@ class EventStore:
         CREATE TABLE IF NOT EXISTS occurrences (
             id TEXT PRIMARY KEY,
             source_id TEXT NOT NULL,
+            source_stream TEXT NOT NULL DEFAULT 'legacy',
             exact_text TEXT NOT NULL,
             exact_symbols TEXT NOT NULL,
             operator_path TEXT NOT NULL,
@@ -150,6 +151,15 @@ class EventStore:
         """
         with self._lock:
             self._conn.executescript(schema)
+            occurrence_columns = {
+                str(row["name"])
+                for row in self._conn.execute("PRAGMA table_info(occurrences)").fetchall()
+            }
+            if "source_stream" not in occurrence_columns:
+                self._conn.execute(
+                    "ALTER TABLE occurrences ADD COLUMN "
+                    "source_stream TEXT NOT NULL DEFAULT 'legacy'"
+                )
             self._conn.commit()
 
     def _ensure_constitutional_rule(self) -> None:
@@ -195,11 +205,12 @@ class EventStore:
         with self._lock:
             self._conn.execute(
                 """INSERT INTO occurrences
-                (id,source_id,exact_text,exact_symbols,operator_path,source_location,source_context,status,evidence_status,checksum,metadata,created_at)
-                VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (id,source_id,source_stream,exact_text,exact_symbols,operator_path,source_location,source_context,status,evidence_status,checksum,metadata,created_at)
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (
                     occurrence_id,
                     data.source_id,
+                    data.source_stream,
                     data.exact_text,
                     _json(exact_symbols),
                     _json(operator_path),
@@ -213,7 +224,16 @@ class EventStore:
                 ),
             )
             self._conn.commit()
-        self.append_event("OCCURRENCE_CREATED", "occurrence", occurrence_id, {"checksum": checksum, "source_id": data.source_id})
+        self.append_event(
+            "OCCURRENCE_CREATED",
+            "occurrence",
+            occurrence_id,
+            {
+                "checksum": checksum,
+                "source_id": data.source_id,
+                "source_stream": data.source_stream,
+            },
+        )
         return self.get_occurrence(occurrence_id)
 
     def occurrence_exists_by_checksum(self, checksum: str, source_location: str | None = None) -> bool:

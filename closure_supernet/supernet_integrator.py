@@ -79,6 +79,7 @@ class SupernetIntegrator:
         occurrence_data = OccurrenceCreate(
             exact_text=envelope.exact_text,
             source_id=envelope.source_id,
+            source_stream=envelope.source_stream,
             source_location=envelope.source_location,
             source_context=envelope.source_context,
             evidence_status=envelope.evidence_status,
@@ -88,6 +89,7 @@ class SupernetIntegrator:
                 "authored_by": envelope.authored_by,
                 "form_label": envelope.form_label,
                 "language_label": envelope.language_label,
+                "source_stream": envelope.source_stream,
                 "perspective_id": envelope.perspective_id,
                 "problem_id": envelope.problem_id,
                 "action_id": envelope.action_id,
@@ -138,6 +140,11 @@ class SupernetIntegrator:
                 ),
                 language_label=metadata.get("language_label"),
                 source_id=str(occurrence.get("source_id") or "source"),
+                source_stream=str(
+                    occurrence.get("source_stream")
+                    or metadata.get("source_stream")
+                    or "legacy"
+                ),
                 source_location=occurrence.get("source_location"),
                 source_context=occurrence.get("source_context"),
                 perspective_id=metadata.get("perspective_id"),
@@ -180,6 +187,7 @@ class SupernetIntegrator:
                 or envelope.external_key
                 or f"occurrence:{occurrence['id']}",
                 "exact_source_ids": [occurrence["id"]],
+                "source_stream": envelope.source_stream,
                 "authored_by": envelope.authored_by,
                 "perspective_id": envelope.perspective_id,
                 "problem_id": envelope.problem_id,
@@ -200,6 +208,7 @@ class SupernetIntegrator:
                     **metadata,
                     "occurrence_checksum": occurrence.get("checksum"),
                     "source_id": occurrence.get("source_id"),
+                    "source_stream": envelope.source_stream,
                     "source_context": occurrence.get("source_context"),
                     "source_location": occurrence.get("source_location"),
                     "exact_symbols": occurrence.get("exact_symbols", []),

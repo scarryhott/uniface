@@ -52,6 +52,7 @@ class ResourceEnvelope(BaseModel):
     form_label: str = Field(default="resource", min_length=1, max_length=240)
     language_label: str | None = Field(default=None, max_length=240)
     source_id: str = Field(default="supernet", min_length=1, max_length=240)
+    source_stream: str = Field(default="unspecified", min_length=1, max_length=240)
     source_location: str | None = None
     source_context: str | None = None
     perspective_id: str | None = None
@@ -115,6 +116,7 @@ class SupernetIntegrationEvent(BaseModel):
     seq: int
     external_key: str | None
     exact_source_ids: list[str]
+    source_stream: str
     authored_by: str
     perspective_id: str | None
     problem_id: str | None
