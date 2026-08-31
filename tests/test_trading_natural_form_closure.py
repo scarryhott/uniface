@@ -54,7 +54,7 @@ def test_successor_quote_pair_is_not_a_natural_trading_closure() -> None:
     assert receipt["fixed_horizon"] is None
 
 
-def test_unitary_curvature_and_ball_maze_co_derive_amplitude_and_timing() -> None:
+def test_cost_curvature_has_zero_available_amplitude_and_zero_closure_timing() -> None:
     receipt = resolve_open_sensor_trading_closure(
         observer_id="trader",
         sensor_feedback=[
@@ -89,82 +89,135 @@ def test_unitary_curvature_and_ball_maze_co_derive_amplitude_and_timing() -> Non
     assert receipt["witnessed_natural_form_count"] == 1
     form = receipt["natural_forms"][0]
     assert form["unitary_curvature"] == "2"
-    assert form["amplitude"] == "2"
     assert form["natural_profit"] == "-2"
+    assert form["amplitude"] == "0"
+    assert form["available_amplitude"] == "0"
+    assert form["timing"]["value"] == "0"
+    assert form["amplitude_timing_numerically_identical"] is True
     assert form["hair_sum"] == "0"
     assert form["hair_closes_on_return"] is True
 
-    assert form["timing"]["maze_steps"] == 3
-    assert form["timing"]["support_start_index"] == 0
-    assert form["timing"]["support_end_index"] == 2
+    # Clock duration is source provenance, not semantic timing.
     assert form["timing"]["duration_seconds"] == "8.0"
+    assert form["timing"]["clock_duration_authors_timing"] is False
+    assert form["clock_duration_is_timing"] is False
     assert form["timing"]["fixed_horizon"] is None
 
     assert form["amplitude_timing_translation_equal"] is True
     assert form["signal_trade_translation_equal"] is True
+    assert form["signal_trade_value_equal"] is True
     assert (
         form["amplitude_projection"]["translation_id"]
         == form["timing"]["translation_id"]
         == form["signal_projection"]["translation_id"]
         == form["trade_projection"]["translation_id"]
     )
-    assert form["signal_precedes_trade_semantically"] is False
-    assert form["trade_precedes_signal_semantically"] is False
 
 
-def test_hair_translation_changes_local_values_not_natural_curvature() -> None:
+def test_raw_ball_timing_moves_under_hair_but_closure_timing_does_not() -> None:
     base = [
-        _returned("ab", "A", "B", "8"),
-        _returned("bc", "B", "C", "3"),
-        _returned("ca", "C", "A", "-9"),
+        _returned("ab", "A", "B", "-3"),
+        _returned("ba", "B", "A", "2"),
     ]
     translated = [
-        _returned("ab", "A", "B", "10", hair_delta="2"),
-        _returned("bc", "B", "C", "7", hair_delta="4"),
-        _returned("ca", "C", "A", "-15", hair_delta="-6"),
+        _returned("ab", "A", "B", "2", hair_delta="5"),
+        _returned("ba", "B", "A", "-3", hair_delta="-5"),
     ]
 
-    left = resolve_open_sensor_trading_closure(
-        observer_id="o",
-        sensor_feedback=base,
-    )
+    left = resolve_open_sensor_trading_closure(observer_id="o", sensor_feedback=base)
     right = resolve_open_sensor_trading_closure(
-        observer_id="o",
-        sensor_feedback=translated,
+        observer_id="o", sensor_feedback=translated
     )
 
     left_form = left["natural_forms"][0]
     right_form = right["natural_forms"][0]
-    assert (
-        left["sensor_returns"][0]["relation_value"]
-        != right["sensor_returns"][0]["relation_value"]
-    )
-    assert left_form["relation_sum"] == right_form["relation_sum"] == "2"
-    assert left_form["unitary_curvature"] == right_form["unitary_curvature"] == "2"
-    assert left_form["natural_profit"] == right_form["natural_profit"] == "-2"
+    assert left_form["unitary_curvature"] == right_form["unitary_curvature"] == "-1"
+    assert left_form["natural_profit"] == right_form["natural_profit"] == "1"
+    assert left_form["amplitude"] == right_form["amplitude"] == "1"
     assert left_form["closure_id"] == right_form["closure_id"]
-    assert right_form["hair_sum"] == "0"
+
+    # The raw running-P&L ball is chart/hair dependent.
+    assert left_form["raw_ball_partition"]["max"] == "3"
+    assert right_form["raw_ball_partition"]["max"] == "1"
+    assert left_form["raw_ball_partition"]["hair_invariant"] is False
+
+    # The unique normalized closure makes the entry free and timing=amplitude.
+    assert left_form["closure_ball_partition"]["max"] == "1"
+    assert right_form["closure_ball_partition"]["max"] == "1"
+    assert left_form["timing"]["value"] == right_form["timing"]["value"] == "1"
+    assert left_form["timing"]["entry_leg_free_in_closure"] is True
+    assert left_form["timing"]["return_attains_timing"] is True
 
 
-def test_ball_partition_maze_not_adjacency_supplies_timing() -> None:
+def test_open_sensor_exposes_all_simple_cycles_not_one_bfs_route() -> None:
     receipt = resolve_open_sensor_trading_closure(
         observer_id="o",
         sensor_feedback=[
             _returned("ab", "A", "B", "1"),
-            _returned("xy", "X", "Y", "5"),
-            _returned("bc", "B", "C", "2"),
-            _returned("ca", "C", "A", "-4"),
+            _returned("ba", "B", "A", "-2"),
+            _returned("ac", "A", "C", "3"),
+            _returned("ca", "C", "A", "-5"),
         ],
     )
 
     assert receipt["status"] == "WITNESSED"
+    assert receipt["open_sensor_runs_all_closed_itineraries"] is True
+    assert receipt["simple_cycles_determine_finite_closed_itinerary_geometry"] is True
+    assert receipt["bfs_route_authors_truth"] is False
+    assert len(receipt["natural_forms"]) == 2
+    signatures = {
+        tuple(
+            (row["source_token"], row["target_token"])
+            for row in form["directed_relation_signature"]
+        )
+        for form in receipt["natural_forms"]
+    }
+    assert signatures == {
+        (("A", "B"), ("B", "A")),
+        (("A", "C"), ("C", "A")),
+    }
+
+
+def test_ball_partition_is_directed_closure_fibre_not_undirected_component() -> None:
+    receipt = resolve_open_sensor_trading_closure(
+        observer_id="o",
+        sensor_feedback=[
+            _returned("ab", "A", "B", "1"),
+            _returned("cb", "C", "B", "1"),
+        ],
+    )
+
+    assert receipt["status"] == "OPEN"
+    assert receipt["natural_forms"] == []
+    assert receipt["undirected_connectivity_authors_ball"] is False
+    assert receipt["ball_partition_is_directed_translation_fibre"] is True
+    assert sorted(ball["member_tokens"] for ball in receipt["ball_partition"]) == [
+        ["A"],
+        ["B"],
+        ["C"],
+    ]
+
+
+def test_profitable_closure_has_amplitude_equal_ball_partition_max() -> None:
+    receipt = resolve_open_sensor_trading_closure(
+        observer_id="o",
+        sensor_feedback=[
+            _returned("ab", "A", "B", "-2"),
+            _returned("ba", "B", "A", "1"),
+        ],
+    )
+
     form = receipt["natural_forms"][0]
-    assert set(form["return_ids"]) == {"ab", "bc", "ca"}
-    assert "xy" not in form["return_ids"]
-    assert form["timing"]["maze_steps"] == 3
-    assert form["timing"]["support_start_index"] == 0
-    assert form["timing"]["support_end_index"] == 3
-    assert len(receipt["ball_partition"]) == 2
+    assert form["unitary_curvature"] == "-1"
+    assert form["natural_profit"] == "1"
+    assert form["amplitude"] == "1"
+    assert form["raw_ball_partition"]["max"] == "2"
+    assert form["closure_ball_partition"]["max"] == "1"
+    assert form["timing"]["value"] == "1"
+    assert form["amplitude_timing_numerically_identical"] is True
+    assert form["signal_projection"]["value"] == "1"
+    assert form["trade_projection"]["value"] == "1"
+    assert form["signal_trade_value_equal"] is True
 
 
 def test_trade_execution_remains_open_when_cost_return_is_incomplete() -> None:
@@ -178,6 +231,7 @@ def test_trade_execution_remains_open_when_cost_return_is_incomplete() -> None:
 
     form = receipt["natural_forms"][0]
     assert form["natural_profit"] == "1"
+    assert form["amplitude"] == "1"
     assert form["orientation"] == "PROFITABLE"
     assert form["signal_trade_translation_equal"] is True
     assert form["trade_projection"]["execution_return_status"] == "OPEN"
@@ -223,16 +277,19 @@ def test_computation_limit_leaves_open_sensor_continuation_open() -> None:
     assert receipt["boundary_receipt"]["limit_is_semantic"] is False
 
 
-def test_research_api_runs_natural_trading_closure_without_mutation(tmp_path) -> None:
-    app = create_app(
-        SimpleNamespace(database_path=tmp_path / "natural-trading-closure.db")
-    )
+def test_research_api_exposes_nrrf870_without_mutation(tmp_path) -> None:
+    app = create_app(SimpleNamespace(database_path=tmp_path / "nrrf870.db"))
     with TestClient(app) as client:
         before = client.get("/supernet/interface").json()["closure_ui_contract"]
         capabilities = client.get(
             "/supernet/closure-equations/capabilities"
         ).json()
         assert capabilities["successor_quote_loop_authors_truth"] is False
+        assert capabilities["open_sensor_all_closed_itineraries"] is True
+        assert capabilities["bfs_route_authors_truth"] is False
+        assert capabilities["amplitude_is_negative_curvature_part"] is True
+        assert capabilities["ball_partition_max_gives_timing"] is True
+        assert capabilities["clock_duration_authors_timing"] is False
         assert capabilities["amplitude_timing_one_translation"] is True
         assert capabilities["signal_trade_one_translation"] is True
 
@@ -251,8 +308,11 @@ def test_research_api_runs_natural_trading_closure_without_mutation(tmp_path) ->
         assert response.status_code == 200
         trading = response.json()["trading"]
         assert trading["status"] == "WITNESSED"
-        assert trading["natural_forms"][0]["natural_profit"] == "1"
-        assert trading["natural_forms"][0]["signal_trade_translation_equal"] is True
+        form = trading["natural_forms"][0]
+        assert form["natural_profit"] == "1"
+        assert form["amplitude"] == "1"
+        assert form["timing"]["value"] == "1"
+        assert form["signal_trade_translation_equal"] is True
 
         after = client.get("/supernet/interface").json()["closure_ui_contract"]
         assert after["id"] == before["id"]
