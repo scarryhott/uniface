@@ -15,10 +15,15 @@ import math
 from collections import Counter
 from typing import Any, Iterable, Mapping
 
+from .closure_naturality_equations import (
+    FORMAL_MODULE as CLOSURE_NATURALITY_FORMAL_MODULE,
+    PROTOCOL as CLOSURE_NATURALITY_PROTOCOL,
+    derive_closure_naturality_equations,
+)
 
 PROTOCOL = "SUPERNET-TRANSLATIONAL-VISUALIZATION"
-SCHEMA = "closure.supernet/translational-visualization-v5"
-BUILDER_VERSION = "translational-visualization-5"
+SCHEMA = "closure.supernet/translational-visualization-v6"
+BUILDER_VERSION = "translational-visualization-6"
 OPEN_STATUS = "OPEN_SOURCE_BOUNDARY"
 BLOCKED_STATUS = "OPEN_TRUTH_CONSTRAINT"
 WITNESSED_STATUS = "WITNESSED"
@@ -100,11 +105,12 @@ def _renderer_relation() -> dict[str, Any]:
 
     return {
         "role": "TRANSLATIONAL_RELATION_EVALUATOR",
-        "input": "ACTIVE_PERSPECTIVE_RELATION_ONLY",
+        "input": "INTERACTIVE_TRANSLATION_OF_CLOSURE_EQUATIONS_ONLY",
         "visible_words_source": "SOURCE_RETURNS_ONLY",
-        "geometry_source": "EQUALITY_FIBRES_AND_TRANSLATION_RELATIONS_ONLY",
+        "geometry_source": "CLOSURE_EQUATION_FIBRES_AND_PULL_SQUARES_ONLY",
         "interaction_source": "SOURCE_PRESERVING_RETURN_RELATION_ONLY",
-        "natural_form_constraint": "TRANSLATED_READING_KERNEL",
+        "natural_form_constraint": "NRRF866_INTERACTIVE_CLOSURE_EQUATION_SYSTEM",
+        "equation_system_required": True,
         "geometry_acceptance": "EXACT_LOCAL_CLOSURE_REDERIVATION",
         "successor_acceptance": "VERIFIED_CLOSURE_BEFORE_INTERFACE_COMMIT",
         "latent_structure": "VERIFIED_CLOSURE_RELATION",
@@ -551,6 +557,8 @@ def _closure_process(contract: Mapping[str, Any]) -> dict[str, Any]:
         and set(lineage_ids).issubset(set(source_return_ids))
     )
     witnessed_status = WITNESSED_STATUS if translated else status
+    naturality = contract.get("closure_naturality_equations")
+    naturality = naturality if isinstance(naturality, Mapping) else {}
     return {
         "formal_interpretation": {
             "module": (
@@ -666,8 +674,24 @@ def _closure_process(contract: Mapping[str, Any]) -> dict[str, Any]:
                 "one_token_closure_limit_preserved": True,
             },
         },
+        "closure_naturality_growth": {
+            "formal_module": CLOSURE_NATURALITY_FORMAL_MODULE,
+            "formal_theorem": (
+                "closure_naturality_is_translational_truth_is_the_growth_of_the_universe"
+            ),
+            "equation_protocol": CLOSURE_NATURALITY_PROTOCOL,
+            "equation_system_id": naturality.get("id"),
+            "interactive_translation_id": naturality.get(
+                "interactive_translation_id"
+            ),
+            "runtime_checks": dict(naturality.get("checks") or {}),
+            "finite_runtime_instance_only": True,
+            "lean_theorems_reproved_by_python": False,
+        },
         "latent_interactive_interface": {
             "latent_structure": "VERIFIED_CLOSURE_RELATION",
+            "latent_equation_system_id": naturality.get("id"),
+            "all_interface_relations_factor_through_closure_equations": True,
             "visible_projection_is_derived": True,
             "local_perspective_hair_is_mutable": True,
             "local_modification_is_potential_until_commit": True,
@@ -693,6 +717,7 @@ def _closure_process(contract: Mapping[str, Any]) -> dict[str, Any]:
 def _finish_contract(body: dict[str, Any]) -> dict[str, Any]:
     body.pop("id", None)
     body.pop("audit", None)
+    body.pop("closure_naturality_equations", None)
     perspective = str(body.get("perspective_id") or "participant")
     status = str(body.get("status") or OPEN_STATUS)
     supplied_perspective_closure = body.get("perspective_closure")
@@ -738,6 +763,9 @@ def _finish_contract(body: dict[str, Any]) -> dict[str, Any]:
         }
     )
     body["claims"] = claims
+    body["closure_naturality_equations"] = (
+        derive_closure_naturality_equations(body)
+    )
     body["closure_process"] = _closure_process(body)
     body["audit"] = _audit_contract(body)
     body["id"] = _digest("translational-visualization", body)
@@ -760,6 +788,7 @@ def attach_perspective_closure(
             "id",
             "audit",
             "closure_process",
+            "closure_naturality_equations",
             "perspective_closure",
             "continuation_index",
             "continuation_lineage_ids",
@@ -798,6 +827,7 @@ def derive_open_ui_contract(
             "visual_closure_id": None,
             "nrrf843_ui_id": None,
             "interaction_closure_id": None,
+            "interactive_translation_id": None,
             "field_event_seq": None,
             "natural_form_ids": [],
             "source_return_ids": [],
@@ -837,6 +867,7 @@ def _derive_blocked_ui_contract(
     visual_closure_id: Any,
     nrrf843_ui_id: Any,
     interaction_closure_id: Any,
+    interactive_translation_id: Any,
     field_event_seq: int | None,
     natural_form_ids: list[str],
     source_return_ids: list[str],
@@ -865,6 +896,7 @@ def _derive_blocked_ui_contract(
             "visual_closure_id": visual_closure_id,
             "nrrf843_ui_id": nrrf843_ui_id,
             "interaction_closure_id": interaction_closure_id,
+            "interactive_translation_id": interactive_translation_id,
             "field_event_seq": field_event_seq,
             "natural_form_ids": natural_form_ids,
             "source_return_ids": source_return_ids,
@@ -1155,6 +1187,13 @@ def derive_closure_ui_contract(
     visual_closure_id = truth_derivation.get("visual_truth_closure", {}).get("id")
     nrrf843_ui_id = nrrf843_ui.get("id")
     interaction_closure_id = interaction_closure.get("id")
+    interactive_translation = interaction_closure.get("interactive_translation")
+    interactive_translation = (
+        interactive_translation
+        if isinstance(interactive_translation, Mapping)
+        else {}
+    )
+    interactive_translation_id = interactive_translation.get("id")
     active_reading = physical_topology.get("projection_reading", {})
     readiness_checks = {
         "closure_derivation_present": bool(closure_derivation_id),
@@ -1178,6 +1217,12 @@ def derive_closure_ui_contract(
             and interaction_closure.get("visual_closure_id") == visual_closure_id
             and interaction_closure.get("nrrf843_ui_id") == nrrf843_ui_id
         ),
+        "interactive_translation_witness_present": bool(
+            interactive_translation_id
+        ),
+        "closure_equations_derived_from_interaction": bool(
+            interactive_translation.get("closure_equations_derived") is True
+        ),
         "active_perspective_projection_present": bool(perspective and active_reading),
         "focus_event_present": bool(focus_event_id),
         "field_revision_present": bool(
@@ -1192,6 +1237,7 @@ def derive_closure_ui_contract(
             visual_closure_id=visual_closure_id,
             nrrf843_ui_id=nrrf843_ui_id,
             interaction_closure_id=interaction_closure_id,
+            interactive_translation_id=interactive_translation_id,
             field_event_seq=field_event_seq,
             natural_form_ids=natural_form_ids,
             source_return_ids=source_return_ids,
@@ -1224,6 +1270,7 @@ def derive_closure_ui_contract(
             visual_closure_id=visual_closure_id,
             nrrf843_ui_id=nrrf843_ui_id,
             interaction_closure_id=interaction_closure_id,
+            interactive_translation_id=interactive_translation_id,
             field_event_seq=field_event_seq,
             natural_form_ids=natural_form_ids,
             source_return_ids=source_return_ids,
@@ -1266,6 +1313,7 @@ def derive_closure_ui_contract(
             "visual_closure_id": visual_closure_id,
             "nrrf843_ui_id": nrrf843_ui_id,
             "interaction_closure_id": interaction_closure_id,
+            "interactive_translation_id": interactive_translation_id,
             "field_event_seq": field_event_seq,
             "natural_form_ids": natural_form_ids,
             "source_return_ids": source_return_ids,
@@ -1500,6 +1548,30 @@ def _audit_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
     if contract.get("renderer_relation") != _renderer_relation():
         errors.append("renderer:external-vocabulary-or-authority")
     errors.extend(_perspective_closure_errors(contract))
+    expected_naturality = derive_closure_naturality_equations(contract)
+    stored_naturality = contract.get("closure_naturality_equations")
+    if stored_naturality != expected_naturality:
+        errors.append("closure-naturality:not-derived")
+    naturality_checks = expected_naturality["checks"]
+    if status == WITNESSED_STATUS:
+        for check in (
+            "translated_readings_have_one_closure",
+            "active_reading_is_projection",
+            "translation_family_connected",
+            "closure_fibres_are_translation_classes",
+            "closure_is_canonical_section",
+            "all_translation_equations_hold",
+            "all_pull_naturality_squares_commute",
+            "distinctions_only_grow_with_arena",
+            "growth_saturates_at_reach",
+            "finite_runtime_instance_checked",
+        ):
+            if naturality_checks.get(check) is not True:
+                errors.append(f"closure-naturality:{check}")
+        if expected_naturality.get("interactive_translation_id") != contract.get(
+            "interactive_translation_id"
+        ):
+            errors.append("closure-naturality:interactive-translation")
     continuation_index = contract.get("continuation_index")
     raw_lineage = contract.get("continuation_lineage_ids")
     if (
@@ -1819,6 +1891,12 @@ def _audit_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
         ),
         "visualization_is_exact_relation_projection": (
             "visualization:not-exact-projection" not in ordered_errors
+        ),
+        "closure_naturality_equations_match_recomputation": (
+            "closure-naturality:not-derived" not in ordered_errors
+        ),
+        "interface_is_derived_from_interactive_closure_equations": not any(
+            item.startswith("closure-naturality:") for item in ordered_errors
         ),
         "open_relations_do_not_execute_as_equality": not any(
             item.endswith(":open-equality") for item in ordered_errors

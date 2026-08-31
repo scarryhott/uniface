@@ -42,7 +42,7 @@ from .supernet_store import SupernetIntegrationStore
 from .translational_truth_axiometry import derive_closure
 
 
-VERSION = "3.21.0"
+VERSION = "3.22.0"
 PROJECTION_RECEIPT_PROTOCOL = (
     "closure.supernet/conscious-interactive-projection-v1"
 )
@@ -57,6 +57,7 @@ class TranslationalReturnRequest(BaseModel):
     perspective_id: str = Field(min_length=1, max_length=500)
     focus_event_id: str | None = Field(default=None, max_length=500)
     exact_source_return: str = Field(min_length=1, max_length=20_000)
+    closure_equation_system_id: str = Field(min_length=25, max_length=128)
     local_projection_commitment: str = Field(min_length=25, max_length=128)
     local_perspective_hair_millidegrees: int = Field(
         default=0,
@@ -104,6 +105,9 @@ def derive_local_projection_commitment(
 
     body = {
         "contract_id": contract.get("id"),
+        "closure_equation_system_id": (
+            contract.get("closure_naturality_equations") or {}
+        ).get("id"),
         "return_relation_id": return_relation_id,
         "perspective_id": perspective_id,
         "focus_event_id": focus_event_id,
@@ -364,6 +368,7 @@ class TranslationalReturnLedger:
         prior_projection_id: str,
         return_relation_id: str,
         local_projection_commitment: str,
+        closure_equation_system_id: str,
         local_perspective_hair_millidegrees: int,
     ) -> bool:
         metadata = event.get("metadata") or {}
@@ -376,6 +381,8 @@ class TranslationalReturnLedger:
             and metadata.get("return_relation_id") == return_relation_id
             and metadata.get("local_projection_commitment")
             == local_projection_commitment
+            and metadata.get("closure_equation_system_id")
+            == closure_equation_system_id
             and metadata.get("local_perspective_hair_millidegrees")
             == local_perspective_hair_millidegrees
             and metadata.get("canonical_visual_value")
@@ -433,6 +440,7 @@ class TranslationalReturnLedger:
         prior_projection_id: str,
         return_relation_id: str,
         local_projection_commitment: str,
+        closure_equation_system_id: str,
         local_perspective_hair_millidegrees: int,
     ) -> dict[str, Any]:
         external_key = f"projection-return:{fingerprint}"
@@ -448,6 +456,7 @@ class TranslationalReturnLedger:
                 prior_projection_id=prior_projection_id,
                 return_relation_id=return_relation_id,
                 local_projection_commitment=local_projection_commitment,
+                closure_equation_system_id=closure_equation_system_id,
                 local_perspective_hair_millidegrees=(
                     local_perspective_hair_millidegrees
                 ),
@@ -501,6 +510,7 @@ class TranslationalReturnLedger:
                     "prior_projection_id": prior_projection_id,
                     "return_relation_id": return_relation_id,
                     "local_projection_commitment": local_projection_commitment,
+                    "closure_equation_system_id": closure_equation_system_id,
                     "local_perspective_hair_millidegrees": (
                         local_perspective_hair_millidegrees
                     ),
@@ -519,6 +529,7 @@ class TranslationalReturnLedger:
             prior_projection_id=prior_projection_id,
             return_relation_id=return_relation_id,
             local_projection_commitment=local_projection_commitment,
+            closure_equation_system_id=closure_equation_system_id,
             local_perspective_hair_millidegrees=(
                 local_perspective_hair_millidegrees
             ),
@@ -816,6 +827,9 @@ class MinimalProjectionRuntime:
                 "local_projection_commitment": (
                     request.local_projection_commitment
                 ),
+                "closure_equation_system_id": (
+                    request.closure_equation_system_id
+                ),
                 "local_perspective_hair_millidegrees": (
                     request.local_perspective_hair_millidegrees
                 ),
@@ -877,6 +891,7 @@ class MinimalProjectionRuntime:
             prior_projection_id=contract["id"],
             return_relation_id=request.return_relation_id,
             local_projection_commitment=request.local_projection_commitment,
+            closure_equation_system_id=request.closure_equation_system_id,
             local_perspective_hair_millidegrees=(
                 request.local_perspective_hair_millidegrees
             ),
@@ -912,6 +927,9 @@ class MinimalProjectionRuntime:
                 "local_projection_commitment": (
                     request.local_projection_commitment
                 ),
+                "closure_equation_system_id": (
+                    request.closure_equation_system_id
+                ),
                 "local_perspective_hair_millidegrees": (
                     request.local_perspective_hair_millidegrees
                 ),
@@ -925,6 +943,9 @@ class MinimalProjectionRuntime:
             "committed_local_projection": {
                 "id": request.local_projection_commitment,
                 "latent_contract_id": contract["id"],
+                "closure_equation_system_id": (
+                    request.closure_equation_system_id
+                ),
                 "perspective_id": request.perspective_id,
                 "focus_event_id": request.focus_event_id,
                 "hair_millidegrees": (
@@ -1011,13 +1032,23 @@ def create_app(config: Any | None = None) -> FastAPI:
             "mutation_relations": ["SOURCE_PRESERVING_TRANSLATIONAL_RETURN"],
             "parallel_ui_routes": False,
             "parallel_mutation_routes": False,
-            "truth_source": "EXPLICIT_TRANSLATED_PERSPECTIVE_VISUALIZATION_KERNEL",
-            "visualization_acceptance": "EXACT_LOCAL_CLOSURE_REDERIVATION",
+            "truth_source": "INTERACTIVE_TRANSLATION_CLOSURE_EQUATION_SYSTEM",
+            "visualization_acceptance": (
+                "EXACT_LOCAL_EQUATION_AND_GEOMETRY_REDERIVATION"
+            ),
             "interaction_proof": "VERIFIED_SUCCESSOR_CLOSURE_BEFORE_COMMIT",
-            "latent_ui_state": "VERIFIED_CLOSURE_RELATION",
+            "latent_ui_state": "VERIFIED_CLOSURE_EQUATION_SYSTEM",
             "local_perspective": "MUTABLE_HAIR_AND_FOCUS",
             "local_modification": "UNCOMMITTED_CLOSURE_POTENTIAL",
             "commit_protocol": "LOCAL_PROJECTION_COMMITMENT_THEN_REDERIVATION",
+            "interface_derivation": "INTERACTIVE_TRANSLATION_OF_CLOSURE_EQUATIONS",
+            "closure_equation_protocol": (
+                "closure.supernet/closure-naturality-equations-v1"
+            ),
+            "closure_naturality_module": (
+                "NRRF866ClosureNaturalityIsTranslationalTruthIsTheGrowthOfTheUniverse"
+            ),
+            "browser_rederives_pull_and_growth_equations": True,
             "canonical_store": "SUPERNET_INTEGRATION_EVENT_AND_VISUAL_RECEIPT_LINEAGE",
             "lean_bridge": "NRRF859ConsciousSupernetInteractiveProjectionBridge",
             "declared_formal_continuation": (
@@ -1114,6 +1145,14 @@ def create_app(config: Any | None = None) -> FastAPI:
                 raise HTTPException(
                     400,
                     "The return is not at the active closure focus",
+                )
+            current_equation_id = current.get(
+                "closure_naturality_equations", {}
+            ).get("id")
+            if current_equation_id != data.closure_equation_system_id:
+                raise HTTPException(
+                    400,
+                    "The local projection is not based on the active closure equations",
                 )
             expected_local_commitment = local_projection_commitment(
                 current,

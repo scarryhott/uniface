@@ -120,7 +120,7 @@ svg {
   "use strict";
 
   const namespace = "http://www.w3.org/2000/svg";
-  const schema = "closure.supernet/translational-visualization-v5";
+  const schema = "closure.supernet/translational-visualization-v6";
   const protocol = "SUPERNET-TRANSLATIONAL-VISUALIZATION";
   const statuses = new Set([
     "OPEN_SOURCE_BOUNDARY",
@@ -481,6 +481,296 @@ svg {
       .sort(compareStringArrays);
   }
 
+  async function deriveClosureNaturalityEquations(contract) {
+    const status = asText(contract.status || "OPEN_SOURCE_BOUNDARY");
+    const projection = isRecord(contract.projection) ? contract.projection : {};
+    const closure = isRecord(contract.perspective_closure)
+      ? contract.perspective_closure : {};
+    const states = Array.isArray(projection.states)
+      ? projection.states.filter((item) => isRecord(item) && item.id) : [];
+    const carrier = states.map((item) => asText(item.id)).sort(compareUnicodeCodePoints);
+    const stateByEvent = Object.create(null);
+    for (const state of states) {
+      if (state.event_id) stateByEvent[asText(state.event_id)] = asText(state.id);
+    }
+
+    const readings = Object.create(null);
+    if (isRecord(closure.readings)) {
+      for (const [perspective, rawReading] of Object.entries(closure.readings)) {
+        if (!isRecord(rawReading)) continue;
+        const reading = Object.create(null);
+        for (const [stateId, value] of Object.entries(rawReading)) {
+          reading[asText(stateId)] = asText(value);
+        }
+        readings[asText(perspective)] = reading;
+      }
+    }
+    const perspectiveIds = Object.keys(readings).sort(compareUnicodeCodePoints);
+    const kernels = Object.create(null);
+    for (const perspective of perspectiveIds) {
+      kernels[perspective] = readingKernel(readings[perspective]) || [];
+    }
+    const commonKernel = perspectiveIds.length ? kernels[perspectiveIds[0]] : [];
+    const kernelsAgree = perspectiveIds.every(
+      (perspective) => stable(kernels[perspective]) === stable(commonKernel),
+    );
+    const projectionReading = Object.create(null);
+    if (isRecord(projection.reading)) {
+      for (const [stateId, value] of Object.entries(projection.reading)) {
+        projectionReading[asText(stateId)] = asText(value);
+      }
+    }
+    const activeReadingIsProjection = status !== "WITNESSED" || (
+      owns(readings, asText(contract.perspective_id))
+      && stable(readings[asText(contract.perspective_id)]) === stable(projectionReading)
+    );
+
+    const fibreRows = Array.isArray(projection.equality_fibres)
+      ? projection.equality_fibres.filter((item) => isRecord(item) && item.id) : [];
+    const projectionKernel = fibreRows.map((item) =>
+      unique(item.member_state_ids).sort(compareUnicodeCodePoints)
+    ).sort(compareStringArrays);
+    const section = Object.create(null);
+    for (const fibre of fibreRows) {
+      for (const stateId of unique(fibre.member_state_ids)) {
+        section[stateId] = asText(fibre.id);
+      }
+    }
+
+    const translationEquations = [];
+    const rawTranslations = Array.isArray(closure.translations) ? closure.translations : [];
+    for (const raw of rawTranslations.filter(isRecord)) {
+      const source = asText(raw.source_perspective_id);
+      const target = asText(raw.target_perspective_id);
+      const expected = Object.create(null);
+      let wellDefined = owns(readings, source) && owns(readings, target);
+      for (const stateId of carrier) {
+        const sourceValue = readings[source]?.[stateId];
+        const targetValue = readings[target]?.[stateId];
+        if (sourceValue === undefined || targetValue === undefined) {
+          wellDefined = false;
+          continue;
+        }
+        if (owns(expected, sourceValue) && expected[sourceValue] !== targetValue) {
+          wellDefined = false;
+        }
+        expected[sourceValue] = targetValue;
+      }
+      const supplied = Object.create(null);
+      if (isRecord(raw.display_translation)) {
+        for (const [key, value] of Object.entries(raw.display_translation)) {
+          supplied[asText(key)] = asText(value);
+        }
+      }
+      const expectedKeys = Object.keys(expected);
+      const faithful = wellDefined
+        && Boolean(raw.id)
+        && source !== target
+        && stable(supplied) === stable(expected)
+        && new Set(expectedKeys).size === new Set(expectedKeys.map((key) => expected[key])).size
+        && stable(kernels[source] || []) === stable(kernels[target] || []);
+      translationEquations.push({
+        id: asText(raw.id),
+        source_perspective_id: source,
+        target_perspective_id: target,
+        derived_hair_relabelling: expected,
+        source_kernel: kernels[source] || [],
+        target_kernel: kernels[target] || [],
+        translation_equation_holds: faithful,
+      });
+    }
+    const translationGraph = new Map(
+      perspectiveIds.map((perspective) => [perspective, new Set()]),
+    );
+    for (const equation of translationEquations) {
+      if (!equation.translation_equation_holds) continue;
+      translationGraph.get(equation.source_perspective_id).add(
+        equation.target_perspective_id,
+      );
+      translationGraph.get(equation.target_perspective_id).add(
+        equation.source_perspective_id,
+      );
+    }
+    const reachedPerspectives = new Set();
+    const perspectiveFrontier = perspectiveIds.length ? [perspectiveIds[0]] : [];
+    if (perspectiveFrontier.length) reachedPerspectives.add(perspectiveIds[0]);
+    while (perspectiveFrontier.length) {
+      const current = perspectiveFrontier.pop();
+      for (const neighbour of translationGraph.get(current)) {
+        if (!reachedPerspectives.has(neighbour)) {
+          reachedPerspectives.add(neighbour);
+          perspectiveFrontier.push(neighbour);
+        }
+      }
+    }
+    const translationFamilyConnected = perspectiveIds.length === 0
+      || reachedPerspectives.size === perspectiveIds.length;
+
+    const lineageIds = unique(contract.continuation_lineage_ids);
+    const lineageStates = unique(lineageIds.map((eventId) => stateByEvent[eventId]));
+    const lineageSet = new Set(lineageStates);
+    const arenaOrder = [...lineageStates, ...carrier.filter((stateId) => !lineageSet.has(stateId))];
+    const growthStages = [];
+    let previousDistinctions = 0;
+    let previousSquare = true;
+    const sectionCounts = new Map();
+    const sectionMembers = new Map();
+    const readingCounts = new Map(
+      perspectiveIds.map((perspective) => [perspective, new Map()]),
+    );
+    const readingMembers = new Map(
+      perspectiveIds.map((perspective) => [perspective, new Map()]),
+    );
+    for (const [rawIndex, stateId] of arenaOrder.entries()) {
+      const index = rawIndex + 1;
+      const sectionValue = owns(section, stateId) ? section[stateId] : null;
+      const sectionKey = sectionValue === null ? "None" : asText(sectionValue);
+      const equalPriorCount = sectionCounts.get(sectionKey) || 0;
+      const equalPriorStateIds = sectionMembers.get(sectionKey) || [];
+      const translatedValues = Object.create(null);
+      const translatedEqualCounts = Object.create(null);
+      const translatedEqualStateIds = Object.create(null);
+      for (const perspective of perspectiveIds) {
+        const value = owns(readings[perspective], stateId)
+          ? readings[perspective][stateId] : null;
+        translatedValues[perspective] = value;
+        const readingKey = value === null ? "None" : asText(value);
+        translatedEqualCounts[perspective] = readingCounts.get(perspective).get(readingKey) || 0;
+        translatedEqualStateIds[perspective] = readingMembers.get(perspective).get(readingKey) || [];
+      }
+      const closurePriorDigest = await digest("arena-fibre", equalPriorStateIds);
+      const translatedPriorDigests = Object.create(null);
+      for (const perspective of perspectiveIds) {
+        translatedPriorDigests[perspective] = await digest(
+          "arena-fibre", translatedEqualStateIds[perspective],
+        );
+      }
+      const newDistinctions = index - 1 - equalPriorCount;
+      const pairAgreement = sectionValue !== null && perspectiveIds.every(
+        (perspective) => translatedValues[perspective] !== null
+          && translatedPriorDigests[perspective] === closurePriorDigest,
+      );
+      const squareCommutes = previousSquare && pairAgreement;
+      const distinctions = previousDistinctions + newDistinctions;
+      growthStages.push({
+        index,
+        arena_size: index,
+        added_state_id: stateId,
+        pull_map_entry: [stateId, stateId],
+        translated_reading_values: translatedValues,
+        translated_equal_prior_counts: translatedEqualCounts,
+        translated_equal_prior_digests: translatedPriorDigests,
+        closure_section_value: sectionValue,
+        closure_equal_prior_count: equalPriorCount,
+        closure_equal_prior_digest: closurePriorDigest,
+        new_distinctions: newDistinctions,
+        naturality_square_commutes: squareCommutes,
+        distinction_count: distinctions,
+        prior_distinctions_preserved: newDistinctions >= 0,
+        strictly_grows: newDistinctions > 0,
+        at_full_reach: index === arenaOrder.length,
+      });
+      sectionCounts.set(sectionKey, equalPriorCount + 1);
+      if (!sectionMembers.has(sectionKey)) sectionMembers.set(sectionKey, []);
+      sectionMembers.get(sectionKey).push(stateId);
+      for (const perspective of perspectiveIds) {
+        const value = translatedValues[perspective];
+        const readingKey = value === null ? "None" : asText(value);
+        const counts = readingCounts.get(perspective);
+        counts.set(readingKey, (counts.get(readingKey) || 0) + 1);
+        const members = readingMembers.get(perspective);
+        if (!members.has(readingKey)) members.set(readingKey, []);
+        members.get(readingKey).push(stateId);
+      }
+      previousSquare = squareCommutes;
+      previousDistinctions = distinctions;
+    }
+
+    const allSquares = growthStages.every((stage) => stage.naturality_square_commutes);
+    const allGrowth = growthStages.every((stage) => stage.prior_distinctions_preserved);
+    const fullReach = carrier.length === 0 || (
+      growthStages.at(-1)?.at_full_reach === true
+      && growthStages.at(-1)?.arena_size === carrier.length
+      && stable(projectionKernel) === stable(commonKernel)
+    );
+    const finiteChecked = status !== "WITNESSED" || (
+      carrier.length > 0
+      && perspectiveIds.length > 0
+      && kernelsAgree
+      && activeReadingIsProjection
+      && stable(projectionKernel) === stable(commonKernel)
+      && translationFamilyConnected
+      && sameMembers(Object.keys(section), carrier)
+      && translationEquations.every((item) => item.translation_equation_holds)
+      && allSquares && allGrowth && fullReach
+    );
+    return {
+      protocol: "closure.supernet/closure-naturality-equations-v1",
+      formal_module: "NRRF866ClosureNaturalityIsTranslationalTruthIsTheGrowthOfTheUniverse",
+      formal_source_verified_by_runtime: false,
+      runtime_reproves_lean: false,
+      status,
+      active_perspective_id: contract.perspective_id ?? null,
+      interactive_translation_id: contract.interactive_translation_id ?? null,
+      operators: {
+        chart: "EXPLICIT_PERSPECTIVE_READING",
+        hair_action: "FAITHFUL_DISPLAY_RELABELING",
+        pull: "RESTRICT_READING_ALONG_ARENA_MAP",
+        natural_form: "CANONICAL_READING_KERNEL_SECTION",
+        closure_fibre: "EQUALITY_OF_NATURAL_FORMS",
+      },
+      equations: {
+        pull_identity: "pull(id,c)=c",
+        pull_composition: "pull(g,pull(f,c))=pull(f∘g,c)",
+        naturality_square: "naturalForm(o,pull(f,c))=pull(f,naturalForm(f(o),c))",
+        translation_truth: "closure(c)=closure(d) iff d=hairAct(h,c)",
+        growth: "agreement(W)<=agreement(V) along f:W→V",
+      },
+      finite_instance: {
+        carrier_state_ids: carrier,
+        perspective_ids: perspectiveIds,
+        reading_kernels: kernels,
+        closure_fibres: commonKernel,
+        natural_form_section: section,
+        translation_equations: translationEquations,
+        growth_order: arenaOrder,
+        pull_growth_stages: growthStages,
+      },
+      checks: {
+        translated_readings_have_one_closure: kernelsAgree,
+        active_reading_is_projection: activeReadingIsProjection,
+        translation_family_connected: translationFamilyConnected,
+        closure_fibres_are_translation_classes: stable(projectionKernel) === stable(commonKernel)
+          && translationFamilyConnected,
+        closure_is_canonical_section: sameMembers(Object.keys(section), carrier),
+        all_translation_equations_hold: translationEquations.every((item) => item.translation_equation_holds),
+        all_pull_naturality_squares_commute: allSquares,
+        distinctions_only_grow_with_arena: allGrowth,
+        growth_saturates_at_reach: fullReach,
+        strict_growth_witnessed: growthStages.some((stage) => stage.strictly_grows),
+        finite_runtime_instance_checked: finiteChecked,
+      },
+      boundary: {
+        runtime_is_finite_quotient_instance: true,
+        lean_theorems_are_not_reproved_by_runtime: true,
+        universe_growth_is_relational_arena_growth: true,
+        physical_cosmology_claimed: false,
+        truth_issued: false,
+      },
+    };
+  }
+
+  async function closureNaturalityEquationsMatch(contract) {
+    const supplied = contract.closure_naturality_equations;
+    if (!isRecord(supplied)) return false;
+    const body = await deriveClosureNaturalityEquations(contract);
+    const suppliedBody = Object.fromEntries(
+      Object.entries(supplied).filter(([key]) => key !== "id"),
+    );
+    if (stable(suppliedBody) !== stable(body)) return false;
+    return supplied.id === await digest("closure-naturality-equations", body);
+  }
+
   function perspectiveClosureMatches(contract, projection) {
     const closure = contract.perspective_closure;
     if (!isRecord(closure)) return false;
@@ -644,6 +934,8 @@ svg {
         && sourceReturnIds.includes(contract.focus_event_id)
         && lineageIds.at(-1) !== contract.focus_event_id) return false;
     const witnessedStatus = translated ? "WITNESSED" : contract.status;
+    const naturality = isRecord(contract.closure_naturality_equations)
+      ? contract.closure_naturality_equations : {};
     const expected = {
       formal_interpretation: {
         module: "NRRF858ConsciousNatureRelativeAxiomsProofsUnderstandingClosuresTranslationalTruthContinuingExistence",
@@ -724,8 +1016,20 @@ svg {
           one_token_closure_limit_preserved: true,
         },
       },
+      closure_naturality_growth: {
+        formal_module: "NRRF866ClosureNaturalityIsTranslationalTruthIsTheGrowthOfTheUniverse",
+        formal_theorem: "closure_naturality_is_translational_truth_is_the_growth_of_the_universe",
+        equation_protocol: "closure.supernet/closure-naturality-equations-v1",
+        equation_system_id: naturality.id ?? null,
+        interactive_translation_id: naturality.interactive_translation_id ?? null,
+        runtime_checks: isRecord(naturality.checks) ? {...naturality.checks} : {},
+        finite_runtime_instance_only: true,
+        lean_theorems_reproved_by_python: false,
+      },
       latent_interactive_interface: {
         latent_structure: "VERIFIED_CLOSURE_RELATION",
+        latent_equation_system_id: naturality.id ?? null,
+        all_interface_relations_factor_through_closure_equations: true,
         visible_projection_is_derived: true,
         local_perspective_hair_is_mutable: true,
         local_modification_is_potential_until_commit: true,
@@ -755,9 +1059,11 @@ svg {
     if (!statuses.has(contract.status)) return false;
     const renderer = contract.renderer_relation || {};
     if (renderer.role !== "TRANSLATIONAL_RELATION_EVALUATOR") return false;
-    if (renderer.input !== "ACTIVE_PERSPECTIVE_RELATION_ONLY") return false;
+    if (renderer.input !== "INTERACTIVE_TRANSLATION_OF_CLOSURE_EQUATIONS_ONLY") return false;
     if (renderer.visible_words_source !== "SOURCE_RETURNS_ONLY") return false;
-    if (renderer.natural_form_constraint !== "TRANSLATED_READING_KERNEL") return false;
+    if (renderer.geometry_source !== "CLOSURE_EQUATION_FIBRES_AND_PULL_SQUARES_ONLY") return false;
+    if (renderer.natural_form_constraint !== "NRRF866_INTERACTIVE_CLOSURE_EQUATION_SYSTEM") return false;
+    if (renderer.equation_system_required !== true) return false;
     if (renderer.geometry_acceptance !== "EXACT_LOCAL_CLOSURE_REDERIVATION") return false;
     if (renderer.successor_acceptance !== "VERIFIED_CLOSURE_BEFORE_INTERFACE_COMMIT") return false;
     if (renderer.latent_structure !== "VERIFIED_CLOSURE_RELATION") return false;
@@ -941,7 +1247,11 @@ svg {
     active = validate(contract) && verifiedContracts.has(contract) ? contract : null;
     mount.replaceChildren();
     mount.dataset.state = active ? active.status : "OPEN_TRUTH_CONSTRAINT";
+    delete mount.dataset.closureEquationSystemId;
+    delete mount.dataset.closureNaturality;
     if (!active) return;
+    mount.dataset.closureEquationSystemId = active.closure_naturality_equations.id;
+    mount.dataset.closureNaturality = "PULL_SQUARES_AND_ARENA_GROWTH";
     const projection = active.projection;
     const visualization = locallyDerivedVisualizations.get(active);
     if (!visualization) { active = null; return; }
@@ -1028,6 +1338,7 @@ svg {
   async function verifyContract(contract) {
     try {
       if (!validate(contract)
+          || !await closureNaturalityEquationsMatch(contract)
           || !await visualizationMatches(contract)
           || !await contractIdMatchesContent(contract)) return false;
       verifiedContracts.add(contract);
@@ -1094,6 +1405,7 @@ svg {
     try {
       const localProjectionCommitment = await digest("local-projection", {
         contract_id: submittedContract.id,
+        closure_equation_system_id: submittedContract.closure_naturality_equations.id,
         return_relation_id: relation.id,
         perspective_id: submittedContract.perspective_id,
         focus_event_id: submittedContract.focus_event_id,
@@ -1110,6 +1422,7 @@ svg {
           perspective_id: submittedContract.perspective_id,
           focus_event_id: submittedContract.focus_event_id,
           exact_source_return: exactSourceReturn,
+          closure_equation_system_id: submittedContract.closure_naturality_equations.id,
           local_projection_commitment: localProjectionCommitment,
           local_perspective_hair_millidegrees: submittedHair,
           source_stream: "full-surface-interaction",
@@ -1132,6 +1445,7 @@ svg {
       const committed = payload.committed_local_projection || {};
       if (committed.id !== localProjectionCommitment
           || committed.latent_contract_id !== submittedContract.id
+          || committed.closure_equation_system_id !== submittedContract.closure_naturality_equations.id
           || committed.perspective_id !== submittedContract.perspective_id
           || committed.focus_event_id !== submittedContract.focus_event_id
           || committed.hair_millidegrees !== submittedHair

@@ -71,6 +71,9 @@ def return_request(
         "perspective_id": contract["perspective_id"],
         "focus_event_id": contract["focus_event_id"],
         "exact_source_return": exact_source,
+        "closure_equation_system_id": contract[
+            "closure_naturality_equations"
+        ]["id"],
         "source_stream": source_stream,
     }
     payload["local_projection_commitment"] = derive_local_projection_commitment(
