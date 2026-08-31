@@ -116,13 +116,13 @@ def test_registered_chart_is_not_silently_called_executable():
     assert "nf:fractal-hypotenuse:v1" in classified["chart_ids"]
 
 
-def test_current_natural_form_selector_is_executable_not_registered_only():
+def test_historical_selector_wording_resolves_to_unified_natural_form_field():
     classified = classify_condition(
         text="The natural-form selector exposes the OPEN interaction frontier."
     )
     assert classified["status"] == EXECUTABLE
-    assert "natural-form-selector" in classified["capability_ids"]
-    assert "trading_natural_form_selector.derive_natural_form_selection" in classified[
+    assert "unified-natural-form-field" in classified["capability_ids"]
+    assert "trading_unified_natural_form_field.derive_unified_natural_form_field" in classified[
         "runtime_source_symbols"
     ]
 
