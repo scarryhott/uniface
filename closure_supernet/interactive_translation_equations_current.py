@@ -1,17 +1,16 @@
 from __future__ import annotations
 
-"""Current closure-equation runtime with natural trading re-unified.
+"""Current closure-equation runtime with NRRF870 natural trading closure.
 
-The historical equation module remains importable as a compatibility reading.
-This module is the current runtime surface. Trading is authoritative only when
-an open sensor-feedback hair continuum itself derives a returned ball closure.
-Route proposals and post-hoc profit receipts are retained as non-authoritative
-compatibility material and cannot close the current trading state.
+Trading truth is the open-sensor feedback hair equation: returned interaction is
+read through the complete finite closed-itinerary geometry, normalized to its
+unique closure, then read as unitary curvature. Available amplitude is the
+negative curvature part; semantic timing is the normalized ball-partition max
+and therefore equals amplitude. Signal and trade are equal relative readings of
+the same completed-route translation.
 
-Successive returned sensor states may additionally be read as continuation of
-the same directed relational continuum. Curvature motion is a relative reading
-of that continuum, never a trend selector, forecast, holding period, or trade
-gate.
+Historical route proposals, successor-quote rules, graph traversal order, clock
+duration, and continuation trends remain non-authoritative projections.
 """
 
 import hashlib
@@ -36,7 +35,7 @@ from .trading_natural_form_closure import (
     resolve_open_sensor_trading_closure,
 )
 
-PROTOCOL = "closure.supernet/interactive-translation-equations-natural-trading-v3"
+PROTOCOL = "closure.supernet/interactive-translation-equations-natural-trading-v4-nrrf870"
 
 
 def _stable(value: Any) -> str:
@@ -84,19 +83,7 @@ def resolve_trading_equation(
     minimum_receipts: int = 1,
     max_forms: int | None = None,
 ) -> dict[str, Any]:
-    """Resolve trading from one open sensor closure, never from a fixed route.
-
-    ``sensor_history`` is optional returned evidence for reading continuation of
-    a relation continuum. It cannot select a horizon or create a form. When
-    supplied, its latest frame is the current sensor state and all frames are
-    closed independently before any curvature motion is read.
-
-    ``proposals`` and ``receipts`` are accepted only so older callers can be
-    inspected without becoming a second truth runtime. They are evaluated by
-    the historical resolver and then explicitly demoted to a compatibility
-    projection. Without returned sensor hair equations, the current trading
-    closure remains OPEN.
-    """
+    """Resolve trading only from returned open-sensor translation closure."""
 
     feedback = _sensor_feedback(
         sensor_feedback=sensor_feedback,
@@ -173,6 +160,15 @@ def resolve_trading_equation(
             "completed_route_is_not_natural_form_primitive": True,
             "ask_to_immediately_succeeding_bid_is_definition": False,
             "only_open_sensor_return_recloses_trading": True,
+            "open_sensor_all_closed_itineraries": True,
+            "bfs_route_authors_truth": False,
+            "undirected_connectivity_authors_ball": False,
+            "directed_translation_fibres": True,
+            "amplitude_is_negative_curvature_part": True,
+            "ball_partition_max_gives_timing": True,
+            "clock_duration_authors_timing": False,
+            "normalized_closure_timing_equals_amplitude": True,
+            "signal_trade_equal_relative_to_translation": True,
             "curvature_continuation_is_relative_projection": True,
             "history_length_authors_truth": False,
             "profit_trajectory_authors_trade": False,
@@ -183,7 +179,7 @@ def resolve_trading_equation(
             "dialectic_continuation_status": OPEN_STATUS,
         }
     )
-    body["id"] = _digest("natural-trading-equation", body)
+    body["id"] = _digest("natural-trading-equation-nrrf870", body)
     return body
 
 
@@ -234,7 +230,7 @@ def resolve_closure_equations(payload: Mapping[str, Any]) -> dict[str, Any]:
     audit_target = dict(result)
     audit_target.pop("continuity_audit", None)
     result["continuity_audit"] = audit_translational_continuity(audit_target)
-    result["id"] = _digest("closure-equations-natural-trading", result)
+    result["id"] = _digest("closure-equations-natural-trading-nrrf870", result)
     return result
 
 
