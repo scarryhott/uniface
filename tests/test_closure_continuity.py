@@ -13,8 +13,6 @@ def _truth():
     return {
         "id": "truth:1",
         "visual_truth_closure": {"id": "visual:1"},
-        # Deliberately false materialized status flags: the refactor must
-        # recompute closure rather than trust them.
         "status": "OPEN",
         "supernet_open": True,
         "natural_forms": [
@@ -70,10 +68,10 @@ def _derive(ui, journey, **compatibility):
     )
 
 
-def test_explicit_source_choice_and_partition_recompute_witness_closure():
+def test_source_choice_without_returned_interaction_remains_open():
     result = _derive(_ui("equal"), _journey())
-    assert result["status"] == WITNESSED_STATUS
-    assert result["translational_continuity"]["translational_truth_witnessed"] is True
+    assert result["status"] == OPEN_STATUS
+    assert result["translational_continuity"]["translational_truth_witnessed"] is False
     assert result["unification_constraint"]["stored_status_flags_used_as_evidence"] is False
     assert result["existence_closed"] is False
     assert result["dialectic_continuation_status"] == OPEN_STATUS
@@ -113,7 +111,7 @@ def test_parallel_compatibility_products_cannot_author_interaction_truth():
         tokenomic={"status": "CLOSED", "arbitrary": 3},
         network_return={"status": "FAILED", "arbitrary": 4},
     )
-    assert left["status"] == right["status"] == WITNESSED_STATUS
+    assert left["status"] == right["status"] == OPEN_STATUS
     assert left["translational_truth_id"] == right["translational_truth_id"]
     assert all(
         receipt["semantic_authority"] is False

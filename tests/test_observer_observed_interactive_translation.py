@@ -22,10 +22,10 @@ def test_interaction_is_primitive_and_closure_equations_are_derived():
     assert result["return_is_primitive"] is False
     assert result["closure_equations_derived"] is True
     ab = next(row for row in result["interactions"] if row["id"] == "ab")
-    ac = next(row for row in result["interactions"] if row["id"] == "ac")
     assert ab["translation_relation_witnessed"] is True
     assert ab["closure_preserved_after_translation"] is True
-    assert ac["translation_relation_witnessed"] is False
+    assert "ac" in result["open_visual_edge_ids"]
+    assert result["raw_visual_adjacency_authors_truth"] is False
 
 
 def test_return_is_witness_not_fixed_semantics():
