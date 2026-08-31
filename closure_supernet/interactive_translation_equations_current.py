@@ -7,12 +7,11 @@ interaction is read through complete closed-itinerary geometry, normalized to
 its unique closure, and quotiented by translational truth. There is no second
 trajectory, trend, tolerance, forecast, or inter-class dynamics law.
 
-Accumulated interaction can only refine the truth partition:
-- equal normalized natural forms are one ball / hair orbit / truth class;
-- distinct normalized natural forms remain distinct truths;
-- OPEN interaction contributes no synthetic truth;
-- profit is discovered only when a currently returned natural form is itself
-  profitable.
+The natural-form selector is also a pure reading of translational truth. It may
+select what interaction to OPEN next, but it cannot select what the return will
+mean. Profitable returned natural forms select themselves; otherwise OPEN exposes
+the minimal return-generated closure frontier, or a generic relation-space
+extension when the known returned space is saturated.
 """
 
 import hashlib
@@ -35,11 +34,12 @@ from .trading_natural_form_closure import (
     PROTOCOL as TRADING_PROTOCOL,
     resolve_open_sensor_trading_closure,
 )
+from .trading_natural_form_selector import derive_natural_form_selection
 from .trading_translational_truth_partition import (
     derive_translational_truth_partition,
 )
 
-PROTOCOL = "closure.supernet/interactive-translation-equations-trading-translational-truth-alone-v6"
+PROTOCOL = "closure.supernet/interactive-translation-equations-trading-natural-form-selector-v7"
 
 
 def _stable(value: Any) -> str:
@@ -87,7 +87,7 @@ def resolve_trading_equation(
     minimum_receipts: int = 1,
     max_forms: int | None = None,
 ) -> dict[str, Any]:
-    """Resolve trading from returned interaction using translational truth alone."""
+    """Resolve truth, then derive its natural-form interaction frontier."""
 
     feedback = _sensor_feedback(
         sensor_feedback=sensor_feedback,
@@ -117,6 +117,7 @@ def resolve_trading_equation(
         if history
         else None
     )
+    natural_selection = derive_natural_form_selection(natural_closure=natural)
 
     current_profit_truth_witnessed = any(
         form.get("orientation") == "PROFITABLE"
@@ -131,11 +132,15 @@ def resolve_trading_equation(
     body = dict(natural)
     body["protocol"] = PROTOCOL
     body["natural_trading_protocol"] = TRADING_PROTOCOL
-    # Kept only as a compatibility field. The authoritative runtime no longer
-    # computes a separate continuation/trajectory object.
+    # Historical continuation remains compatibility-only. Current dynamics are
+    # returned interaction -> truth -> natural-form OPEN selection -> return.
     body["closure_continuation"] = None
     body["translational_truth_partition"] = truth_partition
     body["translational_truth_learning"] = truth_partition
+    body["natural_form_selection"] = natural_selection
+    body["selected_interactions"] = list(
+        natural_selection.get("selected_interactions", [])
+    )
     body["current_profit_truth_witnessed"] = current_profit_truth_witnessed
     body["learned_profit"] = learned_profit
 
@@ -208,13 +213,20 @@ def resolve_trading_equation(
             "profit_learning_is_discovery_not_prediction": True,
             "positive_profit_requires_current_returned_truth": True,
             "positive_crossing_requires_current_execution_return": True,
+            "natural_form_selects_interaction": True,
+            "selection_is_set_valued": True,
+            "selection_authors_truth": False,
+            "open_boundary_is_interaction_frontier": True,
+            "profit_selection_requires_returned_positive_amplitude": True,
+            "external_strategy_selector_present": False,
+            "predeclared_candidate_graph_present": False,
             "configuration_authors_truth": False,
             "computation_bounds_author_truth": False,
             "existence_closed": False,
             "dialectic_continuation_status": OPEN_STATUS,
         }
     )
-    body["id"] = _digest("natural-trading-equation-translational-truth-alone", body)
+    body["id"] = _digest("natural-trading-equation-natural-form-selector", body)
     return body
 
 
@@ -224,9 +236,12 @@ def resolve_closure_equations(payload: Mapping[str, Any]) -> dict[str, Any]:
     result: dict[str, Any] = {
         "protocol": PROTOCOL,
         "equation": (
-            "Q_(t+1)=Close(Q_t + Translate(observer_t, returned_interaction_t))"
+            "Q_(t+1)=Close(Q_t + Translate(observer_t, returned_interaction_t)); "
+            "NaturalSelect(Q_t)=ProfitNaturalForms(Q_t) or OPENBoundary(Q_t)"
         ),
         "translational_truth_alone": True,
+        "natural_form_selects_interaction": True,
+        "selection_authors_truth": False,
         "proposal_status": OPEN_STATUS,
         "only_returned_interaction_recloses": True,
         "separate_dynamics_law_present": False,
@@ -267,7 +282,7 @@ def resolve_closure_equations(payload: Mapping[str, Any]) -> dict[str, Any]:
     audit_target = dict(result)
     audit_target.pop("continuity_audit", None)
     result["continuity_audit"] = audit_translational_continuity(audit_target)
-    result["id"] = _digest("closure-equations-translational-truth-alone", result)
+    result["id"] = _digest("closure-equations-natural-form-selector", result)
     return result
 
 
