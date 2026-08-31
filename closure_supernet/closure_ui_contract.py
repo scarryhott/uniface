@@ -1,22 +1,30 @@
 from __future__ import annotations
 
-"""Atlas-aware closure UI contract.
+"""Proof-indexed atlas-aware closure UI contract.
 
-The previous contract remains the finite closure renderer and verification
-kernel. This wrapper changes the semantic carrier: the rendered ball/fibre
-projection is a locally compatible chart inside a versioned natural-form atlas.
-The UI receipt therefore carries the glued compatible sub-atlas and preserves
-OPEN chart translations without promoting historical resemblance to equality.
+The finite renderer remains the existing closure/naturality evaluator.  This
+wrapper changes the semantic carrier to the complete versioned natural-form
+atlas and seals every projection with the formal Lean proof index plus the final
+Supernet closure certificate.  OPEN remains a valid unresolved relation inside
+closure; it is not a missing subsystem or a reason to invent a final form.
 """
 
 from typing import Any, Mapping
 
 from . import closure_ui_contract_legacy as _legacy
+from .formal_proof_index import (
+    derive_formal_proof_index,
+    validate_formal_proof_index,
+)
 from .natural_form_atlas import (
     UI_PROTOCOL as ATLAS_UI_PROTOCOL,
     derive_glued_ui_subatlas,
     derive_versioned_natural_form_atlas,
     validate_versioned_natural_form_atlas,
+)
+from .supernet_closure_certificate import (
+    derive_supernet_closure_certificate,
+    validate_supernet_closure_certificate,
 )
 
 PROTOCOL = _legacy.PROTOCOL
@@ -44,9 +52,12 @@ def _seal_with_atlas(
     atlas: Mapping[str, Any],
 ) -> dict[str, Any]:
     body = dict(contract)
-    body.pop("id", None)
+    for key in ("id", "formal_proof_index", "supernet_closure_certificate"):
+        body.pop(key, None)
     body["natural_form_atlas"] = dict(atlas)
     body["glued_ui_subatlas"] = derive_glued_ui_subatlas(atlas)
+    proof_index = derive_formal_proof_index(atlas)
+    body["formal_proof_index"] = proof_index
     body["atlas_semantics"] = {
         "ui_is_locally_glued_atlas": True,
         "edge_is_ongoing_view_transport": True,
@@ -56,9 +67,18 @@ def _seal_with_atlas(
         "historical_form_meaning_may_be_replaced_without_return": False,
         "cross_form_equality_requires_source_preserving_return": True,
         "open_cross_form_relations_remain_navigable": True,
+        "formal_proof_index_required": True,
+        "archive_audit_gates_supernet_closure": False,
+        "open_relation_breaks_supernet_closure": False,
         "atlas_ui_protocol": ATLAS_UI_PROTOCOL,
         "truth_issued": False,
     }
+    certificate = derive_supernet_closure_certificate(
+        atlas=atlas,
+        formal_proof_index=proof_index,
+        ui_contract=body,
+    )
+    body["supernet_closure_certificate"] = certificate
     body["id"] = _legacy._digest("translational-visualization", body)
     return body
 
@@ -157,26 +177,68 @@ def validate_ui_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
         and semantics.get("cross_form_equality_requires_source_preserving_return")
         is True
         and semantics.get("open_cross_form_relations_remain_navigable") is True
+        and semantics.get("formal_proof_index_required") is True
+        and semantics.get("archive_audit_gates_supernet_closure") is False
+        and semantics.get("open_relation_breaks_supernet_closure") is False
         and semantics.get("truth_issued") is False
     )
+
+    proof_index = contract.get("formal_proof_index")
+    proof_validation = (
+        validate_formal_proof_index(proof_index, atlas=atlas)
+        if isinstance(proof_index, Mapping) and isinstance(atlas, Mapping)
+        else {"valid": False, "errors": ["formal-proof-index:missing"]}
+    )
+    certificate = contract.get("supernet_closure_certificate")
+    certificate_validation = (
+        validate_supernet_closure_certificate(
+            certificate,
+            atlas=atlas,
+            formal_proof_index=proof_index,
+            ui_contract=contract,
+        )
+        if isinstance(certificate, Mapping)
+        and isinstance(atlas, Mapping)
+        and isinstance(proof_index, Mapping)
+        else {"valid": False, "errors": ["supernet-closure:missing"]}
+    )
+
     atlas_errors = list(atlas_validation.get("errors", []))
     if not glue_matches:
         atlas_errors.append("atlas-ui:glue-mismatch")
     if not semantics_valid:
         atlas_errors.append("atlas-ui:semantics")
+    atlas_errors.extend(proof_validation.get("errors", []))
+    atlas_errors.extend(certificate_validation.get("errors", []))
+
     legacy["natural_form_atlas_valid"] = bool(atlas_validation.get("valid"))
     legacy["glued_ui_subatlas_matches_atlas"] = glue_matches
+    legacy["formal_proof_index_valid"] = bool(proof_validation.get("valid"))
+    legacy["supernet_closure_certificate_valid"] = bool(
+        certificate_validation.get("valid")
+    )
+    legacy["supernet_closed"] = bool(
+        isinstance(certificate, Mapping) and certificate.get("supernet_closed") is True
+    )
     legacy["interface_is_glued_versioned_subatlas"] = bool(
-        atlas_validation.get("valid") and glue_matches and semantics_valid
+        atlas_validation.get("valid")
+        and glue_matches
+        and semantics_valid
+        and proof_validation.get("valid")
+        and certificate_validation.get("valid")
     )
     legacy["closure_ball_is_master_container"] = False
     legacy["cross_form_equality_requires_source_preserving_return"] = True
+    legacy["archive_audit_gates_supernet_closure"] = False
+    legacy["open_relations_are_part_of_closure"] = True
     legacy["atlas_errors"] = atlas_errors
     legacy["valid"] = bool(
         legacy.get("valid")
         and atlas_validation.get("valid")
         and glue_matches
         and semantics_valid
+        and proof_validation.get("valid")
+        and certificate_validation.get("valid")
     )
     return legacy
 

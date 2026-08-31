@@ -1,19 +1,32 @@
 # Archive-to-runtime closure audit
 
-Supernet now has a deterministic audit surface for the stronger claim that the historical ontology has been preserved rather than merely summarized.
+Supernet retains a deterministic archive audit for the stronger historical-forensics question: whether every semantic condition in a supplied export has been individually classified. It is **diagnostic**, not the semantic authority that closes Supernet.
 
-## Closure distinction
+The authoritative Supernet closure is proof-indexed:
 
-The audit separates two claims:
+```text
+known/versioned natural-form atlas
++ indexed Lean witnesses
++ source-preserving returned translations
++ preserved OPEN relations
++ UI = Glue(compatible sub-atlas)
+```
+
+The archive therefore cannot gate `supernet_closed`. It can only report additional historical coverage against exact supplied bytes.
+
+## Audit distinction
+
+The audit separates two archive-local claims:
 
 ```text
 historical_inventory_closed
-    every detected Supernet semantic condition has a classification;
-    OPEN is allowed and MISSING is not.
+    every detected Supernet semantic condition in this supplied archive
+    has a classification; OPEN is allowed and MISSING is not.
 
 runtime_execution_closed
-    every detected condition is EXECUTABLE or WITNESSED;
-    REGISTERED, OPEN, and MISSING block this stronger claim.
+    every detected condition in this supplied archive is EXECUTABLE or
+    WITNESSED; REGISTERED, OPEN, and MISSING block this stronger archive-local
+    execution claim.
 ```
 
 The five classifications are:
@@ -28,7 +41,7 @@ The five classifications are:
 
 ## Source integrity
 
-The parser binds the receipt to the exact archive bytes with SHA-256 and checks both exported header totals: `Conversations with user messages` and `User messages`. A mismatch prevents historical inventory closure.
+The parser binds the receipt to the exact archive bytes with SHA-256 and checks both exported header totals: `Conversations with user messages` and `User messages`. A mismatch prevents that archive's inventory closure.
 
 Conversation boundaries are recognized only when an exported `##` title is immediately followed by its `Conversation ID` line. Markdown headings inside user messages therefore remain source text rather than becoming false conversations.
 
@@ -40,13 +53,13 @@ Only then does the archive condition classify as `WITNESSED`.
 
 ## Runtime use
 
-Run the complete receipt:
+Run the complete archive receipt:
 
 ```bash
 closure-supernet-audit user_inputs_only.md --output archive_closure_audit.json
 ```
 
-Print only its closure summary:
+Print only its archive-local summary:
 
 ```bash
 closure-supernet-audit user_inputs_only.md --summary
@@ -62,6 +75,13 @@ closure-supernet-audit user_inputs_only.md \
 
 The audit is deterministic text/registry matching. It does not use embeddings or a semantic-similarity model to manufacture historical equality.
 
-## Current archive boundary
+## Closure boundary
 
-The historical File Library contains a `user_inputs_only.md` export whose header states 42,683 user messages. A File Library reference is not a runtime filesystem path, so the repository must not claim that the full archive has already passed merely because it can be searched interactively. Until the exact archive bytes are supplied to `closure-supernet-audit`, the global `every historical condition is running` claim remains OPEN.
+A File Library reference is not a runtime filesystem path, so the audit must not claim to have processed bytes it did not receive. That limitation affects only the archive-forensics receipt. It does **not** hold the Supernet semantic closure OPEN.
+
+The runtime closure certificate explicitly requires:
+
+```text
+archive_audit_required_for_supernet_closure = false
+archive_audit_is_diagnostic_only = true
+```
