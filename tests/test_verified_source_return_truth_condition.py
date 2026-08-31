@@ -33,8 +33,6 @@ def _row(
         "target": target,
         "value": value,
         "hair_delta": hair_delta,
-        # Deliberately include all historical caller claims. In VERIFIED mode
-        # none of these is sufficient without the signed source witness.
         "source_ids": [f"caller:{return_id}"],
         "returned": True,
         "authenticated": True,
@@ -74,16 +72,24 @@ def _sign(
     return result
 
 
+def _atlas_row() -> dict[str, object]:
+    return {
+        "source_chart_id": "runtime-nf:truth",
+        "target_chart_id": "historical:family",
+        "returned": True,
+        "source_preserved": True,
+        "closure_commutes": True,
+        "return_preserved": True,
+        "source_return_ids": ["caller-id"],
+    }
+
+
 def test_unsigned_caller_flags_cannot_author_current_truth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv(PUBLIC_KEYS_ENV, raising=False)
     receipt = resolve_trading_equation(
         observer_id="o",
-        sensor_feedback=[
-            _row("a", "A", "B", "-3"),
-            _row("b", "B", "A", "2"),
-        ],
+        sensor_feedback=[_row("a", "A", "B", "-3"), _row("b", "B", "A", "2")],
     )
-
     assert receipt["source_return_truth_condition_enforced"] is True
     assert receipt["truth_requires_verified_source_witness"] is True
     assert receipt["caller_returned_flag_authors_truth"] is False
@@ -101,7 +107,6 @@ def test_signed_exact_source_returns_can_reclose_truth(monkeypatch: pytest.Monke
         _sign(_row("b", "B", "A", "2"), private=private, authority=authority),
     ]
     receipt = resolve_trading_equation(observer_id="o", sensor_feedback=feedback)
-
     assert receipt["status"] == "WITNESSED"
     assert receipt["source_truth_audit"]["feedback"]["verified_count"] == 2
     assert len(receipt["natural_forms"]) == 1
@@ -116,13 +121,10 @@ def test_tampering_with_signed_relation_value_forces_open(monkeypatch: pytest.Mo
     first = _sign(_row("a", "A", "B", "-3"), private=private, authority=authority)
     second = _sign(_row("b", "B", "A", "2"), private=private, authority=authority)
     first["value"] = "-300"
-
     receipt = resolve_trading_equation(observer_id="o", sensor_feedback=[first, second])
     assert receipt["status"] == "OPEN"
     assert receipt["natural_forms"] == []
-    reasons = {
-        row["reason"] for row in receipt["source_truth_audit"]["feedback"]["returns"]
-    }
+    reasons = {row["reason"] for row in receipt["source_truth_audit"]["feedback"]["returns"]}
     assert "SOURCE_WITNESS_SEMANTIC_MISMATCH" in reasons
 
 
@@ -132,7 +134,6 @@ def test_source_witness_is_observer_relative_and_not_replayable(monkeypatch: pyt
         _sign(_row("a", "A", "B", "-3"), private=private, authority=authority, observer_id="o"),
         _sign(_row("b", "B", "A", "2"), private=private, authority=authority, observer_id="o"),
     ]
-
     receipt = resolve_trading_equation(observer_id="other", sensor_feedback=feedback)
     assert receipt["status"] == "OPEN"
     assert receipt["natural_forms"] == []
@@ -147,10 +148,8 @@ def test_closed_hair_remains_presentation_and_needs_no_resigning(monkeypatch: py
     translated = [dict(base[0]), dict(base[1])]
     translated[0]["hair_delta"] = "5"
     translated[1]["hair_delta"] = "-5"
-
     left = resolve_trading_equation(observer_id="o", sensor_feedback=base)
     right = resolve_trading_equation(observer_id="o", sensor_feedback=translated)
-
     assert left["status"] == right["status"] == "WITNESSED"
     assert left["natural_forms"][0]["closure_id"] == right["natural_forms"][0]["closure_id"]
     assert left["natural_forms"][0]["natural_profit"] == right["natural_forms"][0]["natural_profit"] == "1"
@@ -158,15 +157,7 @@ def test_closed_hair_remains_presentation_and_needs_no_resigning(monkeypatch: py
 
 def test_unsigned_atlas_translation_cannot_author_family_admissibility(monkeypatch: pytest.MonkeyPatch) -> None:
     private, authority = _authority(monkeypatch)
-    raw = {
-        "source_chart_id": "runtime-nf:truth",
-        "target_chart_id": "historical:family",
-        "returned": True,
-        "source_preserved": True,
-        "closure_commutes": True,
-        "return_preserved": True,
-        "source_return_ids": ["caller-id"],
-    }
+    raw = _atlas_row()
     unsigned, audit = verify_atlas_translation_sources(observer_id="o", sources=[raw])
     assert audit["verified_count"] == 0
     assert unsigned[0]["returned"] is False
@@ -188,6 +179,40 @@ def test_unsigned_atlas_translation_cannot_author_family_admissibility(monkeypat
     assert verified[0]["source_return_ids"] == ["exact-source:atlas-1"]
 
 
+def test_nested_atlas_translation_is_verified_individually(monkeypatch: pytest.MonkeyPatch) -> None:
+    private, authority = _authority(monkeypatch)
+    raw = _atlas_row()
+    unsigned_source = {
+        "atlas_translations": [raw],
+        "source_witness": {"caller": "outer-container-witness-must-not-count"},
+    }
+    unsigned, audit = verify_atlas_translation_sources(observer_id="o", sources=[unsigned_source])
+    assert audit["nested_atlas_translations_verified_individually"] is True
+    assert audit["outer_container_witness_cannot_author_nested_translation"] is True
+    assert audit["verified_count"] == 0
+    nested_unsigned = unsigned[0]["atlas_translations"][0]
+    assert nested_unsigned["returned"] is False
+    assert nested_unsigned["source_preserved"] is False
+    assert "source_witness" not in unsigned[0]
+
+    signed_row = dict(raw)
+    signed_row["source_witness"] = issue_atlas_translation_witness(
+        private_key=private,
+        authority_id=authority,
+        observer_id="o",
+        source_event_id="exact-source:nested-atlas-1",
+        source_stream="test-atlas-feed",
+        row=raw,
+    )
+    verified, audit2 = verify_atlas_translation_sources(
+        observer_id="o", sources=[{"atlas_translations": [signed_row]}]
+    )
+    assert audit2["verified_count"] == 1
+    nested_verified = verified[0]["atlas_translations"][0]
+    assert nested_verified["returned"] is True
+    assert nested_verified["source_return_ids"] == ["exact-source:nested-atlas-1"]
+
+
 def test_external_resolver_forbids_formal_fixture_bypass() -> None:
     with pytest.raises(ValueError, match="require VERIFIED source truth"):
         resolve_closure_equations({
@@ -203,10 +228,7 @@ def test_formal_fixture_mode_is_explicit_direct_compatibility_only() -> None:
     receipt = resolve_trading_equation(
         observer_id="o",
         source_truth_mode="FORMAL_FIXTURE",
-        sensor_feedback=[
-            _row("a", "A", "B", "-3"),
-            _row("b", "B", "A", "2"),
-        ],
+        sensor_feedback=[_row("a", "A", "B", "-3"), _row("b", "B", "A", "2")],
     )
     assert receipt["status"] == "WITNESSED"
     assert receipt["source_return_truth_condition_enforced"] is False
