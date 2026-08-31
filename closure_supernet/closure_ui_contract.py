@@ -238,10 +238,19 @@ def _projective_visualization(
             projective_parameter = math.tan(phase / 2.0)
             x = centre_x + orbit * math.cos(phase)
             y = centre_y + orbit * 0.72 * math.sin(phase)
+        source_extent = sum(
+            len(str(state_by_id.get(str(state_id), {}).get("source_trace") or ""))
+            for state_id in fibre.get("member_state_ids", [])
+        )
         radius = min(
-            132.0,
-            54.0
-            + math.sqrt(max(1, len(fibre.get("member_state_ids", [])))) * 18.0,
+            190.0,
+            max(
+                72.0,
+                54.0
+                + math.sqrt(max(1, len(fibre.get("member_state_ids", []))))
+                * 18.0,
+                60.0 + math.sqrt(max(1, source_extent)) * 7.0,
+            ),
         )
         primitive = {
             "natural_form_id": fibre_id,

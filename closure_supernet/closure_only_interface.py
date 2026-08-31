@@ -251,7 +251,17 @@ svg {
         x = 500 + orbit * Math.cos(phase);
         y = 500 + orbit * .72 * Math.sin(phase);
       }
-      const radius = Math.min(132, 54 + Math.sqrt(Math.max(1, (fibre.member_state_ids || []).length)) * 18);
+      const members = (fibre.member_state_ids || [])
+        .map((stateId) => stateById.get(asText(stateId))).filter(Boolean);
+      const sourceExtent = members.reduce(
+        (total, member) => total + Array.from(asText(member.source_trace)).length,
+        0,
+      );
+      const radius = Math.min(190, Math.max(
+        72,
+        54 + Math.sqrt(Math.max(1, (fibre.member_state_ids || []).length)) * 18,
+        60 + Math.sqrt(Math.max(1, sourceExtent)) * 7,
+      ));
       fibrePrimitives.push({
         natural_form_id: fibreId,
         centre: [rounded(x), rounded(y)],
@@ -919,9 +929,9 @@ svg {
       sourceBlock(
         svg,
         x - traceWidth / 2,
-        y - primitive.radius * .55,
+        y - primitive.radius * .8,
         traceWidth,
-        primitive.radius * 1.25,
+        primitive.radius * 1.6,
         trace,
         "source-trace",
       );
