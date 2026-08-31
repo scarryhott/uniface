@@ -119,6 +119,7 @@ const statuses = new Set([
   "OPEN_TRUTH_CONSTRAINT",
   "WITNESSED",
 ]);
+const locallyDerivedVisualizations = new WeakMap();
 {functions}
 
 let input = "";
@@ -135,6 +136,7 @@ process.stdin.on("end", async () => {{
     results.push({{
       canonical: stable(body),
       id_matches: await contractIdMatchesContent(contract),
+      visualization_matches: await visualizationMatches(contract),
       boundary_and_structure_valid: validate(contract),
     }});
   }}
@@ -201,6 +203,7 @@ def test_browser_sha256_matches_python_and_both_rejection_gates(
     assert results[0]["id_matches"] is True
     assert results[0]["boundary_and_structure_valid"] is True
     assert results[1]["id_matches"] is True
+    assert results[1]["visualization_matches"] is True
     assert results[1]["boundary_and_structure_valid"] is True
 
     # The substitute source is structurally plausible.  Only recomputing the
@@ -216,7 +219,28 @@ def test_browser_sha256_matches_python_and_both_rejection_gates(
     assert validate_ui_contract(boundary_tamper)["valid"] is False
 
     assert "if (!validate(contract)" in CLOSURE_ONLY_SUPERNET_HTML
+    assert "!await visualizationMatches(contract)" in CLOSURE_ONLY_SUPERNET_HTML
     assert "!await contractIdMatchesContent(contract)" in CLOSURE_ONLY_SUPERNET_HTML
+
+
+def test_browser_rederives_exact_geometry_before_rendering(tmp_path: Path) -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node is required to execute the published browser verifier")
+
+    _, witnessed = actual_open_and_witnessed_contracts(tmp_path)
+    tampered = deepcopy(witnessed)
+    tampered["projection"]["visualization"]["fibre_primitives"][0]["centre"][0] += 1
+    tampered = reseal_content_id(tampered)
+
+    [result] = browser_contract_checks(node, [tampered])
+    assert result["id_matches"] is True
+    assert result["boundary_and_structure_valid"] is True
+    assert result["visualization_matches"] is False
+    assert validate_ui_contract(tampered)["valid"] is False
+    assert "const visualization = locallyDerivedVisualizations.get(active)" in (
+        CLOSURE_ONLY_SUPERNET_HTML
+    )
 
 
 def test_browser_canonical_json_matches_python_for_unicode_and_proto(

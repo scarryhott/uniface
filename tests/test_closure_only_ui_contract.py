@@ -134,6 +134,12 @@ def test_open_projection_has_no_authored_page_or_substitute_content(
     assert contract["renderer_relation"]["fixed_visible_controls"] == []
     assert contract["renderer_relation"]["authored_visible_vocabulary"] == []
     assert contract["renderer_relation"]["fallback_visuals"] == []
+    assert contract["renderer_relation"]["natural_form_constraint"] == (
+        "TRANSLATED_READING_KERNEL"
+    )
+    assert contract["renderer_relation"]["geometry_acceptance"] == (
+        "EXACT_LOCAL_CLOSURE_REDERIVATION"
+    )
     for removed_app_layer in (
         "root",
         "scene",
@@ -203,6 +209,18 @@ def test_universal_return_derives_the_only_visible_source_and_successor_closure(
     assert validation["every_visible_word_is_a_source_return"] is True
     assert validation["equality_fibres_partition_visible_states"] is True
     assert validation["active_reading_determines_projection"] is True
+    assert validation["visualization_is_exact_relation_projection"] is True
+    dialectic = successor["closure_process"]["interactive_translation_dialectic"]
+    assert dialectic["dialogue"]["turn_ids"] == successor[
+        "continuation_lineage_ids"
+    ]
+    assert dialectic["dialogue"]["accumulation_is_append_only"] is True
+    assert dialectic["natural_forms"][
+        "translated_reading_family_verified"
+    ] is True
+    assert dialectic["argument_truth"]["police_verdict_issued"] is False
+    assert dialectic["open_existence"]["continuation_reopens"] is True
+    assert dialectic["open_existence"]["one_token_closure_limit_preserved"] is True
 
 
 def test_each_return_recloses_one_carrier_and_preserves_exact_source_traces(

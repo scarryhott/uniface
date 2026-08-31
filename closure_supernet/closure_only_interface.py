@@ -107,7 +107,7 @@ svg {
   "use strict";
 
   const namespace = "http://www.w3.org/2000/svg";
-  const schema = "closure.supernet/translational-visualization-v3";
+  const schema = "closure.supernet/translational-visualization-v4";
   const protocol = "SUPERNET-TRANSLATIONAL-VISUALIZATION";
   const statuses = new Set([
     "OPEN_SOURCE_BOUNDARY",
@@ -127,6 +127,7 @@ svg {
   let draft = "";
   let executing = false;
   const verifiedContracts = new WeakSet();
+  const locallyDerivedVisualizations = new WeakMap();
 
   function svgElement(name, attributes = {}) {
     const node = document.createElementNS(namespace, name);
@@ -184,6 +185,189 @@ svg {
       .map((value) => value.toString(16).padStart(2, "0"))
       .join("");
     return contract.id === `translational-visualization:${hexadecimal.slice(0, 24)}`;
+  }
+
+  async function sha256Hex(value) {
+    const digest = await crypto.subtle.digest(
+      "SHA-256", new TextEncoder().encode(value),
+    );
+    return [...new Uint8Array(digest)]
+      .map((item) => item.toString(16).padStart(2, "0")).join("");
+  }
+
+  async function digest(prefix, value) {
+    return `${prefix}:${(await sha256Hex(stable(value))).slice(0, 24)}`;
+  }
+
+  function rounded(value) {
+    return Number(value.toFixed(6));
+  }
+
+  function visualSignature(fibre, stateById) {
+    const members = (fibre.member_state_ids || [])
+      .map((id) => stateById.get(asText(id))).filter(Boolean);
+    return stable({
+      display: unique(fibre.display_fibre_ids).sort(compareUnicodeCodePoints),
+      source: members.map((item) => asText(item.source_trace))
+        .sort(compareUnicodeCodePoints),
+      source_returns: unique(members.flatMap((item) => item.source_return_ids || []))
+        .sort(compareUnicodeCodePoints),
+    });
+  }
+
+  async function hue(signature) {
+    return Number.parseInt((await sha256Hex(signature)).slice(0, 8), 16) % 360;
+  }
+
+  async function locallyDeriveVisualization(contract) {
+    const projection = contract.projection;
+    const stateById = new Map(projection.states.map((item) => [asText(item.id), item]));
+    const decorated = await Promise.all(projection.equality_fibres.map(async (fibre) => ({
+      fibre,
+      signature: visualSignature(fibre, stateById),
+    })));
+    decorated.sort((left, right) => {
+      const leftFocus = asText(left.fibre.id) === asText(contract.return_relation?.parent_natural_form_id) ? 0 : 1;
+      const rightFocus = asText(right.fibre.id) === asText(contract.return_relation?.parent_natural_form_id) ? 0 : 1;
+      return leftFocus - rightFocus || compareUnicodeCodePoints(left.signature, right.signature);
+    });
+    const focusId = contract.return_relation?.parent_natural_form_id || null;
+    const count = decorated.length;
+    const orbit = Math.min(338, 172 + Math.max(0, count - 2) * 18);
+    const peripheralCount = Math.max(1, count - (focusId ? 1 : 0));
+    let peripheralIndex = 0;
+    const positions = new Map();
+    const fibrePrimitives = [];
+    for (const {fibre, signature} of decorated) {
+      const fibreId = asText(fibre.id);
+      const focused = fibreId === asText(focusId);
+      let x = 500;
+      let y = 500;
+      let parameter = 0;
+      if (!focused && count !== 1) {
+        const phase = (2 * Math.PI * peripheralIndex / peripheralCount) - Math.PI / 2;
+        peripheralIndex += 1;
+        parameter = Math.tan(phase / 2);
+        x = 500 + orbit * Math.cos(phase);
+        y = 500 + orbit * .72 * Math.sin(phase);
+      }
+      const radius = Math.min(132, 54 + Math.sqrt(Math.max(1, (fibre.member_state_ids || []).length)) * 18);
+      fibrePrimitives.push({
+        natural_form_id: fibreId,
+        centre: [rounded(x), rounded(y)],
+        radius: rounded(radius),
+        projective_parameter: Number.isFinite(parameter) ? rounded(parameter) : "INFINITY",
+        hue: await hue(signature),
+        focused,
+        source_state_ids: [...(fibre.member_state_ids || [])],
+        source_return_ids: [...(fibre.source_return_ids || [])],
+        derivation: fibre.derivation,
+      });
+      positions.set(fibreId, {x, y});
+    }
+    const formByState = new Map();
+    for (const fibre of projection.equality_fibres) {
+      for (const stateId of fibre.member_state_ids || []) formByState.set(asText(stateId), asText(fibre.id));
+    }
+    const pathBetween = (sourceForm, targetForm) => {
+      const source = positions.get(sourceForm);
+      const target = positions.get(targetForm);
+      const dx = target.x - source.x;
+      const dy = target.y - source.y;
+      const length = Math.max(1, Math.hypot(dx, dy));
+      const bend = Math.min(86, length * .18);
+      return [[rounded(source.x), rounded(source.y)], [
+        rounded((source.x + target.x) / 2 - dy / length * bend),
+        rounded((source.y + target.y) / 2 + dx / length * bend),
+      ], [rounded(target.x), rounded(target.y)]];
+    };
+    const translationPrimitives = [];
+    for (const relation of projection.translations) {
+      const sourceForm = formByState.get(asText(relation.source_state_id));
+      const targetForm = formByState.get(asText(relation.target_state_id));
+      if (!positions.has(sourceForm) || !positions.has(targetForm)) continue;
+      translationPrimitives.push({
+        relation_id: relation.id,
+        source_natural_form_id: sourceForm,
+        target_natural_form_id: targetForm,
+        quadratic_path: pathBetween(sourceForm, targetForm),
+        executes_as_equality: relation.executes_as_equality === true,
+        hue: await hue(`${sourceForm}\u2192${targetForm}`),
+        derivation: relation.derivation,
+      });
+    }
+    const focusForm = positions.has(asText(focusId))
+      ? asText(focusId) : (decorated.length ? asText(decorated[0].fibre.id) : "");
+    const focusPosition = positions.get(focusForm) || {x: 500, y: 500};
+    const potentialPrimitives = [];
+    for (const relation of projection.potentials) {
+      const targetFormValue = formByState.get(asText(relation.target_state_id));
+      const targetForm = targetFormValue === undefined ? null : targetFormValue;
+      let points;
+      if (targetForm !== null && positions.has(targetForm)) {
+        points = pathBetween(focusForm, targetForm);
+      } else {
+        const signature = stable({
+          relation: relation.id,
+          natural_form: relation.shared_natural_form_id,
+          source_returns: relation.derivation?.source_return_ids || [],
+        });
+        const phase = 2 * Math.PI * (await hue(signature) / 360);
+        const targetX = 500 + 455 * Math.cos(phase);
+        const targetY = 500 + 455 * Math.sin(phase);
+        const dx = targetX - focusPosition.x;
+        const dy = targetY - focusPosition.y;
+        const length = Math.max(1, Math.hypot(dx, dy));
+        const bend = Math.min(86, length * .18);
+        points = [[rounded(focusPosition.x), rounded(focusPosition.y)], [
+          rounded((focusPosition.x + targetX) / 2 - dy / length * bend),
+          rounded((focusPosition.y + targetY) / 2 + dx / length * bend),
+        ], [rounded(targetX), rounded(targetY)]];
+      }
+      potentialPrimitives.push({
+        relation_id: relation.id,
+        source_natural_form_id: focusForm || null,
+        target_natural_form_id: targetForm,
+        quadratic_path: points,
+        hue: await hue(asText(relation.id)),
+        derivation: relation.derivation,
+      });
+    }
+    const withoutDerivation = (items) => items.map((item) => Object.fromEntries(
+      Object.entries(item).filter(([key]) => key !== "derivation"),
+    ));
+    const stateBasis = projection.states.map((item) => Object.fromEntries(
+      Object.entries(item).filter(([key]) => key !== "derivation" && key !== "source_trace"),
+    ));
+    const relationDigest = await digest("projection-relation", {
+      reading: projection.reading,
+      states: stateBasis,
+      equality_fibres: withoutDerivation(projection.equality_fibres),
+      translations: withoutDerivation(projection.translations),
+      potentials: withoutDerivation(projection.potentials),
+    });
+    return {
+      operator: "PERSPECTIVE_RELATION_PROJECTIVE_FOLD",
+      axiometry: {
+        finite_pole: 0,
+        projective_seam: "tan(pi/2)=infinity",
+        fold: "RP1_TO_VISUAL_ORBIT",
+        one_primitive_per_equality_fibre: true,
+      },
+      view_box: [0, 0, 1000, 1000],
+      fibre_primitives: fibrePrimitives,
+      translation_primitives: translationPrimitives,
+      potential_primitives: potentialPrimitives,
+      derivation: projection.visualization.derivation,
+      relation_digest: relationDigest,
+    };
+  }
+
+  async function visualizationMatches(contract) {
+    const local = await locallyDeriveVisualization(contract);
+    locallyDerivedVisualizations.set(contract, local);
+    if (stable(local) !== stable(contract.projection.visualization)) return false;
+    return true;
   }
 
   function derivationMatches(contract, derivation, allowOpen = false) {
@@ -480,6 +664,42 @@ svg {
         terminal: false,
         new_empirical_evidence_created_by_iteration: false,
       },
+      interactive_translation_dialectic: {
+        formal_module: "NRRF862InteractiveTranslationRelativeUnityOfNaturalFormsArgumentFlowPolicePerspectiveTruthNoClosedExistenceDialecticContinuation",
+        formal_module_source_verified_by_runtime: false,
+        dialogue: {
+          formal_theorems: ["replay_eq_hairAct_accum", "translationalTruth_eq_dialogues"],
+          turn_ids: lineageIds,
+          accumulation_is_append_only: true,
+          runtime_hair_potential_composition_verified: false,
+        },
+        natural_forms: {
+          formal_theorem: "naturalForms_eq_iff_obsEquiv",
+          translated_reading_family_verified: translated,
+          one_geometry_kernel_verified: translated,
+          complete_invariant_over_all_charts_verified_by_runtime: false,
+        },
+        perspective_flow: {
+          formal_theorem: "coherent_iff_single_chart",
+          single_runtime_chart_family_verified: translated,
+          all_stage_dialogue_reachability_verified_by_runtime: false,
+        },
+        argument_truth: {
+          formal_theorems: ["police_eq_truth", "police_and_perspective_translate_equally_into_truth", "isPolice_truthVerdict"],
+          structured_route_and_value_supplied: false,
+          round_argument_admission_verified_by_runtime: false,
+          police_verdict_issued: false,
+        },
+        open_existence: {
+          formal_theorems: ["argument_never_closes_existence", "argument_compatible_with_existence", "chain_open", "interactive_translation_relative_unity_of_natural_forms", "exists_live_argument"],
+          formal_two_distinct_tokens_required: true,
+          runtime_distinct_perspectives: Object.keys(closure.readings || {}).length,
+          runtime_two_token_premise_verified: Object.keys(closure.readings || {}).length >= 2,
+          continuation_reopens: true,
+          terminal: false,
+          one_token_closure_limit_preserved: true,
+        },
+      },
       boundary: {
         source_preserved: true,
         truth_issued: false,
@@ -503,6 +723,9 @@ svg {
     if (renderer.role !== "TRANSLATIONAL_RELATION_EVALUATOR") return false;
     if (renderer.input !== "ACTIVE_PERSPECTIVE_RELATION_ONLY") return false;
     if (renderer.visible_words_source !== "SOURCE_RETURNS_ONLY") return false;
+    if (renderer.natural_form_constraint !== "TRANSLATED_READING_KERNEL") return false;
+    if (renderer.geometry_acceptance !== "EXACT_LOCAL_CLOSURE_REDERIVATION") return false;
+    if (renderer.successor_acceptance !== "VERIFIED_CLOSURE_BEFORE_INTERFACE_COMMIT") return false;
     if (!Array.isArray(renderer.fixed_visible_controls) || renderer.fixed_visible_controls.length) return false;
     if (!Array.isArray(renderer.authored_visible_vocabulary) || renderer.authored_visible_vocabulary.length) return false;
     if (!Array.isArray(renderer.fallback_visuals) || renderer.fallback_visuals.length) return false;
@@ -629,7 +852,8 @@ svg {
     mount.dataset.state = active ? active.status : "OPEN_TRUTH_CONSTRAINT";
     if (!active) return;
     const projection = active.projection;
-    const visualization = projection.visualization;
+    const visualization = locallyDerivedVisualizations.get(active);
+    if (!visualization) { active = null; return; }
     const svg = svgElement("svg", {viewBox: visualization.view_box.join(" ")});
     mount.append(svg);
     const fibreById = new Map(projection.equality_fibres.map((fibre) => [fibre.id, fibre]));
@@ -707,7 +931,9 @@ svg {
 
   async function verifyContract(contract) {
     try {
-      if (!validate(contract) || !await contractIdMatchesContent(contract)) return false;
+      if (!validate(contract)
+          || !await visualizationMatches(contract)
+          || !await contractIdMatchesContent(contract)) return false;
       verifiedContracts.add(contract);
       return true;
     } catch (_error) {
