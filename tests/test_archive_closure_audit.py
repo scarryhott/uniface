@@ -1,4 +1,4 @@
-from closure_supernet.archive_closure_audit import (
+from closure_supernet.archive_closure_audit_current import (
     EXECUTABLE,
     MISSING,
     OPEN,
@@ -114,6 +114,17 @@ def test_registered_chart_is_not_silently_called_executable():
     )
     assert classified["status"] == REGISTERED
     assert "nf:fractal-hypotenuse:v1" in classified["chart_ids"]
+
+
+def test_current_natural_form_selector_is_executable_not_registered_only():
+    classified = classify_condition(
+        text="The natural-form selector exposes the OPEN interaction frontier."
+    )
+    assert classified["status"] == EXECUTABLE
+    assert "natural-form-selector" in classified["capability_ids"]
+    assert "trading_natural_form_selector.derive_natural_form_selection" in classified[
+        "runtime_source_symbols"
+    ]
 
 
 def test_runtime_capability_can_close_a_complete_fixture():
