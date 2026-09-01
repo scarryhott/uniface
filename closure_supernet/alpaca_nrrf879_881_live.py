@@ -17,7 +17,7 @@ from .trading_returned_family_kernel_nrrf887_attempt import (
 )
 from .trading_translation_family_nrrf884_886 import derive_translation_families
 
-PROTOCOL = "closure.supernet/alpaca-nrrf879-892-live-v9-vision-slide"
+PROTOCOL = "closure.supernet/alpaca-nrrf879-892-live-v10-interaction-integral"
 
 
 class AlpacaNRRF879881Runtime:
@@ -70,6 +70,7 @@ class AlpacaNRRF879881Runtime:
             "nrrf887_ai_diffusion": diffusion,
             "translational_truth_action_field": continuous.get("translational_truth_action_field"),
             "nrrf892_vision_crystal_market_rendering": continuous.get("nrrf892_vision_crystal_market_rendering"),
+            "live_interaction_integration": continuous.get("live_interaction_integration"),
             "observation_and_trading_are_translation_equal_readings": True,
             "open_is_current_boundary_not_accumulated_queue": True,
             "realized_profit_is_projection_of_same_continuous_closure": True,
@@ -77,6 +78,8 @@ class AlpacaNRRF879881Runtime:
             "market_side_is_relative_visualization_of_translational_slide": True,
             "market_side_is_separate_semantic_bridge": False,
             "vision_slide_closed_through_furthered_family": True,
+            "formal_horizon_and_vision_horizon_are_kept_distinct": True,
+            "fixed_holding_period_used_for_live_profit_function": False,
             "stage_gate_present": False,
             "separate_observation_pipeline_present": False,
             "family_is_relative_visualization_of_selected_natural_forms": True,
@@ -99,6 +102,7 @@ def compact_receipt(receipt: Mapping[str, Any]) -> dict[str, Any]:
     profit = dict(continuous.get("realized_profit_projection") or {})
     action = dict(continuous.get("translational_truth_action_field") or {})
     rendering = dict(continuous.get("nrrf892_vision_crystal_market_rendering") or {})
+    live = dict(continuous.get("live_interaction_integration") or {})
     diffusion = dict(receipt.get("nrrf887_ai_diffusion") or {})
     bridge = dict(receipt.get("nrrf879_881_runtime") or {})
     return {
@@ -121,10 +125,17 @@ def compact_receipt(receipt: Mapping[str, Any]) -> dict[str, Any]:
         "translational_truth_actions": action.get("actions", []),
         "nrrf892_market_rendering_status": rendering.get("status"),
         "nrrf892_market_renderings": rendering.get("renderings", []),
+        "live_interaction_integration_status": live.get("status"),
+        "live_interaction_quote": live.get("quote"),
+        "live_interaction_families": live.get("family_integrations", []),
+        "completed_vision_run_count": live.get("completed_vision_run_count"),
+        "live_profit_function": live.get("live_profit_function"),
         "market_side_is_relative_visualization_of_translational_slide": True,
         "observation_and_trading_are_translation_equal_readings": True,
         "realized_profit_is_projection_of_same_continuous_closure": True,
         "action_is_unique_relative_slide_not_prediction": True,
+        "formal_horizon_and_vision_horizon_are_kept_distinct": True,
+        "fixed_holding_period_used_for_live_profit_function": False,
         "open_is_current_boundary_not_accumulated_queue": True,
         "fixed_price_subset_is_maximally_unified": False,
         "profitability_authors_family_membership": False,
