@@ -38,6 +38,13 @@ def _physical_aperture_surface(html: str) -> str:
         '  document.body.append(sensor);',
         1,
     )
+    # Geometry is rederived after each hair move and source keystroke, so a
+    # relation's JavaScript object identity is intentionally ephemeral. The
+    # content-addressed relation ID is the stable interactive identity.
+    body = body.replace(
+        "relation===activeRelation",
+        "activeRelation && relation.id===activeRelation.id",
+    )
     return body
 
 
