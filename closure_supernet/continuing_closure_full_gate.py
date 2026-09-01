@@ -3,7 +3,7 @@ from __future__ import annotations
 """Full Supernet gate with continuation, not OPEN, as the published ontology.
 
 The wire protocol remains unchanged so existing verified clients and return
-receipts still validate.  The semantic contract is strengthened by attaching a
+receipts still validate. The semantic contract is strengthened by attaching a
 canonical continuing-translation closure in which every relation is inside
 closure and is either RETURNED or CONTINUING.
 """
@@ -20,6 +20,13 @@ from .translation_supervisory_full_gate import source_perspective_registry
 PROTOCOL = "SUPERNET-CONTINUING-CLOSURE-FULL-GATE"
 SCHEMA = "closure.supernet/continuing-closure-full-gate-v1"
 
+# Freeze the exact NRRF883 predecessor before the published v5 runtime exposes
+# the stronger validator through older import boundaries. This prevents the v5
+# validator from recursively calling itself while still letting historical
+# callers validate the current public contract through the compatibility alias.
+_DERIVE_PREDECESSOR = _v4_gate.derive_full_supernet_gate_contract
+_VALIDATE_PREDECESSOR = _v4_gate.validate_full_supernet_gate_contract
+
 
 def derive_full_supernet_gate_contract(
     closure_contract: Mapping[str, Any],
@@ -27,7 +34,7 @@ def derive_full_supernet_gate_contract(
     navigation_context: Mapping[str, Any] | None = None,
     source_perspective_by_event: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
-    predecessor = _v4_gate.derive_full_supernet_gate_contract(
+    predecessor = _DERIVE_PREDECESSOR(
         closure_contract,
         navigation_context=navigation_context,
         source_perspective_by_event=(
@@ -72,14 +79,14 @@ def validate_full_supernet_gate_contract(
     if dict(full_gate) != expected:
         errors.append("continuing-closure-full-gate:not-derived")
 
-    predecessor = _v4_gate.derive_full_supernet_gate_contract(
+    predecessor = _DERIVE_PREDECESSOR(
         closure_contract,
         navigation_context=(
             navigation_context if isinstance(navigation_context, Mapping) else None
         ),
         source_perspective_by_event=provenance,
     )
-    predecessor_validation = _v4_gate.validate_full_supernet_gate_contract(predecessor)
+    predecessor_validation = _VALIDATE_PREDECESSOR(predecessor)
     if predecessor_validation.get("valid") is not True:
         errors.extend(predecessor_validation.get("errors", []))
 
