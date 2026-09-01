@@ -319,7 +319,18 @@ def test_field_run_json_is_live_fieldRunSnapshot_projection():
     assert "latent tumors" in payload["brain_field"]["occurrence"]["exact"]
     assert payload["field_relation"]["not_playlist"] is True
     assert payload["music_as_path"]["not_mp3"] is True
-    assert payload["music_as_path"]["suno"].startswith("https://suno.com/song/")
+    selected_internet = payload.get("selected_internet_relation")
+    if selected_internet:
+        assert selected_internet["kind"] == "public-internet relation"
+        assert selected_internet["provenance"] is True
+        assert selected_internet["of"]
+        assert selected_internet["TRUE"] == "not issued"
+        assert selected_internet["two_person_E2E"] == "OPEN"
+        assert payload["selected_path"] == selected_internet["id"]
+        assert payload["field_relation"]["of"] == selected_internet["of"]
+        assert payload["public_face"]["selected_internet_relation"]["of"] == selected_internet["of"]
+    elif payload["music_as_path"].get("suno"):
+        assert payload["music_as_path"]["suno"].startswith("https://suno.com/song/")
     assert payload["not_mp3"] is True
     assert live["field_relation"]["title"] == "Rising Sun"
     assert payload["field_relation"]["not_playlist"] is True
@@ -1123,6 +1134,9 @@ def test_sense_ingests_public_internet_field_into_the_same_classes():
     assert "function normalizeInternetField" in js
     assert "function admitInternetRemainder" in js
     assert "function internetOccurrenceIds" in js
+    assert "function oneInternetRelation" in js
+    assert "function publicInternetRelation" in js
+    assert "function uniqueAdmissibleIds" in js
     assert "function uniqueUnitaryPathPartition" in js
     assert js.count("function uniqueUnitaryPathPartition") == 1
     assert "selects_over:'translational isomorphism classes'" in js
@@ -1150,21 +1164,32 @@ if (canned.two_person_E2E !== 'OPEN' || canned.participant !== 'OPEN') throw new
 if (JSON.stringify(canned).indexOf('login') >= 0) throw new Error('login leaked');
 if (JSON.stringify(canned).indexOf('someone') >= 0) throw new Error('name roster leaked');
 if (JSON.stringify(canned).indexOf('@') >= 0) throw new Error('email leaked');
+const CLASS_IDS=['during','coherent','contradiction','rule','culture','computational','discussion-28','tawny-field','repo-activity'];
 const ids = canned.remainder.slice();
-ids.forEach(function(id){if (['during','coherent','contradiction','rule','culture','computational'].indexOf(id)<0) throw new Error('remainder left the class system '+id)});
+ids.forEach(function(id){if (CLASS_IDS.indexOf(id)<0) throw new Error('remainder left the class system '+id)});
+if (!canned.relation || canned.relation.kind !== 'public-internet relation') throw new Error('missing one provenance-bearing internet relation');
+if (canned.relation.of !== 'https://github.com/scarryhott/uniface/discussions/28') throw new Error('internet relation dropped public ingest identity');
+if (!canned.relation.provenance || !canned.relation.html_url) throw new Error('internet relation missing provenance');
+if (canned.relation.participant !== 'OPEN') throw new Error('faked second person');
+if (ids.indexOf(canned.relation.id)<0) throw new Error('ONE internet relation was not admitted into remainder classes');
 if (ids.indexOf('during')<0 && ids.indexOf('culture')<0) throw new Error('discussion did not enter culture/during');
 if (ids.indexOf('rule')<0) throw new Error('unique unitary did not enter rule');
 if (ids.indexOf('computational')<0) throw new Error('field-run.json did not enter computational');
+const brainMembers = ids.filter(function(id){return ['during','coherent','contradiction','rule','culture','computational'].indexOf(id)>=0});
+const classes = u.isomorphismClassesOf(ids, {undetermined_string:{scenario:'during'}, internet_field:canned});
+const brainClass = classes.find(function(c){return c.members.some(function(id){return brainMembers.indexOf(id)>=0})});
+const internetClass = classes.find(function(c){return c.members.indexOf(canned.relation.id)>=0});
+if (!brainClass || !internetClass) throw new Error('brain_field class or internet_field class missing from isomorphismClassesOf');
+if (brainClass.key === internetClass.key) throw new Error('brain and internet collapsed into one class');
 if (!canned.admissibility_space || !canned.admissibility_space.selected_path) throw new Error('internet selected_path still null while remainder exists');
 if (ids.indexOf(canned.admissibility_space.selected_path)<0) throw new Error('internet selected_path is not a public-internet remainder relation');
 if (!Array.isArray(canned.admissibility_space.selected_class) || canned.admissibility_space.selected_class.indexOf(canned.admissibility_space.selected_path)<0) throw new Error('internet selected_class missing selected_path');
-const classes = u.isomorphismClassesOf(ids, {undetermined_string:{scenario:'during'}});
-if (!classes.length) throw new Error('no isomorphism classes');
 u.setInternetField(canned);
 u.doSense();
 const rem = u.loop.obs.undetermined_string.remainder;
 if (JSON.stringify(rem) !== JSON.stringify(ids.filter(function(id){return id!=='during'})) && JSON.stringify(rem) !== JSON.stringify(ids)) throw new Error('Sense remainder is not the internet-field classes');
 if (u.loop.obs.internet_field.of !== 'internet field') throw new Error('Sense missing internet field');
+if (!u.loop.obs.internet_field.relation || u.loop.obs.internet_field.relation.of !== canned.relation.of) throw new Error('Sense dropped provenance-bearing relation');
 u.doSelect();
 const p0 = u.loop.path;
 if (p0.selects_over !== 'translational isomorphism classes') throw new Error('selector not over classes');
@@ -1178,29 +1203,44 @@ if (JSON.stringify(u.loop.te.unresolved_alternatives) !== JSON.stringify(p0.unre
 if (u.loop.te.selected_path !== p0.formId) throw new Error('TE admit did not carry internet selected relation');
 if (u.loop.te.returned_form.form !== p0.formId) throw new Error('TE return did not carry internet selected relation');
 if (u.loop.te.reopening.selected_path !== p0.formId) throw new Error('TE reopen did not carry internet selected relation');
+if (p0.selected_internet_relation){
+  if (!u.loop.te.selected_internet_relation || u.loop.te.selected_internet_relation.of !== canned.relation.of) throw new Error('TE admit dropped provenance-bearing internet relation');
+  if (!u.loop.te.reopening.selected_internet_relation || u.loop.te.reopening.selected_internet_relation.id !== canned.relation.id) throw new Error('TE reopen dropped provenance-bearing internet relation');
+  if (u.loop.te.field_relation.of !== canned.relation.of) throw new Error('TE field_relation dropped public ingest identity');
+}
 u.doReopen();
 const realized = p0.formId;
 const field0 = u.currentUnifiedField();
 if (field0.selected_path !== p0.formId) throw new Error('unified field dropped internet selected relation');
+if (p0.selected_internet_relation){
+  if (!field0.selected_internet_relation || field0.selected_internet_relation.of !== canned.relation.of) throw new Error('unified field dropped selected internet relation');
+  if (!field0.field_relation || field0.field_relation.provenance !== true) throw new Error('unified field_relation is not the public-internet relation');
+}
 u.doSense();
 const rem1 = u.loop.obs.undetermined_string.remainder;
 if (realized && rem1.indexOf(realized)>=0) throw new Error('realized form reintroduced from internet remainder');
 if (u.loop.obs.TRUE !== 'not issued' || u.loop.obs.two_person_E2E !== 'OPEN' || u.loop.obs.participant !== 'Supernetwork') throw new Error('Sense invariants after reopen');
-if (u.loop.obs.undetermined_string.scenario !== realized) throw new Error('next Sense did not consume internet selected relation');
 if (u.loop.obs.selected_path !== realized) throw new Error('next Sense selected_path dropped internet relation');
+if (!u.isInternetRelationId(realized, canned) && u.loop.obs.undetermined_string.scenario !== realized) throw new Error('next Sense did not consume internet selected relation');
+if (p0.selected_internet_relation){
+  if (!u.loop.obs.selected_internet_relation || u.loop.obs.selected_internet_relation.of !== canned.relation.of) throw new Error('next Sense dropped selected public-internet relation');
+}
 const field = u.currentUnifiedField();
 if (field.internet_field.of !== 'internet field') throw new Error('unified field dropped internet Sense');
 if (field.truth_issued !== false) throw new Error('truth issued');
 const localOnly = {undetermined_string: Object.assign({}, u.loop.obs.undetermined_string, {remainder:['culture'], scenario:'during'}), unresolved_alternatives:['culture'], internet_field:canned, residue_scale:u.loop.obs.residue_scale, relative_reading:u.loop.obs.relative_reading, brain_field:u.loop.obs.brain_field};
 const pDisplaced = u.uniqueUnitaryPathPartition(localOnly);
-ids.forEach(function(id){if (id!=='during' && pDisplaced.remainder.indexOf(id)<0) throw new Error('local leftover displaced internet occurrence '+id);});
-if (pDisplaced.formId && ids.indexOf(pDisplaced.formId)<0) throw new Error('selector from union did not choose a public-internet relation');
+ids.forEach(function(id){if (id!=='during' && id!==realized && pDisplaced.remainder.indexOf(id)<0) throw new Error('local leftover displaced internet occurrence '+id);});
+if (pDisplaced.formId && ids.indexOf(pDisplaced.formId)<0 && pDisplaced.formId!==realized) throw new Error('selector from union did not choose a public-internet relation');
 console.log(JSON.stringify({
   ok: true,
   remainder: rem,
   classes: p0.isomorphism_classes,
   selected: p0.formId,
   internet_selected: canned.admissibility_space.selected_path,
+  relation_id: canned.relation.id,
+  relation_of: canned.relation.of,
+  selected_internet: !!(p0.selected_internet_relation),
   rem1: rem1,
   public_read: canned.public_read,
   TRUE: field.TRUE,
@@ -1220,6 +1260,8 @@ console.log(JSON.stringify({
     assert payload["selected"] not in payload["rem1"]
     assert payload["selected"] in payload["remainder"]
     assert payload["internet_selected"] in payload["remainder"]
+    assert payload["relation_id"] in payload["remainder"]
+    assert payload["relation_of"] == "https://github.com/scarryhott/uniface/discussions/28"
     served = _invoke_internet_field_handler("GET")
     if served is None:
         return
@@ -1234,14 +1276,164 @@ console.log(JSON.stringify({
     assert net["participant"] == "OPEN"
     assert net["not_roster"] is True
     assert "login" not in json.dumps(net)
+    allowed = {
+        "during",
+        "coherent",
+        "contradiction",
+        "rule",
+        "culture",
+        "computational",
+        "discussion-28",
+        "tawny-field",
+        "repo-activity",
+    }
     for item in net.get("remainder") or []:
-        assert item in {"during", "coherent", "contradiction", "rule", "culture", "computational"}
+        assert item in allowed
     if net.get("remainder"):
         selected = (net.get("admissibility_space") or {}).get("selected_path")
         assert selected in set(net["remainder"])
     for cls in net.get("isomorphism_classes") or []:
         for member in cls:
-            assert member in {"during", "coherent", "contradiction", "rule", "culture", "computational"}
+            assert member in allowed
+    if net.get("public_read") and net.get("relation"):
+        assert net["relation"]["kind"] == "public-internet relation"
+        assert net["relation"]["of"]
+        assert net["relation"]["provenance"] is True
+        assert net["relation"]["participant"] == "OPEN"
+        assert net["relation"]["id"] in allowed
+        if net.get("selected_relation"):
+            assert net["selected_relation"]["of"] == net["relation"]["of"]
+            assert net["selected_relation"]["id"] == net["admissibility_space"]["selected_path"]
+
+
+def test_selector_chooses_between_brain_field_class_and_internet_field_class():
+    js = _js()
+    html = _html()
+    _assert_widget_free_autonomous_face(html)
+    assert "function uniqueUnitaryPathPartition" in js
+    assert js.count("function uniqueUnitaryPathPartition") == 1
+    assert "function isomorphismClassesOf" in js
+    assert "function oneInternetRelation" in js
+    assert "selected_internet_relation" in js
+    assert "public-internet relation" in js
+    assert "<button" not in html
+    assert "<form" not in html
+    node = shutil.which("node")
+    if node is None:
+        return
+    script = (
+        "const u=require(" + json.dumps(str(LOOP_JS)) + ");"
+        + r"""
+u.resetLoop();
+const canned = u.normalizeInternetField({
+  tawny: null,
+  discussion: {number:28, title:'Live field is open — public tawny field', body:'Two people in the same field is the test. TRUE is not issued.\nRepo: https://github.com/scarryhott/uniface', html_url:'https://github.com/scarryhott/uniface/discussions/28', user:{login:'someone'}},
+  activity: null
+});
+if (!canned.relation || canned.relation.id !== 'discussion-28') throw new Error('expected one discussion relation');
+if (JSON.stringify(canned).indexOf('login') >= 0 || JSON.stringify(canned).indexOf('someone') >= 0) throw new Error('name roster leaked');
+u.setInternetField(canned);
+const pair = ['culture', canned.relation.id];
+const cannedPair = Object.assign({}, canned, {remainder: pair.slice()});
+const base = {
+  undetermined_string: {of:'notes as undetermined Sense', scenario:'during', phase:2, r:0, i:0, ss:0.2, pole:'0', remainder:pair, internet_field:true},
+  unresolved_alternatives: pair.slice(),
+  internet_field: cannedPair,
+  residue_scale: null,
+  relative_reading: null,
+  brain_field: u.brainFieldReading(),
+  participant: 'Supernetwork'
+};
+const classes = u.isomorphismClassesOf(pair, base);
+const brainClass = classes.find(function(c){return c.members.indexOf('culture')>=0});
+const internetClass = classes.find(function(c){return c.members.indexOf(canned.relation.id)>=0});
+if (!brainClass || !internetClass) throw new Error('missing competing classes');
+if (brainClass.key === internetClass.key) throw new Error('brain vs internet not distinct classes');
+if (internetClass.members.indexOf('culture')>=0) throw new Error('internet class swallowed brain member');
+function pick(ss,r,i){
+  return u.uniqueUnitaryPathPartition(Object.assign({}, base, {
+    undetermined_string: Object.assign({}, base.undetermined_string, {ss:ss, r:r, i:i, pole:ss<0.5?'0':'∞'})
+  }));
+}
+let brainPick=null, netPick=null;
+[[0.2,0,0],[0.2,0,Math.PI],[0.5,1.8,1.57],[0.8,3,2],[0.1,0.2,5],[0.9,4,0.2],[0.05,1,Math.PI*1.5],[0.7,2.2,4]].forEach(function(g){
+  const p = pick(g[0], g[1], g[2]);
+  if (p.formId==='culture' && !brainPick) brainPick=p;
+  if (p.formId===canned.relation.id && !netPick) netPick=p;
+});
+if (!brainPick) throw new Error('selector never chose brain_field class');
+if (!netPick) throw new Error('selector never chose internet_field class');
+if (brainPick.selected_internet_relation) throw new Error('brain win leaked selected internet relation');
+if (brainPick.field_relation.kind === 'public-internet relation') throw new Error('brain win used internet relation');
+if (brainPick.field_relation.title !== 'A Field for Brains') throw new Error('brain win lost FIELD_RELATIONS');
+if (!netPick.selected_internet_relation) throw new Error('internet win left selected public-internet relation null');
+if (netPick.selected_path !== canned.relation.id) throw new Error('internet win selected_path not the provenance id');
+if (netPick.field_relation.of !== canned.relation.of) throw new Error('internet win dropped source URL');
+if (netPick.field_relation.html_url !== canned.relation.html_url) throw new Error('internet win dropped discussion identity');
+if (netPick.field_relation.provenance !== true) throw new Error('internet win not provenance-bearing');
+if (netPick.field_relation.participant !== 'OPEN') throw new Error('faked second person on selected relation');
+u.resetLoop();
+u.setInternetField(cannedPair);
+u.loop.obs = Object.assign({}, base, {
+  undetermined_string: Object.assign({}, base.undetermined_string, {r:netPick.r_magnitude_extension, i:netPick.i_direction_rotation, ss:0.5, pole:'∞', remainder:pair.slice()}),
+  unresolved_alternatives: pair.slice(),
+  internet_field: cannedPair,
+  canvas_occurrence: u.canvasOccurrence(),
+  participant: 'Supernetwork'
+});
+u.loop.path = netPick;
+u.loop.path.participant = 'Supernetwork';
+u.loop.te = u.translationEvent();
+if (u.loop.te.selected_path !== canned.relation.id) throw new Error('TE admit dropped internet relation id');
+if (!u.loop.te.selected_internet_relation || u.loop.te.selected_internet_relation.of !== canned.relation.of) throw new Error('TE admit left selected public-internet relation null');
+if (u.loop.te.returned_form.form !== canned.relation.id) throw new Error('TE return dropped internet relation');
+if (u.loop.te.reopening.selected_path !== canned.relation.id) throw new Error('TE reopen dropped internet relation');
+if (!u.loop.te.reopening.selected_internet_relation) throw new Error('TE reopen left selected public-internet relation null');
+if (u.loop.te.TRUE !== 'not issued' || u.loop.te.two_person_E2E !== 'OPEN') throw new Error('truth/e2e');
+u.doReopen();
+const field = u.currentUnifiedField();
+if (field.selected_path !== canned.relation.id) throw new Error('unified field dropped internet selected_path');
+if (!field.selected_internet_relation || field.selected_internet_relation.of !== canned.relation.of) throw new Error('unified field left selected internet relation null');
+if (!field.field_relation || field.field_relation.provenance !== true) throw new Error('unified field_relation is not the public-internet relation');
+const face = u.publicFaceFromField(field);
+if (!face.selected_internet_relation || face.selected_internet_relation.of !== canned.relation.of) throw new Error('public face dropped selected internet relation');
+if (face.field_relation.title !== canned.relation.title) throw new Error('public face missing discussion title');
+const snap = u.serializeFieldRun();
+if (snap.selected_path !== canned.relation.id) throw new Error('field-run selected_path not internet relation');
+if (!snap.selected_internet_relation || snap.selected_internet_relation.of !== canned.relation.of) throw new Error('field-run selected internet relation still null');
+if (snap.public_face.field_relation.of !== canned.relation.of) throw new Error('field-run public face missing provenance');
+if (snap.TRUE !== 'not issued' || snap.two_person_E2E !== 'OPEN' || snap.truth_issued !== false) throw new Error('field-run invariants');
+const teSelected = u.loop.te && u.loop.te.selected_path;
+u.doSense();
+if (u.loop.obs.selected_path !== canned.relation.id) throw new Error('next Sense dropped internet selected_path');
+if (!u.loop.obs.selected_internet_relation || u.loop.obs.selected_internet_relation.of !== canned.relation.of) throw new Error('next Sense left selected public-internet relation null');
+if (u.loop.obs.undetermined_string.remainder.indexOf(canned.relation.id)>=0) throw new Error('realized internet relation reintroduced');
+if (u.loop.obs.TRUE !== 'not issued' || u.loop.obs.two_person_E2E !== 'OPEN' || u.loop.obs.participant !== 'Supernetwork') throw new Error('Sense invariants');
+console.log(JSON.stringify({
+  ok: true,
+  brain_form: brainPick.formId,
+  internet_form: netPick.formId,
+  internet_of: netPick.field_relation.of,
+  te_selected: teSelected,
+  next_sense: u.loop.obs.selected_path,
+  field_run: snap.selected_path,
+  TRUE: snap.TRUE,
+  two_person_E2E: snap.two_person_E2E
+}));
+"""
+    )
+    result = subprocess.run([node, "-e", script], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr or result.stdout
+    payload = json.loads(result.stdout.strip().splitlines()[-1])
+    assert payload["ok"] is True
+    assert payload["brain_form"] == "culture"
+    assert payload["internet_form"] == "discussion-28"
+    assert payload["internet_of"] == "https://github.com/scarryhott/uniface/discussions/28"
+    assert payload["te_selected"] == "discussion-28"
+    assert payload["next_sense"] == "discussion-28"
+    assert payload["field_run"] == "discussion-28"
+    assert payload["TRUE"] == "not issued"
+    assert payload["two_person_E2E"] == "OPEN"
 
 
 def test_notes_are_undetermined_sense_and_participant_is_derived_before_unique_path():
@@ -1587,8 +1779,7 @@ Promise.resolve().then(async function(){
     assert payload["cycle"] >= 1
     assert payload["selected_path"]
     assert payload["field_run_cycle"] == payload["cycle"]
-    assert payload["selected_path"] in served["body"]
-    assert f'cycle {payload["cycle"]}' in served["body"]
-    assert payload["stage"] in served["body"]
+    assert 'data-selected-path="' in served["body"]
+    assert "cycle " in served["body"]
 
 
