@@ -25,6 +25,15 @@ def _config(tmp_path: Path) -> RuntimeConfig:
     )
 
 
+def _full_gate(client: TestClient, perspective_id: str) -> dict:
+    response = client.get(
+        "/supernet/interface",
+        params={"perspective_id": perspective_id, "potential_gate": True},
+    )
+    assert response.status_code == 200, response.text
+    return response.json()["supernet_potential_gate"]
+
+
 def _open_path(full: dict) -> dict:
     gate = full["relative_natural_form_potential_gate"]
     return next(
@@ -38,8 +47,9 @@ def _open_path(full: dict) -> dict:
 def _return(client: TestClient, full: dict, source: str) -> dict:
     path = _open_path(full)
     response = client.post(
-        f"/supernet/potential-gates/{full['id']}/return",
+        f"/supernet/interface/projections/{full['id']}/return",
         json={
+            "interaction_kind": "POTENTIAL_GATE_RETURN",
             "relation_id": path["id"],
             "perspective_id": full["perspective_id"],
             "focus_event_id": full["focus_event_id"],
@@ -59,12 +69,8 @@ def test_full_supernet_is_truth_plus_relative_natural_form_potential(
 ) -> None:
     app = create_app(_config(tmp_path))
     with TestClient(app) as client:
-        response = client.get(
-            "/supernet/potential-gate",
-            params={"perspective_id": "perspective:origin"},
-        )
-    assert response.status_code == 200
-    full = response.json()["supernet_potential_gate"]
+        full = _full_gate(client, "perspective:origin")
+
     assert validate_full_supernet_gate_contract(full)["valid"] is True
     gate = full["relative_natural_form_potential_gate"]
     assert full["supernet_is_relative_natural_form_potential_gate"] is True
@@ -96,15 +102,13 @@ def test_full_supernet_is_truth_plus_relative_natural_form_potential(
 def test_return_refines_truth_and_rederives_the_whole_gate(tmp_path: Path) -> None:
     app = create_app(_config(tmp_path))
     with TestClient(app) as client:
-        opened = client.get(
-            "/supernet/potential-gate",
-            params={"perspective_id": "perspective:return"},
-        ).json()["supernet_potential_gate"]
+        opened = _full_gate(client, "perspective:return")
         successor = _return(
             client,
             opened,
             "A returned source refines the closure and therefore the full potential gate.",
         )
+
     assert successor["id"] != opened["id"]
     assert successor["truth_invariant_id"] != opened["truth_invariant_id"]
     assert successor["relative_natural_form_potential_gate"]["id"] != opened[
@@ -125,22 +129,13 @@ def test_perspective_navigation_relocalises_one_unchanged_truth_gate(
 ) -> None:
     app = create_app(_config(tmp_path))
     with TestClient(app) as client:
-        origin_a = client.get(
-            "/supernet/potential-gate",
-            params={"perspective_id": "perspective:a"},
-        ).json()["supernet_potential_gate"]
+        origin_a = _full_gate(client, "perspective:a")
         _return(client, origin_a, "Perspective A returns one exact relation.")
 
-        origin_b = client.get(
-            "/supernet/potential-gate",
-            params={"perspective_id": "perspective:b"},
-        ).json()["supernet_potential_gate"]
+        origin_b = _full_gate(client, "perspective:b")
         _return(client, origin_b, "Perspective B returns another exact relation.")
 
-        at_a = client.get(
-            "/supernet/potential-gate",
-            params={"perspective_id": "perspective:a"},
-        ).json()["supernet_potential_gate"]
+        at_a = _full_gate(client, "perspective:a")
         transport = next(
             path
             for path in at_a["relative_natural_form_potential_gate"]["paths"]
@@ -148,14 +143,16 @@ def test_perspective_navigation_relocalises_one_unchanged_truth_gate(
             and path["target_perspective_id"] == "perspective:b"
         )
         response = client.post(
-            f"/supernet/potential-gates/{at_a['id']}/navigate",
+            f"/supernet/interface/projections/{at_a['id']}/return",
             json={
+                "interaction_kind": "PERSPECTIVE_NAVIGATION",
                 "relation_id": transport["id"],
                 "perspective_id": at_a["perspective_id"],
                 "focus_event_id": at_a["focus_event_id"],
                 "navigation_context": at_a["navigation_context"],
             },
         )
+
     assert response.status_code == 200, response.text
     payload = response.json()
     assert payload["navigated"] is True
@@ -183,13 +180,16 @@ def test_live_surface_navigates_the_gate_not_a_fixed_focus_graph(
     with TestClient(app) as client:
         page = client.get("/")
         capabilities = client.get("/supernet/interface/capabilities").json()
+
     assert page.status_code == 200
     html = page.text
     static_body = html.split("<body>", 1)[1].split("<script>", 1)[0].strip()
     assert static_body == '<main id="translational-mirror"></main>'
-    assert "/supernet/potential-gate" in html
-    assert "/supernet/potential-gates/" in html
+    assert 'query.set("potential_gate","true")' in html
+    assert "/supernet/interface/projections/" in html
     assert "PERSPECTIVE_TRANSPORT" in html
+    assert "PERSPECTIVE_NAVIGATION" in html
+    assert "POTENTIAL_GATE_RETURN" in html
     assert "OPEN_RETURN_EXTENSION" in html
     assert "data-relative-natural-form-potential-gate" in html
     assert "data-equality-is-local-gate-constraint" in html
@@ -199,6 +199,8 @@ def test_live_surface_navigates_the_gate_not_a_fixed_focus_graph(
     assert capabilities["navigation_mutates_truth"] is False
     assert capabilities["return_may_refine_truth"] is True
     assert capabilities["equality_is_one_local_gate_constraint"] is True
+    assert capabilities["parallel_ui_routes"] is False
+    assert capabilities["parallel_mutation_routes"] is False
 
 
 def test_browser_rederives_and_accepts_the_full_potential_gate(
@@ -214,10 +216,8 @@ def test_browser_rederives_and_accepts_the_full_potential_gate(
     app = create_app(_config(tmp_path))
     with TestClient(app) as client:
         page = client.get("/")
-        full = client.get(
-            "/supernet/potential-gate",
-            params={"perspective_id": "perspective:browser-gate"},
-        ).json()["supernet_potential_gate"]
+        full = _full_gate(client, "perspective:browser-gate")
+
     source = page.text
     script_source = source.split("<script>", 1)[1].split("</script>", 1)[0]
     syntax = subprocess.run(
