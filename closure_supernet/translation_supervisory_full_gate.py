@@ -88,9 +88,13 @@ def _refine_gate(
     base_gate: Mapping[str, Any],
     *,
     contract: Mapping[str, Any],
+    source_perspective_by_event: Mapping[str, str],
 ) -> dict[str, Any]:
     gate = deepcopy(dict(base_gate))
-    geometry = derive_translation_supervisory_geometry(contract)
+    geometry = derive_translation_supervisory_geometry(
+        contract,
+        source_perspective_by_event=source_perspective_by_event,
+    )
     active = str(gate.get("active_perspective_id") or "participant")
 
     semantic_perspectives = {
@@ -193,7 +197,13 @@ def derive_full_supernet_gate_contract(
     closure_contract: Mapping[str, Any],
     *,
     navigation_context: Mapping[str, Any] | None = None,
+    source_perspective_by_event: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
+    provenance = {
+        str(event_id): str(perspective_id)
+        for event_id, perspective_id in dict(source_perspective_by_event or {}).items()
+        if str(event_id) and str(perspective_id)
+    }
     base = _base.derive_full_supernet_gate_contract(
         closure_contract,
         navigation_context=navigation_context,
@@ -201,6 +211,7 @@ def derive_full_supernet_gate_contract(
     gate = _refine_gate(
         base["relative_natural_form_potential_gate"],
         contract=closure_contract,
+        source_perspective_by_event=provenance,
     )
     body = dict(base)
     body.pop("id", None)
@@ -208,6 +219,7 @@ def derive_full_supernet_gate_contract(
     body["schema"] = SCHEMA
     body["relative_natural_form_potential_gate"] = gate
     body["navigation_context"] = gate["navigation_context"]
+    body["source_perspective_by_event"] = dict(sorted(provenance.items()))
     body["translation_supervisory_geometry_id"] = gate[
         "translation_supervisory_geometry_id"
     ]
@@ -226,6 +238,8 @@ def validate_full_supernet_gate_contract(
 ) -> dict[str, Any]:
     closure_contract = full_gate.get("closure_ui_contract")
     navigation_context = full_gate.get("navigation_context")
+    provenance = full_gate.get("source_perspective_by_event")
+    provenance = provenance if isinstance(provenance, Mapping) else {}
     if not isinstance(closure_contract, Mapping):
         return {
             "valid": False,
@@ -236,6 +250,7 @@ def validate_full_supernet_gate_contract(
         navigation_context=(
             navigation_context if isinstance(navigation_context, Mapping) else None
         ),
+        source_perspective_by_event=provenance,
     )
     errors: list[str] = []
     if dict(full_gate) != expected:
@@ -248,6 +263,7 @@ def validate_full_supernet_gate_contract(
         geometry_validation = validate_translation_supervisory_geometry(
             geometry,
             contract=closure_contract,
+            source_perspective_by_event=provenance,
         )
         if geometry_validation.get("valid") is not True:
             errors.extend(geometry_validation.get("errors", []))
