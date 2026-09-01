@@ -17,7 +17,7 @@ from .trading_returned_family_kernel_nrrf887_attempt import (
 )
 from .trading_translation_family_nrrf884_886 import derive_translation_families
 
-PROTOCOL = "closure.supernet/alpaca-nrrf879-887-live-v6-continuous-unified"
+PROTOCOL = "closure.supernet/alpaca-nrrf879-887-live-v7-continuous-profit"
 
 
 class AlpacaNRRF879881Runtime:
@@ -70,6 +70,7 @@ class AlpacaNRRF879881Runtime:
             "nrrf887_ai_diffusion": diffusion,
             "observation_and_trading_are_translation_equal_readings": True,
             "open_is_current_boundary_not_accumulated_queue": True,
+            "realized_profit_is_projection_of_same_continuous_closure": True,
             "stage_gate_present": False,
             "separate_observation_pipeline_present": False,
             "family_is_relative_visualization_of_selected_natural_forms": True,
@@ -86,6 +87,7 @@ class AlpacaNRRF879881Runtime:
 
 def compact_receipt(receipt: Mapping[str, Any]) -> dict[str, Any]:
     continuous = dict(receipt.get("continuous_unified_closure") or {})
+    profit = dict(continuous.get("realized_profit_projection") or {})
     diffusion = dict(receipt.get("nrrf887_ai_diffusion") or {})
     bridge = dict(receipt.get("nrrf879_881_runtime") or {})
     return {
@@ -95,12 +97,17 @@ def compact_receipt(receipt: Mapping[str, Any]) -> dict[str, Any]:
         "current_revision": continuous.get("current_revision"),
         "new_returned_reading_count": continuous.get("new_returned_reading_count"),
         "completed_temporal_trade_count": continuous.get("completed_temporal_trade_count"),
+        "realized_profit_status": profit.get("status"),
+        "realized_net_profit_quote": profit.get("realized_net_profit_quote"),
+        "new_realized_profit_delta_quote": profit.get("new_realized_profit_delta_quote"),
+        "open_net_profit_temporal_closure_ids": profit.get("open_net_profit_temporal_closure_ids", []),
         "open_boundary": continuous.get("open_boundary"),
         "translation_family_count": continuous.get("translation_families", {}).get("family_count"),
         "returned_family_kernel_status": continuous.get("returned_family_kernel", {}).get("status"),
         "nrrf887_diffusion_status": diffusion.get("status"),
         "relative_global_intent": diffusion.get("global_intent"),
         "observation_and_trading_are_translation_equal_readings": True,
+        "realized_profit_is_projection_of_same_continuous_closure": True,
         "open_is_current_boundary_not_accumulated_queue": True,
         "stage_gate_present": False,
         "separate_observation_pipeline_present": False,
