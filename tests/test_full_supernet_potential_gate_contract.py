@@ -24,15 +24,21 @@ def _config(tmp_path: Path) -> RuntimeConfig:
     )
 
 
+def _gate(client: TestClient, perspective_id: str) -> dict:
+    response = client.get(
+        "/supernet/interface",
+        params={"perspective_id": perspective_id, "potential_gate": True},
+    )
+    assert response.status_code == 200, response.text
+    return response.json()["supernet_potential_gate"]
+
+
 def test_gate_rejects_truth_reduction_and_navigation_truth_drift(
     tmp_path: Path,
 ) -> None:
     app = create_app(_config(tmp_path))
     with TestClient(app) as client:
-        full = client.get(
-            "/supernet/potential-gate",
-            params={"perspective_id": "perspective:guard"},
-        ).json()["supernet_potential_gate"]
+        full = _gate(client, "perspective:guard")
 
     reduced = deepcopy(full)
     reduced["relative_natural_form_potential_gate"][
@@ -48,10 +54,7 @@ def test_gate_rejects_truth_reduction_and_navigation_truth_drift(
 def test_every_gate_path_is_truth_inert_until_return(tmp_path: Path) -> None:
     app = create_app(_config(tmp_path))
     with TestClient(app) as client:
-        full = client.get(
-            "/supernet/potential-gate",
-            params={"perspective_id": "perspective:path-guard"},
-        ).json()["supernet_potential_gate"]
+        full = _gate(client, "perspective:path-guard")
 
     gate = full["relative_natural_form_potential_gate"]
     assert gate["paths"]
