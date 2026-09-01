@@ -70,5 +70,5 @@ def test_equal_translation_surface_has_no_hidden_interaction_geometry(tmp_path: 
     assert "pointer-events:stroke" in html
     assert '"data-visible-equals-interaction":"true"' in html
     assert '"data-same-object-visible-and-interactive":"true"' in html
+    assert '"data-presentation-only":"false"' in html
     assert "natural-form-family-layer" not in html
-    assert "presentation-only" not in html.lower()
