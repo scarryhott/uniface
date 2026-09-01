@@ -21,6 +21,10 @@ cost-complete temporal inventory-return closure appears:
     Pi_real(Q_(t+1)) = Pi_real(Q_t)
                        + sum(Pi_nat(tau) for tau in NewClosed(Q_(t+1))).
 
+Returned natural forms are readings of Q as well.  Translation-family, AI
+and profit objects are derived relative readings of the same current; they do
+not create another stage or another closure revision.
+
 This Python layer is a runtime correspondence; it does not execute or re-prove
 Lean.
 """
@@ -35,7 +39,7 @@ from .trading_ai_diffusion_nrrf887 import derive_nrrf887_diffusion
 from .trading_returned_family_kernel_nrrf887_attempt import derive_returned_family_kernel
 from .trading_translation_family_nrrf884_886 import derive_translation_families
 
-PROTOCOL = "closure.supernet/trading-continuous-unified-closure-nrrf879-887-v2-profit-projection"
+PROTOCOL = "closure.supernet/trading-continuous-unified-closure-nrrf879-887-v3-all-relative-readings"
 
 
 def _stable(value: Any) -> str:
@@ -76,6 +80,11 @@ def _returned_readings(trading: Mapping[str, Any]) -> list[dict[str, Any]]:
         rows.append({"kind": "FILL_RETURN", "reading": dict(raw)})
     for raw in trading.get("temporal_closures", []):
         rows.append({"kind": "TEMPORAL_TRADE_CLOSURE", "reading": dict(raw)})
+    field = dict(trading.get("trading_projection_field") or {})
+    for raw in field.get("returned_natural_forms", []):
+        row = dict(raw)
+        if row.get("returned_truth_member") is True:
+            rows.append({"kind": "NATURAL_FORM_RETURN", "reading": row})
     return rows
 
 
@@ -86,6 +95,7 @@ def _reading_key(row: Mapping[str, Any]) -> str:
         "source_event_id",
         "temporal_closure_id",
         "closure_id",
+        "form_id",
         "order_id",
         "trade_id",
         "id",
@@ -160,9 +170,8 @@ def _realized_profit_projection(
                 realized_ids.add(closure_id)
                 newly_realized.append(closure_id)
                 delta += net
-        else:
-            if closure_id not in realized_ids:
-                unresolved_ids.add(closure_id)
+        elif closure_id not in realized_ids:
+            unresolved_ids.add(closure_id)
 
     total = prior_total + delta
     return {
@@ -216,7 +225,26 @@ def derive_continuous_unified_closure(
     )
     profit_projection = _realized_profit_projection(trading=trading, prior=prior)
 
-    # One current boundary only.  Reasons are recomputed from present unresolved
+    derived_readings: list[dict[str, Any]] = []
+    if families.get("family_count", 0):
+        derived_readings.append({
+            "kind": "TRANSLATION_FAMILY_FIELD",
+            "reading": families,
+            "authors_new_truth": False,
+        })
+    if diffusion.get("status") == WITNESSED_STATUS:
+        derived_readings.append({
+            "kind": "AI_DIFFUSION_PQ",
+            "reading": diffusion,
+            "authors_new_truth": False,
+        })
+    derived_readings.append({
+        "kind": "REALIZED_PROFIT_PROJECTION",
+        "reading": profit_projection,
+        "authors_new_truth": False,
+    })
+
+    # One current boundary only. Reasons are recomputed from present unresolved
     # relations; stale reason strings are never accumulated as semantic objects.
     boundary: list[str] = []
     if not all_readings:
@@ -241,12 +269,17 @@ def derive_continuous_unified_closure(
         "returned_readings": all_readings,
         "new_returned_readings": current_readings,
         "new_returned_reading_count": len(current_readings),
+        "derived_relative_readings": derived_readings,
+        "current_relative_readings": [*all_readings, *derived_readings],
+        "derived_readings_do_not_increment_revision": True,
         "observation_and_trading_are_translation_equal_readings": True,
+        "natural_form_is_reading_of_same_current": True,
         "observation_is_not_presemantic_environment": True,
         "completed_trade_is_projection_not_truth_start": True,
         "quote_can_update_current_closure_without_realizing_pnl": True,
         "fill_can_update_current_closure_without_being_only_truth_source": True,
         "ai_diffusion_is_reading_of_same_current": True,
+        "profit_is_reading_of_same_current": True,
         "action_is_reading_of_same_current": True,
         "translation_families": families,
         "returned_family_kernel": kernel,
