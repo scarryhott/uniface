@@ -8,11 +8,14 @@ same carrier. No agent or self-runtime mutation authority exists beside
 """
 
 from .agent_closure_mcp import attach_supernet_agent_mcp
+from .self_runtime_projection import attach_self_runtime_projection
 from .supernet_closure_runtime import create_app as _create_closure_app
 
 
 def create_app(config=None):
-    return attach_supernet_agent_mcp(_create_closure_app(config))
+    app = _create_closure_app(config)
+    app = attach_supernet_agent_mcp(app)
+    return attach_self_runtime_projection(app)
 
 
 app = create_app()
