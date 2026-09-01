@@ -54,6 +54,7 @@ def test_agent_interaction_and_self_observation_close_through_same_runtime_ident
 ) -> None:
     app = create_app(_config(tmp_path))
     runtime = app.state.runtime
+    exact = "Agent interaction returns into the same self runtime closure form."
 
     async def scenario() -> None:
         async with Client(app.state.supernet_agent_mcp) as client:
@@ -72,7 +73,7 @@ def test_agent_interaction_and_self_observation_close_through_same_runtime_ident
                 await client.call_tool(
                     "supernet_offer",
                     {
-                        "exact_text": "Agent interaction returns into the same self runtime closure form.",
+                        "exact_text": exact,
                         "actor_id": "openai-agent",
                         "perspective_id": "openai-agent",
                         "form_label": "agent self runtime interaction",
@@ -83,12 +84,15 @@ def test_agent_interaction_and_self_observation_close_through_same_runtime_ident
             translation = offered["translation"]
             assert translation["operator"] == TRANSLATE_OPERATOR
             assert translation["runtime_state_change_is_this_translation"] is True
-            assert translation["agent_interaction_is_this_translation"] is True
             assert translation["runtime_identity_is_translational_truth"] is True
+            assert offered["agent_interaction_is_this_translation"] is True
+            assert offered["browser_and_agent_share_translation_operator"] is True
+            assert offered["separate_agent_mutation_authority"] is False
             assert translation["source_runtime_identity_id"] == self_before["runtime_identity_id"]
             assert translation["target_runtime_identity_id"] == offered["self_runtime"]["runtime_identity_id"]
             assert offered["self_runtime"]["published_semantic_carrier"] == "SUPERNET_CLOSURE_FORM"
             assert offered["self_runtime"]["translation_operator"] == TRANSLATE_OPERATOR
+            assert runtime.ledger.list_returns()[-1]["exact_source"] == exact
 
             after = _structured(
                 await client.call_tool(
