@@ -61,15 +61,15 @@ function visualInteraction(full,path){
     attrs_anchor = (
         '"data-return-aperture":path.status!=="WITNESSED"});'
     )
-    attrs_replacement = (
-        '"data-return-aperture":path.status!=="WITNESSED",'
-        '"data-user-token-interaction-equal":visual?.equal_user_token_interaction===true,'
-        '"data-visually-identified":visual?.visually_identified===true,'
-        '"data-visual-identification-id":visual?.visual_identification_id||"",'
-        '"data-maze-cell-id":visual?.maze_cell_id||"",'
-        '"data-semantic-family-id":visual?.semantic_family_id||"",'
-        '"data-natural-form-id":visual?.natural_form_id||""});'
-    )
+    attrs_replacement = ''.join((
+        '"data-return-aperture":path.status!=="WITNESSED",',
+        '"data-user-token-interaction-equal":visual?.equal_user_token_interaction===true,',
+        '"data-visually-identified":visual?.visually_identified===true,',
+        '"data-visual-identification-id":visual?.visual_identification_id||"",',
+        '"data-maze-cell-id":visual?.maze_cell_id||"",',
+        '"data-semantic-family-id":visual?.semantic_family_id||"",',
+        '"data-natural-form-id":visual?.natural_form_id||""});',
+    ))
     if attrs_anchor not in body:
         raise RuntimeError("path attribute browser anchor changed")
     body = body.replace(attrs_anchor, attrs_replacement, 1)
@@ -77,10 +77,10 @@ function visualInteraction(full,path){
     root_anchor = (
         '"data-equality-is-local-gate-constraint":"true",'
     )
-    root_replacement = root_anchor + (
-        '"data-visual-identification-iff-equal-user-token-interaction":"true",'
-        '"data-ui-is-relative-user-token-interaction":"true",'
-    )
+    root_replacement = root_anchor + ''.join((
+        '"data-visual-identification-iff-equal-user-token-interaction":"true",',
+        '"data-ui-is-relative-user-token-interaction":"true",',
+    ))
     if root_anchor not in body:
         raise RuntimeError("surface root browser anchor changed")
     body = body.replace(root_anchor, root_replacement, 1)
