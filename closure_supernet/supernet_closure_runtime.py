@@ -2,17 +2,16 @@ from __future__ import annotations
 
 """Single published Supernet closure-form runtime and transition operator.
 
-Legacy storage/network mechanics remain available as compatibility evidence,
-but the active browser and runtime both execute ``SUPERNET_TRANSLATE``. The
-server emits one content-addressed translation receipt, and the browser uses
-that exact receipt as its visible trajectory. Navigation and return are no
-longer separate public interaction operators.
+The historical interaction URI is retained as a wire address only. Current
+browser/runtime semantics at that address are ``SUPERNET_TRANSLATE``: one
+content-addressed receipt is both the state transition and the visible
+trajectory. Historical payloads are accepted only as compatibility encoding.
 """
 
 from typing import Any, Mapping
 
 from fastapi import HTTPException
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from . import full_supernet_projection_runtime_v7 as _legacy_runtime
 from . import continuous_translation_field as _legacy_gate
@@ -25,8 +24,10 @@ from .supernet_closure_form import (
 )
 from .one_closure_form_interface import POTENTIAL_GATE_SUPERNET_HTML
 
-TRANSLATION_ENDPOINT = "/supernet/interface/projections/{contract_id}/translate"
-LEGACY_INTERACTION_ENDPOINT = _legacy_runtime.INTERACTION_ENDPOINT
+# Preserve the established public URI so the wire topology does not become a
+# second semantic system. The operation at this path is now SUPERNET_TRANSLATE.
+TRANSLATION_ENDPOINT = _legacy_runtime.INTERACTION_ENDPOINT
+LEGACY_INTERACTION_ENDPOINT = TRANSLATION_ENDPOINT
 INTERACTION_ENDPOINT = TRANSLATION_ENDPOINT
 
 
@@ -58,6 +59,17 @@ def _route_endpoint(app: Any, path: str, method: str) -> Any:
         if getattr(route, "path", None) == path and method in methods:
             return route.endpoint
     raise RuntimeError(f"missing route: {method} {path}")
+
+
+def _remove_route(app: Any, path: str, method: str) -> None:
+    app.router.routes[:] = [
+        route
+        for route in app.router.routes
+        if not (
+            getattr(route, "path", None) == path
+            and method in (getattr(route, "methods", set()) or set())
+        )
+    ]
 
 
 def _provenance(runtime: Any) -> dict[str, str]:
@@ -106,7 +118,7 @@ def _replace_capabilities(app: Any) -> None:
                 "mutation_relations": [TRANSLATE_OPERATOR],
                 "opener": "RELATIVE_LOCALIZATION_OF_CLOSURE_FORM",
                 "ui": "VISUAL_APPEARANCE_OF_CLOSURE_FORM",
-                "interaction": "SUPERNET_TRANSLATE",
+                "interaction": TRANSLATE_OPERATOR,
                 "slide": "CURRENT_COORDINATE_OF_CLOSURE_FORM",
                 "crystal_ball": "ORBIT_VISUALIZATION_OF_CLOSURE_FORM",
                 "hair": "SELF_LOCATION_COORDINATE_OF_CLOSURE_FORM",
@@ -123,8 +135,9 @@ def _replace_capabilities(app: Any) -> None:
                 "continuing_interaction_uses_same_translation_operator": True,
                 "separate_navigation_operator": False,
                 "separate_return_operator": False,
-                "legacy_interaction_endpoint": LEGACY_INTERACTION_ENDPOINT,
-                "legacy_interaction_endpoint_is_compatibility_only": True,
+                "wire_path_retained_for_compatibility": True,
+                "legacy_interaction_payloads_are_compatibility_only": True,
+                "legacy_navigation_vocabulary_is_compatibility_only": True,
                 "legacy_modules_are_compatibility_evidence_only": True,
                 "single_published_semantic_carrier": True,
                 "truth_issued": False,
@@ -141,13 +154,28 @@ def create_app(config=None):
     _legacy_gate.validate_full_supernet_gate_contract = validate_full_supernet_gate_contract
     app = _legacy_runtime.create_app(config)
     runtime = app.state.runtime
+
+    # Freeze the former handler as a private compatibility implementation, then
+    # replace its route with the one current transition operation at the same URI.
     legacy_interact = _route_endpoint(app, LEGACY_INTERACTION_ENDPOINT, "POST")
+    _remove_route(app, TRANSLATION_ENDPOINT, "POST")
 
     @app.post(TRANSLATION_ENDPOINT)
     async def translate(
         contract_id: str,
-        data: SupernetTranslationRequest,
-    ) -> dict[str, Any]:
+        payload: dict[str, Any],
+    ) -> Any:
+        # Old clients/tests may still send historical interaction-kind payloads.
+        # They are decoded by the frozen predecessor but do not define the
+        # current browser/runtime semantics or a second public route.
+        if "source_closure_form_id" not in payload or "source_interaction_id" not in payload:
+            return await legacy_interact(contract_id, payload)
+
+        try:
+            data = SupernetTranslationRequest.model_validate(payload)
+        except ValidationError as error:
+            raise HTTPException(status_code=422, detail=error.errors()) from error
+
         current = _current_form_state(runtime, data)
         if current.get("id") != contract_id:
             raise HTTPException(409, "The Supernet closure form has changed")
@@ -186,10 +214,9 @@ def create_app(config=None):
         elif phase == "AI_CONTINUING":
             exact_source = data.exact_source_return.strip()
             if not exact_source:
-                # A continuing slide is still an interaction of the same
-                # closure form. It executes SUPERNET_TRANSLATE without adding a
-                # returned determination, so the semantic successor is the same
-                # carrier and the browser receives a canonical trajectory.
+                # A continuing slide executes the same translation without
+                # adding a new returned determination. Source and target are one
+                # carrier; the receipt is still the runtime/browser trajectory.
                 result = {
                     "replayed": False,
                     "truth_refined": False,
