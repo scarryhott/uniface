@@ -29,7 +29,12 @@ def _single_interaction_route(html: str) -> str:
     )
     body = body.replace(
         '"use strict";',
-        '"use strict";\n// Runtime-created aperture compatibility witness: sensor.id = "return-sensor";\nconst RETURN_APERTURE="RETURN_APERTURE";\nconst OPEN_RETURN_EXTENSION="OPEN_RETURN_EXTENSION";\nconst RELATION_PROVENANCE_PREFIX="natural-form-relation:";',
+        '"use strict";\n// Runtime-created aperture compatibility witness: sensor.id = "return-sensor";\nconst RETURN_APERTURE="RETURN_APERTURE";\nconst OPEN_RETURN_EXTENSION="OPEN_RETURN_EXTENSION";',
+        1,
+    )
+    body = body.replace(
+        '</style>',
+        '.closure-relation{pointer-events:stroke}\n</style>',
         1,
     )
     required = (
@@ -38,6 +43,7 @@ def _single_interaction_route(html: str) -> str:
         'query.set("potential_gate","true")',
         '/supernet/interface/projections/',
         'sensor.id = "return-sensor"',
+        '.closure-relation',
     )
     if not all(token in body for token in required):
         raise RuntimeError("the potential-gate interface could not be unified")
