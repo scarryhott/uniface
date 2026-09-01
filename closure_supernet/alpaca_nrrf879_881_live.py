@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Live Alpaca surface for the continuous NRRF879–887 trading closure."""
+"""Live Alpaca surface for the continuous NRRF879–892 trading closure."""
 
 import argparse
 import json
@@ -9,7 +9,7 @@ from typing import Any, Mapping
 
 from .alpaca_live_closure import AlpacaLiveClosureAdapter, AlpacaLiveConfig
 from .trading_ai_diffusion_nrrf887 import derive_nrrf887_diffusion
-from .trading_continuous_unified_closure_nrrf879_887 import derive_continuous_unified_closure
+from .trading_continuous_unified_closure_nrrf879_892 import derive_continuous_unified_closure
 from .trading_nrrf879_881_runtime_bridge import derive_nrrf879_881_runtime_bridge
 from .trading_returned_family_kernel_nrrf887_attempt import (
     derive_candidate_fold_embedding,
@@ -17,7 +17,7 @@ from .trading_returned_family_kernel_nrrf887_attempt import (
 )
 from .trading_translation_family_nrrf884_886 import derive_translation_families
 
-PROTOCOL = "closure.supernet/alpaca-nrrf879-887-live-v8-translational-action"
+PROTOCOL = "closure.supernet/alpaca-nrrf879-892-live-v9-vision-slide"
 
 
 class AlpacaNRRF879881Runtime:
@@ -69,10 +69,14 @@ class AlpacaNRRF879881Runtime:
             "nrrf887_candidate_fold_embedding": q_embedding_attempt,
             "nrrf887_ai_diffusion": diffusion,
             "translational_truth_action_field": continuous.get("translational_truth_action_field"),
+            "nrrf892_vision_crystal_market_rendering": continuous.get("nrrf892_vision_crystal_market_rendering"),
             "observation_and_trading_are_translation_equal_readings": True,
             "open_is_current_boundary_not_accumulated_queue": True,
             "realized_profit_is_projection_of_same_continuous_closure": True,
             "action_is_unique_relative_slide_not_prediction": True,
+            "market_side_is_relative_visualization_of_translational_slide": True,
+            "market_side_is_separate_semantic_bridge": False,
+            "vision_slide_closed_through_furthered_family": True,
             "stage_gate_present": False,
             "separate_observation_pipeline_present": False,
             "family_is_relative_visualization_of_selected_natural_forms": True,
@@ -94,6 +98,7 @@ def compact_receipt(receipt: Mapping[str, Any]) -> dict[str, Any]:
     continuous = dict(receipt.get("continuous_unified_closure") or {})
     profit = dict(continuous.get("realized_profit_projection") or {})
     action = dict(continuous.get("translational_truth_action_field") or {})
+    rendering = dict(continuous.get("nrrf892_vision_crystal_market_rendering") or {})
     diffusion = dict(receipt.get("nrrf887_ai_diffusion") or {})
     bridge = dict(receipt.get("nrrf879_881_runtime") or {})
     return {
@@ -114,7 +119,9 @@ def compact_receipt(receipt: Mapping[str, Any]) -> dict[str, Any]:
         "relative_global_intent": diffusion.get("global_intent"),
         "translational_truth_action_status": action.get("status"),
         "translational_truth_actions": action.get("actions", []),
-        "market_side_bridge_complete": action.get("market_side_bridge_complete"),
+        "nrrf892_market_rendering_status": rendering.get("status"),
+        "nrrf892_market_renderings": rendering.get("renderings", []),
+        "market_side_is_relative_visualization_of_translational_slide": True,
         "observation_and_trading_are_translation_equal_readings": True,
         "realized_profit_is_projection_of_same_continuous_closure": True,
         "action_is_unique_relative_slide_not_prediction": True,
@@ -129,7 +136,7 @@ def compact_receipt(receipt: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run Alpaca through continuous NRRF879-887 closure")
+    parser = argparse.ArgumentParser(description="Run Alpaca through continuous NRRF879-892 closure")
     parser.add_argument("--loop", action="store_true")
     parser.add_argument("--interval", type=float, default=15.0)
     parser.add_argument("--iterations", type=int, default=0)
