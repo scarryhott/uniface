@@ -14,10 +14,18 @@ OPEN is only the unresolved boundary of Q_(t+1).  It never becomes a second
 history, selector, or gate.  Completed inventory-return trades remain one
 projection of this current, not the point at which truth begins.
 
+Realized net profit is another projection of that same state.  Observation may
+change Q without changing realized P&L; realized P&L changes exactly when a new
+cost-complete temporal inventory-return closure appears:
+
+    Pi_real(Q_(t+1)) = Pi_real(Q_t)
+                       + sum(Pi_nat(tau) for tau in NewClosed(Q_(t+1))).
+
 This Python layer is a runtime correspondence; it does not execute or re-prove
 Lean.
 """
 
+from decimal import Decimal, InvalidOperation
 import hashlib
 import json
 from typing import Any, Mapping, Sequence
@@ -27,7 +35,7 @@ from .trading_ai_diffusion_nrrf887 import derive_nrrf887_diffusion
 from .trading_returned_family_kernel_nrrf887_attempt import derive_returned_family_kernel
 from .trading_translation_family_nrrf884_886 import derive_translation_families
 
-PROTOCOL = "closure.supernet/trading-continuous-unified-closure-nrrf879-887-v1"
+PROTOCOL = "closure.supernet/trading-continuous-unified-closure-nrrf879-887-v2-profit-projection"
 
 
 def _stable(value: Any) -> str:
@@ -36,6 +44,22 @@ def _stable(value: Any) -> str:
 
 def _digest(prefix: str, value: Any) -> str:
     return f"{prefix}:{hashlib.sha256(_stable(value).encode('utf-8')).hexdigest()[:24]}"
+
+
+def _decimal(value: Any) -> Decimal | None:
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        result = value if isinstance(value, Decimal) else Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError):
+        return None
+    return result if result.is_finite() else None
+
+
+def _text(value: Decimal) -> str:
+    if value == 0:
+        return "0"
+    return format(value.normalize(), "f")
 
 
 def _returned_readings(trading: Mapping[str, Any]) -> list[dict[str, Any]]:
@@ -53,6 +77,112 @@ def _returned_readings(trading: Mapping[str, Any]) -> list[dict[str, Any]]:
     for raw in trading.get("temporal_closures", []):
         rows.append({"kind": "TEMPORAL_TRADE_CLOSURE", "reading": dict(raw)})
     return rows
+
+
+def _reading_key(row: Mapping[str, Any]) -> str:
+    kind = str(row.get("kind") or "RETURN")
+    reading = dict(row.get("reading") or {})
+    for key in (
+        "source_event_id",
+        "temporal_closure_id",
+        "closure_id",
+        "order_id",
+        "trade_id",
+        "id",
+    ):
+        value = reading.get(key)
+        if value is not None:
+            return f"{kind}:{key}:{value}"
+    return _digest("continuous-returned-reading", {"kind": kind, "reading": reading})
+
+
+def _dedupe_new_readings(
+    *,
+    prior_readings: Sequence[Mapping[str, Any]],
+    current_readings: Sequence[Mapping[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    all_rows = [dict(row) for row in prior_readings]
+    seen = {_reading_key(row) for row in all_rows}
+    new_rows: list[dict[str, Any]] = []
+    for raw in current_readings:
+        row = dict(raw)
+        key = _reading_key(row)
+        if key in seen:
+            continue
+        seen.add(key)
+        new_rows.append(row)
+        all_rows.append(row)
+    return all_rows, new_rows
+
+
+def _temporal_closure_id(row: Mapping[str, Any]) -> str:
+    for key in ("temporal_closure_id", "closure_id", "id"):
+        value = row.get(key)
+        if value is not None:
+            return str(value)
+    return _digest(
+        "temporal-closure-projection",
+        {
+            "source_event_ids": list(row.get("source_event_ids", [])),
+            "opened_at": row.get("opened_at"),
+            "returned_at": row.get("returned_at"),
+        },
+    )
+
+
+def _realized_profit_projection(
+    *,
+    trading: Mapping[str, Any],
+    prior: Mapping[str, Any],
+) -> dict[str, Any]:
+    prior_projection = dict(prior.get("realized_profit_projection") or {})
+    prior_total = _decimal(prior_projection.get("realized_net_profit_quote")) or Decimal("0")
+    realized_ids = {str(x) for x in prior_projection.get("realized_temporal_closure_ids", [])}
+    seen_ids = {str(x) for x in prior_projection.get("seen_temporal_closure_ids", [])}
+    unresolved_ids = {str(x) for x in prior_projection.get("open_net_profit_temporal_closure_ids", [])}
+
+    delta = Decimal("0")
+    newly_realized: list[str] = []
+    current_closures = [dict(row) for row in trading.get("temporal_closures", [])]
+
+    for closure in current_closures:
+        closure_id = _temporal_closure_id(closure)
+        seen_ids.add(closure_id)
+        net = _decimal(closure.get("net_profit_quote"))
+        net_witnessed = bool(
+            closure.get("cost_complete") is True
+            and closure.get("net_profit_status") == WITNESSED_STATUS
+            and net is not None
+        )
+        if net_witnessed:
+            unresolved_ids.discard(closure_id)
+            if closure_id not in realized_ids:
+                realized_ids.add(closure_id)
+                newly_realized.append(closure_id)
+                delta += net
+        else:
+            if closure_id not in realized_ids:
+                unresolved_ids.add(closure_id)
+
+    total = prior_total + delta
+    return {
+        "status": OPEN_STATUS if unresolved_ids else WITNESSED_STATUS,
+        "realized_net_profit_quote": _text(total),
+        "new_realized_profit_delta_quote": _text(delta),
+        "newly_realized_temporal_closure_ids": newly_realized,
+        "realized_temporal_closure_ids": sorted(realized_ids),
+        "seen_temporal_closure_ids": sorted(seen_ids),
+        "open_net_profit_temporal_closure_ids": sorted(unresolved_ids),
+        "completed_trade_projection_count": len(seen_ids),
+        "realized_profit_projection_count": len(realized_ids),
+        "recurrence": "Pi_real(Q_(t+1))=Pi_real(Q_t)+sum(Pi_nat(tau), tau in NewClosed(Q_(t+1)))",
+        "profit_is_projection_of_same_continuous_closure": True,
+        "observation_can_change_current_closure_without_changing_realized_profit": True,
+        "realized_profit_changes_only_on_new_cost_complete_temporal_closure": True,
+        "incomplete_fee_evidence_leaves_only_that_profit_projection_open": True,
+        "unrealized_profit_authors_truth": False,
+        "expected_profit_authors_truth": False,
+    }
 
 
 def derive_continuous_unified_closure(
@@ -78,14 +208,18 @@ def derive_continuous_unified_closure(
         returned_diffusion_kernel=returned_kernel,
     )
 
-    current_readings = _returned_readings(trading)
+    receipt_readings = _returned_readings(trading)
     previous_readings = list(prior.get("returned_readings", []))
-    all_readings = [*previous_readings, *current_readings]
+    all_readings, current_readings = _dedupe_new_readings(
+        prior_readings=previous_readings,
+        current_readings=receipt_readings,
+    )
+    profit_projection = _realized_profit_projection(trading=trading, prior=prior)
 
-    # One current boundary only.  Reasons are recomputed from the present state;
-    # prior OPEN reasons are not accumulated as semantic objects.
+    # One current boundary only.  Reasons are recomputed from present unresolved
+    # relations; stale reason strings are never accumulated as semantic objects.
     boundary: list[str] = []
-    if not current_readings and not previous_readings:
+    if not all_readings:
         boundary.append("NO_RETURNED_INTERACTION_YET")
     if families.get("unresolved_member_count", 0):
         boundary.append("UNRESOLVED_TRANSLATION_FAMILY")
@@ -93,16 +227,19 @@ def derive_continuous_unified_closure(
         boundary.append("AUTHORITATIVE_CLOSURE_NUMBER_Q_OPEN")
     if families.get("family_count", 0) and kernel.get("status") != WITNESSED_STATUS and not trading.get("returned_diffusion_kernel"):
         boundary.append("RETURNED_RELATIVE_INTERACTION_KERNEL_P_OPEN")
+    if profit_projection.get("open_net_profit_temporal_closure_ids"):
+        boundary.append("RETURNED_NET_PROFIT_COST_EVIDENCE_OPEN")
 
-    completed_trade_count = len(trading.get("temporal_closures", []))
     current_truth_witnessed = bool(all_readings)
 
     body = {
         "protocol": PROTOCOL,
         "equation": "Q_(t+1)=Close(Q_t⊕R_(t+1))",
+        "profit_equation": "Pi_real(Q_(t+1))=Pi_real(Q_t)+sum(Pi_nat(NewClosed(Q_(t+1))))",
         "status": WITNESSED_STATUS if current_truth_witnessed else OPEN_STATUS,
         "current_revision": int(prior.get("current_revision", 0)) + len(current_readings),
         "returned_readings": all_readings,
+        "new_returned_readings": current_readings,
         "new_returned_reading_count": len(current_readings),
         "observation_and_trading_are_translation_equal_readings": True,
         "observation_is_not_presemantic_environment": True,
@@ -114,7 +251,8 @@ def derive_continuous_unified_closure(
         "translation_families": families,
         "returned_family_kernel": kernel,
         "ai_diffusion": diffusion,
-        "completed_temporal_trade_count": completed_trade_count,
+        "realized_profit_projection": profit_projection,
+        "completed_temporal_trade_count": profit_projection["completed_trade_projection_count"],
         "open_boundary": {
             "status": OPEN_STATUS if boundary else WITNESSED_STATUS,
             "unresolved_relations": boundary,
