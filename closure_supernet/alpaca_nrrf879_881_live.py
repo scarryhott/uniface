@@ -9,6 +9,7 @@ from typing import Any, Mapping
 
 from .alpaca_live_closure import AlpacaLiveClosureAdapter, AlpacaLiveConfig
 from .trading_ai_diffusion_nrrf887 import derive_nrrf887_diffusion
+from .trading_interactive_architecture_nrrf879_887 import derive_interactive_trading_architecture
 from .trading_nrrf879_881_runtime_bridge import derive_nrrf879_881_runtime_bridge
 from .trading_returned_family_kernel_nrrf887_attempt import (
     derive_candidate_fold_embedding,
@@ -16,7 +17,7 @@ from .trading_returned_family_kernel_nrrf887_attempt import (
 )
 from .trading_translation_family_nrrf884_886 import derive_translation_families
 
-PROTOCOL = "closure.supernet/alpaca-nrrf879-887-live-v4-kernel-attempt"
+PROTOCOL = "closure.supernet/alpaca-nrrf879-887-live-v5-interactive-architecture"
 
 
 class AlpacaNRRF879881Runtime:
@@ -34,10 +35,6 @@ class AlpacaNRRF879881Runtime:
             natural_form_field=natural_form_field,
             translational_truth_partition=trading.get("translational_truth_partition"),
         )
-
-        # P can be derived from the returned temporal family sequence without a
-        # predictor.  We use an explicitly returned upstream kernel when one is
-        # present; otherwise the history-derived kernel is the only fallback.
         kernel_attempt = derive_returned_family_kernel(
             translation_family_receipt=family,
             natural_form_field=natural_form_field,
@@ -45,9 +42,6 @@ class AlpacaNRRF879881Runtime:
         returned_kernel = trading.get("returned_diffusion_kernel")
         if returned_kernel is None:
             returned_kernel = kernel_attempt.get("returned_diffusion_kernel")
-
-        # q remains strict.  The candidate embedding is exposed for testing but
-        # is never copied into the authoritative NRRF887 coordinate field.
         q_embedding_attempt = derive_candidate_fold_embedding(
             translation_family_receipt=family,
             natural_form_field=natural_form_field,
@@ -57,6 +51,7 @@ class AlpacaNRRF879881Runtime:
             translation_family_receipt=family,
             returned_diffusion_kernel=returned_kernel,
         )
+        interactive = derive_interactive_trading_architecture(trading_receipt=trading)
 
         valid = bool(
             bridge["anti_smuggling_audit"]["valid"]
@@ -71,6 +66,7 @@ class AlpacaNRRF879881Runtime:
             "nrrf887_returned_family_kernel_attempt": kernel_attempt,
             "nrrf887_candidate_fold_embedding": q_embedding_attempt,
             "nrrf887_ai_diffusion": diffusion,
+            "nrrf879_887_interactive_architecture": interactive,
             "family_is_relative_visualization_of_selected_natural_forms": True,
             "ai_is_probabilistic_diffusion_of_local_interactions": True,
             "history_derived_kernel_may_feed_diffusion_when_witnessed": True,
@@ -92,6 +88,7 @@ def compact_receipt(receipt: Mapping[str, Any]) -> dict[str, Any]:
     kernel_attempt = dict(receipt.get("nrrf887_returned_family_kernel_attempt") or {})
     q_attempt = dict(receipt.get("nrrf887_candidate_fold_embedding") or {})
     diffusion = dict(receipt.get("nrrf887_ai_diffusion") or {})
+    interactive = dict(receipt.get("nrrf879_887_interactive_architecture") or {})
     trading = dict(receipt.get("trading") or {})
     return {
         "protocol": PROTOCOL,
@@ -111,6 +108,9 @@ def compact_receipt(receipt: Mapping[str, Any]) -> dict[str, Any]:
         "oscillation_before": diffusion.get("oscillation_before"),
         "oscillation_after": diffusion.get("oscillation_after"),
         "relative_global_intent": diffusion.get("global_intent"),
+        "interactive_architecture_status": interactive.get("status"),
+        "interactive_stages": interactive.get("stages", []),
+        "interaction_projection": interactive.get("interaction_projection"),
         "family_is_relative_visualization_of_selected_natural_forms": True,
         "ai_is_probabilistic_diffusion_of_local_interactions": True,
         "history_derived_kernel_may_feed_diffusion_when_witnessed": True,
