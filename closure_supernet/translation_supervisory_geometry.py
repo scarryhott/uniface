@@ -17,8 +17,8 @@ contain JSON of the form
 
     {"semantic_market_valuation": {"tokens": {"alpha": "2/3", "beta": "5"}}}
 
-The observer is never read from caller-authored JSON.  It is taken from the
-returned state's source perspective provenance.
+The observer is never read from caller-authored JSON.  It is supplied from the
+canonical returned-event provenance by the projection runtime.
 """
 
 from fractions import Fraction
@@ -150,11 +150,16 @@ def determined_translation(
     return scale, WITNESSED_STATUS, shared
 
 
-def _parse_state_valuation(state: Mapping[str, Any]) -> dict[str, Any] | None:
-    perspective_id = str(state.get("source_perspective_id") or "")
+def _parse_state_valuation(
+    state: Mapping[str, Any],
+    *,
+    source_perspective_by_event: Mapping[str, str],
+) -> dict[str, Any] | None:
+    event_id = str(state.get("event_id") or "")
+    perspective_id = str(source_perspective_by_event.get(event_id) or "")
     source_trace = state.get("source_trace")
     source_returns = _unique(state.get("source_return_ids", []))
-    if not perspective_id or not isinstance(source_trace, str) or not source_returns:
+    if not event_id or not perspective_id or not isinstance(source_trace, str) or not source_returns:
         return None
     try:
         decoded = json.loads(source_trace)
@@ -176,7 +181,7 @@ def _parse_state_valuation(state: Mapping[str, Any]) -> dict[str, Any] | None:
     body = {
         "perspective_id": perspective_id,
         "state_id": str(state.get("id") or ""),
-        "event_id": str(state.get("event_id") or ""),
+        "event_id": event_id,
         "source_return_ids": source_returns,
         "tokens": exact_tokens,
         "normalized": normalize(exact_tokens),
@@ -193,13 +198,28 @@ def _parse_state_valuation(state: Mapping[str, Any]) -> dict[str, Any] | None:
     return body
 
 
-def returned_valuations(contract: Mapping[str, Any]) -> list[dict[str, Any]]:
+def returned_valuations(
+    contract: Mapping[str, Any],
+    *,
+    source_perspective_by_event: Mapping[str, str] | None = None,
+) -> list[dict[str, Any]]:
     projection = contract.get("projection")
     projection = projection if isinstance(projection, Mapping) else {}
+    provenance = {
+        str(event_id): str(perspective_id)
+        for event_id, perspective_id in dict(source_perspective_by_event or {}).items()
+        if str(event_id) and str(perspective_id)
+    }
     parsed = [
         value
         for state in _rows(projection.get("states"))
-        if (value := _parse_state_valuation(state)) is not None
+        if (
+            value := _parse_state_valuation(
+                state,
+                source_perspective_by_event=provenance,
+            )
+        )
+        is not None
     ]
     # Keep the latest returned valuation per perspective in deterministic event order.
     latest: dict[str, dict[str, Any]] = {}
@@ -210,8 +230,18 @@ def returned_valuations(contract: Mapping[str, Any]) -> list[dict[str, Any]]:
 
 def derive_translation_supervisory_geometry(
     contract: Mapping[str, Any],
+    *,
+    source_perspective_by_event: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
-    valuations = returned_valuations(contract)
+    provenance = {
+        str(event_id): str(perspective_id)
+        for event_id, perspective_id in dict(source_perspective_by_event or {}).items()
+        if str(event_id) and str(perspective_id)
+    }
+    valuations = returned_valuations(
+        contract,
+        source_perspective_by_event=provenance,
+    )
     by_perspective = {row["perspective_id"]: row for row in valuations}
     perspectives = sorted(by_perspective)
     relations: list[dict[str, Any]] = []
@@ -311,6 +341,7 @@ def derive_translation_supervisory_geometry(
         "logarithms_used": False,
         "floating_point_used_for_truth": False,
         "fiat_settlement_claimed": False,
+        "source_perspective_by_event": dict(sorted(provenance.items())),
         "valuations": valuations,
         "relations": relations,
         "natural_form_supervision": supervision,
@@ -323,6 +354,7 @@ def derive_translation_supervisory_geometry(
         "ai_supervision_equals_token_translation_geometry": True,
         "perspective_navigation_requires_determined_translation_when_semantic_market_evidence_exists": True,
         "no_shared_token_does_not_determine_translation": True,
+        "observer_identity_comes_only_from_returned_event_provenance": True,
         "selection_authors_truth": False,
         "rendering_authors_truth": False,
         "truth_issued": False,
@@ -335,8 +367,12 @@ def validate_translation_supervisory_geometry(
     geometry: Mapping[str, Any],
     *,
     contract: Mapping[str, Any],
+    source_perspective_by_event: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
-    expected = derive_translation_supervisory_geometry(contract)
+    expected = derive_translation_supervisory_geometry(
+        contract,
+        source_perspective_by_event=source_perspective_by_event,
+    )
     errors: list[str] = []
     if dict(geometry) != expected:
         errors.append("translation-supervisory-geometry:not-derived")
@@ -346,6 +382,8 @@ def validate_translation_supervisory_geometry(
         errors.append("translation-supervisory-geometry:selection-authority")
     if expected.get("rendering_authors_truth") is not False:
         errors.append("translation-supervisory-geometry:rendering-authority")
+    if expected.get("observer_identity_comes_only_from_returned_event_provenance") is not True:
+        errors.append("translation-supervisory-geometry:observer-smuggling")
     return {
         "valid": not errors,
         "errors": errors,
