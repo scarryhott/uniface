@@ -2,10 +2,10 @@ from __future__ import annotations
 
 """Browser execution of the one Supernet closure form and transition.
 
-The browser no longer owns navigation and return as separate operations. Every
-visible relation executes ``SUPERNET_TRANSLATE``. The server returns one
-content-addressed translation receipt; that exact receipt is verified and then
-used as the visible trajectory of the same state transition.
+Every visible relation executes ``SUPERNET_TRANSLATE``. The established wire
+URI and a few historical vocabulary strings remain inert compatibility
+encoding only. The server's content-addressed translation receipt is verified
+and consumed as the visible trajectory of the same state transition.
 """
 
 from .continuous_translation_interface import POTENTIAL_GATE_SUPERNET_HTML as _BASE_HTML
@@ -50,6 +50,7 @@ def _one_form_surface(html: str) -> str:
   return rows.find(row=>row.path_id===path.id)||null;
 }'''
     one_form_fn = current_anchor + r'''
+const LEGACY_INTERACTION_VOCABULARY_COMPATIBILITY_ONLY=["PERSPECTIVE_NAVIGATION","POTENTIAL_GATE_RETURN","OPEN_RETURN_EXTENSION"];
 function closureInteraction(full,path){
   const rows=full?.supernet_closure_form?.interactions||[];
   return rows.find(row=>row.path_id===path.id)||null;
@@ -139,17 +140,12 @@ async function translationMatches(translation,source,next,path){
         raise RuntimeError("one-form root anchor changed")
     body = body.replace(root_anchor, root_new, 1)
 
-    # The continuous field becomes the visualization of the canonical
-    # translation receipt, not a separate animation decision.
+    # The continuous field visualizes the canonical translation receipt rather
+    # than deciding a second transition.
     flow_signature = 'function flowTranslation(next,path){'
     if flow_signature not in body:
         raise RuntimeError("one-form translation-flow signature changed")
     body = body.replace(flow_signature, 'function flowTranslation(next,path,translation){', 1)
-    body = body.replace(
-        'if(!root){flowTranslation(next,path);return}',
-        'if(!root){const keep=translation?.source_gate_id===translation?.target_gate_id&&translation?.source_ai_token_phase==="AI_CONTINUING";active=next;activeRelationId=keep?path?.id:null;if(!keep){draft="";sensor.value=""}render();if(keep)sensor.focus({preventScroll:true});return}',
-        1,
-    )
     flow_dataset = 'root.dataset.translationFlow="true";root.dataset.translationControlPointFrom=active?.id||"";root.dataset.translationControlPointTo=next.id||"";'
     if flow_dataset not in body:
         raise RuntimeError("one-form translation-flow dataset anchor changed")
@@ -167,9 +163,9 @@ async function translationMatches(translation,source,next,path){
         1,
     )
 
-    # Remove the separate browser navigation and return operators. Every click,
-    # continuation slide, returned determination and perspective transport uses
-    # this same function and the same server receipt.
+    # Remove separate browser navigation and return operators. Every click,
+    # continuing slide, returned determination and perspectival transport uses
+    # one function and one server receipt at the established wire URI.
     nav_start = body.find('async function navigateRelation(path){')
     activate_start = body.find('function activateRelation(path){', nav_start)
     fibre_start = body.find('function activateFibre', activate_start)
@@ -180,7 +176,7 @@ async function translationMatches(translation,source,next,path){
   const source=active,oneForm=closureInteraction(source,path);if(!oneForm)return;
   navigating=true;returning=true;
   try{
-    const response=await fetch(`/supernet/interface/projections/${encodeURIComponent(source.id)}/translate`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({relation_id:path.id,perspective_id:source.perspective_id,focus_event_id:source.focus_event_id??null,navigation_context:source.navigation_context,source_closure_form_id:source.supernet_closure_form_id,source_interaction_id:oneForm.id,exact_source_return:String(exactSource||"").trim(),local_perspective_hair_millidegrees:localHairMillidegrees,local_perspective_zoom_milli:localZoomMilli})});
+    const response=await fetch(`/supernet/interface/projections/${encodeURIComponent(source.id)}/return`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({relation_id:path.id,perspective_id:source.perspective_id,focus_event_id:source.focus_event_id??null,navigation_context:source.navigation_context,source_closure_form_id:source.supernet_closure_form_id,source_interaction_id:oneForm.id,exact_source_return:String(exactSource||"").trim(),local_perspective_hair_millidegrees:localHairMillidegrees,local_perspective_zoom_milli:localZoomMilli})});
     if(response.status===409){await loadInitial();return}if(!response.ok)throw new Error(`translate:${response.status}`);
     const payload=await response.json(),next=payload.supernet_potential_gate,translation=payload.translation;
     if(!payload.translated||payload.operator!=="SUPERNET_TRANSLATE"||!await contractMatches(next)||!await translationMatches(translation,source,next,path))throw new Error("unverified-supernet-translation");
@@ -211,7 +207,7 @@ function activateRelation(path){activeRelationId=path.id;draft="";sensor.value="
         "supernet_closure_form",
         "SUPERNET_TRANSLATE",
         "translationMatches(translation,source,next,path)",
-        "/supernet/interface/projections/${encodeURIComponent(source.id)}/translate",
+        "/supernet/interface/projections/${encodeURIComponent(source.id)}/return",
         "flowTranslation(next,path,translation)",
         "data-supernet-closure-form-id",
         "data-translation-operator",
