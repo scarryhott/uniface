@@ -10,6 +10,7 @@ closure form and has no truth authority.
 """
 
 import os
+from contextlib import asynccontextmanager
 from typing import Annotated, Any, Literal
 
 from fastapi import FastAPI
@@ -218,6 +219,16 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
     )
     app.mount("/mcp", mcp_app, name="supernet-agent-mcp")
     app.state.supernet_agent_mcp = mcp
+
+    original_lifespan = app.router.lifespan_context
+
+    @asynccontextmanager
+    async def combined_lifespan(host_app: FastAPI):
+        async with original_lifespan(host_app):
+            async with mcp.session_manager.run():
+                yield
+
+    app.router.lifespan_context = combined_lifespan
 
     @app.get("/supernet/agent/capabilities")
     async def supernet_agent_capabilities() -> dict[str, Any]:
