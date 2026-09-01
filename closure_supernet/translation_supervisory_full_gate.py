@@ -26,18 +26,18 @@ from typing import Any, Mapping
 from . import full_supernet_potential_gate as _base
 from .closure_continuity import OPEN_STATUS, WITNESSED_STATUS
 from .translation_supervisory_geometry import (
+    PROTOCOL as TRANSLATION_PROTOCOL,
+    SCHEMA as TRANSLATION_SCHEMA,
     derive_translation_supervisory_geometry,
     validate_translation_supervisory_geometry,
 )
 
-PROTOCOL = "SUPERNET-NRRF882-TRANSLATION-SUPERVISORY-FULL-GATE"
-SCHEMA = "closure.supernet/nrrf882-translation-supervisory-full-gate-v1"
+# The public full-gate protocol is preserved so existing browsers remain one
+# realization of the same Supernet object. NRRF882 is an additional derived
+# constraint inside that gate, not a parallel protocol.
+PROTOCOL = _base.FULL_PROTOCOL
+SCHEMA = _base.FULL_SCHEMA
 
-# Runtime provenance is append-only and never caller-authored. The registry is
-# only a bridge for the immediate successor gate because the legacy closure
-# contract intentionally omits event authorship. Every emitted full-gate
-# contract carries the exact map used to derive it, so validation does not rely
-# on mutable process state.
 _SOURCE_PERSPECTIVE_REGISTRY: dict[str, str] = {}
 
 
@@ -193,6 +193,8 @@ def _refine_gate(
     gate["unitary_curvature"] = curvature
     gate["translation_supervisory_geometry"] = geometry
     gate["translation_supervisory_geometry_id"] = geometry["id"]
+    gate["translation_supervisory_protocol"] = TRANSLATION_PROTOCOL
+    gate["translation_supervisory_schema"] = TRANSLATION_SCHEMA
     gate["ai_supervision_is_token_translation_geometry"] = True
     gate["semantic_navigation_is_translation_determined"] = True
     gate["no_shared_token_relative_position_is_open"] = True
