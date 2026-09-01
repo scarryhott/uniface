@@ -33,8 +33,12 @@ def _rows(value: Any) -> list[Mapping[str, Any]]:
     return [item for item in value if isinstance(item, Mapping)]
 
 
+def _state_of_status(status: Any) -> str:
+    return RETURNED if status == WITNESSED_STATUS else CONTINUING
+
+
 def _state_of(path: Mapping[str, Any]) -> str:
-    return RETURNED if path.get("status") == WITNESSED_STATUS else CONTINUING
+    return _state_of_status(path.get("status"))
 
 
 def _semantic_kind(path: Mapping[str, Any]) -> str:
@@ -111,6 +115,34 @@ def _relation(path: Mapping[str, Any]) -> dict[str, Any]:
     return body
 
 
+def _family(raw: Mapping[str, Any]) -> dict[str, Any] | None:
+    family_id = str(raw.get("family_id") or raw.get("family") or "")
+    if not family_id:
+        return None
+    state = _state_of_status(raw.get("status"))
+    returned = state == RETURNED
+    body = {
+        "family_id": family_id,
+        "closure_state": state,
+        "returned": returned,
+        "continuing": not returned,
+        "chart_ids": sorted({str(item) for item in raw.get("chart_ids", []) if str(item)}),
+        "compatible_chart_ids": sorted(
+            {str(item) for item in raw.get("compatible_chart_ids", []) if str(item)}
+        ),
+        "continuing_chart_ids": sorted(
+            {str(item) for item in raw.get("open_boundary_chart_ids", []) if str(item)}
+        ),
+        "selectable": raw.get("selectable") is True
+        or raw.get("selectable_as_interaction_proposal") is True,
+        "empirical_return_required": raw.get("empirical_return_required") is True,
+        "selection_changes_truth": False,
+        "family_membership_is_inside_closure": True,
+    }
+    body["id"] = _base._digest("continuing-natural-form-family", body)
+    return body
+
+
 def derive_continuing_translation_closure(
     full_gate: Mapping[str, Any],
 ) -> dict[str, Any]:
@@ -144,14 +176,20 @@ def derive_continuing_translation_closure(
         relation.pop("id", None)
         relation["id"] = _base._digest("continuing-translation-relation", relation)
 
+    families = [
+        family
+        for raw in _rows(gate.get("family_potentials"))
+        if (family := _family(raw)) is not None
+    ]
     returned_ids = [row["id"] for row in relations if row["returned"]]
     continuing_ids = [row["id"] for row in relations if row["continuing"]]
+    returned_family_ids = [row["id"] for row in families if row["returned"]]
+    continuing_family_ids = [row["id"] for row in families if row["continuing"]]
 
     translation_geometry = gate.get("translation_supervisory_geometry")
     translation_geometry = (
         translation_geometry if isinstance(translation_geometry, Mapping) else {}
     )
-    family_potentials = [dict(row) for row in _rows(gate.get("family_potentials"))]
 
     body = {
         "protocol": PROTOCOL,
@@ -170,8 +208,12 @@ def derive_continuing_translation_closure(
         "continuing_relation_ids": continuing_ids,
         "returned_relation_count": len(returned_ids),
         "continuing_relation_count": len(continuing_ids),
-        "natural_form_family_potentials": family_potentials,
+        "natural_form_families": families,
+        "natural_form_family_count": len(families),
+        "returned_family_ids": returned_family_ids,
+        "continuing_family_ids": continuing_family_ids,
         "closure_contains_every_current_translation": True,
+        "closure_contains_every_current_natural_form_family": True,
         "continuation_is_inside_closure": True,
         "nonreturned_relation_is_continuation_not_nonclosure": True,
         "returned_is_determination_not_membership": True,
@@ -261,18 +303,21 @@ def validate_continuing_translation_closure(
         errors.append("continuing-closure:continuation-outside")
     if continuum.get("closure_contains_every_current_translation") is not True:
         errors.append("continuing-closure:relation-omission")
-    for relation in _rows(continuum.get("relations")):
-        returned = relation.get("returned") is True
-        continuing = relation.get("continuing") is True
-        state = relation.get("closure_state")
-        if returned == continuing:
-            errors.append(f"continuing-closure:state-overlap:{relation.get('id')}")
-        if state not in {RETURNED, CONTINUING}:
-            errors.append(f"continuing-closure:unknown-state:{relation.get('id')}")
-        if returned and state != RETURNED:
-            errors.append(f"continuing-closure:returned-state:{relation.get('id')}")
-        if continuing and state != CONTINUING:
-            errors.append(f"continuing-closure:continuing-state:{relation.get('id')}")
+    if continuum.get("closure_contains_every_current_natural_form_family") is not True:
+        errors.append("continuing-closure:family-omission")
+    for collection in ("relations", "natural_form_families"):
+        for row in _rows(continuum.get(collection)):
+            returned = row.get("returned") is True
+            continuing = row.get("continuing") is True
+            state = row.get("closure_state")
+            if returned == continuing:
+                errors.append(f"continuing-closure:state-overlap:{row.get('id')}")
+            if state not in {RETURNED, CONTINUING}:
+                errors.append(f"continuing-closure:unknown-state:{row.get('id')}")
+            if returned and state != RETURNED:
+                errors.append(f"continuing-closure:returned-state:{row.get('id')}")
+            if continuing and state != CONTINUING:
+                errors.append(f"continuing-closure:continuing-state:{row.get('id')}")
     return {
         "valid": not errors,
         "errors": errors,
@@ -280,6 +325,7 @@ def validate_continuing_translation_closure(
         "relation_count": continuum.get("relation_count", 0),
         "returned_relation_count": continuum.get("returned_relation_count", 0),
         "continuing_relation_count": continuum.get("continuing_relation_count", 0),
+        "natural_form_family_count": continuum.get("natural_form_family_count", 0),
     }
 
 
