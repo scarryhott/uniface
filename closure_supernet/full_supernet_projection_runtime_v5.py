@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from . import full_supernet_projection_runtime_v4 as _v4
+from . import equal_user_token_visual_identification as _visual_gate_module
 from .continuing_closure_full_gate import (
     derive_full_supernet_gate_contract,
     validate_full_supernet_gate_contract,
@@ -51,11 +52,15 @@ def _replace_capabilities(app: Any) -> None:
 def create_app(config=None):
     # v4 installs these globals into the already single-route v3 runtime. We
     # strengthen that exact path rather than adding a parallel semantic store.
-    # Do not overwrite the predecessor module's validator: the v5 validator
-    # intentionally invokes it to verify the NRRF883 predecessor independently.
+    # The v5 full-gate module froze the original NRRF883 validator at import
+    # time, so it is now safe to expose the stronger validator through the old
+    # NRRF883 import boundary for historical callers/tests.
     _v4.derive_full_supernet_gate_contract = derive_full_supernet_gate_contract
     _v4.validate_full_supernet_gate_contract = validate_full_supernet_gate_contract
     _v4.POTENTIAL_GATE_SUPERNET_HTML = POTENTIAL_GATE_SUPERNET_HTML
+    _visual_gate_module.validate_full_supernet_gate_contract = (
+        validate_full_supernet_gate_contract
+    )
     app = _v4.create_app(config)
     _replace_capabilities(app)
     return app
