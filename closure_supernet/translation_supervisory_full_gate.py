@@ -3,12 +3,12 @@ from __future__ import annotations
 """Full-gate refinement by NRRF882 translation equivalence.
 
 The base full gate remains the source of closure, OPEN continuation, hair,
-maze, curvature, atlas freedom and navigation history.  This module refines
+maze, curvature, atlas freedom and navigation history. This module refines
 its perspectival relation field with the exact translation-equivalence
 geometry returned by ``translation_supervisory_geometry``.
 
 When two perspectives both have returned semantic market valuations, the
-semantic relation is authoritative for their *relative translation*:
+semantic relation is authoritative for their relative translation:
 
 * shared-token, cross-consistent valuations -> WITNESSED perspective transport;
 * no shared token -> OPEN relative position;
@@ -32,6 +32,38 @@ from .translation_supervisory_geometry import (
 
 PROTOCOL = "SUPERNET-NRRF882-TRANSLATION-SUPERVISORY-FULL-GATE"
 SCHEMA = "closure.supernet/nrrf882-translation-supervisory-full-gate-v1"
+
+# Runtime provenance is append-only and never caller-authored. The registry is
+# only a bridge for the immediate successor gate because the legacy closure
+# contract intentionally omits event authorship. Every emitted full-gate
+# contract carries the exact map used to derive it, so validation does not rely
+# on mutable process state.
+_SOURCE_PERSPECTIVE_REGISTRY: dict[str, str] = {}
+
+
+def set_source_perspective_registry(mapping: Mapping[str, str]) -> None:
+    _SOURCE_PERSPECTIVE_REGISTRY.clear()
+    _SOURCE_PERSPECTIVE_REGISTRY.update(
+        {
+            str(event_id): str(perspective_id)
+            for event_id, perspective_id in mapping.items()
+            if str(event_id) and str(perspective_id)
+        }
+    )
+
+
+def update_source_perspective_registry(mapping: Mapping[str, str]) -> None:
+    _SOURCE_PERSPECTIVE_REGISTRY.update(
+        {
+            str(event_id): str(perspective_id)
+            for event_id, perspective_id in mapping.items()
+            if str(event_id) and str(perspective_id)
+        }
+    )
+
+
+def source_perspective_registry() -> dict[str, str]:
+    return dict(sorted(_SOURCE_PERSPECTIVE_REGISTRY.items()))
 
 
 def _semantic_pair_key(source: str, target: str) -> tuple[str, str]:
@@ -77,7 +109,6 @@ def _semantic_paths(
         path["cross_loss"] = relation.get("cross_loss")
         path["semantic_translation_determined"] = witnessed
         path["semantic_translation_reason"] = relation.get("reason")
-        # Re-address after adding the NRRF882-specific semantic fields.
         path.pop("id", None)
         path["id"] = _base._digest("potential-gate-path", path)
         rows.append(path)
@@ -199,11 +230,15 @@ def derive_full_supernet_gate_contract(
     navigation_context: Mapping[str, Any] | None = None,
     source_perspective_by_event: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
-    provenance = {
-        str(event_id): str(perspective_id)
-        for event_id, perspective_id in dict(source_perspective_by_event or {}).items()
-        if str(event_id) and str(perspective_id)
-    }
+    source_map = (
+        source_perspective_registry()
+        if source_perspective_by_event is None
+        else {
+            str(event_id): str(perspective_id)
+            for event_id, perspective_id in source_perspective_by_event.items()
+            if str(event_id) and str(perspective_id)
+        }
+    )
     base = _base.derive_full_supernet_gate_contract(
         closure_contract,
         navigation_context=navigation_context,
@@ -211,7 +246,7 @@ def derive_full_supernet_gate_contract(
     gate = _refine_gate(
         base["relative_natural_form_potential_gate"],
         contract=closure_contract,
-        source_perspective_by_event=provenance,
+        source_perspective_by_event=source_map,
     )
     body = dict(base)
     body.pop("id", None)
@@ -219,7 +254,7 @@ def derive_full_supernet_gate_contract(
     body["schema"] = SCHEMA
     body["relative_natural_form_potential_gate"] = gate
     body["navigation_context"] = gate["navigation_context"]
-    body["source_perspective_by_event"] = dict(sorted(provenance.items()))
+    body["source_perspective_by_event"] = dict(sorted(source_map.items()))
     body["translation_supervisory_geometry_id"] = gate[
         "translation_supervisory_geometry_id"
     ]
@@ -290,5 +325,8 @@ __all__ = [
     "PROTOCOL",
     "SCHEMA",
     "derive_full_supernet_gate_contract",
+    "set_source_perspective_registry",
+    "source_perspective_registry",
+    "update_source_perspective_registry",
     "validate_full_supernet_gate_contract",
 ]
