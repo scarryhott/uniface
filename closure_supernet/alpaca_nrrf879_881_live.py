@@ -17,7 +17,7 @@ from .trading_returned_family_kernel_nrrf887_attempt import (
 )
 from .trading_translation_family_nrrf884_886 import derive_translation_families
 
-PROTOCOL = "closure.supernet/alpaca-nrrf879-887-live-v7-continuous-profit"
+PROTOCOL = "closure.supernet/alpaca-nrrf879-887-live-v8-translational-action"
 
 
 class AlpacaNRRF879881Runtime:
@@ -68,9 +68,11 @@ class AlpacaNRRF879881Runtime:
             "nrrf887_returned_family_kernel_attempt": kernel_attempt,
             "nrrf887_candidate_fold_embedding": q_embedding_attempt,
             "nrrf887_ai_diffusion": diffusion,
+            "translational_truth_action_field": continuous.get("translational_truth_action_field"),
             "observation_and_trading_are_translation_equal_readings": True,
             "open_is_current_boundary_not_accumulated_queue": True,
             "realized_profit_is_projection_of_same_continuous_closure": True,
+            "action_is_unique_relative_slide_not_prediction": True,
             "stage_gate_present": False,
             "separate_observation_pipeline_present": False,
             "family_is_relative_visualization_of_selected_natural_forms": True,
@@ -82,6 +84,7 @@ class AlpacaNRRF879881Runtime:
             "fixed_price_subset_is_maximally_unified": False,
             "profitability_authors_family_membership": False,
             "profitability_authors_diffusion": False,
+            "profitability_authors_action": False,
             "automatic_order_submission": False,
             "runtime_semantic_author_present": bridge["anti_smuggling_audit"]["runtime_semantic_author_present"],
         }
@@ -90,6 +93,7 @@ class AlpacaNRRF879881Runtime:
 def compact_receipt(receipt: Mapping[str, Any]) -> dict[str, Any]:
     continuous = dict(receipt.get("continuous_unified_closure") or {})
     profit = dict(continuous.get("realized_profit_projection") or {})
+    action = dict(continuous.get("translational_truth_action_field") or {})
     diffusion = dict(receipt.get("nrrf887_ai_diffusion") or {})
     bridge = dict(receipt.get("nrrf879_881_runtime") or {})
     return {
@@ -108,11 +112,16 @@ def compact_receipt(receipt: Mapping[str, Any]) -> dict[str, Any]:
         "returned_family_kernel_status": continuous.get("returned_family_kernel", {}).get("status"),
         "nrrf887_diffusion_status": diffusion.get("status"),
         "relative_global_intent": diffusion.get("global_intent"),
+        "translational_truth_action_status": action.get("status"),
+        "translational_truth_actions": action.get("actions", []),
+        "market_side_bridge_complete": action.get("market_side_bridge_complete"),
         "observation_and_trading_are_translation_equal_readings": True,
         "realized_profit_is_projection_of_same_continuous_closure": True,
+        "action_is_unique_relative_slide_not_prediction": True,
         "open_is_current_boundary_not_accumulated_queue": True,
         "fixed_price_subset_is_maximally_unified": False,
         "profitability_authors_family_membership": False,
+        "profitability_authors_action": False,
         "stage_gate_present": False,
         "separate_observation_pipeline_present": False,
         "automatic_order_submission": False,
