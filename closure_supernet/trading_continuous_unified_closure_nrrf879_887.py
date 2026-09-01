@@ -21,9 +21,17 @@ cost-complete temporal inventory-return closure appears:
     Pi_real(Q_(t+1)) = Pi_real(Q_t)
                        + sum(Pi_nat(tau) for tau in NewClosed(Q_(t+1))).
 
-Returned natural forms are readings of Q as well.  Translation-family, AI
-and profit objects are derived relative readings of the same current; they do
-not create another stage or another closure revision.
+Returned natural forms are readings of Q as well. Translation-family, AI,
+action and profit objects are derived relative readings of the same current;
+they do not create another stage or another closure revision.  When NRRF887
+closure-number diffusion is witnessed, the action coordinate is the unique
+relative slide
+
+    Delta_i = (P_t q_t)_i - q_(t,i),
+
+with horizon and size inherited only when they are family-invariant returned
+coordinates of that same natural form.  Profit/forecast/novelty do not author
+this action field.
 
 This Python layer is a runtime correspondence; it does not execute or re-prove
 Lean.
@@ -35,11 +43,12 @@ import json
 from typing import Any, Mapping, Sequence
 
 from .closure_continuity import OPEN_STATUS, WITNESSED_STATUS
+from .trading_action_as_translational_truth_nrrf886_887 import derive_translational_truth_action_field
 from .trading_ai_diffusion_nrrf887 import derive_nrrf887_diffusion
 from .trading_returned_family_kernel_nrrf887_attempt import derive_returned_family_kernel
 from .trading_translation_family_nrrf884_886 import derive_translation_families
 
-PROTOCOL = "closure.supernet/trading-continuous-unified-closure-nrrf879-887-v3-all-relative-readings"
+PROTOCOL = "closure.supernet/trading-continuous-unified-closure-nrrf879-887-v4-translational-action"
 
 
 def _stable(value: Any) -> str:
@@ -216,6 +225,10 @@ def derive_continuous_unified_closure(
         translation_family_receipt=families,
         returned_diffusion_kernel=returned_kernel,
     )
+    translational_action = derive_translational_truth_action_field(
+        translation_family_receipt=families,
+        diffusion_receipt=diffusion,
+    )
 
     receipt_readings = _returned_readings(trading)
     previous_readings = list(prior.get("returned_readings", []))
@@ -238,6 +251,12 @@ def derive_continuous_unified_closure(
             "reading": diffusion,
             "authors_new_truth": False,
         })
+    if translational_action.get("action_count", 0):
+        derived_readings.append({
+            "kind": "TRANSLATIONAL_TRUTH_ACTION_FIELD",
+            "reading": translational_action,
+            "authors_new_truth": False,
+        })
     derived_readings.append({
         "kind": "REALIZED_PROFIT_PROJECTION",
         "reading": profit_projection,
@@ -255,6 +274,10 @@ def derive_continuous_unified_closure(
         boundary.append("AUTHORITATIVE_CLOSURE_NUMBER_Q_OPEN")
     if families.get("family_count", 0) and kernel.get("status") != WITNESSED_STATUS and not trading.get("returned_diffusion_kernel"):
         boundary.append("RETURNED_RELATIVE_INTERACTION_KERNEL_P_OPEN")
+    if translational_action.get("unresolved_family_ids"):
+        boundary.append("TRANSLATIONAL_TRUTH_ACTION_COORDINATE_OPEN")
+    if translational_action.get("action_count", 0) and not translational_action.get("market_side_bridge_complete"):
+        boundary.append("CLOSURE_SLIDE_TO_CONCRETE_MARKET_SIDE_BRIDGE_OPEN")
     if profit_projection.get("open_net_profit_temporal_closure_ids"):
         boundary.append("RETURNED_NET_PROFIT_COST_EVIDENCE_OPEN")
 
@@ -263,6 +286,7 @@ def derive_continuous_unified_closure(
     body = {
         "protocol": PROTOCOL,
         "equation": "Q_(t+1)=Close(Q_t⊕R_(t+1))",
+        "action_equation": "Delta_i=(P_t q_t)_i-q_(t,i)",
         "profit_equation": "Pi_real(Q_(t+1))=Pi_real(Q_t)+sum(Pi_nat(NewClosed(Q_(t+1))))",
         "status": WITNESSED_STATUS if current_truth_witnessed else OPEN_STATUS,
         "current_revision": int(prior.get("current_revision", 0)) + len(current_readings),
@@ -279,11 +303,13 @@ def derive_continuous_unified_closure(
         "quote_can_update_current_closure_without_realizing_pnl": True,
         "fill_can_update_current_closure_without_being_only_truth_source": True,
         "ai_diffusion_is_reading_of_same_current": True,
-        "profit_is_reading_of_same_current": True,
         "action_is_reading_of_same_current": True,
+        "action_is_unique_relative_slide_not_prediction": True,
+        "profit_is_reading_of_same_current": True,
         "translation_families": families,
         "returned_family_kernel": kernel,
         "ai_diffusion": diffusion,
+        "translational_truth_action_field": translational_action,
         "realized_profit_projection": profit_projection,
         "completed_temporal_trade_count": profit_projection["completed_trade_projection_count"],
         "open_boundary": {
