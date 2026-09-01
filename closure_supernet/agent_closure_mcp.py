@@ -4,7 +4,8 @@ from __future__ import annotations
 
 MCP is transport only. Every mutating tool resolves to the current
 ``AI_CONTINUING`` interaction and invokes the exact same ``SUPERNET_TRANSLATE``
-handler used by the browser. The runtime observes itself by projecting the same
+handler used by the browser. The canonical translation receipt is never amended
+by the agent adapter. The runtime observes itself by projecting the same
 content-addressed closure form; self-observation has no truth authority.
 """
 
@@ -71,8 +72,7 @@ def _self_reading(gate: dict[str, Any]) -> dict[str, Any]:
 
 
 def _continuing_interaction(gate: dict[str, Any]) -> dict[str, Any]:
-    rows = gate["supernet_closure_form"].get("interactions") or []
-    for row in rows:
+    for row in gate["supernet_closure_form"].get("interactions") or []:
         if row.get("ai_token_phase") == "AI_CONTINUING":
             return row
     raise ValueError("The current closure form has no continuing interaction to translate")
@@ -80,14 +80,13 @@ def _continuing_interaction(gate: dict[str, Any]) -> dict[str, Any]:
 
 def _compact_interface(gate: dict[str, Any], perspective_id: str) -> dict[str, Any]:
     closure = gate["closure_ui_contract"]
-    returns = closure.get("source_occurrences") or []
     return {
         "focus_event_id": gate.get("focus_event_id"),
         "perspective_id": perspective_id,
         "natural_chart": gate["supernet_closure_form"].get("seen_id"),
         "closure_level": gate["supernet_closure_form"]["id"],
         "visual_closure": closure,
-        "source_fibre": returns,
+        "source_fibre": closure.get("source_occurrences") or [],
         "two_person_E2E": "CONTINUING",
         "truth_issued": False,
     }
@@ -112,14 +111,6 @@ def _allowed_hosts() -> list[str]:
     return sorted(hosts)
 
 
-def _allowed_origins() -> list[str]:
-    return [
-        "https://chat.openai.com",
-        "https://chatgpt.com",
-        "https://platform.openai.com",
-    ]
-
-
 def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
     if getattr(app.state, "supernet_agent_mcp_attached", False):
         return app
@@ -139,6 +130,8 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
         perspective_id: str | None,
         focus_event_id: str | None,
         interaction_kind: str,
+        form_label: str | None = None,
+        sheaf: str | None = None,
     ) -> dict[str, Any]:
         perspective = perspective_id or actor_id
         source = current(perspective, focus_event_id)
@@ -156,23 +149,18 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
         }
         result = await translate(source["id"], payload)
         target = result["supernet_potential_gate"]
-        receipt = dict(result["translation"])
-        receipt.update(
-            {
-                "agent_interaction_kind": interaction_kind,
-                "agent_actor_id": actor_id,
-                "agent_interaction_is_this_translation": True,
-                "browser_and_agent_share_translation_operator": True,
-                "separate_agent_mutation_authority": False,
-                "self_runtime_is_closure_form_reading": True,
-            }
-        )
         return {
             "event_id": target.get("focus_event_id"),
-            "translation": receipt,
+            "translation": dict(result["translation"]),
             "self_runtime": _self_reading(target),
             "interface": _compact_interface(target, perspective),
-            "supernet_potential_gate": target,
+            "agent_interaction_kind": interaction_kind,
+            "agent_actor_id": actor_id,
+            "agent_form_label": form_label,
+            "agent_sheaf": sheaf,
+            "agent_interaction_is_this_translation": True,
+            "browser_and_agent_share_translation_operator": True,
+            "separate_agent_mutation_authority": False,
             "truth_issued": False,
         }
 
@@ -187,10 +175,8 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
     ) -> dict[str, Any]:
         perspective = perspective_id or "runtime:self"
         gate = current(perspective, event_id)
-        rows = runtime.ledger.list_returns()
-        recent = rows[-limit:]
         return {
-            "recent_events": recent,
+            "recent_events": runtime.ledger.list_returns()[-limit:],
             "interface": _compact_interface(gate, perspective),
             "self_runtime": _self_reading(gate),
             "subsystems_are_lenses": True,
@@ -198,10 +184,7 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
             "truth_issued": False,
         }
 
-    @mcp.tool(
-        title="Offer or interact in Supernet",
-        annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False),
-    )
+    @mcp.tool(title="Offer or interact in Supernet", annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False))
     async def supernet_offer(
         exact_text: Annotated[str, Field(min_length=1)],
         actor_id: str = "openai-agent",
@@ -210,21 +193,17 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
         parent_event_id: str | None = None,
         sheaf: AgentSheaf | None = None,
     ) -> dict[str, Any]:
-        prefix = f"[{form_label}]"
-        if sheaf:
-            prefix += f"[{sheaf}]"
         return await translate_text(
-            exact_text=f"{prefix} {exact_text}",
+            exact_text=exact_text,
             actor_id=actor_id,
             perspective_id=perspective_id,
             focus_event_id=parent_event_id,
             interaction_kind="OFFER",
+            form_label=form_label,
+            sheaf=sheaf,
         )
 
-    @mcp.tool(
-        title="Relate Supernet events",
-        annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False),
-    )
+    @mcp.tool(title="Relate Supernet events", annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False))
     async def supernet_relate(
         source_event_id: str,
         target_event_id: str,
@@ -242,10 +221,7 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
             interaction_kind="RELATE",
         )
 
-    @mcp.tool(
-        title="Refine a live relation",
-        annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False),
-    )
+    @mcp.tool(title="Refine a live relation", annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False))
     async def supernet_refine(
         source_event_id: str,
         selected_relation_id: str,
@@ -261,10 +237,7 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
             interaction_kind="REFINE",
         )
 
-    @mcp.tool(
-        title="Return a Supernet form",
-        annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False),
-    )
+    @mcp.tool(title="Return a Supernet form", annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False))
     async def supernet_return(
         event_id: str,
         exact_text: Annotated[str, Field(min_length=1)],
@@ -273,17 +246,15 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
         form_label: str = "agent return",
     ) -> dict[str, Any]:
         return await translate_text(
-            exact_text=f"[{form_label}] {exact_text}",
+            exact_text=exact_text,
             actor_id=actor_id,
             perspective_id=perspective_id,
             focus_event_id=event_id,
             interaction_kind="RETURN",
+            form_label=form_label,
         )
 
-    @mcp.tool(
-        title="Continue a Supernet event",
-        annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False),
-    )
+    @mcp.tool(title="Continue a Supernet event", annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False))
     async def supernet_reopen(
         event_id: str,
         reason: Annotated[str, Field(min_length=1)],
@@ -292,20 +263,15 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
         reopened_sites: list[str] | None = None,
         successor_hints: list[str] | None = None,
     ) -> dict[str, Any]:
-        sites = ",".join(reopened_sites or [])
-        hints = ",".join(successor_hints or [])
         return await translate_text(
-            exact_text=f"CONTINUE {event_id}: {reason}; sites={sites}; hints={hints}",
+            exact_text=f"CONTINUE {event_id}: {reason}; sites={','.join(reopened_sites or [])}; hints={','.join(successor_hints or [])}",
             actor_id=actor_id,
             perspective_id=perspective_id,
             focus_event_id=event_id,
             interaction_kind="CONTINUE",
         )
 
-    @mcp.tool(
-        title="Create a collective continuation",
-        annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False),
-    )
+    @mcp.tool(title="Create a collective continuation", annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False))
     async def supernet_collective(
         event_ids: Annotated[list[str], Field(min_length=2)],
         exact_text: Annotated[str, Field(min_length=1)],
@@ -325,7 +291,11 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
 
     security = TransportSecuritySettings(
         allowed_hosts=_allowed_hosts(),
-        allowed_origins=_allowed_origins(),
+        allowed_origins=[
+            "https://chat.openai.com",
+            "https://chatgpt.com",
+            "https://platform.openai.com",
+        ],
     )
     mcp_app = mcp.streamable_http_app(
         streamable_http_path="/",
