@@ -120,6 +120,7 @@ def _replace_capabilities(app: Any) -> None:
                 "browser_transition_is_runtime_transition": True,
                 "state_transition_is_visual_transition": True,
                 "single_transition_operator": True,
+                "continuing_interaction_uses_same_translation_operator": True,
                 "separate_navigation_operator": False,
                 "separate_return_operator": False,
                 "legacy_interaction_endpoint": LEGACY_INTERACTION_ENDPOINT,
@@ -174,33 +175,46 @@ def create_app(config=None):
             "navigation_context": data.navigation_context,
         }
         if phase == "TOKEN_RETURNED":
-            legacy_payload = {
-                **shared,
-                "interaction_kind": _legacy_runtime.NAVIGATE,
-            }
+            result: Mapping[str, Any] = await legacy_interact(
+                contract_id,
+                {
+                    **shared,
+                    "interaction_kind": _legacy_runtime.NAVIGATE,
+                },
+            )
+            successor = result.get("supernet_potential_gate")
         elif phase == "AI_CONTINUING":
             exact_source = data.exact_source_return.strip()
             if not exact_source:
-                raise HTTPException(
-                    422,
-                    "This continuing translation requires a returned interaction",
+                # A continuing slide is still an interaction of the same
+                # closure form. It executes SUPERNET_TRANSLATE without adding a
+                # returned determination, so the semantic successor is the same
+                # carrier and the browser receives a canonical trajectory.
+                result = {
+                    "replayed": False,
+                    "truth_refined": False,
+                    "continuing": True,
+                }
+                successor = current
+            else:
+                result = await legacy_interact(
+                    contract_id,
+                    {
+                        **shared,
+                        "interaction_kind": _legacy_runtime.RETURN,
+                        "exact_source_return": exact_source,
+                        "local_perspective_hair_millidegrees": (
+                            data.local_perspective_hair_millidegrees
+                        ),
+                        "local_perspective_zoom_milli": (
+                            data.local_perspective_zoom_milli
+                        ),
+                    },
                 )
-            legacy_payload = {
-                **shared,
-                "interaction_kind": _legacy_runtime.RETURN,
-                "exact_source_return": exact_source,
-                "local_perspective_hair_millidegrees": (
-                    data.local_perspective_hair_millidegrees
-                ),
-                "local_perspective_zoom_milli": data.local_perspective_zoom_milli,
-            }
+                successor = result.get("supernet_potential_gate")
         else:
             raise HTTPException(409, "The interaction has no valid AI/token phase")
 
-        result = await legacy_interact(contract_id, legacy_payload)
-        if not isinstance(result, Mapping):
-            raise HTTPException(500, "Supernet translation returned no successor")
-        successor = result.get("supernet_potential_gate")
         if not isinstance(successor, Mapping):
             raise HTTPException(500, "Supernet translation returned no closure form")
         successor_validation = validate_full_supernet_gate_contract(successor)
