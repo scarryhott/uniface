@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-"""Browser execution of the one Supernet closure form and transition.
+"""Browser execution of one Supernet closure form and NRRF892 slide identity.
 
-Every visible relation executes ``SUPERNET_TRANSLATE``. The established wire
-URI and a few historical vocabulary strings remain inert compatibility
-encoding only. The server's content-addressed translation receipt is verified
-and consumed as the visible trajectory of the same state transition.
+Every visible relation executes ``SUPERNET_TRANSLATE``. Where the current
+interaction lies in the NRRF892 vision-chart domain, the browser verifies that
+its translation-truth orbit and vision-crystal orbit are the same identifier.
+The server's content-addressed translation receipt is then consumed as the
+visible trajectory; no second browser transition is allowed.
 """
 
 from .continuous_translation_interface import POTENTIAL_GATE_SUPERNET_HTML as _BASE_HTML
@@ -22,6 +23,9 @@ def _one_form_surface(html: str) -> str:
   if(full.supernet_closure_form_id!==closureForm.id)return false;
   if(full.published_semantic_carrier!=="SUPERNET_CLOSURE_FORM")return false;
   if(full.translation_operator!=="SUPERNET_TRANSLATE")return false;
+  if(full.runtime_identity_id!==closureForm.runtime_identity_id)return false;
+  if(full.runtime_identity_is_translational_truth!==true||closureForm.runtime_identity_is_translational_truth!==true)return false;
+  if(full.vision_slide_operator!=="VISION_SLIDE_TRANS"||closureForm.vision_slide_operator!=="VISION_SLIDE_TRANS")return false;
   if(closureForm.translation_operator!=="SUPERNET_TRANSLATE")return false;
   if(closureForm.opener_ui_interaction_are_one_form!==true)return false;
   if(closureForm.crystal_ball_slide_ai_token_are_one_form!==true)return false;
@@ -30,16 +34,29 @@ def _one_form_surface(html: str) -> str:
   if(closureForm.browser_transition_is_runtime_transition!==true)return false;
   if(closureForm.state_transition_is_visual_transition!==true)return false;
   if(closureForm.single_transition_operator!==true)return false;
+  if(closureForm.rotationless_fold_claimed!==false)return false;
   if(closureForm.separate_navigation_operator!==false||closureForm.separate_return_operator!==false)return false;
   for(const row of closureForm.interactions||[]){
     if(!isRecord(row)||row.id!==await digest("supernet-closure-interaction",withoutId(row)))return false;
+    if(row.runtime_identity_id!==closureForm.runtime_identity_id||row.runtime_identity_is_translational_truth!==true)return false;
     if(row.opener_is_this_form!==true||row.ui_is_this_form!==true)return false;
     if(row.interaction_is_translation_of_this_form!==true)return false;
     if(row.return_is_determination_of_this_form!==true)return false;
-    if(row.translation_operator!=="SUPERNET_TRANSLATE")return false;
+    if(row.translation_operator!=="SUPERNET_TRANSLATE"||row.vision_slide_operator!=="VISION_SLIDE_TRANS")return false;
     if(row.browser_transition_is_runtime_transition!==true)return false;
     if(row.separate_navigation_operator!==false||row.separate_return_operator!==false)return false;
     if(!["AI_CONTINUING","TOKEN_RETURNED"].includes(row.ai_token_phase))return false;
+    const vision=row.nrrf892_vision_bridge;
+    if(!isRecord(vision)||vision.id!==await digest("nrrf892-runtime-vision-bridge",withoutId(vision)))return false;
+    if(vision.translation_truth_orbit_id!==row.translation_truth_orbit_id)return false;
+    if(vision.vision_crystal_orbit_id!==row.vision_crystal_orbit_id)return false;
+    if(vision.rotationless_fold_claimed!==false)return false;
+    if(vision.vision_chart_admitted===true){
+      if(vision.vision_crystal_orbit_id!==vision.translation_truth_orbit_id)return false;
+      if(vision.supernet_translate_is_vision_slide!==true||row.supernet_translate_is_vision_slide!==true)return false;
+      if(vision.slide_is_closure_family_member!==true)return false;
+      if(vision.slide_gravitational_ratio?.num!==1||vision.slide_gravitational_ratio?.den!==1)return false;
+    }else if(vision.vision_crystal_orbit_id!==null)return false;
   }'''
     if verifier_anchor not in body:
         raise RuntimeError("one-form verifier anchor changed")
@@ -60,13 +77,27 @@ async function translationMatches(translation,source,next,path){
   if(!isRecord(translation)||!isRecord(oneForm)||!isRecord(next))return false;
   if(translation.id!==await digest("supernet-translate",withoutId(translation)))return false;
   if(translation.schema!=="closure.supernet/supernet-translate-v1")return false;
-  if(translation.operator!=="SUPERNET_TRANSLATE")return false;
+  if(translation.operator!=="SUPERNET_TRANSLATE"||translation.vision_slide_operator!=="VISION_SLIDE_TRANS")return false;
   if(translation.relation_id!==path.id)return false;
   if(translation.source_gate_id!==source.id||translation.target_gate_id!==next.id)return false;
   if(translation.source_closure_form_id!==source.supernet_closure_form_id)return false;
   if(translation.target_closure_form_id!==next.supernet_closure_form_id)return false;
   if(translation.source_interaction_id!==oneForm.id)return false;
   if(translation.source_ai_token_phase!==oneForm.ai_token_phase)return false;
+  if(translation.runtime_identity_is_translational_truth!==true)return false;
+  if(translation.source_runtime_identity_id!==source.runtime_identity_id)return false;
+  if(translation.target_runtime_identity_id!==next.runtime_identity_id)return false;
+  if(translation.source_translation_truth_orbit_id!==oneForm.translation_truth_orbit_id)return false;
+  if(translation.source_vision_crystal_orbit_id!==oneForm.vision_crystal_orbit_id)return false;
+  if(translation.token_continuation_source_orbit_id!==oneForm.translation_truth_orbit_id)return false;
+  if(translation.truth_refined===false){
+    if(translation.runtime_identity_preserved!==true||translation.translational_truth_preserved!==true)return false;
+    if(translation.source_runtime_identity_id!==translation.target_runtime_identity_id)return false;
+  }
+  if(oneForm.nrrf892_vision_bridge?.vision_chart_admitted===true){
+    if(translation.supernet_translate_is_vision_slide!==true)return false;
+    if(translation.source_vision_crystal_orbit_id!==translation.source_translation_truth_orbit_id)return false;
+  }
   if(translation.runtime_state_change_is_this_translation!==true)return false;
   if(translation.browser_trajectory_is_this_translation!==true)return false;
   if(translation.semantic_transition_is_visual_transition!==true)return false;
@@ -118,6 +149,11 @@ async function translationMatches(translation,source,next,path){
         '"data-supernet-closure-interaction-id":oneForm?.id||"",',
         '"data-ai-token-phase":oneForm?.ai_token_phase||"AI_CONTINUING",',
         '"data-translation-operator":oneForm?.translation_operator||"",',
+        '"data-runtime-identity-id":oneForm?.runtime_identity_id||"",',
+        '"data-translation-truth-orbit-id":oneForm?.translation_truth_orbit_id||"",',
+        '"data-vision-crystal-orbit-id":oneForm?.vision_crystal_orbit_id||"",',
+        '"data-vision-slide-operator":oneForm?.vision_slide_operator||"",',
+        '"data-vision-chart-admitted":oneForm?.nrrf892_vision_bridge?.vision_chart_admitted===true,',
         '"data-one-closure-form":"true",',
         '"data-browser-transition-is-runtime-transition":oneForm?.browser_transition_is_runtime_transition===true,',
         '"data-opener-ui-interaction-one-form":oneForm?.opener_is_this_form===true&&oneForm?.ui_is_this_form===true,',
@@ -130,7 +166,10 @@ async function translationMatches(translation,source,next,path){
     root_new = root_anchor + ''.join((
         '"data-published-semantic-carrier":"SUPERNET_CLOSURE_FORM",',
         '"data-supernet-closure-form-id":active?.supernet_closure_form_id||"",',
+        '"data-runtime-identity-id":active?.runtime_identity_id||"",',
+        '"data-runtime-identity-is-translational-truth":"true",',
         '"data-translation-operator":"SUPERNET_TRANSLATE",',
+        '"data-vision-slide-operator":"VISION_SLIDE_TRANS",',
         '"data-browser-transition-is-runtime-transition":"true",',
         '"data-state-transition-is-visual-transition":"true",',
         '"data-opener-ui-interaction-one-form":"true",',
@@ -140,8 +179,6 @@ async function translationMatches(translation,source,next,path){
         raise RuntimeError("one-form root anchor changed")
     body = body.replace(root_anchor, root_new, 1)
 
-    # The continuous field visualizes the canonical translation receipt rather
-    # than deciding a second transition.
     flow_signature = 'function flowTranslation(next,path){'
     if flow_signature not in body:
         raise RuntimeError("one-form translation-flow signature changed")
@@ -151,7 +188,7 @@ async function translationMatches(translation,source,next,path){
         raise RuntimeError("one-form translation-flow dataset anchor changed")
     body = body.replace(
         flow_dataset,
-        flow_dataset + 'root.dataset.translationReceiptId=translation?.id||"";root.dataset.translationOperator=translation?.operator||"";',
+        flow_dataset + 'root.dataset.translationReceiptId=translation?.id||"";root.dataset.translationOperator=translation?.operator||"";root.dataset.runtimeIdentityId=translation?.source_runtime_identity_id||"";root.dataset.translationTruthOrbitId=translation?.source_translation_truth_orbit_id||"";root.dataset.visionCrystalOrbitId=translation?.source_vision_crystal_orbit_id||"";root.dataset.visionSlideOperator=translation?.vision_slide_operator||"";root.dataset.tokenContinuationSourceOrbitId=translation?.token_continuation_source_orbit_id||"";',
         1,
     )
     flow_finish = 'active=next;activeRelationId=null;draft="";sensor.value="";render();'
@@ -163,9 +200,6 @@ async function translationMatches(translation,source,next,path){
         1,
     )
 
-    # Remove separate browser navigation and return operators. Every click,
-    # continuing slide, returned determination and perspectival transport uses
-    # one function and one server receipt at the established wire URI.
     nav_start = body.find('async function navigateRelation(path){')
     activate_start = body.find('function activateRelation(path){', nav_start)
     fibre_start = body.find('function activateFibre', activate_start)
@@ -206,11 +240,18 @@ function activateRelation(path){activeRelationId=path.id;draft="";sensor.value="
     required = (
         "supernet_closure_form",
         "SUPERNET_TRANSLATE",
+        "VISION_SLIDE_TRANS",
+        "runtime_identity_is_translational_truth",
+        "translation_truth_orbit_id",
+        "vision_crystal_orbit_id",
         "translationMatches(translation,source,next,path)",
         "/supernet/interface/projections/${encodeURIComponent(source.id)}/return",
         "flowTranslation(next,path,translation)",
         "data-supernet-closure-form-id",
-        "data-translation-operator",
+        "data-runtime-identity-id",
+        "data-translation-truth-orbit-id",
+        "data-vision-crystal-orbit-id",
+        "data-vision-slide-operator",
         "data-browser-transition-is-runtime-transition",
         "data-opener-ui-interaction-one-form",
         "data-crystal-ball-slide-ai-token-one-form",
