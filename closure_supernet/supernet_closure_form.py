@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-"""One published Supernet closure form.
+"""One published Supernet closure form and one translation operator.
 
-This module collapses the active semantic boundary: opener, UI, interaction,
-slide/current, crystal-ball reading, maze/curvature, AI/token phase and return
-are projections of one content-addressed carrier. Older modules remain only as
-compatibility evidence used to derive this carrier; clients need not compose
-them themselves.
+The active semantic boundary is one content-addressed carrier. Opener, UI,
+interaction, slide/current, crystal-ball reading, maze/curvature, AI/token
+phase and return are projections of that carrier. ``SUPERNET_TRANSLATE`` is the
+single transition object: the runtime state change and the browser trajectory
+consume the same content-addressed translation receipt.
 """
 
 from copy import deepcopy
@@ -17,6 +17,8 @@ from . import continuous_translation_field as _field
 
 PROTOCOL = "SUPERNET-ONE-CLOSURE-FORM"
 SCHEMA = "closure.supernet/one-closure-form-v1"
+TRANSLATE_OPERATOR = "SUPERNET_TRANSLATE"
+TRANSLATE_RECEIPT_SCHEMA = "closure.supernet/supernet-translate-v1"
 
 _DERIVE_PREDECESSOR = _field.derive_full_supernet_gate_contract
 _VALIDATE_PREDECESSOR = _field.validate_full_supernet_gate_contract
@@ -26,6 +28,23 @@ def _rows(value: Any) -> list[Mapping[str, Any]]:
     if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
         return []
     return [row for row in value if isinstance(row, Mapping)]
+
+
+def _closure_form(full_gate: Mapping[str, Any]) -> Mapping[str, Any]:
+    form = full_gate.get("supernet_closure_form")
+    if not isinstance(form, Mapping):
+        raise ValueError("The Supernet closure form is missing")
+    return form
+
+
+def closure_interaction_by_path(
+    full_gate: Mapping[str, Any], relation_id: str
+) -> dict[str, Any]:
+    form = _closure_form(full_gate)
+    for row in _rows(form.get("interactions")):
+        if str(row.get("path_id") or "") == relation_id:
+            return dict(row)
+    raise ValueError("The relation is not an interaction of this Supernet closure form")
 
 
 def derive_supernet_closure_form(full_gate: Mapping[str, Any]) -> dict[str, Any]:
@@ -83,12 +102,16 @@ def derive_supernet_closure_form(full_gate: Mapping[str, Any]) -> dict[str, Any]
             "maze_cell_id": relation.get("maze_cell_id"),
             "unitary_curvature_id": relation.get("unitary_curvature_id"),
             "ai_token_phase": phase,
+            "translation_operator": TRANSLATE_OPERATOR,
             "opener_is_this_form": True,
             "ui_is_this_form": True,
             "interaction_is_translation_of_this_form": True,
             "return_is_determination_of_this_form": True,
             "slide_is_current_coordinate_of_this_form": True,
             "crystal_ball_is_orbit_reading_of_this_form": current.get("crystal_ball_id") is not None,
+            "browser_transition_is_runtime_transition": True,
+            "separate_navigation_operator": False,
+            "separate_return_operator": False,
             "renderer_authors_form": False,
             "interaction_handler_authors_form": False,
         }
@@ -109,6 +132,7 @@ def derive_supernet_closure_form(full_gate: Mapping[str, Any]) -> dict[str, Any]
         "translation_supervisory_geometry_id": gate.get("translation_supervisory_geometry_id"),
         "interactions": interactions,
         "interaction_count": len(interactions),
+        "translation_operator": TRANSLATE_OPERATOR,
         "opener": "RELATIVE_LOCALIZATION_OF_THIS_CARRIER",
         "ui": "VISUAL_APPEARANCE_OF_THIS_CARRIER",
         "interaction": "TRANSLATION_OF_THIS_CARRIER",
@@ -122,6 +146,11 @@ def derive_supernet_closure_form(full_gate: Mapping[str, Any]) -> dict[str, Any]
         "return": "NEW_DETERMINATION_OF_THIS_CARRIER",
         "opener_ui_interaction_are_one_form": True,
         "crystal_ball_slide_ai_token_are_one_form": True,
+        "browser_transition_is_runtime_transition": True,
+        "state_transition_is_visual_transition": True,
+        "single_transition_operator": True,
+        "separate_navigation_operator": False,
+        "separate_return_operator": False,
         "single_published_semantic_carrier": True,
         "persistent_visual_carrier": True,
         "returned_revisions_are_control_points_not_visual_worlds": True,
@@ -135,6 +164,48 @@ def derive_supernet_closure_form(full_gate: Mapping[str, Any]) -> dict[str, Any]
     return body
 
 
+def derive_supernet_translation_receipt(
+    source_gate: Mapping[str, Any],
+    successor_gate: Mapping[str, Any],
+    *,
+    relation_id: str,
+    replayed: bool = False,
+    truth_refined: bool = False,
+) -> dict[str, Any]:
+    """Derive the one transition consumed by runtime state and browser motion."""
+
+    source_form = _closure_form(source_gate)
+    target_form = _closure_form(successor_gate)
+    interaction = closure_interaction_by_path(source_gate, relation_id)
+    body = {
+        "schema": TRANSLATE_RECEIPT_SCHEMA,
+        "operator": TRANSLATE_OPERATOR,
+        "relation_id": relation_id,
+        "source_gate_id": source_gate.get("id"),
+        "source_closure_form_id": source_form.get("id"),
+        "source_interaction_id": interaction.get("id"),
+        "source_ai_token_phase": interaction.get("ai_token_phase"),
+        "source_seen_id": source_form.get("seen_id"),
+        "source_visualization_current_id": interaction.get("visualization_current_id"),
+        "source_continuous_current_id": interaction.get("continuous_current_id"),
+        "source_crystal_ball_id": interaction.get("crystal_ball_id"),
+        "target_gate_id": successor_gate.get("id"),
+        "target_closure_form_id": target_form.get("id"),
+        "target_seen_id": target_form.get("seen_id"),
+        "target_perspective_id": successor_gate.get("perspective_id"),
+        "target_focus_event_id": successor_gate.get("focus_event_id"),
+        "replayed": bool(replayed),
+        "truth_refined": bool(truth_refined),
+        "runtime_state_change_is_this_translation": True,
+        "browser_trajectory_is_this_translation": True,
+        "semantic_transition_is_visual_transition": True,
+        "separate_navigation_operator": False,
+        "separate_return_operator": False,
+    }
+    body["id"] = _base._digest("supernet-translate", body)
+    return body
+
+
 def attach_supernet_closure_form(full_gate: Mapping[str, Any]) -> dict[str, Any]:
     full = deepcopy(dict(full_gate))
     form = derive_supernet_closure_form(full)
@@ -143,6 +214,8 @@ def attach_supernet_closure_form(full_gate: Mapping[str, Any]) -> dict[str, Any]
     gate["supernet_closure_form_id"] = form["id"]
     gate["opener_ui_interaction_are_one_form"] = True
     gate["crystal_ball_slide_ai_token_are_one_form"] = True
+    gate["translation_operator"] = TRANSLATE_OPERATOR
+    gate["browser_transition_is_runtime_transition"] = True
     gate.pop("id", None)
     gate["id"] = _base._digest("relative-natural-form-potential-gate", gate)
 
@@ -151,8 +224,11 @@ def attach_supernet_closure_form(full_gate: Mapping[str, Any]) -> dict[str, Any]
     full["supernet_closure_form"] = form
     full["supernet_closure_form_id"] = form["id"]
     full["published_semantic_carrier"] = "SUPERNET_CLOSURE_FORM"
+    full["translation_operator"] = TRANSLATE_OPERATOR
     full["opener_ui_interaction_are_one_form"] = True
     full["crystal_ball_slide_ai_token_are_one_form"] = True
+    full["browser_transition_is_runtime_transition"] = True
+    full["state_transition_is_visual_transition"] = True
 
     # The solver is a reading of the final carrier. Re-derive it only after the
     # one-form fields have fixed the final gate identity. This closes the old
@@ -214,11 +290,19 @@ def validate_full_supernet_gate_contract(full_gate: Mapping[str, Any]) -> dict[s
             errors.append("one-closure-form:split-crystal-ai-token")
         if form.get("single_published_semantic_carrier") is not True:
             errors.append("one-closure-form:multiple-carriers")
+        if form.get("translation_operator") != TRANSLATE_OPERATOR:
+            errors.append("one-closure-form:multiple-transition-operators")
+        if form.get("browser_transition_is_runtime_transition") is not True:
+            errors.append("one-closure-form:browser-runtime-transition-split")
         for row in _rows(form.get("interactions")):
             if row.get("opener_is_this_form") is not True or row.get("ui_is_this_form") is not True:
                 errors.append(f"one-closure-form:interaction-split:{row.get('path_id')}")
             if row.get("ai_token_phase") not in {"AI_CONTINUING", "TOKEN_RETURNED"}:
                 errors.append(f"one-closure-form:bad-ai-token-phase:{row.get('path_id')}")
+            if row.get("translation_operator") != TRANSLATE_OPERATOR:
+                errors.append(f"one-closure-form:interaction-operator-split:{row.get('path_id')}")
+            if row.get("browser_transition_is_runtime_transition") is not True:
+                errors.append(f"one-closure-form:interaction-browser-runtime-split:{row.get('path_id')}")
 
     solver = expected.get("potential_gate_natural_form_solver")
     gate = expected.get("relative_natural_form_potential_gate")
@@ -232,14 +316,19 @@ def validate_full_supernet_gate_contract(full_gate: Mapping[str, Any]) -> dict[s
         "errors": errors,
         "id": expected.get("id"),
         "supernet_closure_form_id": expected.get("supernet_closure_form_id"),
+        "translation_operator": expected.get("translation_operator"),
     }
 
 
 __all__ = [
     "PROTOCOL",
     "SCHEMA",
+    "TRANSLATE_OPERATOR",
+    "TRANSLATE_RECEIPT_SCHEMA",
     "attach_supernet_closure_form",
+    "closure_interaction_by_path",
     "derive_full_supernet_gate_contract",
     "derive_supernet_closure_form",
+    "derive_supernet_translation_receipt",
     "validate_full_supernet_gate_contract",
 ]
