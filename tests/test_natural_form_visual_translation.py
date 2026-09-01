@@ -93,12 +93,13 @@ def test_production_surface_is_the_interactive_natural_form_closure_itself(
     for template in OBSOLETE_NAMED_TEMPLATES:
         assert template not in html
 
-    # There is one full-screen relation surface and one physical text aperture;
-    # there are no buttons, menus, cards or separate geometry selectors.
-    static_body = html.split("<body>", 1)[1].split("<script>", 1)[0]
-    assert '<main id="supernet-surface"' in static_body
-    assert '<textarea id="return-sensor"' in static_body
-    for control in ("<button", "<select", "<nav", "<form"):
+    # The authored page remains one blank physical relation aperture. The text
+    # sensor is created by the same runtime only after a relation is entered.
+    static_body = html.split("<body>", 1)[1].split("<script>", 1)[0].strip()
+    assert static_body == '<main id="translational-mirror"></main>'
+    assert 'document.createElement("textarea")' in html
+    assert 'sensor.id = "return-sensor"' in html
+    for control in ("<button", "<input", "<textarea", "<select", "<nav", "<form"):
         assert control not in static_body
 
     solver = opened["interactive_natural_form_solver"]
