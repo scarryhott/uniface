@@ -9,6 +9,7 @@ user interaction and token interaction both factor.
 """
 
 from . import full_supernet_projection_runtime_v3 as _v3
+from . import translation_supervisory_full_gate as _translation_gate_module
 from .equal_user_token_visual_identification import (
     derive_full_supernet_gate_contract,
     validate_full_supernet_gate_contract,
@@ -22,6 +23,13 @@ def create_app(config=None):
     _v3.derive_full_supernet_gate_contract = derive_full_supernet_gate_contract
     _v3.validate_full_supernet_gate_contract = validate_full_supernet_gate_contract
     _v3.POTENTIAL_GATE_SUPERNET_HTML = POTENTIAL_GATE_SUPERNET_HTML
+    # Existing callers/tests may import the NRRF882 validator after importing
+    # api_agent. Expose the stronger validator at that compatibility boundary;
+    # the NRRF883 validator internally reconstructs and validates the original
+    # NRRF882 predecessor before checking the visual-equality layer.
+    _translation_gate_module.validate_full_supernet_gate_contract = (
+        validate_full_supernet_gate_contract
+    )
     return _v3.create_app(config)
 
 
