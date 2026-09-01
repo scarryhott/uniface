@@ -1,6 +1,12 @@
 from __future__ import annotations
 
-"""Full Supernet gate with continuation, not OPEN, as the published ontology."""
+"""Full Supernet gate with continuation, not OPEN, as the published ontology.
+
+The wire protocol remains unchanged so existing verified clients and return
+receipts still validate.  The semantic contract is strengthened by attaching a
+canonical continuing-translation closure in which every relation is inside
+closure and is either RETURNED or CONTINUING.
+"""
 
 from typing import Any, Mapping
 
@@ -32,8 +38,9 @@ def derive_full_supernet_gate_contract(
     )
     full = attach_continuing_translation_closure(predecessor)
     full.pop("id", None)
-    full["protocol"] = PROTOCOL
-    full["schema"] = SCHEMA
+    # Keep predecessor protocol/schema as the compatibility transport envelope.
+    full["continuing_closure_protocol"] = PROTOCOL
+    full["continuing_closure_schema"] = SCHEMA
     full["legacy_status_vocabulary_is_compatibility_only"] = True
     full["published_relation_states"] = ["RETURNED", "CONTINUING"]
     full["nonreturned_does_not_mean_outside_closure"] = True
@@ -94,20 +101,19 @@ def validate_full_supernet_gate_contract(
             for row in continuum.get("relations", [])
             if isinstance(row, Mapping) and row.get("id")
         }
-        partition_ids = set(continuum.get("returned_relation_ids", [])) | set(
-            continuum.get("continuing_relation_ids", [])
-        )
-        if relation_ids != partition_ids:
+        returned_ids = set(continuum.get("returned_relation_ids", []))
+        continuing_ids = set(continuum.get("continuing_relation_ids", []))
+        if relation_ids != returned_ids | continuing_ids:
             errors.append("continuing-closure-full-gate:relation-partition-incomplete")
-        if set(continuum.get("returned_relation_ids", [])) & set(
-            continuum.get("continuing_relation_ids", [])
-        ):
+        if returned_ids & continuing_ids:
             errors.append("continuing-closure-full-gate:relation-state-overlap")
 
     if expected.get("published_relation_states") != ["RETURNED", "CONTINUING"]:
         errors.append("continuing-closure-full-gate:published-status-regression")
     if expected.get("legacy_status_vocabulary_is_compatibility_only") is not True:
         errors.append("continuing-closure-full-gate:legacy-status-authority")
+    if expected.get("continuing_closure_protocol") != PROTOCOL:
+        errors.append("continuing-closure-full-gate:protocol-missing")
     return {
         "valid": not errors,
         "errors": errors,
