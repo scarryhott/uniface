@@ -1,13 +1,12 @@
 """Published Supernet entrypoint.
 
-The production app exposes one closure projection and one source-preserving
-return relation. The visible natural form is the interactive closure relation
-itself: the same path is display, hit target, navigation transport, OPEN return
-aperture, or WITNESSED relation according to the verified contract. Rendering
-cannot independently author equality or truth.
+Production now exposes the full relative natural-form potential gate. The
+witnessed/OPEN closure contract is retained as one truth constraint inside the
+gate; the public surface additionally supports internal perspectival and
+locality navigation without allowing navigation to author truth.
 """
 
-from .natural_form_projection_runtime import app, create_app
+from .full_supernet_projection_runtime import app, create_app
 
 
 __all__ = ["app", "create_app"]
