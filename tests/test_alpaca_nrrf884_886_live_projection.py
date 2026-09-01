@@ -15,6 +15,12 @@ class FakeAdapter:
             "closure_number": "1/2",
             "returned_truth_member": True,
             "selected": True,
+            "relative_hair_horizon": {"status": "WITNESSED", "horizon_return_steps": 3},
+            "relative_ball_size": {
+                "status": "WITNESSED",
+                "relative_ball_size": "10",
+                "relative_ball_size_unit": "USD-notional",
+            },
         }
         trading = {
             "status": "WITNESSED",
@@ -56,27 +62,33 @@ class FakeAdapter:
         return {"protocol": "fake", "status": "WITNESSED", "trading": trading}
 
 
-def test_live_runtime_exposes_nrrf884_887_without_inventing_missing_kernel():
+def test_live_runtime_exposes_nrrf892_without_inventing_missing_kernel_or_action():
     receipt = AlpacaNRRF879881Runtime(FakeAdapter()).resolve_once()
     family = receipt["nrrf884_886_translation_families"]
     kernel = receipt["nrrf887_returned_family_kernel_attempt"]
     diffusion = receipt["nrrf887_ai_diffusion"]
+    continuous = receipt["continuous_unified_closure"]
+    rendering = receipt["nrrf892_vision_crystal_market_rendering"]
 
     assert receipt["status"] == "WITNESSED"
     assert family["family_count"] == 1
     assert family["families"][0]["closure_truth_id"] == "truth-a"
     assert receipt["family_is_relative_visualization_of_selected_natural_forms"] is True
-    assert receipt["new_tt_class_means_trade"] is False
-    assert receipt["same_tt_class_means_do_not_trade"] is False
-    assert receipt["fixed_price_subset_is_maximally_unified"] is False
-    assert receipt["profitability_authors_family_membership"] is False
+    assert receipt["observation_and_trading_are_translation_equal_readings"] is True
+    assert receipt["market_side_is_relative_visualization_of_translational_slide"] is True
+    assert receipt["market_side_is_separate_semantic_bridge"] is False
+    assert receipt["vision_slide_closed_through_furthered_family"] is True
     assert receipt["automatic_order_submission"] is False
 
-    # One returned family occurrence has no witnessed outgoing transition.  The
-    # runtime must not fabricate P=[1].  Trading closure remains witnessed while
-    # NRRF887 diffusion stays OPEN.
+    # One returned family occurrence has no witnessed outgoing transition. The
+    # runtime must not fabricate P=[1], so no Delta and therefore no market-side
+    # rendering may be invented. NRRF892 closes the representation law only
+    # once the translational slide itself is witnessed.
     assert kernel["status"] == "OPEN"
     assert kernel["returned_diffusion_kernel"] is None
     assert kernel["absence_of_outgoing_evidence_creates_self_loop"] is False
     assert diffusion["status"] == "OPEN"
-    assert receipt["candidate_q_embedding_may_feed_diffusion"] is False
+    assert continuous["translational_truth_action_field"]["status"] == "OPEN"
+    assert rendering["status"] == "OPEN"
+    assert rendering["rendering_count"] == 1
+    assert rendering["renderings"][0]["market_side"] is None
