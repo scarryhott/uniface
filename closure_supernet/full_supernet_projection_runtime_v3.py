@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Published full-gate runtime with NRRF882 translation supervision.
 
-The public route set remains unchanged.  This module only changes how the
+The public route set remains unchanged. This module only changes how the
 full potential gate is derived: returned semantic market valuations are joined
 to their canonical event-perspective provenance, and that exact translation
 geometry becomes the shared AI/token supervision and perspectival-navigation
@@ -11,6 +11,7 @@ relation.
 
 from typing import Any, Mapping
 
+from . import full_supernet_potential_gate as _gate_module
 from . import full_supernet_projection_runtime as _runtime
 from .potential_gate_unified_interface import POTENTIAL_GATE_SUPERNET_HTML
 from .translation_supervisory_full_gate import (
@@ -74,6 +75,11 @@ def create_app(config: Any | None = None):
     _runtime.derive_full_supernet_gate_contract = derive_full_supernet_gate_contract
     _runtime.validate_full_supernet_gate_contract = validate_full_supernet_gate_contract
     _runtime._current_gate = _current_gate
+    # Existing callers import the public validator from the base gate module.
+    # Keep that import path valid without changing the base derivation itself.
+    _gate_module.validate_full_supernet_gate_contract = (
+        validate_full_supernet_gate_contract
+    )
     set_source_perspective_registry({})
     app = _runtime.create_app(config)
     _patch_runtime_instance(app.state.runtime)
