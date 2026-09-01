@@ -75,11 +75,13 @@ def test_browser_and_runtime_publish_one_translate_operator(tmp_path: Path) -> N
     assert caps["state_transition_is_visual_transition"] is True
     assert caps["separate_navigation_operator"] is False
     assert caps["separate_return_operator"] is False
+    assert caps["wire_path_retained_for_compatibility"] is True
     assert full["translation_operator"] == TRANSLATE_OPERATOR
     assert full["supernet_closure_form"]["translation_operator"] == TRANSLATE_OPERATOR
     assert "async function translateClosureForm" in html
     assert "translationMatches(translation,source,next,path)" in html
-    assert "/supernet/interface/projections/${encodeURIComponent(source.id)}/translate" in html
+    assert "/supernet/interface/projections/${encodeURIComponent(source.id)}/return" in html
+    assert "/supernet/interface/projections/${encodeURIComponent(source.id)}/translate" not in html
     assert "flowTranslation(next,path,translation)" in html
     assert "async function navigateRelation(path)" not in html
     assert "async function submitReturn()" not in html
