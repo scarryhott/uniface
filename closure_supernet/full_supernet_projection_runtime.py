@@ -3,16 +3,17 @@ from __future__ import annotations
 """Production runtime for the full relative natural-form potential gate.
 
 The historical closure UI contract remains the finite witnessed/OPEN truth
-constraint. This runtime places it inside the larger Supernet gate and adds a
-non-mutating perspectival navigation relation. Only the existing
-source-preserving return operation may change truth.
+constraint. This runtime places it inside the larger Supernet gate and exposes
+one interaction endpoint whose two internal relations are truth-inert
+perspectival navigation and source-preserving return. No parallel public UI or
+mutation route is introduced.
 """
 
-from typing import Any, Mapping
+from typing import Any, Literal, Mapping
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
 from . import minimal_projection_runtime as _base
 from .full_supernet_potential_gate import (
@@ -24,10 +25,15 @@ from .full_supernet_potential_gate import (
 )
 from .potential_gate_interface import POTENTIAL_GATE_SUPERNET_HTML
 
+NAVIGATE = "PERSPECTIVE_NAVIGATION"
+RETURN = "POTENTIAL_GATE_RETURN"
+INTERACTION_ENDPOINT = "/supernet/interface/projections/{contract_id}/return"
+
 
 class PerspectivalNavigationRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    interaction_kind: Literal["PERSPECTIVE_NAVIGATION"]
     relation_id: str = Field(min_length=1, max_length=500)
     perspective_id: str = Field(min_length=1, max_length=500)
     focus_event_id: str | None = Field(default=None, max_length=500)
@@ -37,6 +43,7 @@ class PerspectivalNavigationRequest(BaseModel):
 class PotentialGateReturnRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    interaction_kind: Literal["POTENTIAL_GATE_RETURN"]
     relation_id: str = Field(min_length=1, max_length=500)
     perspective_id: str = Field(min_length=1, max_length=500)
     focus_event_id: str | None = Field(default=None, max_length=500)
@@ -92,6 +99,14 @@ def _path_by_id(
     )
 
 
+def _route_endpoint(app: FastAPI, path: str, method: str) -> Any:
+    for route in app.router.routes:
+        methods = getattr(route, "methods", set()) or set()
+        if getattr(route, "path", None) == path and method in methods:
+            return route.endpoint
+    raise RuntimeError(f"missing base route: {method} {path}")
+
+
 def _replace_route_paths(app: FastAPI, paths: set[str]) -> None:
     app.router.routes[:] = [
         route
@@ -100,16 +115,23 @@ def _replace_route_paths(app: FastAPI, paths: set[str]) -> None:
     ]
 
 
+def _validation_error(error: ValidationError) -> HTTPException:
+    return HTTPException(status_code=422, detail=error.errors())
+
+
 def create_app(config: Any | None = None) -> FastAPI:
     app = _base.create_app(config)
     runtime: _base.MinimalProjectionRuntime = app.state.runtime
+    base_return_endpoint = _route_endpoint(app, INTERACTION_ENDPOINT, "POST")
     _replace_route_paths(
         app,
         {
             "/",
             "/supernet",
             "/natural-interface",
+            "/supernet/interface",
             "/supernet/interface/capabilities",
+            INTERACTION_ENDPOINT,
         },
     )
 
@@ -126,6 +148,11 @@ def create_app(config: Any | None = None) -> FastAPI:
             "surface": "RELATIVE_NATURAL_FORM_POTENTIAL_GATE",
             "input": "FULL_SURFACE_SOURCE_RETURN",
             "mutation_relations": ["SOURCE_PRESERVING_TRANSLATIONAL_RETURN"],
+            "interaction_relations": [
+                "PERSPECTIVE_NAVIGATION",
+                "POTENTIAL_GATE_RETURN",
+            ],
+            "interaction_endpoint": INTERACTION_ENDPOINT,
             "parallel_ui_routes": False,
             "parallel_mutation_routes": False,
             "truth_source": "INTERACTIVE_TRANSLATION_CLOSURE_EQUATION_SYSTEM",
@@ -184,11 +211,19 @@ def create_app(config: Any | None = None) -> FastAPI:
             "existence_closed": False,
         }
 
-    @app.get("/supernet/potential-gate")
-    async def potential_gate(
+    @app.get("/supernet/interface")
+    async def projection(
         perspective_id: str = "perspective",
         focus_event_id: str | None = None,
+        potential_gate: bool = False,
     ) -> dict[str, Any]:
+        if not potential_gate:
+            return {
+                "closure_ui_contract": runtime.project(
+                    perspective_id=perspective_id,
+                    focus_event_id=focus_event_id,
+                )
+            }
         return {
             "supernet_potential_gate": _current_gate(
                 runtime,
@@ -198,9 +233,8 @@ def create_app(config: Any | None = None) -> FastAPI:
             )
         }
 
-    @app.post("/supernet/potential-gates/{gate_id}/navigate")
     async def navigate(
-        gate_id: str,
+        contract_id: str,
         data: PerspectivalNavigationRequest,
     ) -> dict[str, Any]:
         async with runtime.lock:
@@ -210,7 +244,7 @@ def create_app(config: Any | None = None) -> FastAPI:
                 focus_event_id=data.focus_event_id,
                 navigation_context=data.navigation_context,
             )
-            if current["id"] != gate_id:
+            if current["id"] != contract_id:
                 raise HTTPException(409, "The perspectival gate has changed")
             validation = validate_full_supernet_gate_contract(current)
             if validation.get("valid") is not True:
@@ -259,9 +293,8 @@ def create_app(config: Any | None = None) -> FastAPI:
                 "supernet_potential_gate": successor,
             }
 
-    @app.post("/supernet/potential-gates/{gate_id}/return")
     async def return_through_gate(
-        gate_id: str,
+        contract_id: str,
         data: PotentialGateReturnRequest,
     ) -> dict[str, Any]:
         async with runtime.lock:
@@ -271,7 +304,7 @@ def create_app(config: Any | None = None) -> FastAPI:
                 focus_event_id=data.focus_event_id,
                 navigation_context=data.navigation_context,
             )
-            if current["id"] != gate_id:
+            if current["id"] != contract_id:
                 raise HTTPException(409, "The potential gate has changed")
             validation = validate_full_supernet_gate_contract(current)
             if validation.get("valid") is not True:
@@ -396,6 +429,32 @@ def create_app(config: Any | None = None) -> FastAPI:
                 "supernet_potential_gate": successor,
             }
 
+    @app.post(INTERACTION_ENDPOINT)
+    async def interact(
+        contract_id: str,
+        data: dict[str, Any],
+    ) -> Any:
+        interaction_kind = str(data.get("interaction_kind") or "")
+        if not interaction_kind:
+            try:
+                request = _base.TranslationalReturnRequest.model_validate(data)
+            except ValidationError as error:
+                raise _validation_error(error) from error
+            return await base_return_endpoint(contract_id, request)
+        if interaction_kind == NAVIGATE:
+            try:
+                request = PerspectivalNavigationRequest.model_validate(data)
+            except ValidationError as error:
+                raise _validation_error(error) from error
+            return await navigate(contract_id, request)
+        if interaction_kind == RETURN:
+            try:
+                request = PotentialGateReturnRequest.model_validate(data)
+            except ValidationError as error:
+                raise _validation_error(error) from error
+            return await return_through_gate(contract_id, request)
+        raise HTTPException(422, "Unknown Supernet interaction relation")
+
     app.state.full_supernet_runtime = runtime
     return app
 
@@ -407,9 +466,12 @@ derive_local_projection_commitment = _base.derive_local_projection_commitment
 app = create_app()
 
 __all__ = [
+    "INTERACTION_ENDPOINT",
     "MinimalProjectionRuntime",
+    "NAVIGATE",
     "PerspectivalNavigationRequest",
     "PotentialGateReturnRequest",
+    "RETURN",
     "TranslationalReturnRequest",
     "app",
     "create_app",
