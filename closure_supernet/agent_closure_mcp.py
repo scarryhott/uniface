@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-"""Agent participation as a projection of the one Supernet closure transition.
+"""Agent and self-runtime readings of the one Supernet closure form.
 
-The MCP transport is only another perspective on the published closure form.
-Every mutation is wrapped by the same ``SUPERNET_TRANSLATE`` receipt family used
-by the browser/runtime boundary. Self-observation is a read of that same closure
-form and cannot author truth.
+MCP is transport only. Every mutating tool resolves to the current
+``AI_CONTINUING`` interaction and invokes the exact same ``SUPERNET_TRANSLATE``
+handler used by the browser. The runtime observes itself by projecting the same
+content-addressed closure form; self-observation has no truth authority.
 """
 
 import os
 from contextlib import asynccontextmanager
-from typing import Annotated, Any, Awaitable, Callable, Literal, Mapping
+from typing import Annotated, Any, Literal
 
 from fastapi import FastAPI
 from mcp.server import MCPServer
@@ -18,22 +18,8 @@ from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import ToolAnnotations
 from pydantic import Field
 
-from . import full_supernet_potential_gate as _digest_base
-from .embodied_models import SheafKind
 from .nrrf892_runtime_bridge import VISION_SLIDE_OPERATOR
-from .selection_models import SelectionReadingCreate
-from .supernet_closure_form import (
-    TRANSLATE_OPERATOR,
-    TRANSLATE_RECEIPT_SCHEMA,
-    derive_full_supernet_gate_contract,
-)
-from .supernet_models import ResourceEnvelope
-from .topology_models import (
-    CollectiveTraceCreate,
-    EventRelationCreate,
-    EventReopenCreate,
-    EventReturnCreate,
-)
+from .supernet_closure_form import TRANSLATE_OPERATOR, derive_full_supernet_gate_contract
 
 AgentSheaf = Literal[
     "HUMAN_INTERACTION",
@@ -47,16 +33,9 @@ AgentSheaf = Literal[
 ]
 
 
-def _unique(values: list[str]) -> list[str]:
-    return list(dict.fromkeys(str(item) for item in values if str(item)))
-
-
 def _provenance(runtime: Any) -> dict[str, str]:
     result: dict[str, str] = {}
-    ledger = getattr(runtime, "ledger", None)
-    if ledger is None:
-        return result
-    for item in ledger.list_returns():
+    for item in runtime.ledger.list_returns():
         event_id = str(item.get("id") or "")
         perspective_id = str(item.get("perspective_id") or "")
         if event_id and perspective_id:
@@ -64,28 +43,18 @@ def _provenance(runtime: Any) -> dict[str, str]:
     return result
 
 
-def _closure_gate(
-    runtime: Any,
-    perspective_id: str | None,
-    focus_event_id: str | None,
-) -> dict[str, Any]:
-    perspective = perspective_id or "runtime:self"
-    closure_contract = runtime.project(
-        perspective_id=perspective,
+def _gate(runtime: Any, perspective_id: str, focus_event_id: str | None = None) -> dict[str, Any]:
+    closure = runtime.project(
+        perspective_id=perspective_id,
         focus_event_id=focus_event_id,
     )
     return derive_full_supernet_gate_contract(
-        closure_contract,
+        closure,
         source_perspective_by_event=_provenance(runtime),
     )
 
 
-def _self_runtime_reading(
-    runtime: Any,
-    perspective_id: str | None,
-    focus_event_id: str | None,
-) -> dict[str, Any]:
-    gate = _closure_gate(runtime, perspective_id, focus_event_id)
+def _self_reading(gate: dict[str, Any]) -> dict[str, Any]:
     form = gate["supernet_closure_form"]
     return {
         "published_semantic_carrier": "SUPERNET_CLOSURE_FORM",
@@ -101,126 +70,54 @@ def _self_runtime_reading(
     }
 
 
-def _agent_translation_receipt(
-    source_gate: Mapping[str, Any],
-    target_gate: Mapping[str, Any],
-    *,
-    interaction_kind: str,
-    actor_id: str,
-    focus_event_id: str | None,
-) -> dict[str, Any]:
-    source_form = source_gate["supernet_closure_form"]
-    target_form = target_gate["supernet_closure_form"]
-    source_identity = source_form["runtime_identity_id"]
-    target_identity = target_form["runtime_identity_id"]
-    preserved = source_identity == target_identity
-    body = {
-        "schema": TRANSLATE_RECEIPT_SCHEMA,
-        "operator": TRANSLATE_OPERATOR,
-        "relation_id": f"agent:{interaction_kind}:{focus_event_id or 'continuing'}",
-        "agent_interaction_kind": interaction_kind,
-        "agent_actor_id": actor_id,
-        "source_gate_id": source_gate["id"],
-        "source_closure_form_id": source_form["id"],
-        "source_runtime_identity_id": source_identity,
-        "target_gate_id": target_gate["id"],
-        "target_closure_form_id": target_form["id"],
-        "target_runtime_identity_id": target_identity,
-        "runtime_identity_is_translational_truth": True,
-        "runtime_identity_preserved": preserved,
-        "translational_truth_preserved": preserved,
-        "truth_refined": not preserved,
-        "runtime_state_change_is_this_translation": True,
-        "agent_interaction_is_this_translation": True,
-        "browser_and_agent_share_translation_operator": True,
-        "semantic_transition_is_visual_transition": True,
-        "separate_agent_mutation_authority": False,
-        "self_runtime_is_closure_form_reading": True,
-        "vision_slide_operator": VISION_SLIDE_OPERATOR,
-    }
-    body["id"] = _digest_base._digest("supernet-translate", body)
-    return body
+def _continuing_interaction(gate: dict[str, Any]) -> dict[str, Any]:
+    rows = gate["supernet_closure_form"].get("interactions") or []
+    for row in rows:
+        if row.get("ai_token_phase") == "AI_CONTINUING":
+            return row
+    raise ValueError("The current closure form has no continuing interaction to translate")
 
 
-async def _close_agent_mutation(
-    runtime: Any,
-    *,
-    perspective_id: str,
-    source_focus_event_id: str | None,
-    interaction_kind: str,
-    actor_id: str,
-    mutation: Callable[[], Awaitable[tuple[dict[str, Any], str | None]]],
-) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
-    source_gate = _closure_gate(runtime, perspective_id, source_focus_event_id)
-    result, target_focus_event_id = await mutation()
-    target_gate = _closure_gate(runtime, perspective_id, target_focus_event_id)
-    receipt = _agent_translation_receipt(
-        source_gate,
-        target_gate,
-        interaction_kind=interaction_kind,
-        actor_id=actor_id,
-        focus_event_id=target_focus_event_id,
-    )
-    return result, receipt, _self_runtime_reading(
-        runtime, perspective_id, target_focus_event_id
-    )
-
-
-async def _compact_interface(
-    runtime: Any,
-    event_id: str | None,
-    perspective_id: str | None,
-) -> dict[str, Any]:
-    receipt = runtime.natural_interface.select(
-        focus_event_id=event_id,
-        perspective_id=perspective_id,
-    )
-    focused = receipt.get("focus_event") or {}
+def _compact_interface(gate: dict[str, Any], perspective_id: str) -> dict[str, Any]:
+    closure = gate["closure_ui_contract"]
+    returns = closure.get("source_occurrences") or []
     return {
-        "focus_event_id": receipt.get("focus_event_id") or focused.get("id") or event_id,
+        "focus_event_id": gate.get("focus_event_id"),
         "perspective_id": perspective_id,
-        "natural_chart": receipt.get("natural_chart"),
-        "sense_depth": receipt.get("sense_depth"),
-        "closure_level": receipt.get("closure_level"),
-        "visual_closure": receipt.get("visual_closure"),
-        "proof_depth": receipt.get("proof_depth"),
-        "continuation_depth": receipt.get("continuation_depth"),
-        "turing_being_depth": receipt.get("turing_being_depth"),
-        "source_fibre": receipt.get("source_fibre", []),
+        "natural_chart": gate["supernet_closure_form"].get("seen_id"),
+        "closure_level": gate["supernet_closure_form"]["id"],
+        "visual_closure": closure,
+        "source_fibre": returns,
         "two_person_E2E": "CONTINUING",
         "truth_issued": False,
     }
 
 
-def _allowed_hosts(config: Any) -> list[str]:
+def _allowed_hosts() -> list[str]:
     hosts = {
         "localhost",
         "localhost:*",
         "127.0.0.1",
         "127.0.0.1:*",
+        "testserver",
+        "testserver:*",
         "uniface-supernet-production.up.railway.app",
         "uniface-supernet-production.up.railway.app:*",
     }
-    for raw in list(getattr(config, "trusted_hosts", ())) + [
-        os.getenv("RAILWAY_PUBLIC_DOMAIN", ""),
-    ]:
-        host = str(raw).strip()
-        if not host or "*" in host or "://" in host:
-            continue
-        hosts.add(host)
-        if ":" not in host:
-            hosts.add(f"{host}:*")
+    railway = os.getenv("RAILWAY_PUBLIC_DOMAIN", "").strip()
+    if railway and "*" not in railway and "://" not in railway:
+        hosts.add(railway)
+        if ":" not in railway:
+            hosts.add(f"{railway}:*")
     return sorted(hosts)
 
 
-def _allowed_origins(config: Any) -> list[str]:
-    origins = {
-        "https://chatgpt.com",
+def _allowed_origins() -> list[str]:
+    return [
         "https://chat.openai.com",
+        "https://chatgpt.com",
         "https://platform.openai.com",
-        *[str(item) for item in getattr(config, "cors_origins", ()) if str(item)],
-    }
-    return sorted(origins)
+    ]
 
 
 def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
@@ -228,8 +125,56 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
         return app
 
     runtime = app.state.runtime
+    translate = app.state.supernet_translate
     app.state.supernet_agent_mcp_attached = True
     mcp = MCPServer("Closure Supernet Agent")
+
+    def current(perspective_id: str | None, focus_event_id: str | None = None) -> dict[str, Any]:
+        return _gate(runtime, perspective_id or "runtime:self", focus_event_id)
+
+    async def translate_text(
+        *,
+        exact_text: str,
+        actor_id: str,
+        perspective_id: str | None,
+        focus_event_id: str | None,
+        interaction_kind: str,
+    ) -> dict[str, Any]:
+        perspective = perspective_id or actor_id
+        source = current(perspective, focus_event_id)
+        interaction = _continuing_interaction(source)
+        payload = {
+            "relation_id": interaction["path_id"],
+            "perspective_id": perspective,
+            "focus_event_id": source.get("focus_event_id"),
+            "navigation_context": source["navigation_context"],
+            "source_closure_form_id": source["supernet_closure_form_id"],
+            "source_interaction_id": interaction["id"],
+            "exact_source_return": exact_text.strip(),
+            "local_perspective_hair_millidegrees": 0,
+            "local_perspective_zoom_milli": 1000,
+        }
+        result = await translate(source["id"], payload)
+        target = result["supernet_potential_gate"]
+        receipt = dict(result["translation"])
+        receipt.update(
+            {
+                "agent_interaction_kind": interaction_kind,
+                "agent_actor_id": actor_id,
+                "agent_interaction_is_this_translation": True,
+                "browser_and_agent_share_translation_operator": True,
+                "separate_agent_mutation_authority": False,
+                "self_runtime_is_closure_form_reading": True,
+            }
+        )
+        return {
+            "event_id": target.get("focus_event_id"),
+            "translation": receipt,
+            "self_runtime": _self_reading(target),
+            "interface": _compact_interface(target, perspective),
+            "supernet_potential_gate": target,
+            "truth_issued": False,
+        }
 
     @mcp.tool(
         title="Observe Supernet",
@@ -241,16 +186,13 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
         limit: Annotated[int, Field(ge=1, le=50)] = 12,
     ) -> dict[str, Any]:
         perspective = perspective_id or "runtime:self"
-        field = runtime.supernet_field()
-        events = list(field.get("events", []))[-limit:]
-        if event_id is None and events:
-            event_id = events[-1]["id"]
+        gate = current(perspective, event_id)
+        rows = runtime.ledger.list_returns()
+        recent = rows[-limit:]
         return {
-            "field_stage": field.get("current_stage"),
-            "stats": field.get("stats", {}),
-            "recent_events": events,
-            "interface": await _compact_interface(runtime, event_id, perspective),
-            "self_runtime": _self_runtime_reading(runtime, perspective, event_id),
+            "recent_events": recent,
+            "interface": _compact_interface(gate, perspective),
+            "self_runtime": _self_reading(gate),
             "subsystems_are_lenses": True,
             "self_observation_authors_truth": False,
             "truth_issued": False,
@@ -258,12 +200,7 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
 
     @mcp.tool(
         title="Offer or interact in Supernet",
-        annotations=ToolAnnotations(
-            read_only_hint=False,
-            destructive_hint=False,
-            idempotent_hint=False,
-            open_world_hint=False,
-        ),
+        annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False),
     )
     async def supernet_offer(
         exact_text: Annotated[str, Field(min_length=1)],
@@ -273,78 +210,20 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
         parent_event_id: str | None = None,
         sheaf: AgentSheaf | None = None,
     ) -> dict[str, Any]:
-        perspective = perspective_id or actor_id
-        metadata: dict[str, Any] = {
-            "agent_mcp": True,
-            "agent_role": "participant",
-            "translation_operator": TRANSLATE_OPERATOR,
-            "truth_issued": False,
-        }
-        hints = ["agent interaction"]
-        adapter_label = "agent"
-        if sheaf is not None:
-            sheaf_value = SheafKind(sheaf).value
-            adapter_label = "embodied"
-            metadata.update(
-                {
-                    "sheaf": sheaf_value,
-                    "eight_sheaf_supernet": True,
-                    "hypothesis_status": "CONTINUING"
-                    if sheaf_value == "UNKNOWN_UAP_HYPOTHESIS"
-                    else None,
-                    "alien_claim_verified": False,
-                    "anomaly_is_not_explanation": True,
-                }
-            )
-            hints.extend(["eight sheaf", sheaf_value])
-        envelope = ResourceEnvelope(
-            exact_text=exact_text,
-            authored_by=actor_id,
-            form_label=form_label,
-            perspective_id=perspective,
-            affected_perspectives=[perspective],
-            relation_hints=_unique(hints),
-            parent_event_ids=[parent_event_id] if parent_event_id else [],
-            causal_predecessor_ids=[parent_event_id] if parent_event_id else [],
-            adapter_label=adapter_label,
-            metadata=metadata,
-        )
-
-        async def mutation() -> tuple[dict[str, Any], str | None]:
-            result = (
-                await runtime.live_sense.interact(parent_event_id, envelope)
-                if parent_event_id
-                else await runtime.live_sense.offer(envelope)
-            )
-            return result, result["event_id"]
-
-        result, translation, self_runtime = await _close_agent_mutation(
-            runtime,
-            perspective_id=perspective,
-            source_focus_event_id=parent_event_id,
-            interaction_kind="OFFER",
+        prefix = f"[{form_label}]"
+        if sheaf:
+            prefix += f"[{sheaf}]"
+        return await translate_text(
+            exact_text=f"{prefix} {exact_text}",
             actor_id=actor_id,
-            mutation=mutation,
+            perspective_id=perspective_id,
+            focus_event_id=parent_event_id,
+            interaction_kind="OFFER",
         )
-        event_id = result["event_id"]
-        return {
-            "event_id": event_id,
-            "occurrence_ids": result.get("occurrence_ids", []),
-            "sense_receipt": result.get("sense_receipt"),
-            "translation": translation,
-            "self_runtime": self_runtime,
-            "interface": await _compact_interface(runtime, event_id, perspective),
-            "truth_issued": False,
-        }
 
     @mcp.tool(
         title="Relate Supernet events",
-        annotations=ToolAnnotations(
-            read_only_hint=False,
-            destructive_hint=False,
-            idempotent_hint=False,
-            open_world_hint=False,
-        ),
+        annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False),
     )
     async def supernet_relate(
         source_event_id: str,
@@ -354,52 +233,18 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
         perspective_id: str | None = None,
         bidirectional: bool = False,
     ) -> dict[str, Any]:
-        perspective = perspective_id or actor_id
-
-        async def mutation() -> tuple[dict[str, Any], str | None]:
-            result = await runtime.topology.create_relation(
-                EventRelationCreate(
-                    source_event_id=source_event_id,
-                    target_event_id=target_event_id,
-                    authored_by=actor_id,
-                    relation_label=relation_label,
-                    affected_perspectives=[perspective],
-                    bidirectional=bidirectional,
-                    preserves=["exact sources", "direction", "source provenance"],
-                    metadata={"agent_mcp": True, "truth_issued": False},
-                )
-            )
-            event_id = result["relation_event"]["id"]
-            result["sense_receipt"] = await runtime.live_sense.sense_event(event_id)
-            return result, event_id
-
-        result, translation, self_runtime = await _close_agent_mutation(
-            runtime,
-            perspective_id=perspective,
-            source_focus_event_id=source_event_id,
-            interaction_kind="RELATE",
+        direction = "<->" if bidirectional else "->"
+        return await translate_text(
+            exact_text=f"RELATE {source_event_id} {direction} {target_event_id}: {relation_label}",
             actor_id=actor_id,
-            mutation=mutation,
+            perspective_id=perspective_id,
+            focus_event_id=source_event_id,
+            interaction_kind="RELATE",
         )
-        event_id = result["relation_event"]["id"]
-        return {
-            "relation_event_id": event_id,
-            "relation_event": result["relation_event"],
-            "sense_receipt": result["sense_receipt"],
-            "translation": translation,
-            "self_runtime": self_runtime,
-            "interface": await _compact_interface(runtime, event_id, perspective),
-            "truth_issued": False,
-        }
 
     @mcp.tool(
         title="Refine a live relation",
-        annotations=ToolAnnotations(
-            read_only_hint=False,
-            destructive_hint=False,
-            idempotent_hint=False,
-            open_world_hint=False,
-        ),
+        annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False),
     )
     async def supernet_refine(
         source_event_id: str,
@@ -408,66 +253,17 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
         perspective_id: str | None = None,
         reason: str = "Agent refines the live relational field",
     ) -> dict[str, Any]:
-        perspective = perspective_id or actor_id
-        matches = [
-            reading
-            for reading in runtime.selection_store.list_readings()
-            if reading.get("source_event_id") == source_event_id
-            and reading.get("metadata", {}).get("live_sense") is True
-        ]
-        if not matches:
-            raise ValueError("The focused event has no live Sense relation field")
-        source = max(matches, key=lambda item: item["created_at"])
-        if selected_relation_id not in source["admissible_symbols"]:
-            raise ValueError("The selected relation is not admitted by the source reading")
-
-        async def mutation() -> tuple[dict[str, Any], str | None]:
-            reading = await runtime.selection.create_reading(
-                SelectionReadingCreate(
-                    name="MCP agent relational refinement",
-                    authored_by=actor_id,
-                    field_symbols=source["field_symbols"],
-                    admissible_symbols=source["admissible_symbols"],
-                    selected_symbol=selected_relation_id,
-                    source_event_id=source_event_id,
-                    selection_scope="agent MCP relation refinement",
-                    perspective_id=perspective,
-                    source_ids=source.get("source_ids", []),
-                    metadata={
-                        "agent_mcp": True,
-                        "parent_live_sense_reading_id": source["id"],
-                        "reason": reason,
-                        "removed_alternatives_retained": True,
-                        "truth_issued": False,
-                    },
-                )
-            )
-            return {"selection": reading}, source_event_id
-
-        result, translation, self_runtime = await _close_agent_mutation(
-            runtime,
-            perspective_id=perspective,
-            source_focus_event_id=source_event_id,
-            interaction_kind="REFINE",
+        return await translate_text(
+            exact_text=f"REFINE {selected_relation_id}: {reason}",
             actor_id=actor_id,
-            mutation=mutation,
+            perspective_id=perspective_id,
+            focus_event_id=source_event_id,
+            interaction_kind="REFINE",
         )
-        return {
-            **result,
-            "translation": translation,
-            "self_runtime": self_runtime,
-            "interface": await _compact_interface(runtime, source_event_id, perspective),
-            "truth_issued": False,
-        }
 
     @mcp.tool(
         title="Return a Supernet form",
-        annotations=ToolAnnotations(
-            read_only_hint=False,
-            destructive_hint=False,
-            idempotent_hint=False,
-            open_world_hint=False,
-        ),
+        annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False),
     )
     async def supernet_return(
         event_id: str,
@@ -476,51 +272,17 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
         perspective_id: str | None = None,
         form_label: str = "agent return",
     ) -> dict[str, Any]:
-        perspective = perspective_id or actor_id
-
-        async def mutation() -> tuple[dict[str, Any], str | None]:
-            result = await runtime.topology.return_event(
-                event_id,
-                EventReturnCreate(
-                    actor_id=actor_id,
-                    exact_text=exact_text,
-                    form_label=form_label,
-                    affected_perspectives=[perspective],
-                    metadata={"agent_mcp": True, "truth_issued": False},
-                ),
-            )
-            returned_id = result["returned_event"]["id"]
-            result["sense_receipt"] = await runtime.live_sense.sense_event(returned_id)
-            return result, returned_id
-
-        result, translation, self_runtime = await _close_agent_mutation(
-            runtime,
-            perspective_id=perspective,
-            source_focus_event_id=event_id,
-            interaction_kind="RETURN",
+        return await translate_text(
+            exact_text=f"[{form_label}] {exact_text}",
             actor_id=actor_id,
-            mutation=mutation,
+            perspective_id=perspective_id,
+            focus_event_id=event_id,
+            interaction_kind="RETURN",
         )
-        returned_id = result["returned_event"]["id"]
-        return {
-            "source_event_id": event_id,
-            "returned_event_id": returned_id,
-            "source_transition": result["source_transition"],
-            "sense_receipt": result["sense_receipt"],
-            "translation": translation,
-            "self_runtime": self_runtime,
-            "interface": await _compact_interface(runtime, returned_id, perspective),
-            "truth_issued": False,
-        }
 
     @mcp.tool(
-        title="Reopen a Supernet event",
-        annotations=ToolAnnotations(
-            read_only_hint=False,
-            destructive_hint=False,
-            idempotent_hint=False,
-            open_world_hint=False,
-        ),
+        title="Continue a Supernet event",
+        annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False),
     )
     async def supernet_reopen(
         event_id: str,
@@ -530,51 +292,19 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
         reopened_sites: list[str] | None = None,
         successor_hints: list[str] | None = None,
     ) -> dict[str, Any]:
-        perspective = perspective_id or actor_id
-
-        async def mutation() -> tuple[dict[str, Any], str | None]:
-            transition = runtime.topology.reopen(
-                event_id,
-                EventReopenCreate(
-                    actor_id=actor_id,
-                    reason=reason,
-                    reopened_sites=reopened_sites or [],
-                    successor_hints=successor_hints or [],
-                    metadata={
-                        "agent_mcp": True,
-                        "perspective_id": perspective,
-                        "truth_issued": False,
-                    },
-                ),
-            )
-            sense = await runtime.live_sense.sense_event(event_id)
-            return {"transition": transition, "sense_receipt": sense}, event_id
-
-        result, translation, self_runtime = await _close_agent_mutation(
-            runtime,
-            perspective_id=perspective,
-            source_focus_event_id=event_id,
-            interaction_kind="REOPEN",
+        sites = ",".join(reopened_sites or [])
+        hints = ",".join(successor_hints or [])
+        return await translate_text(
+            exact_text=f"CONTINUE {event_id}: {reason}; sites={sites}; hints={hints}",
             actor_id=actor_id,
-            mutation=mutation,
+            perspective_id=perspective_id,
+            focus_event_id=event_id,
+            interaction_kind="CONTINUE",
         )
-        return {
-            "event_id": event_id,
-            **result,
-            "translation": translation,
-            "self_runtime": self_runtime,
-            "interface": await _compact_interface(runtime, event_id, perspective),
-            "truth_issued": False,
-        }
 
     @mcp.tool(
         title="Create a collective continuation",
-        annotations=ToolAnnotations(
-            read_only_hint=False,
-            destructive_hint=False,
-            idempotent_hint=False,
-            open_world_hint=False,
-        ),
+        annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False),
     )
     async def supernet_collective(
         event_ids: Annotated[list[str], Field(min_length=2)],
@@ -582,47 +312,20 @@ def attach_supernet_agent_mcp(app: FastAPI) -> FastAPI:
         actor_id: str = "openai-agent",
         perspective_id: str | None = None,
     ) -> dict[str, Any]:
-        ids = _unique(event_ids)
+        ids = list(dict.fromkeys(event_ids))
         if len(ids) < 2:
             raise ValueError("A collective continuation requires at least two distinct events")
-        perspective = perspective_id or actor_id
-
-        async def mutation() -> tuple[dict[str, Any], str | None]:
-            result = await runtime.topology.create_collective_trace(
-                CollectiveTraceCreate(
-                    authored_by=actor_id,
-                    event_ids=ids,
-                    exact_text=exact_text,
-                    affected_perspectives=[perspective],
-                    relation_hints=["shared architecture", "collective interaction", "agent MCP"],
-                    metadata={"agent_mcp": True, "perspective_id": perspective, "truth_issued": False},
-                )
-            )
-            event_id = result["collective_event"]["id"]
-            result["sense_receipt"] = await runtime.live_sense.sense_event(event_id)
-            return result, event_id
-
-        result, translation, self_runtime = await _close_agent_mutation(
-            runtime,
-            perspective_id=perspective,
-            source_focus_event_id=ids[0],
-            interaction_kind="COLLECTIVE",
+        return await translate_text(
+            exact_text=f"COLLECTIVE[{','.join(ids)}]: {exact_text}",
             actor_id=actor_id,
-            mutation=mutation,
+            perspective_id=perspective_id,
+            focus_event_id=ids[0],
+            interaction_kind="COLLECTIVE",
         )
-        event_id = result["collective_event"]["id"]
-        return {
-            "collective_event_id": event_id,
-            "sense_receipt": result["sense_receipt"],
-            "translation": translation,
-            "self_runtime": self_runtime,
-            "interface": await _compact_interface(runtime, event_id, perspective),
-            "truth_issued": False,
-        }
 
     security = TransportSecuritySettings(
-        allowed_hosts=_allowed_hosts(runtime.config),
-        allowed_origins=_allowed_origins(runtime.config),
+        allowed_hosts=_allowed_hosts(),
+        allowed_origins=_allowed_origins(),
     )
     mcp_app = mcp.streamable_http_app(
         streamable_http_path="/",
