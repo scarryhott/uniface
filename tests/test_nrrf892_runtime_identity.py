@@ -13,6 +13,7 @@ from closure_supernet.nrrf892_runtime_bridge import (
     VISION_CHART_OUTSIDE,
     VISION_SLIDE_OPERATOR,
     derive_runtime_identity_id,
+    derive_vision_bridge_for_interaction,
     validate_vision_bridge,
 )
 from closure_supernet.supernet_closure_form import TRANSLATE_OPERATOR
@@ -106,7 +107,33 @@ def test_runtime_identity_is_translational_truth_and_crystal_orbit(tmp_path: Pat
             assert row["vision_crystal_orbit_id"] is None
 
     assert admitted == form["vision_chart_admitted_interaction_count"]
-    assert admitted > 0
+    assert form["vision_chart_outside_interaction_count"] + admitted == form["interaction_count"]
+
+
+def test_nonzero_rotation_interaction_enters_nrrf892_vision_chart() -> None:
+    bridge = derive_vision_bridge_for_interaction(
+        truth_invariant_id="truth:one",
+        path={
+            "id": "path:one",
+            "relation_id": "relation:one",
+            "source_return_ids": ["return:one"],
+        },
+        interaction={
+            "semantic_family_id": "family:one",
+            "rotation_class_id": "rotation:nonzero",
+        },
+    )
+    assert validate_vision_bridge(bridge)
+    assert bridge["vision_chart_admitted"] is True
+    assert bridge["vision_crystal_orbit_id"] == bridge["translation_truth_orbit_id"]
+    assert bridge["vision_crystal_is_translation_orbit"] is True
+    assert bridge["supernet_translate_is_vision_slide"] is True
+    assert bridge["slide_is_closure_family_member"] is True
+    assert bridge["slide_gravitational_ratio"] == EXACT_ONE
+    assert bridge["slide_inverse_is_family_member"] is True
+    assert bridge["perspective_conjugate_slide_is_family_translation"] is True
+    assert bridge["crystal_action_is_simply_transitive_formal_reading"] is True
+    assert bridge["admitted_vision_redenomination_scales"] == [EXACT_ONE, EXACT_MINUS_ONE]
 
 
 def test_translation_receipt_is_runtime_identity_and_visible_slide(tmp_path: Path) -> None:
