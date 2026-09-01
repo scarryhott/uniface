@@ -24,7 +24,9 @@ def _config(tmp_path: Path) -> RuntimeConfig:
     )
 
 
-def test_equal_translation_browser_accepts_the_current_verified_contract(tmp_path: Path) -> None:
+def test_equal_translation_browser_accepts_the_current_verified_gate(
+    tmp_path: Path,
+) -> None:
     node = shutil.which("node")
     if node is None:
         pytest.skip("Node is required to execute the production browser verifier")
@@ -32,15 +34,18 @@ def test_equal_translation_browser_accepts_the_current_verified_contract(tmp_pat
     app = create_app(_config(tmp_path))
     with TestClient(app) as client:
         page = client.get("/")
-        contract = client.get(
+        full = client.get(
             "/supernet/interface",
-            params={"perspective_id": "perspective:equal-browser"},
-        ).json()["closure_ui_contract"]
+            params={
+                "perspective_id": "perspective:equal-browser",
+                "potential_gate": True,
+            },
+        ).json()["supernet_potential_gate"]
 
-    source = page.text
-    start = source.index("  function asText(value) {")
-    end = source.index("  function solvePoint(solution, point) {", start)
-    verifier = source[start:end]
+    script_source = page.text.split("<script>", 1)[1].split("</script>", 1)[0]
+    start = script_source.index("function asText(v)")
+    end = script_source.index("function phaseWeight", start)
+    verifier = script_source[start:end]
     script = f'''\nconst crypto = require("node:crypto").webcrypto;\n{verifier}\nlet input = "";\nprocess.stdin.setEncoding("utf8");\nprocess.stdin.on("data", chunk => input += chunk);\nprocess.stdin.on("end", async () => {{\n  const contract = JSON.parse(input);\n  process.stdout.write(JSON.stringify({{matches: await contractMatches(contract)}}));\n}});\n'''
     syntax = subprocess.run(
         [node, "--check", "-"],
@@ -52,7 +57,7 @@ def test_equal_translation_browser_accepts_the_current_verified_contract(tmp_pat
     assert syntax.returncode == 0, syntax.stderr or syntax.stdout
     result = subprocess.run(
         [node, "-e", script],
-        input=json.dumps(contract, ensure_ascii=False),
+        input=json.dumps(full, ensure_ascii=False),
         capture_output=True,
         text=True,
         check=False,
@@ -61,7 +66,9 @@ def test_equal_translation_browser_accepts_the_current_verified_contract(tmp_pat
     assert json.loads(result.stdout) == {"matches": True}
 
 
-def test_equal_translation_surface_has_no_hidden_interaction_geometry(tmp_path: Path) -> None:
+def test_equal_translation_surface_has_no_hidden_interaction_geometry(
+    tmp_path: Path,
+) -> None:
     app = create_app(_config(tmp_path))
     with TestClient(app) as client:
         html = client.get("/").text
@@ -71,4 +78,6 @@ def test_equal_translation_surface_has_no_hidden_interaction_geometry(tmp_path: 
     assert '"data-visible-equals-interaction":"true"' in html
     assert '"data-same-object-visible-and-interactive":"true"' in html
     assert '"data-presentation-only":"false"' in html
+    assert '"data-relative-natural-form-potential-gate":"true"' in html
+    assert '"data-equality-is-local-gate-constraint":"true"' in html
     assert "natural-form-family-layer" not in html
