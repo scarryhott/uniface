@@ -8,11 +8,11 @@ class FakeAdapter:
             "kind": "RETURNED_CLOSED_NATURAL_FORM",
             "status": "WITNESSED",
             "closure_truth_id": "truth-a",
-            "closure_number": "1/2",
             "directed_relation_signature": ["USD", "BTC", "USD"],
             "unitary_curvature": "-1",
             "natural_profit": "1",
             "orientation": "PROFITABLE",
+            "closure_number": "1/2",
             "returned_truth_member": True,
             "selected": True,
         }
@@ -44,51 +44,39 @@ class FakeAdapter:
             "temporal_closures": [],
             "current_temporal_closure": None,
             "quote_projections": [],
+            "sensor_returns": [],
             "translational_truth_partition": {"class_count": 1},
             "open_boundary_natural_selection": {"boundary_interaction_count": 0},
             "current_closure_relative_atlas": {"truth_class_count": 1},
             "natural_form_field": {},
             "trading_projection_field": {"returned_natural_forms": [returned]},
             "selected_interactions": [],
-            "returned_diffusion_kernel": {
-                "returned": True,
-                "locality_ids": ["translation-truth-family:dummy"],
-                "matrix": [["1"]],
-            },
+            "returned_diffusion_kernel": None,
         }
         return {"protocol": "fake", "status": "WITNESSED", "trading": trading}
 
 
-def test_live_runtime_exposes_nrrf884_887_family_and_diffusion_without_novelty_gate():
-    runtime = AlpacaNRRF879881Runtime(FakeAdapter())
-    # The family id is content-derived. Resolve once to discover it, then make the
-    # returned kernel explicitly name that locality and resolve again.
-    first = runtime.resolve_once()
-    family_id = first["nrrf884_886_translation_families"]["families"][0]["family_id"]
-    original = runtime.adapter.resolve_once
-
-    def resolved_with_matching_kernel():
-        receipt = original()
-        receipt["trading"]["returned_diffusion_kernel"]["locality_ids"] = [family_id]
-        return receipt
-
-    runtime.adapter.resolve_once = resolved_with_matching_kernel
-    receipt = runtime.resolve_once()
+def test_live_runtime_exposes_nrrf884_887_without_inventing_missing_kernel():
+    receipt = AlpacaNRRF879881Runtime(FakeAdapter()).resolve_once()
     family = receipt["nrrf884_886_translation_families"]
+    kernel = receipt["nrrf887_returned_family_kernel_attempt"]
     diffusion = receipt["nrrf887_ai_diffusion"]
 
     assert receipt["status"] == "WITNESSED"
     assert family["family_count"] == 1
     assert family["families"][0]["closure_truth_id"] == "truth-a"
-    assert diffusion["status"] == "WITNESSED"
-    assert diffusion["closure_number_coordinates"][0]["closure_number"] == "1/2"
-    assert diffusion["diffused_readings"][0]["diffused_closure_number"] == "1/2"
-    assert diffusion["global_intent"]["status"] == "WITNESSED"
     assert receipt["family_is_relative_visualization_of_selected_natural_forms"] is True
-    assert receipt["ai_is_probabilistic_diffusion_of_local_interactions"] is True
     assert receipt["new_tt_class_means_trade"] is False
     assert receipt["same_tt_class_means_do_not_trade"] is False
     assert receipt["fixed_price_subset_is_maximally_unified"] is False
     assert receipt["profitability_authors_family_membership"] is False
-    assert receipt["profitability_authors_diffusion"] is False
     assert receipt["automatic_order_submission"] is False
+
+    # One returned family occurrence has no witnessed outgoing transition.  The
+    # runtime must not fabricate P=[1].  Trading closure remains witnessed while
+    # NRRF887 diffusion stays OPEN.
+    assert kernel["status"] == "OPEN"
+    assert kernel["returned_diffusion_kernel"] is None
+    assert kernel["absence_of_outgoing_evidence_creates_self_loop"] is False
+    assert diffusion["status"] == "OPEN"
+    assert receipt["candidate_q_embedding_may_feed_diffusion"] is False
