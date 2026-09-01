@@ -5,7 +5,8 @@ from __future__ import annotations
 The historical interaction URI is retained as a wire address only. Current
 browser/runtime semantics at that address are ``SUPERNET_TRANSLATE``: one
 content-addressed receipt is both the state transition and the visible
-trajectory. Historical payloads are accepted only as compatibility encoding.
+trajectory. NRRF892 supplies the formal bridge for the vision-crystal slide;
+the runtime records that bridge but does not re-prove the Lean theorem.
 """
 
 from typing import Any, Mapping
@@ -13,8 +14,16 @@ from typing import Any, Mapping
 from fastapi import HTTPException
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from . import full_supernet_projection_runtime_v7 as _legacy_runtime
 from . import continuous_translation_field as _legacy_gate
+from . import full_supernet_projection_runtime_v7 as _legacy_runtime
+from .nrrf892_runtime_bridge import (
+    EXACT_MINUS_ONE,
+    EXACT_ONE,
+    FORMAL_REFERENCE as NRRF892_FORMAL_REFERENCE,
+    VISION_CHART_OUTSIDE,
+    VISION_SLIDE_OPERATOR,
+)
+from .one_closure_form_interface import POTENTIAL_GATE_SUPERNET_HTML
 from .supernet_closure_form import (
     TRANSLATE_OPERATOR,
     closure_interaction_by_path,
@@ -22,10 +31,7 @@ from .supernet_closure_form import (
     derive_supernet_translation_receipt,
     validate_full_supernet_gate_contract,
 )
-from .one_closure_form_interface import POTENTIAL_GATE_SUPERNET_HTML
 
-# Preserve the established public URI so the wire topology does not become a
-# second semantic system. The operation at this path is now SUPERNET_TRANSLATE.
 TRANSLATION_ENDPOINT = _legacy_runtime.INTERACTION_ENDPOINT
 LEGACY_INTERACTION_ENDPOINT = TRANSLATION_ENDPOINT
 INTERACTION_ENDPOINT = TRANSLATION_ENDPOINT
@@ -113,6 +119,18 @@ def _replace_capabilities(app: Any) -> None:
             {
                 "published_semantic_carrier": "SUPERNET_CLOSURE_FORM",
                 "translation_operator": TRANSLATE_OPERATOR,
+                "runtime_identity": "TRANSLATIONAL_TRUTH_CLASS",
+                "runtime_identity_is_translational_truth": True,
+                "vision_slide_operator": VISION_SLIDE_OPERATOR,
+                "supernet_translate_is_vision_slide_where_chart_admitted": True,
+                "vision_crystal": "TRANSLATION_TRUTH_ORBIT",
+                "perspective_transport": "CONJUGATE_SLIDE_WITHIN_CLOSURE_FAMILY",
+                "nrrf892_formal_reference": NRRF892_FORMAL_REFERENCE,
+                "runtime_reproves_nrrf892": False,
+                "rotationless_fold_claimed": False,
+                "rotationless_fold_runtime_state": VISION_CHART_OUTSIDE,
+                "admitted_vision_redenomination_scales": [EXACT_ONE, EXACT_MINUS_ONE],
+                "arbitrary_redenomination_is_translation": False,
                 "interaction_endpoint": TRANSLATION_ENDPOINT,
                 "interaction_relations": [TRANSLATE_OPERATOR],
                 "mutation_relations": [TRANSLATE_OPERATOR],
@@ -155,8 +173,6 @@ def create_app(config=None):
     app = _legacy_runtime.create_app(config)
     runtime = app.state.runtime
 
-    # Freeze the former handler as a private compatibility implementation, then
-    # replace its route with the one current transition operation at the same URI.
     legacy_interact = _route_endpoint(app, LEGACY_INTERACTION_ENDPOINT, "POST")
     _remove_route(app, TRANSLATION_ENDPOINT, "POST")
 
@@ -165,9 +181,6 @@ def create_app(config=None):
         contract_id: str,
         payload: dict[str, Any],
     ) -> Any:
-        # Old clients/tests may still send historical interaction-kind payloads.
-        # They are decoded by the frozen predecessor but do not define the
-        # current browser/runtime semantics or a second public route.
         if "source_closure_form_id" not in payload or "source_interaction_id" not in payload:
             return await legacy_interact(contract_id, payload)
 
@@ -214,9 +227,6 @@ def create_app(config=None):
         elif phase == "AI_CONTINUING":
             exact_source = data.exact_source_return.strip()
             if not exact_source:
-                # A continuing slide executes the same translation without
-                # adding a new returned determination. Source and target are one
-                # carrier; the receipt is still the runtime/browser trajectory.
                 result = {
                     "replayed": False,
                     "truth_refined": False,
