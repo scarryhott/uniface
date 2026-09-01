@@ -11,6 +11,7 @@ source-preserving return operation may change truth.
 from typing import Any, Mapping
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from . import minimal_projection_runtime as _base
@@ -22,8 +23,6 @@ from .full_supernet_potential_gate import (
     validate_full_supernet_gate_contract,
 )
 from .potential_gate_interface import POTENTIAL_GATE_SUPERNET_HTML
-
-_base.CLOSURE_ONLY_SUPERNET_HTML = POTENTIAL_GATE_SUPERNET_HTML
 
 
 class PerspectivalNavigationRequest(BaseModel):
@@ -93,28 +92,78 @@ def _path_by_id(
     )
 
 
-def _replace_capability_route(app: FastAPI) -> None:
+def _replace_route_paths(app: FastAPI, paths: set[str]) -> None:
     app.router.routes[:] = [
         route
         for route in app.router.routes
-        if getattr(route, "path", None)
-        != "/supernet/interface/capabilities"
+        if getattr(route, "path", None) not in paths
     ]
 
 
 def create_app(config: Any | None = None) -> FastAPI:
     app = _base.create_app(config)
     runtime: _base.MinimalProjectionRuntime = app.state.runtime
-    _replace_capability_route(app)
+    _replace_route_paths(
+        app,
+        {
+            "/",
+            "/supernet",
+            "/natural-interface",
+            "/supernet/interface/capabilities",
+        },
+    )
+
+    @app.get("/", response_class=HTMLResponse)
+    @app.get("/supernet", response_class=HTMLResponse)
+    @app.get("/natural-interface", response_class=HTMLResponse)
+    async def surface() -> str:
+        return POTENTIAL_GATE_SUPERNET_HTML
 
     @app.get("/supernet/interface/capabilities")
     async def capabilities() -> dict[str, Any]:
         return {
             "protocol": "closure.supernet/full-potential-gate-closure-v1",
             "surface": "RELATIVE_NATURAL_FORM_POTENTIAL_GATE",
+            "input": "FULL_SURFACE_SOURCE_RETURN",
+            "mutation_relations": ["SOURCE_PRESERVING_TRANSLATIONAL_RETURN"],
+            "parallel_ui_routes": False,
+            "parallel_mutation_routes": False,
+            "truth_source": "INTERACTIVE_TRANSLATION_CLOSURE_EQUATION_SYSTEM",
+            "visualization_acceptance": (
+                "EXACT_LOCAL_EQUATION_AND_GATE_REDERIVATION"
+            ),
+            "interaction_proof": "VERIFIED_SUCCESSOR_CLOSURE_BEFORE_COMMIT",
+            "latent_ui_state": "RELATIVE_NATURAL_FORM_POTENTIAL_GATE",
+            "local_perspective": "MUTABLE_HAIR_ZOOM_FOCUS_AND_PATH",
+            "local_modification": "UNCOMMITTED_CLOSURE_POTENTIAL",
+            "commit_protocol": (
+                "LOCAL_PROJECTION_COMMITMENT_THEN_GATE_REDERIVATION"
+            ),
+            "interface_derivation": (
+                "INTERACTIVE_TRANSLATION_OF_CLOSURE_EQUATIONS"
+            ),
+            "full_interface_derivation": (
+                "LOCAL_NATURAL_FORM_OF_RELATIVE_POTENTIAL_GATE"
+            ),
+            "closure_equation_protocol": (
+                "closure.supernet/closure-naturality-equations-v1"
+            ),
+            "closure_naturality_module": (
+                "NRRF866ClosureNaturalityIsTranslationalTruthIsTheGrowthOfTheUniverse"
+            ),
+            "browser_rederives_pull_and_growth_equations": True,
+            "canonical_store": (
+                "SUPERNET_INTEGRATION_EVENT_AND_VISUAL_RECEIPT_LINEAGE"
+            ),
+            "lean_bridge": (
+                "NRRF859ConsciousSupernetInteractiveProjectionBridge"
+            ),
+            "runtime_reproves_lean": False,
             "projection": "LOCAL_NATURAL_FORM_OF_CURRENT_GATE",
             "truth_constraint": "WITNESSED_AND_OPEN_TRANSLATIONAL_CLOSURE",
-            "potential": "ALL_LOCALLY_ADMISSIBLE_NATURAL_FORM_CONTINUATIONS",
+            "potential": (
+                "ALL_LOCALLY_ADMISSIBLE_NATURAL_FORM_CONTINUATIONS"
+            ),
             "navigation_relation": "PERSPECTIVE_TRANSPORT",
             "navigation_mutates_truth": False,
             "locality_relation": "LOCALITY_TRANSPORT",
