@@ -20,12 +20,17 @@ def _config(tmp_path: Path) -> RuntimeConfig:
     )
 
 
-def test_active_relation_uses_content_addressed_id_across_rerenders(tmp_path: Path) -> None:
+def test_active_gate_path_uses_content_addressed_id_across_rerenders(
+    tmp_path: Path,
+) -> None:
     app = create_app(_config(tmp_path))
     with TestClient(app) as client:
         html = client.get("/").text
 
-    assert "activeRelation && relation.id===activeRelation.id" in html
+    assert "let activeRelationId=null" in html
+    assert "path.id===activeRelationId" in html
+    assert "function activePath(full)" in html
+    assert '"data-active":selected' in html
+    assert "if(selected&&draft)" in html
     assert "relation===activeRelation" not in html
-    assert '"data-active":activeRelation && relation.id===activeRelation.id' in html
-    assert "activeRelation && relation.id===activeRelation.id && draft" in html
+    assert "path===activeRelation" not in html
