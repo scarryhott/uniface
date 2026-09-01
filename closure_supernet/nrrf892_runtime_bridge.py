@@ -42,10 +42,11 @@ def derive_translation_truth_orbit_id(
 ) -> str:
     """Derive an interaction orbit without perspective/render coordinates."""
 
+    source_return_ids = path.get("source_return_ids") or []
     witness = (
         path.get("translation_supervisory_relation_id")
         or path.get("relation_id")
-        or tuple(sorted(str(v) for v in path.get("source_return_ids", []) if v))
+        or tuple(sorted(str(v) for v in source_return_ids if v))
         or path.get("id")
     )
     return _base._digest(
