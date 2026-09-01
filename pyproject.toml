@@ -18,6 +18,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+alpaca = [
+  "alpaca-py>=0.44,<1",
+]
 legacy = [
   "httpx>=0.27,<1",
   "PyJWT[crypto]>=2.9,<3",
@@ -34,6 +37,7 @@ dev = [
 [project.scripts]
 closure-supernet = "closure_supernet.cli_supernet:main"
 closure-supernet-audit = "closure_supernet.archive_closure_audit_current:main"
+closure-supernet-alpaca = "closure_supernet.alpaca_live_closure:main"
 
 [tool.setuptools.packages.find]
 include = ["closure_supernet*"]

@@ -27,6 +27,34 @@ translational-truth equations, those equations become visual axioms, and a
 separate closure-explicit meeting admits them. The quotient, monoid modality,
 0↔∞/tan reading and token relations may then be consequences of that closure.
 
+## Alpaca as a live verified source
+
+The optional Alpaca adapter feeds one live crypto market through time into the
+verified source boundary introduced by PR #104. It is a source adapter, not a
+fixed-trade strategy: it does not choose an exit, holding period, threshold,
+position size, or order. Each received book is signed and retained as a local
+spread/friction projection, but it does not create an ask-to-bid trading loop.
+Only actual returned buy and sell fills form the temporal inventory relation
+seen by the current resolver, which retains authority over closure, TT
+partitioning, hair fidelity, relative-ball sizing, atlas admissibility, and
+OPEN selection.
+
+Install and run one read-only live resolution:
+
+```bash
+pip install -e '.[alpaca]'
+closure-supernet-alpaca
+```
+
+Use `closure-supernet-alpaca --loop --interval 15` to keep receiving live
+snapshots. Configuration is documented in `.env.example`. The adapter requires
+its Ed25519 public key in `CLOSURE_SOURCE_WITNESS_PUBLIC_KEYS`; its private key
+stays with the adapter. A SQLite consumed-event ledger provides replay
+protection across independent process calls. Fill relations deliberately enter
+with `cost_complete=false` until venue fees are also returned, so gross fill
+curvature cannot make an execution actionable. The adapter never submits
+orders.
+
 The semantic user interface is the perspective visualization that presents
 translation equations as truth constraints and returns their closure-transformed
 natural forms. Each receipt carries the pre-axiometry visual mirror and its
