@@ -153,6 +153,13 @@ def attach_supernet_closure_form(full_gate: Mapping[str, Any]) -> dict[str, Any]
     full["published_semantic_carrier"] = "SUPERNET_CLOSURE_FORM"
     full["opener_ui_interaction_are_one_form"] = True
     full["crystal_ball_slide_ai_token_are_one_form"] = True
+
+    # The solver is a reading of the final carrier. Re-derive it only after the
+    # one-form fields have fixed the final gate identity. This closes the old
+    # gate/solver split without giving the solver authority over the carrier.
+    full["potential_gate_natural_form_solver"] = (
+        _base.derive_potential_gate_natural_form_solver(full)
+    )
     full["id"] = _base._digest("full-supernet-potential-gate", full)
     return full
 
@@ -212,6 +219,13 @@ def validate_full_supernet_gate_contract(full_gate: Mapping[str, Any]) -> dict[s
                 errors.append(f"one-closure-form:interaction-split:{row.get('path_id')}")
             if row.get("ai_token_phase") not in {"AI_CONTINUING", "TOKEN_RETURNED"}:
                 errors.append(f"one-closure-form:bad-ai-token-phase:{row.get('path_id')}")
+
+    solver = expected.get("potential_gate_natural_form_solver")
+    gate = expected.get("relative_natural_form_potential_gate")
+    if not isinstance(solver, Mapping) or not isinstance(gate, Mapping):
+        errors.append("one-closure-form:solver-or-gate-missing")
+    elif solver.get("gate_id") != gate.get("id"):
+        errors.append("one-closure-form:solver-not-reading-final-carrier")
 
     return {
         "valid": not errors,
