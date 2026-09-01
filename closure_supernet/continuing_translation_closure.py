@@ -3,16 +3,15 @@ from __future__ import annotations
 """Canonical Supernet closure as one continuing family of translational truth.
 
 The legacy runtime distinguishes ``WITNESSED`` from ``OPEN`` internally because
-older contracts and proofs use that vocabulary.  This module deliberately does
-not change that compatibility boundary.  Instead it derives the published
-semantic object from it:
+older contracts and proofs use that vocabulary. This module does not alter that
+compatibility boundary. Instead it derives the published semantic object:
 
     Closure = all current translation relations
-    Returned(relation)  = the relation has a returned determination
-    Continuing(relation) = the relation remains a continuation in the same closure
+    Returned(relation) = the relation has a returned determination
+    Continuing(relation) = the relation continues in the same closure
 
-Nothing is outside closure.  A non-returned relation is not an ontological gap;
-it is a continuation of the same closure family.  Return changes determination,
+Nothing is outside closure. A non-returned relation is not an ontological gap;
+it is a continuation of the same closure family. Return changes determination,
 not membership in closure.
 """
 
@@ -38,6 +37,28 @@ def _state_of(path: Mapping[str, Any]) -> str:
     return RETURNED if path.get("status") == WITNESSED_STATUS else CONTINUING
 
 
+def _semantic_kind(path: Mapping[str, Any]) -> str:
+    raw = str(path.get("kind") or "TRANSLATION")
+    if "PERSPECTIVE" in raw:
+        return "PERSPECTIVE_TRANSLATION"
+    if "LOCAL" in raw:
+        return "LOCALITY_TRANSLATION"
+    if "RETURN" in raw:
+        return "RETURN_CONTINUATION"
+    if "POTENTIAL" in raw:
+        return "TRANSLATION_CONTINUATION"
+    return "TRANSLATION"
+
+
+def _semantic_action(path: Mapping[str, Any]) -> str:
+    raw = str(path.get("action") or "CONTINUE")
+    if raw == "PERSPECTIVE_TRANSPORT":
+        return "PERSPECTIVE_TRANSPORT"
+    if raw == "LOCALITY_TRANSPORT":
+        return "LOCALITY_TRANSPORT"
+    return "CONTINUE_TO_RETURN"
+
+
 def _relation(path: Mapping[str, Any]) -> dict[str, Any]:
     returned = _state_of(path) == RETURNED
     body = {
@@ -49,13 +70,17 @@ def _relation(path: Mapping[str, Any]) -> dict[str, Any]:
             else str(path.get("target_perspective_id"))
         ),
         "source_state_id": (
-            None if path.get("source_state_id") is None else str(path.get("source_state_id"))
+            None
+            if path.get("source_state_id") is None
+            else str(path.get("source_state_id"))
         ),
         "target_state_id": (
-            None if path.get("target_state_id") is None else str(path.get("target_state_id"))
+            None
+            if path.get("target_state_id") is None
+            else str(path.get("target_state_id"))
         ),
-        "kind": str(path.get("kind") or "TRANSLATION"),
-        "action": str(path.get("action") or "CONTINUE"),
+        "kind": _semantic_kind(path),
+        "action": _semantic_action(path),
         "closure_state": RETURNED if returned else CONTINUING,
         "returned": returned,
         "continuing": not returned,
@@ -219,13 +244,9 @@ def validate_continuing_translation_closure(
         "ui_visualizes_natural_forms_selected_in_translation_closure",
     ):
         predecessor.pop(key, None)
-    # The exact predecessor id is intentionally not reconstructed here; the
-    # continuum is validated against the relation carrier that is present.
     expected = derive_continuing_translation_closure(predecessor)
 
     errors: list[str] = []
-    # revision_basis differs after attachment because the outer gate is
-    # re-addressed.  All semantic fields must otherwise rederive exactly.
     comparable_actual = dict(continuum)
     comparable_expected = dict(expected)
     comparable_expected["revision_basis"] = comparable_actual.get("revision_basis")
