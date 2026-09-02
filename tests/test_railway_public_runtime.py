@@ -39,7 +39,11 @@ def test_railway_publishes_only_the_translational_projection(tmp_path: Path) -> 
         "/supernet/interface",
         "/supernet/interface/capabilities",
         "/supernet/interface/projections/{contract_id}/return",
+        "/supernet/agent/capabilities",
+        "/supernet/agent/self",
+        "/mcp",
         "/livez",
         "/readyz",
     }
+    assert app.state.supernet_translate is not None
     assert app.version == "3.22.0"
