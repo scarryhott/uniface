@@ -9,6 +9,7 @@ content-addressed by the deterministic project closure before publication.
 """
 
 from .agent_closure_mcp import attach_supernet_agent_mcp
+from .deterministic_translation_kernel import attach_deterministic_translation_kernel
 from .project_determinism import attach_deterministic_project_closure
 from .self_runtime_projection import attach_self_runtime_projection
 from .supernet_closure_runtime import create_app as _create_closure_app
@@ -16,6 +17,10 @@ from .supernet_closure_runtime import create_app as _create_closure_app
 
 def create_app(config=None):
     app = _create_closure_app(config)
+    # Derivation: browser transition = runtime transition.  Bind that one
+    # translation before agent/self transports so every later projection sees
+    # the same callable rather than introducing another mutation authority.
+    app = attach_deterministic_translation_kernel(app)
     app = attach_supernet_agent_mcp(app)
     app = attach_self_runtime_projection(app)
     return attach_deterministic_project_closure(app)
