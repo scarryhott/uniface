@@ -110,7 +110,7 @@ def test_agent_and_self_runtime_share_the_exact_published_translation(tmp_path: 
     assert translation["runtime_identity_is_translational_truth"] is True
     assert translation["source_runtime_identity_id"] == before["runtime_identity_id"]
     assert translation["target_runtime_identity_id"] == after["runtime_identity_id"]
-    assert after["closure_form_id"] == target["supernet_closure_form_id"]
+    assert after["runtime_identity_id"] == target["supernet_closure_form"]["runtime_identity_id"]
     assert after["self_observation_authors_truth"] is False
     assert runtime.ledger.list_returns()[-1]["exact_source"] == exact
     runtime.close()
