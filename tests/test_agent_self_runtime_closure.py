@@ -101,6 +101,7 @@ def test_agent_and_self_runtime_share_the_exact_published_translation(tmp_path: 
                 "focus_event_id": target.get("focus_event_id"),
             },
         ).json()
+        last_exact_source = runtime.ledger.list_returns()[-1]["exact_source"]
 
     translation = result["translation"]
     assert result["operator"] == TRANSLATE_OPERATOR
@@ -112,5 +113,4 @@ def test_agent_and_self_runtime_share_the_exact_published_translation(tmp_path: 
     assert translation["target_runtime_identity_id"] == after["runtime_identity_id"]
     assert after["runtime_identity_id"] == target["supernet_closure_form"]["runtime_identity_id"]
     assert after["self_observation_authors_truth"] is False
-    assert runtime.ledger.list_returns()[-1]["exact_source"] == exact
-    runtime.close()
+    assert last_exact_source == exact
