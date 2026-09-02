@@ -68,12 +68,17 @@ with TestClient(asgi.app) as client:
             ),
         }},
     )
+    agent = client.get("/supernet/agent/capabilities").json()
+    self_reading = client.get("/supernet/agent/self", params={{"perspective_id": "p"}}).json()
     assert root.status_code == 200
     assert '<main id="translational-mirror"></main>' in root.text
     assert result.status_code == 200, result.text
     assert result.json()["closure_ui_contract"]["status"] == "WITNESSED"
     assert client.get("/trading").status_code == 404
-    assert client.get("/mcp").status_code == 404
+    assert agent["translation_operator"] == "SUPERNET_TRANSLATE"
+    assert agent["separate_agent_mutation_authority"] is False
+    assert self_reading["runtime_identity_is_translational_truth"] is True
+    assert self_reading["self_observation_authors_truth"] is False
 print("ok")
 """.format(
         db=str(tmp_path / "isolated.db"),
