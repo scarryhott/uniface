@@ -36,6 +36,7 @@ dev = [
 [project.scripts]
 closure-supernet = "closure_supernet.cli_supernet:main"
 closure-supernet-audit = "closure_supernet.archive_closure_audit_current:main"
+closure-supernet-project-audit = "closure_supernet.deterministic_project_closure:main"
 closure-supernet-alpaca = "closure_supernet.alpaca_live_closure:main"
 
 [tool.setuptools.packages.find]
