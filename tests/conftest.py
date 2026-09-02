@@ -19,10 +19,9 @@ LEGACY_NULLABLE_URL_ASSERTION = (
 CROSS_PROCESS_PATH_ASSERTION = 'assert payload["selected_path"] in served["body"]'
 
 
-# These modules exercise the historical manager-composition runtime rather than
-# the published projection-only closure runtime. They remain executable and
-# visible, but they are a nonblocking compatibility lane until each manager is
-# translated through the current closure equation.
+# These modules exercise retained historical manager-composition charts rather
+# than the published one-form runtime.  They remain executable and are run in a
+# separate, blocking lane: an unexpected historical regression now fails CI.
 LEGACY_RUNTIME_TEST_FILES = {
     "test_agent_mcp.py",
     "test_community_garden_coordination.py",
@@ -54,10 +53,11 @@ LEGACY_RUNTIME_TEST_FILES = {
     "test_unify_closure_supernet.py",
 }
 
-# This single historical assertion encoded the older rule that production could
-# expose only projection/return/health routes. Agent and self-runtime surfaces
-# are now admitted only as projections/transports of SUPERNET_TRANSLATE, so the
-# old absence assertion remains compatibility evidence rather than current law.
+# This single assertion is itself a preserved historical witness. It encoded
+# the older rule that production must exclude all agent/self transports. The
+# current returned law admits them only through SUPERNET_TRANSLATE, so the old
+# assertion must continue to fail. A strict xfail detects either accidental
+# erasure of that history or accidental restoration of the obsolete law.
 LEGACY_RUNTIME_TEST_NODEIDS = {
     "tests/test_closure_only_ui_contract.py::test_production_exposes_only_projection_return_and_runtime_health",
 }
@@ -66,7 +66,7 @@ LEGACY_RUNTIME_TEST_NODEIDS = {
 def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
         "markers",
-        "legacy_runtime: historical manager-composition compatibility lane",
+        "legacy_runtime: retained historical natural-form compatibility lane",
     )
 
 
@@ -77,11 +77,21 @@ def pytest_collection_modifyitems(
     del config
     marker = pytest.mark.legacy_runtime
     for item in items:
-        if (
-            Path(str(item.path)).name in LEGACY_RUNTIME_TEST_FILES
-            or item.nodeid in LEGACY_RUNTIME_TEST_NODEIDS
-        ):
+        is_file_history = Path(str(item.path)).name in LEGACY_RUNTIME_TEST_FILES
+        is_superseded_assertion = item.nodeid in LEGACY_RUNTIME_TEST_NODEIDS
+        if is_file_history or is_superseded_assertion:
             item.add_marker(marker)
+        if is_superseded_assertion:
+            item.add_marker(
+                pytest.mark.xfail(
+                    reason=(
+                        "preserved pre-agent production-surface assertion; "
+                        "current agent/self transports factor through "
+                        "SUPERNET_TRANSLATE"
+                    ),
+                    strict=True,
+                )
+            )
 
 
 @pytest.hookimpl(hookwrapper=True)
