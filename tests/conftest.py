@@ -54,6 +54,14 @@ LEGACY_RUNTIME_TEST_FILES = {
     "test_unify_closure_supernet.py",
 }
 
+# This single historical assertion encoded the older rule that production could
+# expose only projection/return/health routes. Agent and self-runtime surfaces
+# are now admitted only as projections/transports of SUPERNET_TRANSLATE, so the
+# old absence assertion remains compatibility evidence rather than current law.
+LEGACY_RUNTIME_TEST_NODEIDS = {
+    "tests/test_closure_only_ui_contract.py::test_production_exposes_only_projection_return_and_runtime_health",
+}
+
 
 def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
@@ -69,7 +77,10 @@ def pytest_collection_modifyitems(
     del config
     marker = pytest.mark.legacy_runtime
     for item in items:
-        if Path(str(item.path)).name in LEGACY_RUNTIME_TEST_FILES:
+        if (
+            Path(str(item.path)).name in LEGACY_RUNTIME_TEST_FILES
+            or item.nodeid in LEGACY_RUNTIME_TEST_NODEIDS
+        ):
             item.add_marker(marker)
 
 
